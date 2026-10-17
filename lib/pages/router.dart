@@ -5,6 +5,8 @@ library;
 import 'package:flutter/widgets.dart';
 
 import '../state/gui_state.dart';
+import 'alarms_page.dart';
+import 'alert_list_page.dart';
 import 'blank_page.dart';
 import 'date_page.dart';
 import 'fallback_page.dart';
@@ -20,6 +22,7 @@ import 'sun_times_page.dart';
 import 'system_face_page.dart';
 import 'text_frame_page.dart';
 import 'time_page.dart';
+import 'timer_page.dart';
 import 'url_frame_page.dart';
 import 'weather_now_page.dart';
 
@@ -32,6 +35,9 @@ const routes = <String, PageBuilder>{
   'ovos-skill-weather.openvoiceos/DailyForecast': ForecastPage.build_,
   'ovos-skill-weather.openvoiceos/HourlyForecast': ForecastPage.build_,
   'ovos-skill-weather.openvoiceos/SunriseSunset': SunTimesPage.page,
+  'ovos-skill-alerts.openvoiceos/Timer': TimerPage.page,
+  'ovos-skill-alerts.openvoiceos/AlarmsOverviewCard': AlarmsPage.page,
+  'ovos-skill-alerts.openvoiceos/ListView': AlertListPage.page,
 };
 
 const templates = <String, PageBuilder>{

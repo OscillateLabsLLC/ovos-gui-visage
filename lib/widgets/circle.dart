@@ -26,8 +26,10 @@ class Circle extends StatelessWidget {
   final double size;
   final Color? fill;
   final Gradient? gradient;
-  final Ring? ring;
-  final Glow? glow;
+
+  /// Usually a [Ring]; any widget that fills the circle's box works (a pulsing wrapper around one, say).
+  final Widget? ring;
+  final Widget? glow;
   final List<Widget> children;
 
   @override
