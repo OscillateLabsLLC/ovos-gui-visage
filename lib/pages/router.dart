@@ -8,6 +8,7 @@ import '../state/gui_state.dart';
 import 'blank_page.dart';
 import 'date_page.dart';
 import 'fallback_page.dart';
+import 'forecast_page.dart';
 import 'html_frame_page.dart';
 import 'idle_page.dart';
 import 'image_frame_page.dart';
@@ -15,15 +16,22 @@ import 'input_box_page.dart';
 import 'loading_page.dart';
 import 'page.dart';
 import 'status_page.dart';
+import 'sun_times_page.dart';
 import 'system_face_page.dart';
 import 'text_frame_page.dart';
 import 'time_page.dart';
 import 'url_frame_page.dart';
+import 'weather_now_page.dart';
 
 const routes = <String, PageBuilder>{
   'ovos-skill-homescreen.openvoiceos/idle': IdlePage.page,
   'ovos-skill-date-time.openvoiceos/time': TimePage.page,
   'ovos-skill-date-time.openvoiceos/date': DatePage.page,
+  'ovos-skill-weather.openvoiceos/CurrentWeather': WeatherNowPage.build_,
+  'ovos-skill-weather.openvoiceos/SingleDay': WeatherNowPage.build_,
+  'ovos-skill-weather.openvoiceos/DailyForecast': ForecastPage.build_,
+  'ovos-skill-weather.openvoiceos/HourlyForecast': ForecastPage.build_,
+  'ovos-skill-weather.openvoiceos/SunriseSunset': SunTimesPage.page,
 };
 
 const templates = <String, PageBuilder>{
