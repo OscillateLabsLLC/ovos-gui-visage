@@ -18,7 +18,9 @@ const _wrapBelowPx = 48;
 const _minShortPx = 40;
 final _breakAfter = RegExp(r'[\s.,:;/-]');
 final _safeUrl = RegExp(r'^https?://', caseSensitive: false);
-final _safeImage = RegExp(r'^(data:image/|https?://|/res/)', caseSensitive: false);
+/// data:image, http(s), the middle layer's /res/ URLs, and (same-host display) absolute file paths; resources.dart
+/// decides whether a path is a loadable image.
+final _safeImage = RegExp(r'^(data:image/|https?://|/)', caseSensitive: false);
 const _fillToFit = {'fit': BoxFit.contain, 'crop': BoxFit.cover, 'stretch': BoxFit.fill};
 
 ({String title, String text}) textFrameModel(Json? data) => (title: text(data?['title']), text: text(data?['text']));

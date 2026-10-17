@@ -1,5 +1,6 @@
 /// Plays one of OVOS's own Lottie files from the ovos-gui cache. A one-shot plays its live segment once and holds
-/// the last frame; a missing or unreadable file shows [fallback] instead.
+/// the last frame; a missing or unreadable file shows [fallback] instead. With [fitRing] the animation is placed so
+/// its main ring lands on the chip's ring (fit.dart) instead of filling the box.
 library;
 
 import 'dart:convert';
@@ -8,14 +9,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import 'fit.dart';
 import 'segment.dart';
 
 class CacheLottie extends StatefulWidget {
-  const CacheLottie({super.key, required this.file, required this.loop, required this.fallback});
+  const CacheLottie({super.key, required this.file, required this.loop, required this.fallback, this.fitRing = false});
 
   final File file;
   final bool loop;
   final Widget fallback;
+  final bool fitRing;
 
   @override
   State<CacheLottie> createState() => _CacheLottieState();
@@ -29,8 +32,8 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
     try {
       final bytes = await widget.file.readAsBytes();
       final composition = await LottieComposition.fromBytes(bytes);
-      final segment = liveSegment(jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>);
-      return _Loaded(composition, segment);
+      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      return _Loaded(composition, liveSegment(json), widget.fitRing ? ringFit(json) : null);
     } on Object {
       return null;
     }
@@ -61,15 +64,29 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
         final loaded = snapshot.data;
         if (loaded == null) return snapshot.connectionState == ConnectionState.done ? widget.fallback : const SizedBox();
         if (!_controller.isAnimating && _controller.value == 0) _start(loaded);
-        return Lottie(composition: loaded.composition, controller: _controller, fit: BoxFit.contain);
+        final lottie = Lottie(composition: loaded.composition, controller: _controller, fit: BoxFit.contain);
+        final fit = loaded.fit;
+        if (fit == null) return lottie;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final side = constraints.biggest.shortestSide;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(left: fit.left * side, top: fit.top * side, width: fit.width * side, height: fit.height * side, child: lottie),
+              ],
+            );
+          },
+        );
       },
     );
   }
 }
 
 class _Loaded {
-  _Loaded(this.composition, this.segment);
+  _Loaded(this.composition, this.segment, this.fit);
 
   final LottieComposition composition;
   final ({double start, double end}) segment;
+  final ({double width, double height, double left, double top})? fit;
 }

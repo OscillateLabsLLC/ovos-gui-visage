@@ -37,11 +37,12 @@ void main() {
     }
   });
 
-  test('image sources: data:image, http(s) and /res/ load; bare paths and other schemes do not', () {
+  test('image sources: data:image, http(s), /res/ and absolute paths are candidates; other schemes are not', () {
     expect(imageSource('data:image/png;base64,AAAA'), 'data:image/png;base64,AAAA');
     expect(imageSource('https://x.org/a.png'), 'https://x.org/a.png');
     expect(imageSource('/res/ns/qt5/a.svg'), '/res/ns/qt5/a.svg');
-    for (final bad in ['/etc/passwd', 'file:///tmp/a.png', 'javascript:alert(1)', 'data:text/html,<b>x</b>']) {
+    expect(imageSource('/home/ovos/.cache/ovos_gui/x/a.png'), '/home/ovos/.cache/ovos_gui/x/a.png');
+    for (final bad in ['relative.png', 'file:///tmp/a.png', 'javascript:alert(1)', 'data:text/html,<b>x</b>']) {
       expect(imageSource(bad), isNull, reason: bad);
     }
     expect(['fit', 'crop', 'stretch', 'CROP', 'zoom'].map((fill) => imageModel({'fill': fill}).fit),
