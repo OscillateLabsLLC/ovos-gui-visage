@@ -8,6 +8,17 @@ import '../theme.dart';
 import '../widgets/circle.dart';
 import 'page.dart';
 
+final _trailingAmPm = RegExp(r'^(.*?)\s*([AaPp][Mm])$');
+
+/// The skill sends "12:15 PM" with an empty `ampm_string` on 12-hour installs; the suffix belongs on its own line.
+({String time, String ampm}) timeParts(Json data) {
+  final time = text(data['time_string']);
+  final ampm = text(data['ampm_string']);
+  final match = ampm.isEmpty ? _trailingAmPm.firstMatch(time) : null;
+  if (match == null) return (time: time, ampm: ampm);
+  return (time: match.group(1)!, ampm: match.group(2)!.toUpperCase());
+}
+
 class TimePage extends StatelessWidget {
   const TimePage({super.key, required this.data});
 
@@ -17,8 +28,7 @@ class TimePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final time = text(data['time_string']);
-    final ampm = text(data['ampm_string']);
+    final (:time, :ampm) = timeParts(data);
     return Center(
       child: Circle(
         size: 380,

@@ -25,6 +25,13 @@ void main() {
     expect(find.text('--:--'), findsOneWidget);
   });
 
+  test('a trailing AM/PM in time_string moves to the am/pm line', () {
+    expect(timeParts({'time_string': '12:15 PM'}), (time: '12:15', ampm: 'PM'));
+    expect(timeParts({'time_string': '9:05 am', 'ampm_string': ''}), (time: '9:05', ampm: 'AM'));
+    expect(timeParts({'time_string': '21:05'}), (time: '21:05', ampm: ''));
+    expect(timeParts({'time_string': '9:05', 'ampm_string': 'PM'}), (time: '9:05', ampm: 'PM'));
+  });
+
   testWidgets('date page hides the Python None location', (tester) async {
     final data = {'weekday_string': 'saturday', 'daymonth_string': 'october 17', 'year_string': '2026', 'location_string': 'None'};
     await tester.pumpWidget(host(DatePage.page(data, ctx)));
