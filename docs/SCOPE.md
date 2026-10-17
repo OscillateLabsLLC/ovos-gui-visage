@@ -79,12 +79,16 @@ test/
 
 ## Phases
 
-0. **Spike** (this commit series): protocol clients, state parity, the face with recorded
-   visemes, OVOS Lottie playback, all against the live stack on macOS.
-1. Core shell: router, idle page, date-time pages, text/face/loading/status/image templates,
-   WidgetManager, offline pill, reconnect.
-2. Weather and alerts pages, the self-animating icons.
-3. OCP pages: now playing, busy, suggestions, home.
+0. **Spike** (done): protocol clients, state parity, the face with recorded visemes, OVOS
+   Lottie playback, all against the live stack on macOS.
+1. **Core shell** (done): router, idle page, date-time pages, text/face/loading/status/image
+   templates, WidgetManager, offline pill, reconnect.
+2. **Weather and alerts pages** (done). Icons are static SVG with whole-icon motion (the sun
+   turns, clouds drift); per-part motion (rays only, falling drops, the bell's clapper) is a
+   follow-up.
+3. **OCP pages** (done): now playing, busy, suggestions, home. Verified by replaying the
+   recorded OCP session data through ovos-gui with `gui.value.set` / `gui.page.show`, since
+   OCP need not be installed to test the pages.
 4. Webviews with platform gating; the web build and its sidecar.
 5. CI matrix (macOS, Linux, Windows, web), packaging, release-please.
 6. Floating widget mode (later, about a day): a frameless always-on-top window that snaps
