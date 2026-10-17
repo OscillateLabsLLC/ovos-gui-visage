@@ -1,0 +1,61 @@
+{
+ "current": [
+  "ovos-skill-homescreen.openvoiceos",
+  "idle"
+ ],
+ "snapshot": {
+  "active": [
+   "ovos-skill-homescreen.openvoiceos"
+  ],
+  "idle_namespace": "ovos-skill-homescreen.openvoiceos",
+  "namespaces": {
+   "ovos-skill-homescreen.openvoiceos": {
+    "data": {
+     "applications_model": [
+      {
+       "action": "ovos.common_play.OCP.homescreen.app",
+       "name": "OCP",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos.common_play/OCP.png"
+      },
+      {
+       "action": "ovos-skill-local-media.openvoiceos.File Browser.homescreen.app",
+       "name": "File Browser",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos-skill-local-media.openvoiceos/ovos-file-browser.svg"
+      }
+     ],
+     "apps_enabled": true,
+     "dateFormat": "DMY",
+     "date_string": "10/10/2026",
+     "day_string": "10",
+     "month_string": "October",
+     "notification": {},
+     "notification_model": [],
+     "persistent_menu_hint": false,
+     "rtl_mode": 0,
+     "skill_info_enabled": false,
+     "skill_info_prefix": false,
+     "system_connectivity": "offline",
+     "time_string": "22:54",
+     "weather_api_enabled": true,
+     "weather_code": 0,
+     "weather_temp": 21.7,
+     "weekday_string": "Saturday",
+     "year_string": "2026"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [
+     "idle"
+    ],
+    "skill_id": "ovos-skill-homescreen.openvoiceos"
+   },
+   "ovos-skill-weather.openvoiceos": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "ovos-skill-weather.openvoiceos"
+   }
+  }
+ }
+}

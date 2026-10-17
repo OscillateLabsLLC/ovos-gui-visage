@@ -1,0 +1,142 @@
+{
+ "current": [
+  "ovos-skill-homescreen.openvoiceos",
+  "idle"
+ ],
+ "snapshot": {
+  "active": [
+   "ovos-skill-homescreen.openvoiceos"
+  ],
+  "idle_namespace": "ovos-skill-homescreen.openvoiceos",
+  "namespaces": {
+   "ovos-skill-homescreen.openvoiceos": {
+    "data": {
+     "applications_model": [
+      {
+       "action": "ovos.common_play.OCP.homescreen.app",
+       "name": "OCP",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos.common_play/OCP.png"
+      },
+      {
+       "action": "ovos-skill-local-media.openvoiceos.File Browser.homescreen.app",
+       "name": "File Browser",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos-skill-local-media.openvoiceos/ovos-file-browser.svg"
+      }
+     ],
+     "apps_enabled": true,
+     "dateFormat": "DMY",
+     "date_string": "10/10/2026",
+     "day_string": "10",
+     "month_string": "October",
+     "notifcation_counter": 2,
+     "notification": {},
+     "notification_model": {
+      "count": 0,
+      "storedmodel": []
+     },
+     "persistent_menu_hint": false,
+     "rtl_mode": 0,
+     "skill_info_enabled": false,
+     "skill_info_prefix": false,
+     "system_connectivity": "offline",
+     "time_string": "23:52",
+     "weather_api_enabled": true,
+     "weather_code": 0,
+     "weather_temp": 20.7,
+     "weekday_string": "Saturday",
+     "year_string": "2026"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [
+     "idle"
+    ],
+    "skill_id": "ovos-skill-homescreen.openvoiceos"
+   },
+   "visage-templates-animated": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-animated"
+   },
+   "visage-templates-html": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-html"
+   },
+   "visage-templates-image": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-image"
+   },
+   "visage-templates-image-http": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-image-http"
+   },
+   "visage-templates-input": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-input"
+   },
+   "visage-templates-loading": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-loading"
+   },
+   "visage-templates-status-off": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-status-off"
+   },
+   "visage-templates-status-ok": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-status-ok"
+   },
+   "visage-templates-text": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-text"
+   },
+   "visage-templates-text-long": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-text-long"
+   },
+   "visage-templates-url": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-url"
+   },
+   "visage-templates-url-refused": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-url-refused"
+   }
+  }
+ }
+}

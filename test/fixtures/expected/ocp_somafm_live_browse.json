@@ -1,0 +1,517 @@
+{
+ "current": [
+  "ovos.common_play",
+  "Home"
+ ],
+ "snapshot": {
+  "active": [
+   "ovos.common_play",
+   "ovos-skill-homescreen.openvoiceos"
+  ],
+  "idle_namespace": "ovos-skill-homescreen.openvoiceos",
+  "namespaces": {
+   "ovos-skill-homescreen.openvoiceos": {
+    "data": {
+     "applications_model": [
+      {
+       "action": "ovos.common_play.OCP.homescreen.app",
+       "name": "OCP",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos.common_play/OCP.png"
+      },
+      {
+       "action": "ovos-skill-local-media.openvoiceos.File Browser.homescreen.app",
+       "name": "File Browser",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos-skill-local-media.openvoiceos/ovos-file-browser.svg"
+      }
+     ],
+     "apps_enabled": true,
+     "dateFormat": "DMY",
+     "date_string": "11/10/2026",
+     "day_string": "11",
+     "month_string": "October",
+     "notification": {},
+     "notification_model": [],
+     "persistent_menu_hint": false,
+     "rtl_mode": 0,
+     "skill_info_enabled": false,
+     "skill_info_prefix": false,
+     "system_connectivity": "offline",
+     "time_string": "00:24",
+     "weather_api_enabled": true,
+     "weather_code": 0,
+     "weather_temp": 22.4,
+     "weekday_string": "Sunday",
+     "year_string": "2026"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [
+     "idle"
+    ],
+    "skill_id": "ovos-skill-homescreen.openvoiceos"
+   },
+   "ovos.common_play": {
+    "data": {
+     "allowUrlChange": false,
+     "app_view_timeout": 30,
+     "app_view_timeout_enabled": false,
+     "app_view_timeout_mode": "all",
+     "artist": "SomaFM",
+     "bg_image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp_bg.png",
+     "canNext": true,
+     "canPause": true,
+     "canPrev": false,
+     "canResume": true,
+     "displayBottomBar": true,
+     "duration": -1,
+     "footer_text": "Searching...",
+     "homepage_index": 0,
+     "image": "https://api.somafm.com/logos/512/dz2512.png?v=1776988037",
+     "javascript": "",
+     "javascriptCanOpenWindows": false,
+     "length": 60499.592,
+     "loopStatus": "None",
+     "media": {
+      "album": "skill-ovos-somafm.openvoiceos",
+      "artist": "SomaFM",
+      "bg_image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp_bg.png",
+      "cps_data": {},
+      "data": {},
+      "duration": -1,
+      "image": "https://api.somafm.com/logos/512/dz2512.png?v=1776988037",
+      "is_cps": false,
+      "javascript": "",
+      "length": -1,
+      "match_confidence": 100,
+      "media_type": 7,
+      "phrase": null,
+      "playback": 3,
+      "position": 94.56,
+      "skill_icon": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+      "skill_id": "skill-ovos-somafm.openvoiceos",
+      "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+      "status": 1,
+      "title": "Drone Zone 2",
+      "track": "Drone Zone 2",
+      "uri": "http://ice2.somafm.com/dz2-128-mp3"
+     },
+     "playerBackend": "OVOSSyncPlayer",
+     "playlistModel": {
+      "data": [
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/dz2512.png?v=1776988037",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Drone Zone 2",
+        "uri": "http://ice2.somafm.com/dz2-128-mp3"
+       }
+      ]
+     },
+     "position": 33.722919,
+     "searchModel": {
+      "data": [
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/dz2512.png?v=1776988037",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Drone Zone 2",
+        "uri": "http://ice2.somafm.com/dz2-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/7soul512.png?v=1396144489",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Seven Inch Soul",
+        "uri": "http://ice2.somafm.com/7soul-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/beatblender512.png?v=1299186119",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Beat Blender",
+        "uri": "http://ice2.somafm.com/beatblender-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/bootliquor512.png?v=1299122797",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Boot Liquor",
+        "uri": "http://ice2.somafm.com/bootliquor-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/brfm512.jpg?v=1342301053",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Black Rock FM",
+        "uri": "http://ice2.somafm.com/brfm-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/cliqhop512.png?v=1491429885",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "cliqhop idm",
+        "uri": "http://ice2.somafm.com/cliqhop-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/covers512.png?v=1299185740",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Covers",
+        "uri": "http://ice2.somafm.com/covers-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/deepspaceone512.png?v=1378071297",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Deep Space One",
+        "uri": "http://ice2.somafm.com/deepspaceone-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/defcon512.png?v=1781243226",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "DEF CON Radio",
+        "uri": "http://ice2.somafm.com/defcon-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/digitalis512.png?v=1299186238",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Digitalis",
+        "uri": "http://ice2.somafm.com/digitalis-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/doomed512.png?v=1299186756",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Doomed",
+        "uri": "http://ice2.somafm.com/doomed-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/dronezone512.png?v=1299186962",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Drone Zone",
+        "uri": "http://ice2.somafm.com/dronezone-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/dubstep512.png?v=1338923994",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Dub Step Beyond",
+        "uri": "http://ice2.somafm.com/dubstep-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/fluid512.jpg?v=1436822727",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Fluid",
+        "uri": "http://ice2.somafm.com/fluid-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/folkfwd512.png?v=1359700713",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Folk Forward",
+        "uri": "http://ice2.somafm.com/folkfwd-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/groovesalad512.png?v=1780812671",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Groove Salad",
+        "uri": "http://ice2.somafm.com/groovesalad-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/groovesalad2512.png?v=1779933336",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Groove Salad 2",
+        "uri": "http://ice2.somafm.com/groovesalad2-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/gsclassic512.jpg?v=1747344773",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Groove Salad Classic",
+        "uri": "http://ice2.somafm.com/gsclassic-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/illstreet512.png?v=1747344746",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Illinois Street Lounge",
+        "uri": "http://ice2.somafm.com/illstreet-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/indiepop512.png?v=1299187943",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Indie Pop Rocks!",
+        "uri": "http://ice2.somafm.com/indiepop-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/live512.png?v=1782343536",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "SomaFM Live",
+        "uri": "http://ice2.somafm.com/live-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/lush512.png?v=1317866644",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Lush",
+        "uri": "http://ice2.somafm.com/lush-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/missioncontrol512.jpg?v=1342304239",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Mission Control",
+        "uri": "http://ice2.somafm.com/missioncontrol-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/poptron512.png?v=1299124019",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "PopTron",
+        "uri": "http://ice2.somafm.com/poptron-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/secretagent512.png?v=1299188268",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Secret Agent",
+        "uri": "http://ice2.somafm.com/secretagent-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/seventies512.jpg?v=1435992015",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Left Coast 70s",
+        "uri": "http://ice2.somafm.com/seventies-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/sf1033512.png?v=1335919711",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "SF 10-33",
+        "uri": "http://ice2.somafm.com/sf1033-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/sonicuniverse512.png?v=1299205522",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Sonic Universe",
+        "uri": "http://ice2.somafm.com/sonicuniverse-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/spacestation512.png?v=1299205660",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Space Station Soma",
+        "uri": "http://ice2.somafm.com/spacestation-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/suburbsofgoa512.png?v=1299205961",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Suburbs of Goa",
+        "uri": "http://ice2.somafm.com/suburbsofgoa-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/thetrip512.jpg?v=1447535194",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "The Trip",
+        "uri": "http://ice2.somafm.com/thetrip-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/thistle512.jpg?v=1433008752",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "ThistleRadio",
+        "uri": "http://ice2.somafm.com/thistle-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/u80s512.png?v=1418528343",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Underground 80s",
+        "uri": "http://ice2.somafm.com/u80s-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/metal512.png?v=1438371170",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Metal Detector",
+        "uri": "http://ice2.somafm.com/metal-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/reggae512.png?v=1579290024",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Heavyweight Reggae",
+        "uri": "http://ice2.somafm.com/reggae-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/scanner512.png?v=1674976259",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "SF Police Scanner",
+        "uri": "http://ice2.somafm.com/scanner-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/vaporwaves512.png?v=1601767635",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Vaporwaves",
+        "uri": "http://ice2.somafm.com/vaporwaves-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/specials512.png?v=1674947103",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "SomaFM Specials",
+        "uri": "http://ice2.somafm.com/specials-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/n5md512.png?v=1605058529",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "n5MD Radio",
+        "uri": "http://ice2.somafm.com/n5md-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/synphaera512.jpg?v=1611903618",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Synphaera Radio",
+        "uri": "http://ice2.somafm.com/synphaera-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/darkzone512.jpg?v=1674958826",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "The Dark Zone",
+        "uri": "http://ice2.somafm.com/darkzone-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/sfinsf512.jpg?v=1674967929",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "SF in SF",
+        "uri": "http://ice2.somafm.com/sfinsf-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/bossa-512.jpg?v=1695354225",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Bossa Beyond",
+        "uri": "http://ice2.somafm.com/bossa-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/insound-512.jpg?v=1695848542",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "The In-Sound",
+        "uri": "http://ice2.somafm.com/insound-128-mp3"
+       },
+       {
+        "album": "skill-ovos-somafm.openvoiceos",
+        "duration": -1,
+        "image": "https://api.somafm.com/logos/512/chillits512.png?v=1772560617",
+        "source": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+        "track": "Chillits Radio",
+        "uri": "http://ice2.somafm.com/chillits-128-mp3"
+       }
+      ]
+     },
+     "shuffleStatus": false,
+     "skillCards": [
+      {
+       "image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_skill_news/res/news.png",
+       "media_type": [
+        8,
+        0
+       ],
+       "skill_id": "ovos-skill-news.openvoiceos",
+       "title": "News Skill"
+      },
+      {
+       "image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/skill_ovos_somafm/res/somafm.png",
+       "media_type": [
+        2,
+        7,
+        0
+       ],
+       "skill_id": "skill-ovos-somafm.openvoiceos",
+       "title": "somafm skill"
+      }
+     ],
+     "status": "Stopped",
+     "stream": "http://ice2.somafm.com/dz2-128-mp3",
+     "title": "Drone Zone 2",
+     "uri": "http://ice2.somafm.com/dz2-128-mp3"
+    },
+    "events": {
+     "ocp.gui.show.suggestion.view.disambiguation": {},
+     "ocp.gui.show.suggestion.view.playlist": {}
+    },
+    "focused_index": 2,
+    "pages": [
+     "PlayerLoader",
+     "SuggestionsView",
+     "Home"
+    ],
+    "skill_id": "ovos.common_play"
+   }
+  }
+ }
+}

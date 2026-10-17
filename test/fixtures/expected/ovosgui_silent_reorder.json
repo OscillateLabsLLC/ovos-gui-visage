@@ -1,0 +1,88 @@
+{
+ "current": [
+  "ovos.common_play",
+  "PlayerLoader"
+ ],
+ "snapshot": {
+  "active": [
+   "visage-templates-image-http",
+   "ovos.common_play",
+   "ovos-skill-homescreen.openvoiceos"
+  ],
+  "idle_namespace": "ovos-skill-homescreen.openvoiceos",
+  "namespaces": {
+   "ovos-skill-homescreen.openvoiceos": {
+    "data": {
+     "applications_model": [
+      {
+       "action": "ovos.common_play.OCP.homescreen.app",
+       "name": "OCP",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos.common_play/OCP.png"
+      },
+      {
+       "action": "ovos-skill-local-media.openvoiceos.File Browser.homescreen.app",
+       "name": "File Browser",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos-skill-local-media.openvoiceos/ovos-file-browser.svg"
+      }
+     ],
+     "apps_enabled": true,
+     "dateFormat": "DMY",
+     "date_string": "10/10/2026",
+     "day_string": "10",
+     "month_string": "October",
+     "notifcation_counter": 2,
+     "notification": {},
+     "notification_model": {
+      "count": 0,
+      "storedmodel": []
+     },
+     "persistent_menu_hint": false,
+     "rtl_mode": 0,
+     "skill_info_enabled": false,
+     "skill_info_prefix": false,
+     "system_connectivity": "offline",
+     "time_string": "23:49",
+     "weather_api_enabled": true,
+     "weather_code": 0,
+     "weather_temp": 20.7,
+     "weekday_string": "Saturday",
+     "year_string": "2026"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [
+     "idle"
+    ],
+    "skill_id": "ovos-skill-homescreen.openvoiceos"
+   },
+   "ovos.common_play": {
+    "data": {},
+    "events": {
+     "ocp.gui.show.suggestion.view.playlist": {}
+    },
+    "focused_index": 0,
+    "pages": [
+     "PlayerLoader",
+     "SuggestionsView"
+    ],
+    "skill_id": "ovos.common_play"
+   },
+   "visage-templates": {
+    "data": {},
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates"
+   },
+   "visage-templates-image-http": {
+    "data": {
+     "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/500px-Fronalpstock_big.jpg"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [],
+    "skill_id": "visage-templates-image-http"
+   }
+  }
+ }
+}

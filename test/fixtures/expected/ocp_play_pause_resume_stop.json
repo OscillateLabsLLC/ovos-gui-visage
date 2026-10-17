@@ -1,0 +1,131 @@
+{
+ "current": [
+  "ovos.common_play",
+  "PlayerLoader"
+ ],
+ "snapshot": {
+  "active": [
+   "ovos.common_play",
+   "ovos-skill-homescreen.openvoiceos"
+  ],
+  "idle_namespace": "ovos-skill-homescreen.openvoiceos",
+  "namespaces": {
+   "ovos-skill-homescreen.openvoiceos": {
+    "data": {
+     "applications_model": [
+      {
+       "action": "ovos.common_play.OCP.homescreen.app",
+       "name": "OCP",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos.common_play/OCP.png"
+      },
+      {
+       "action": "ovos-skill-local-media.openvoiceos.File Browser.homescreen.app",
+       "name": "File Browser",
+       "thumbnail": "/home/ovos/.cache/ovos_gui/ovos-skill-local-media.openvoiceos/ovos-file-browser.svg"
+      }
+     ],
+     "apps_enabled": true,
+     "dateFormat": "DMY",
+     "date_string": "10/10/2026",
+     "day_string": "10",
+     "month_string": "October",
+     "notifcation_counter": 2,
+     "notification": {},
+     "notification_model": {
+      "count": 0,
+      "storedmodel": []
+     },
+     "persistent_menu_hint": false,
+     "rtl_mode": 0,
+     "skill_info_enabled": false,
+     "skill_info_prefix": false,
+     "system_connectivity": "offline",
+     "time_string": "23:54",
+     "weather_api_enabled": true,
+     "weather_code": 0,
+     "weather_temp": 20.7,
+     "weekday_string": "Saturday",
+     "year_string": "2026"
+    },
+    "events": {},
+    "focused_index": 0,
+    "pages": [
+     "idle"
+    ],
+    "skill_id": "ovos-skill-homescreen.openvoiceos"
+   },
+   "ovos.common_play": {
+    "data": {
+     "allowUrlChange": false,
+     "app_view_timeout": 30,
+     "app_view_timeout_enabled": false,
+     "app_view_timeout_mode": "all",
+     "artist": "SomaFM",
+     "bg_image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp_bg.png",
+     "canNext": false,
+     "canPause": true,
+     "canPrev": false,
+     "canResume": true,
+     "duration": 213000,
+     "footer_text": "Searching...",
+     "image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp.png",
+     "javascript": "",
+     "javascriptCanOpenWindows": false,
+     "loopStatus": "None",
+     "media": {
+      "album": "visage-ocp-test",
+      "artist": "SomaFM",
+      "bg_image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp_bg.png",
+      "cps_data": {},
+      "data": {},
+      "duration": 213000,
+      "image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp.png",
+      "is_cps": false,
+      "javascript": "",
+      "length": 213000,
+      "match_confidence": 100,
+      "media_type": 7,
+      "phrase": null,
+      "playback": 3,
+      "position": 0,
+      "skill_icon": "",
+      "skill_id": "visage-ocp-test",
+      "source": "",
+      "status": 1,
+      "title": "Groove Salad (finite test 3)",
+      "track": "Groove Salad (finite test 3)",
+      "uri": "https://ice1.somafm.com/groovesalad-128-mp3"
+     },
+     "playerBackend": "OVOSSyncPlayer",
+     "playlistModel": {
+      "data": [
+       {
+        "album": "visage-ocp-test",
+        "duration": 213000,
+        "image": "/home/ovos/.venvs/ovos/lib/python3.11/site-packages/ovos_plugin_common_play/ocp/res/ui/images/ocp.png",
+        "source": "",
+        "track": "Groove Salad (finite test 3)",
+        "uri": "https://ice1.somafm.com/groovesalad-128-mp3"
+       }
+      ]
+     },
+     "position": 0,
+     "shuffleStatus": false,
+     "status": "Stopped",
+     "stream": "https://ice1.somafm.com/groovesalad-128-mp3",
+     "title": "Groove Salad (finite test 3)",
+     "uri": "https://ice1.somafm.com/groovesalad-128-mp3"
+    },
+    "events": {
+     "ocp.gui.show.suggestion.view.playlist": {}
+    },
+    "focused_index": 0,
+    "pages": [
+     "PlayerLoader",
+     "SuggestionsView"
+    ],
+    "skill_id": "ovos.common_play"
+   }
+  }
+ }
+}
