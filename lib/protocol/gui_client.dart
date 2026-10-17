@@ -111,8 +111,17 @@ class GuiClient {
     log?.call('connected to $url and re-announced framework=$framework on the GUI socket');
     onStatus(true);
     await for (final frame in channel.stream) {
-      if (frame is String) onMessage(jsonDecode(frame) as Json);
+      if (frame is String) _deliver(jsonDecode(frame) as Json);
     }
     log?.call('GUI socket closed');
+  }
+
+  /// A handler fault is a bug to log loudly, not a reason to drop the socket and lose state.
+  void _deliver(Json message) {
+    try {
+      onMessage(message);
+    } on Object catch (err, stack) {
+      log?.call('GUI message handler failed on $message: $err\n$stack');
+    }
   }
 }

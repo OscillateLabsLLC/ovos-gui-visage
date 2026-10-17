@@ -16,7 +16,7 @@ void main() {
     controller.playVisemes([
       ['0', 0.5],
       ['2', 1.0],
-    ], const Duration(seconds: 1));
+    ], at: const Duration(seconds: 1));
     expect(controller.targetCode(const Duration(milliseconds: 1200)), 0);
     expect(controller.targetCode(const Duration(milliseconds: 1700)), 2);
     expect(controller.targetCode(const Duration(milliseconds: 2500)), restCode);

@@ -31,12 +31,9 @@ bool isContentPage(Target? target, String idleNamespace) {
 }
 
 class Attention extends ChangeNotifier {
-  Attention(this.face, {required this.now});
+  Attention(this.face);
 
   final FaceController face;
-
-  /// Monotonic clock shared with the face ticker, so viseme anchoring matches its frame times.
-  final Duration Function() now;
   bool shown = false;
   bool compact = false;
   Timer? _hideTimer;
@@ -64,7 +61,7 @@ class Attention extends ChangeNotifier {
     } else if (event == 'recognizer_loop:audio_output_end') {
       _settle(fadeAfterAudio);
     } else if (event == visemeEvent && shown) {
-      face.playVisemes(data['visemes'] as List?, now());
+      face.playVisemes(data['visemes'] as List?);
     }
   }
 

@@ -6,7 +6,10 @@ import 'dart:convert';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-typedef Json = Map<String, dynamic>;
+import '../json.dart';
+
+export '../json.dart';
+
 typedef BusHandler = void Function(Json message);
 
 const defaultBusUrl = 'ws://127.0.0.1:8181/core';

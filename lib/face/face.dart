@@ -23,6 +23,8 @@ const _wideEye = 1.18;
 
 /// Drives a [Face] from outside: the attention overlay and the SYSTEM_Face page call these.
 class FaceController extends ChangeNotifier {
+  /// Monotonic clock for viseme timing, shared by the widget's ticker and whoever anchors a viseme list.
+  final Stopwatch clock = Stopwatch()..start();
   FaceMode _mode = FaceMode.rest;
   bool _sleeping = false;
   bool _blinking = false;
@@ -47,9 +49,9 @@ class FaceController extends ChangeNotifier {
   }
 
   /// Visemes are timed from speech start on the producing machine; same-host assumption: anchor on arrival.
-  void playVisemes(List<dynamic>? visemes, Duration now) {
+  void playVisemes(List<dynamic>? visemes, {Duration? at}) {
     _visemes = visemes;
-    _anchor = now;
+    _anchor = at ?? clock.elapsed;
   }
 
   void widen() => _flash((v) => _wide = v, _widenFor);
@@ -132,7 +134,7 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
     final kEye = _ease(dt, _eyeEaseMs);
     setState(() {
       final shapes = widget.theme.mouthShapes;
-      _lips = lerpPoints(_lips, shapes[c.targetCode(elapsed)] ?? shapes[restCode]!, k);
+      _lips = lerpPoints(_lips, shapes[c.targetCode(c.clock.elapsed)] ?? shapes[restCode]!, k);
       _eyeOpen += (c.targetEyeOpen - _eyeOpen) * kEye;
       _eyeScale += (c.targetEyeScale - _eyeScale) * kEye;
     });

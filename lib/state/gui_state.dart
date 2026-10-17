@@ -4,12 +4,14 @@
 /// test/fixtures/expected; the replay test requires this model to produce the same ones.
 library;
 
+import '../json.dart';
+
+export '../json.dart';
+
 const activeSkills = 'mycroft.system.active_skills';
 const systemNamespace = 'system';
 const defaultIdleNamespace = 'ovos-skill-homescreen.openvoiceos';
 const focusEvent = 'page_gained_focus';
-
-typedef Json = Map<String, dynamic>;
 
 class Namespace {
   Namespace(this.skillId);
