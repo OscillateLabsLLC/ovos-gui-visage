@@ -1,27 +1,26 @@
-// Spike entry point: connects to OVOS, shows the current page as a label, overlays the face for listen/think/speak
-// (full over idle, compact badge over content), and plays OVOS's Lottie files from the cache in a strip at the
-// bottom. The real page router replaces the label; the rest stays.
-import 'dart:io';
-
+// App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the
+// face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3).
 import 'package:flutter/material.dart';
 
 import 'attention.dart';
 import 'face/face.dart';
 import 'face/face_theme.dart';
 import 'face/visage_theme.dart';
-import 'lottie/cache_lottie.dart';
+import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
+import 'theme.dart';
+import 'widgets/widget_manager.dart';
 
-const _pageBg = Color(0xFF05070A);
+const _pageBg = VisageColors.pageBg;
 const _dimBg = Color(0xEB05070A);
 const _badgeDisc = Color(0xEB141B24);
-const _muted = Color(0xFF8A96A8);
 const _badgeHeight = 104.0;
 const _badgeGap = 7.0;
 
-final cacheRoot = Directory('${Platform.environment['HOME']}/.cache/ovos_gui');
+/// Content pages keep this much of the bottom free for the badge (SPEC 5.3: badge plus a 7 px gap above and below).
+const _attentionStrip = _badgeHeight + 2 * _badgeGap;
 
 void main() => runApp(const VisageApp());
 
@@ -32,7 +31,7 @@ class VisageApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Material(color: Color(0xFF0B0F14), child: Center(child: Screen())),
+      home: Material(color: VisageColors.bg, child: Center(child: Screen())),
     );
   }
 }
@@ -49,6 +48,7 @@ class _ScreenState extends State<Screen> {
   final face = FaceController();
   late final Attention attention = Attention(face);
   late final CoreBus bus = CoreBus(log: _log);
+  late final WidgetManager widgets = WidgetManager(bus, log: _log);
   late final GuiClient gui = GuiClient(
     bus: bus,
     guiId: 'ovos-gui-visage-${DateTime.now().millisecondsSinceEpoch % 100000}',
@@ -65,6 +65,7 @@ class _ScreenState extends State<Screen> {
   void initState() {
     super.initState();
     attention.addListener(_refresh);
+    widgets;
     bus.start();
     gui.start();
   }
@@ -114,8 +115,12 @@ class _ScreenState extends State<Screen> {
           child: Stack(
             children: [
               const Positioned.fill(child: ColoredBox(color: _pageBg)),
-              _PageLabel(state: state),
-              Positioned(left: 0, right: 0, bottom: 8, child: _LottieStrip(root: cacheRoot)),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
+                  child: PageHost(state: state),
+                ),
+              ),
               _AttentionOverlay(attention: attention, face: face),
               if (!guiConnected) const _OfflinePill(),
             ],
@@ -125,37 +130,6 @@ class _ScreenState extends State<Screen> {
     );
   }
 }
-
-class _PageLabel extends StatelessWidget {
-  const _PageLabel({required this.state});
-
-  final GuiState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final target = state.current();
-    final data = target == null ? const <String, dynamic>{} : state.namespace(target.namespace).data;
-    final keys = data.keys.take(8).map((k) => '$k: ${_short(data[k])}').join('\n');
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 48, 24, 140),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(target?.page ?? 'blank', style: const TextStyle(color: Colors.white, fontSize: 40)),
-          Text(target?.namespace ?? '', style: const TextStyle(color: _muted, fontSize: 14)),
-          const SizedBox(height: 16),
-          Text(keys, style: const TextStyle(color: _muted, fontSize: 13, fontFamily: 'Menlo')),
-        ],
-      ),
-    );
-  }
-
-  String _short(Object? value) {
-    final text = value.toString();
-    return text.length > 40 ? '${text.substring(0, 40)}…' : text;
-  }
-}
-
 /// The face over the page: full and dimming over idle, else scaled into a disc at the bottom centre (SPEC 5.3).
 class _AttentionOverlay extends StatelessWidget {
   const _AttentionOverlay({required this.attention, required this.face});
@@ -207,31 +181,6 @@ class _DiscPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DiscPainter old) => old.centre != centre || old.radius != radius;
-}
-
-/// Spike only: OVOS's loading (loop), success and fail (one-shot, held) animations side by side.
-class _LottieStrip extends StatelessWidget {
-  const _LottieStrip({required this.root});
-
-  final Directory root;
-
-  @override
-  Widget build(BuildContext context) {
-    final dir = '${root.path}/system/qt5/animations';
-    Widget chip(String name, bool loop) => SizedBox(
-          width: 90,
-          height: 90,
-          child: CacheLottie(
-            file: File('$dir/$name.json'),
-            loop: loop,
-            fallback: const Icon(Icons.broken_image, color: _muted),
-          ),
-        );
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [chip('loading', true), chip('status-success', false), chip('status-fail', false)],
-    );
-  }
 }
 
 class _OfflinePill extends StatelessWidget {

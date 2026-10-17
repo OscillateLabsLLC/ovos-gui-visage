@@ -87,6 +87,11 @@ test/
 3. OCP pages: now playing, busy, suggestions, home.
 4. Webviews with platform gating; the web build and its sidecar.
 5. CI matrix (macOS, Linux, Windows, web), packaging, release-please.
+6. Floating widget mode (later, about a day): a frameless always-on-top window that snaps
+   to a screen corner, via `window_manager` plus the display bounds. Works on macOS,
+   Windows and X11; Wayland does not let apps position their own windows, and the web
+   build has no window to move. Nothing in the pages changes, since the frame already
+   scales to the window.
 
 ## Verifying a change
 
