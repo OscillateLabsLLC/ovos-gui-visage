@@ -10,6 +10,7 @@ import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/sun_times_page.dart';
 import 'package:ovos_gui_visage/pages/weather_model.dart';
 import 'package:ovos_gui_visage/pages/weather_now_page.dart';
+import 'package:ovos_gui_visage/widgets/icon_layers.g.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
 const weather = 'ovos-skill-weather.openvoiceos';
@@ -46,7 +47,7 @@ void main() {
     expect(animatedIconName(99), 'clouds');
     expect(animatedIconName(null), 'clouds');
     for (final name in icons.toSet()) {
-      expect(File('assets/icons/$name.svg').existsSync(), isTrue, reason: name);
+      expect(iconLayers.containsKey(name), isTrue, reason: name);
     }
   });
 

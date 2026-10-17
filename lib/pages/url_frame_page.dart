@@ -5,9 +5,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import '../widgets/motion_icon.dart';
 import 'page.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
@@ -25,14 +25,14 @@ class UrlFramePage extends StatelessWidget {
     return StaggerEnter(
       gap: 10,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 14),
+        const Padding(
+          padding: EdgeInsets.only(bottom: 14),
           child: Circle(
             size: 180,
             gradient: gradientFill,
-            glow: const Glow(),
-            ring: const Ring(),
-            children: [icon('globe', size: 104)],
+            glow: Glow(),
+            ring: Ring(),
+            children: [MotionIcon('globe', size: 104)],
           ),
         ),
         Text(model.url, textAlign: TextAlign.center, style: VisageText.fg(24)),

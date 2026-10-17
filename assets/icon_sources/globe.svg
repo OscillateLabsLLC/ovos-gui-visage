@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .meridian { fill: none; stroke: #9fd0ff; stroke-width: 2; animation: turn 6s linear infinite; }
+    .m2 { animation-delay: -2s; }
+    .m3 { animation-delay: -4s; }
+    @keyframes turn { 0% { rx: 0; opacity: 0.2; } 50% { rx: 22px; opacity: 0.9; } 100% { rx: 0; opacity: 0.2; } }
+    @media (prefers-reduced-motion: reduce) { .meridian { animation: none; rx: 11px; opacity: 0.7; } }
+  </style>
   <defs>
     <radialGradient id="sea" cx="0.35" cy="0.3" r="0.85">
       <stop offset="0" stop-color="#3fb0ff"/>

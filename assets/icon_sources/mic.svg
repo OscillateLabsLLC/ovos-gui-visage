@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .wave { fill: none; stroke: #1e9bff; stroke-width: 2.5; transform-origin: 32px 26px; opacity: 0; animation: wave 2.4s ease-out infinite; }
+    .wave.w2 { animation-delay: 0.8s; }
+    .wave.w3 { animation-delay: 1.6s; }
+    @keyframes wave { 0% { transform: scale(0.55); opacity: 0.9; } 100% { transform: scale(1.35); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .wave { animation: none; opacity: 0.35; transform: none; } }
+  </style>
   <defs>
     <radialGradient id="head" cx="0.35" cy="0.3" r="0.9">
       <stop offset="0" stop-color="#ffffff"/>

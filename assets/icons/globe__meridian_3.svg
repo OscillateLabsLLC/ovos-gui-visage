@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="sea" cx="0.35" cy="0.3" r="0.85">
+      <stop offset="0" stop-color="#3fb0ff" />
+      <stop offset="1" stop-color="#0f4c80" />
+    </radialGradient>
+    <clipPath id="disc"><circle cx="32" cy="32" r="22" /></clipPath>
+  </defs>
+  <g clip-path="url(#disc)">
+    <ellipse cx="32" cy="32" rx="11" ry="22" />
+    </g>
+  </svg>

@@ -3,12 +3,10 @@
 /// loudest thing on screen: shaking bell, red bloom on a loop. Otherwise only the next to fire glows.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
+import '../widgets/motion_icon.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'alerts_model.dart';
@@ -168,64 +166,13 @@ class _Label extends StatelessWidget {
   Widget build(BuildContext context) => Text(text.toUpperCase(), style: VisageText.fg(px).copyWith(letterSpacing: 1));
 }
 
-/// The bell icon, pivoting at its hanger (bell.svg's transform-origin, 9 of 64 from the top). At rest it swings
-/// once every 3.2 s as the SVG's CSS did (still for 70 % of the cycle, then 14, -11, 6, -3 degrees); a ringing
-/// alarm shakes it 14 degrees either way every 0.45 s.
-class Bell extends StatefulWidget {
+/// The bell icon: its rest swing and clapper offset come from the icon motion table; a ringing alarm shakes it.
+class Bell extends StatelessWidget {
   const Bell({super.key, required this.size, required this.shaking});
 
   final double size;
   final bool shaking;
 
   @override
-  State<Bell> createState() => _BellState();
-}
-
-const _swingCycle = Duration(milliseconds: 3200);
-const _shakeCycle = Duration(milliseconds: 450);
-const _pivot = Alignment(0, -0.72);
-// (cycle fraction, degrees) keyframes of the rest swing.
-const _swingKeys = [(0.0, 0.0), (0.7, 0.0), (0.76, 14.0), (0.84, -11.0), (0.91, 6.0), (0.96, -3.0), (1.0, 0.0)];
-
-double swingDegrees(double t) {
-  for (var i = 1; i < _swingKeys.length; i++) {
-    final (t0, a0) = _swingKeys[i - 1];
-    final (t1, a1) = _swingKeys[i];
-    if (t <= t1) return a0 + (a1 - a0) * Curves.easeInOut.transform((t - t0) / (t1 - t0));
-  }
-  return 0;
-}
-
-class _BellState extends State<Bell> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: _cycle)..repeat();
-
-  Duration get _cycle => widget.shaking ? _shakeCycle : _swingCycle;
-
-  @override
-  void didUpdateWidget(Bell old) {
-    super.didUpdateWidget(old);
-    if (old.shaking != widget.shaking) {
-      _controller
-        ..duration = _cycle
-        ..repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  double _degrees(double t) => widget.shaking ? -14 * math.sin(2 * math.pi * t) : swingDegrees(t);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) =>
-          Transform.rotate(angle: _degrees(_controller.value) * math.pi / 180, alignment: _pivot, child: child),
-      child: icon('bell', size: widget.size),
-    );
-  }
+  Widget build(BuildContext context) => MotionIcon('bell', size: size, ringing: shaking);
 }

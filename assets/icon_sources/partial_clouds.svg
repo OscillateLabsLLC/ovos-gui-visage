@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .rays { transform-box: fill-box; transform-origin: center; animation: spin 20s linear infinite; }
+    .cloud { animation: drift 7s ease-in-out infinite alternate; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes drift { from { transform: translateX(-2px); } to { transform: translateX(3px); } }
+    @media (prefers-reduced-motion: reduce) { .rays, .cloud { animation: none; } }
+  </style>
   <defs><path id="ray" d="M22 3v6"/></defs>
   <g class="rays" stroke="#ffc93c" stroke-width="3" stroke-linecap="round">
     <use href="#ray"/>

@@ -1,13 +1,13 @@
-/// ovos-skill-alerts.openvoiceos / ListView (SPEC 8.5): a hero chip (reminder icon in a glowing gradient circle, item
-/// count inside) with the header beneath it, then the {main, secondary} items as plain stacked rows.
+/// ovos-skill-alerts.openvoiceos / ListView (SPEC 8.5): a hero chip (ticking reminder icon in a glowing gradient
+/// circle, item count inside) with the header beneath it, then the {main, secondary} items as plain stacked rows.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import '../widgets/motion_icon.dart';
 import 'alarms_page.dart' show AlertsHeader;
 import 'alerts_model.dart';
 import 'page.dart';
@@ -34,7 +34,7 @@ class AlertListPage extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                icon('reminder', size: 104),
+                const MotionIcon('reminder', size: 104),
                 const SizedBox(height: 4),
                 Text(
                   '${model.items.length}',

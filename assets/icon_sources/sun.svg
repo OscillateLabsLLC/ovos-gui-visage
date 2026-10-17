@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .rays { transform-box: fill-box; transform-origin: center; animation: spin 20s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .rays { animation: none; } }
+  </style>
   <defs>
     <radialGradient id="core" cx="0.4" cy="0.4" r="0.7">
       <stop offset="0" stop-color="#ffe27a"/>

@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .star { animation: twinkle 3s ease-in-out infinite; }
+    .star:nth-of-type(2) { animation-delay: -1.5s; }
+    @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+    @media (prefers-reduced-motion: reduce) { .star { animation: none; } }
+  </style>
   <defs>
     <mask id="crescent">
       <rect width="64" height="64" fill="#fff"/>

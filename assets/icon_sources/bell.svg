@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .bell { transform-origin: 32px 9px; animation: swing 3.2s ease-in-out infinite; }
+    .clapper { transform-origin: 32px 12px; animation: swing 3.2s ease-in-out -0.25s infinite; }
+    @keyframes swing { 0%, 70%, 100% { transform: rotate(0deg); } 76% { transform: rotate(14deg); } 84% { transform: rotate(-11deg); } 91% { transform: rotate(6deg); } 96% { transform: rotate(-3deg); } }
+    @media (prefers-reduced-motion: reduce) { .bell, .clapper { animation: none; } }
+  </style>
   <defs>
     <radialGradient id="brass" cx="0.38" cy="0.3" r="0.8">
       <stop offset="0" stop-color="#ffe9a3"/>
