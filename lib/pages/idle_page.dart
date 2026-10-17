@@ -54,6 +54,8 @@ class IdlePage extends StatelessWidget {
     final alarm = events[alarmEvent] as Map?;
     final media = events[mediaEvent] as Map?;
     return Stack(
+      // The badge sits in the shell's padding, above the page box; Stack would clip it by default.
+      clipBehavior: Clip.none,
       children: [
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
