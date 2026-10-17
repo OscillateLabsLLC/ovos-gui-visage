@@ -6,10 +6,15 @@ import 'package:flutter/widgets.dart';
 
 import '../state/gui_state.dart';
 import 'blank_page.dart';
+import 'date_page.dart';
 import 'fallback_page.dart';
 import 'page.dart';
+import 'time_page.dart';
 
-const routes = <String, PageBuilder>{};
+const routes = <String, PageBuilder>{
+  'ovos-skill-date-time.openvoiceos/time': TimePage.page,
+  'ovos-skill-date-time.openvoiceos/date': DatePage.page,
+};
 
 const templates = <String, PageBuilder>{};
 
