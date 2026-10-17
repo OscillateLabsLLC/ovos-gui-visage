@@ -16,18 +16,21 @@ final cacheRoot = Directory('${Platform.environment['HOME']}/.cache/ovos_gui');
 /// Path of the ovos-gui cache file for a `/res/...` URL (what the Python middle layer would have served).
 File cacheFile(String resUrl) => File('${cacheRoot.path}/${resUrl.substring('/res/'.length)}');
 
-/// A widget for the image, or null when the value is not something this display can load.
-Widget? imageFor(String? value, {BoxFit fit = BoxFit.contain}) {
+/// A widget for the image, or null when the value is not something this display can load. [broken] is shown in
+/// place of a network or file image that fails to decode.
+Widget? imageFor(String? value, {BoxFit fit = BoxFit.contain, Widget? broken}) {
   final src = (value ?? '').trim();
   if (src.isEmpty) return null;
+  Widget onError(BuildContext context, Object error, StackTrace? stack) => broken ?? const SizedBox.shrink();
   if (src.startsWith('data:image/')) return _dataImage(src, fit);
-  if (src.startsWith('http://') || src.startsWith('https://')) return Image.network(src, fit: fit);
+  if (src.startsWith('http://') || src.startsWith('https://')) return Image.network(src, fit: fit, errorBuilder: onError);
   final path = src.startsWith('/res/') ? cacheFile(src).path : src.replaceFirst(_fileScheme, '');
   if (!path.startsWith('/')) return null;
   final file = File(path);
-  final suffix = path.substring(path.lastIndexOf('.')).toLowerCase();
+  final dot = path.lastIndexOf('.');
+  final suffix = dot < 0 ? '' : path.substring(dot).toLowerCase();
   if (!imageSuffixes.contains(suffix) || !file.existsSync()) return null;
-  return suffix == '.svg' ? SvgPicture.file(file, fit: fit) : Image.file(file, fit: fit);
+  return suffix == '.svg' ? SvgPicture.file(file, fit: fit) : Image.file(file, fit: fit, errorBuilder: onError);
 }
 
 Widget? _dataImage(String src, BoxFit fit) {

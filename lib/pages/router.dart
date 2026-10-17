@@ -16,6 +16,9 @@ import 'idle_page.dart';
 import 'image_frame_page.dart';
 import 'input_box_page.dart';
 import 'loading_page.dart';
+import 'now_playing_page.dart';
+import 'ocp_busy_page.dart';
+import 'ocp_list_page.dart';
 import 'page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
@@ -38,6 +41,12 @@ const routes = <String, PageBuilder>{
   'ovos-skill-alerts.openvoiceos/Timer': TimerPage.page,
   'ovos-skill-alerts.openvoiceos/AlarmsOverviewCard': AlarmsPage.page,
   'ovos-skill-alerts.openvoiceos/ListView': AlertListPage.page,
+  // OCP shows PlayerLoader and names the player in playerBackend; the page renders OVOSSyncPlayer, else the fallback.
+  'ovos.common_play/PlayerLoader': NowPlayingPage.page,
+  'ovos.common_play/OVOSSyncPlayer': NowPlayingPage.page,
+  'ovos.common_play/busy': OcpBusyPage.page,
+  'ovos.common_play/SuggestionsView': OcpListPage.build_,
+  'ovos.common_play/Home': OcpListPage.build_,
 };
 
 const templates = <String, PageBuilder>{

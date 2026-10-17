@@ -177,6 +177,17 @@ class StaggerEnter extends StatelessWidget {
   }
 }
 
+/// One item rising and fading in after [delay], for lists that are not a plain column (StaggerEnter does columns).
+class RiseIn extends StatelessWidget {
+  const RiseIn({super.key, required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => _Enter(delay: Duration(milliseconds: 60 * index), child: child);
+}
+
 class _Enter extends StatelessWidget {
   const _Enter({required this.delay, required this.child});
 
