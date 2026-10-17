@@ -9,6 +9,7 @@ import 'blank_page.dart';
 import 'date_page.dart';
 import 'fallback_page.dart';
 import 'html_frame_page.dart';
+import 'idle_page.dart';
 import 'image_frame_page.dart';
 import 'input_box_page.dart';
 import 'loading_page.dart';
@@ -20,6 +21,7 @@ import 'time_page.dart';
 import 'url_frame_page.dart';
 
 const routes = <String, PageBuilder>{
+  'ovos-skill-homescreen.openvoiceos/idle': IdlePage.page,
   'ovos-skill-date-time.openvoiceos/time': TimePage.page,
   'ovos-skill-date-time.openvoiceos/date': DatePage.page,
 };
