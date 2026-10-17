@@ -5,7 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
+import '../widgets/weather_icon.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'page.dart';
@@ -87,7 +87,7 @@ class IdlePage extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            icon(weatherIconName(data['weather_code']), size: 72),
+            WeatherIcon(weatherIconName(data['weather_code']), size: 72),
             const SizedBox(height: 4),
             Text('${number(data['weather_temp']).round()}°', style: VisageText.fg(34)),
           ],
