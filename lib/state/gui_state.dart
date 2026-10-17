@@ -27,13 +27,7 @@ class Namespace {
     focusedIndex = 0;
   }
 
-  Json toJson() => {
-        'skill_id': skillId,
-        'pages': List.of(pages),
-        'data': data,
-        'focused_index': focusedIndex,
-        'events': events,
-      };
+  Json toJson() => {'skill_id': skillId, 'pages': List.of(pages), 'data': data, 'focused_index': focusedIndex, 'events': events};
 }
 
 /// The (namespace, page, index) the screen shows.
@@ -45,8 +39,7 @@ class Target {
   final int index;
 
   @override
-  bool operator ==(Object other) =>
-      other is Target && other.namespace == namespace && other.page == page && other.index == index;
+  bool operator ==(Object other) => other is Target && other.namespace == namespace && other.page == page && other.index == index;
 
   @override
   int get hashCode => Object.hash(namespace, page, index);
@@ -96,10 +89,10 @@ class GuiState {
   }
 
   Json snapshot() => {
-        'active': List.of(active),
-        'idle_namespace': idleNamespace,
-        'namespaces': {for (final entry in namespaces.entries) entry.key: entry.value.toJson()},
-      };
+    'active': List.of(active),
+    'idle_namespace': idleNamespace,
+    'namespaces': {for (final entry in namespaces.entries) entry.key: entry.value.toJson()},
+  };
 
   late final Map<String, void Function(Json)> _handlers = {
     'mycroft.session.set': _sessionSet,

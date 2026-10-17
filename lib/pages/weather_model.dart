@@ -26,7 +26,8 @@ String animatedIconName(Object? code) {
 
 bool _isBlank(Object? value) => value == null || value == '';
 
-double? _numberOrNull(Object? value) => _isBlank(value) ? null : (value is num ? value.toDouble() : double.tryParse(value.toString()));
+double? _numberOrNull(Object? value) =>
+    _isBlank(value) ? null : (value is num ? value.toDouble() : double.tryParse(value.toString()));
 
 String degrees(Object? value) {
   final n = _numberOrNull(value);
@@ -73,18 +74,18 @@ NowModel nowModel(String page, Json data) {
 typedef ForecastItem = ({String label, String icon, String main, String sub});
 
 ForecastItem _dailyItem(Map day) => (
-      label: text(day['date']),
-      icon: animatedIconName(day['weatherCondition']),
-      main: degrees(day['highTemperature']),
-      sub: degrees(day['lowTemperature']),
-    );
+  label: text(day['date']),
+  icon: animatedIconName(day['weatherCondition']),
+  main: degrees(day['highTemperature']),
+  sub: degrees(day['lowTemperature']),
+);
 
 ForecastItem _hourlyItem(Map hour) => (
-      label: text(hour['time']),
-      icon: animatedIconName(hour['weatherCondition']),
-      main: degrees(hour['temperature']),
-      sub: percent(hour['precipitation']),
-    );
+  label: text(hour['time']),
+  icon: animatedIconName(hour['weatherCondition']),
+  main: degrees(hour['temperature']),
+  sub: percent(hour['precipitation']),
+);
 
 typedef ForecastModel = ({String heading, String location, List<ForecastItem> items, bool hourly});
 
@@ -105,8 +106,8 @@ ForecastModel forecastModel(String page, Json data) {
 typedef SunTimesModel = ({String heading, String location, String sunrise, String sunset});
 
 SunTimesModel sunTimesModel(Json data) => (
-      heading: text(data['currentTimezone']),
-      location: text(data['weatherLocation']),
-      sunrise: _isBlank(data['sunrise']) ? missing : text(data['sunrise']),
-      sunset: _isBlank(data['sunset']) ? missing : text(data['sunset']),
-    );
+  heading: text(data['currentTimezone']),
+  location: text(data['weatherLocation']),
+  sunrise: _isBlank(data['sunrise']) ? missing : text(data['sunrise']),
+  sunset: _isBlank(data['sunset']) ? missing : text(data['sunset']),
+);

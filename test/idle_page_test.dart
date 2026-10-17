@@ -7,7 +7,11 @@ import 'package:ovos_gui_visage/pages/idle_page.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
-Widget host(Widget page) => MaterialApp(home: Material(child: Center(child: SizedBox(width: 432, height: 736, child: page))));
+Widget host(Widget page) => MaterialApp(
+  home: Material(
+    child: Center(child: SizedBox(width: 432, height: 736, child: page)),
+  ),
+);
 
 GuiState replayFixture(String name) {
   final state = GuiState();
@@ -26,15 +30,32 @@ void main() {
   });
 
   test('date line follows dateFormat and falls back to date_string', () {
-    expect(dateLine({'weekday_string': 'Saturday', 'day_string': '17', 'month_string': 'October', 'dateFormat': 'DMY'}), 'Saturday, 17 October');
-    expect(dateLine({'weekday_string': 'Saturday', 'day_string': '17', 'month_string': 'October', 'dateFormat': 'MDY'}), 'Saturday, October 17');
+    expect(
+      dateLine({'weekday_string': 'Saturday', 'day_string': '17', 'month_string': 'October', 'dateFormat': 'DMY'}),
+      'Saturday, 17 October',
+    );
+    expect(
+      dateLine({'weekday_string': 'Saturday', 'day_string': '17', 'month_string': 'October', 'dateFormat': 'MDY'}),
+      'Saturday, October 17',
+    );
     expect(dateLine({'date_string': '17/10/2026'}), '17/10/2026');
   });
 
   test('notification count is the larger of the counter and the stored model', () {
     expect(notificationCount({'notification_model': [], 'notifcation_counter': 0}), 0);
-    expect(notificationCount({'notification_model': {'storedmodel': [], 'count': 2}}), 2);
-    expect(notificationCount({'notification_model': {'count': 1}, 'notifcation_counter': 3}), 3);
+    expect(
+      notificationCount({
+        'notification_model': {'storedmodel': [], 'count': 2},
+      }),
+      2,
+    );
+    expect(
+      notificationCount({
+        'notification_model': {'count': 1},
+        'notifcation_counter': 3,
+      }),
+      3,
+    );
   });
 
   testWidgets('the recorded boot sync renders the idle clock and weather', (tester) async {
@@ -48,7 +69,13 @@ void main() {
   });
 
   testWidgets('a timer widget event shows the timer chip', (tester) async {
-    const ctx = PageContext(namespace: defaultIdleNamespace, page: 'idle', events: {timerEvent: {'count': 2}});
+    const ctx = PageContext(
+      namespace: defaultIdleNamespace,
+      page: 'idle',
+      events: {
+        timerEvent: {'count': 2},
+      },
+    );
     await tester.pumpWidget(host(IdlePage.page({'time_string': '10:00'}, ctx)));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('2'), findsOneWidget);

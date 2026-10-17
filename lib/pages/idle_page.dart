@@ -109,7 +109,11 @@ class IdlePage extends StatelessWidget {
           children: [
             Text(
               time.isEmpty ? '--:--' : time,
-              style: VisageText.fg(92, weight: FontWeight.w300, height: 1).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
+              style: VisageText.fg(
+                92,
+                weight: FontWeight.w300,
+                height: 1,
+              ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
             ),
             const SizedBox(height: 10),
             Text(dateLine(data), style: VisageText.muted(20)),

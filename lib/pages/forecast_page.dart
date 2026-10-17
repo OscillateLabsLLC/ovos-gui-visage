@@ -27,7 +27,10 @@ class ForecastPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 8,
       children: [
-        Padding(padding: const EdgeInsets.only(bottom: 20), child: SkillHeader(heading: model.heading, location: model.location)),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SkillHeader(heading: model.heading, location: model.location),
+        ),
         for (final item in model.items) _item(item, subColour),
       ],
     );
@@ -53,7 +56,10 @@ class ForecastPage extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Text(item.main, style: VisageText.fg(22).copyWith(fontFeatures: VisageText.tabular)),
-                  Text(item.sub, style: VisageText.base.copyWith(color: subColour, fontSize: 14, fontFeatures: VisageText.tabular)),
+                  Text(
+                    item.sub,
+                    style: VisageText.base.copyWith(color: subColour, fontSize: 14, fontFeatures: VisageText.tabular),
+                  ),
                 ],
               ),
             ),

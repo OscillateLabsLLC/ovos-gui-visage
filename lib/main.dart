@@ -31,7 +31,10 @@ class VisageApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Material(color: VisageColors.bg, child: Center(child: Screen())),
+      home: Material(
+        color: VisageColors.bg,
+        child: Center(child: Screen()),
+      ),
     );
   }
 }
@@ -130,6 +133,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 }
+
 /// The face over the page: full and dimming over idle, else scaled into a disc at the bottom centre (SPEC 5.3).
 class _AttentionOverlay extends StatelessWidget {
   const _AttentionOverlay({required this.attention, required this.face});

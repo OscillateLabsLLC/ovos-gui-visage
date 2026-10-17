@@ -41,7 +41,11 @@ class TimePage extends StatelessWidget {
             children: [
               Text(
                 time.isEmpty ? '--:--' : time,
-                style: VisageText.fg(120, weight: FontWeight.w300, height: 1).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
+                style: VisageText.fg(
+                  120,
+                  weight: FontWeight.w300,
+                  height: 1,
+                ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
               ),
               if (ampm.isNotEmpty)
                 Padding(

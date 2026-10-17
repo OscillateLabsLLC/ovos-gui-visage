@@ -20,7 +20,8 @@ class WeatherIcon extends StatefulWidget {
 }
 
 class _WeatherIconState extends State<WeatherIcon> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: _period)..repeat(reverse: _drifting.contains(widget.name));
+  late final AnimationController _controller = AnimationController(vsync: this, duration: _period)
+    ..repeat(reverse: _drifting.contains(widget.name));
 
   Duration get _period => _spinning.contains(widget.name) ? const Duration(seconds: 20) : const Duration(seconds: 7);
 

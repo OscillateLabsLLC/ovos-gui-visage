@@ -89,7 +89,10 @@ test/
 3. **OCP pages** (done): now playing, busy, suggestions, home. Verified by replaying the
    recorded OCP session data through ovos-gui with `gui.value.set` / `gui.page.show`, since
    OCP need not be installed to test the pages.
-4. Webviews with platform gating; the web build and its sidecar.
+4. Webviews with platform gating; the web build and its sidecar. The web build does not
+   compile yet: `lib/resources.dart` and `lib/lottie/cache_lottie.dart` read files with
+   `dart:io`, so the resource layer needs a web implementation that fetches the sidecar's
+   `/res/` URLs instead (conditional imports).
 5. CI matrix (macOS, Linux, Windows, web), packaging, release-please.
 6. Floating widget mode (later, about a day): a frameless always-on-top window that snaps
    to a screen corner, via `window_manager` plus the display bounds. Works on macOS,

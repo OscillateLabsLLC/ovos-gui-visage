@@ -112,7 +112,10 @@ class WidgetManager {
   void _onStorageClearItem(Json message) {
     final notification = _notificationOf(message);
     if (notification == null) return;
-    storage = [for (final item in storage) if (!_sameNotification(item, notification)) item];
+    storage = [
+      for (final item in storage)
+        if (!_sameNotification(item, notification)) item,
+    ];
     emitStorageModel();
   }
 

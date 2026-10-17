@@ -3,7 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/json.dart';
 import 'package:ovos_gui_visage/pages/ocp_model.dart';
 
-const song = <String, dynamic>{'uri': 'https://x/song.mp3', 'title': 'Song', 'artist': 'Band', 'status': 'Playing', 'duration': '200000', 'position': 0};
+const song = <String, dynamic>{
+  'uri': 'https://x/song.mp3',
+  'title': 'Song',
+  'artist': 'Band',
+  'status': 'Playing',
+  'duration': '200000',
+  'position': 0,
+};
 
 void main() {
   test('cover art: URLs and (same-host) paths are candidates; empty is none', () {
@@ -17,8 +24,13 @@ void main() {
   });
 
   test('status words, times and backends', () {
-    expect(['Playing', 'Paused', 'Stopped', null, 'weird'].map(playbackState),
-        [PlaybackState.playing, PlaybackState.paused, PlaybackState.stopped, PlaybackState.stopped, PlaybackState.stopped]);
+    expect(['Playing', 'Paused', 'Stopped', null, 'weird'].map(playbackState), [
+      PlaybackState.playing,
+      PlaybackState.paused,
+      PlaybackState.stopped,
+      PlaybackState.stopped,
+      PlaybackState.stopped,
+    ]);
     expect([0, 5400, 65000, 213000, 3725000].map(formatTime), ['0:00', '0:05', '1:05', '3:33', '1:02:05']);
     expect(isSyncPlayer({'playerBackend': 'OVOSSyncPlayer'}), isTrue);
     expect(isSyncPlayer({'playerBackend': 'OVOSWebPlayer'}), isFalse);
@@ -45,10 +57,17 @@ void main() {
   });
 
   test('measured live stream: duration 0, length grows with position; the ring stays full', () {
-    final stream = {'uri': 'https://ice1.somafm.com/groovesalad-128-mp3', 'title': 'Groove Salad', 'status': 'Playing', 'duration': 0};
+    final stream = {
+      'uri': 'https://ice1.somafm.com/groovesalad-128-mp3',
+      'title': 'Groove Salad',
+      'status': 'Playing',
+      'duration': 0,
+    };
     const samples = [(14, 43284), (16, 45270), (18, 47333), (20, 49554)];
     Track? previous;
-    final models = [for (final (p, l) in samples) previous = trackModel({...stream, 'position': p, 'length': l}, previous)];
+    final models = [
+      for (final (p, l) in samples) previous = trackModel({...stream, 'position': p, 'length': l}, previous),
+    ];
     expect(models.every((t) => t.live && t.durationMs == 0), isTrue);
     expect(models.map((t) => t.positionMs), [14000, 16000, 18000, 20000]);
     expect(models.map((t) => progressAt(t, 1500).fraction), [1, 1, 1, 1]);

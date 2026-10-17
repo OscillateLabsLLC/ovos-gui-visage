@@ -29,7 +29,11 @@ class InputBoxPage extends StatelessWidget {
         Circle(size: 200, gradient: gradientFill, glow: const Glow(), ring: const Ring(), children: [_PulsingMic()]),
         if (model.title.isNotEmpty) Text(model.title, textAlign: TextAlign.center, style: VisageText.fg(30)),
         if (model.placeholder.isNotEmpty)
-          Text(model.placeholder, textAlign: TextAlign.center, style: VisageText.muted(22).copyWith(fontStyle: FontStyle.italic)),
+          Text(
+            model.placeholder,
+            textAlign: TextAlign.center,
+            style: VisageText.muted(22).copyWith(fontStyle: FontStyle.italic),
+          ),
         if (hints.isNotEmpty) TemplateHint(hints),
       ],
     );
@@ -43,8 +47,8 @@ class _PulsingMic extends StatefulWidget {
 }
 
 class _PulsingMicState extends State<_PulsingMic> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))..repeat();
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))
+    ..repeat();
 
   @override
   void dispose() {
@@ -60,7 +64,10 @@ class _PulsingMicState extends State<_PulsingMic> with SingleTickerProviderState
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedBuilder(animation: _controller, builder: (context, _) => CustomPaint(size: const Size(110, 110), painter: _WavePainter(_controller.value))),
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) => CustomPaint(size: const Size(110, 110), painter: _WavePainter(_controller.value)),
+          ),
           icon('mic', size: 110),
         ],
       ),

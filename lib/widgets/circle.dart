@@ -13,15 +13,7 @@ const ringRadiusFraction = 0.46;
 
 /// A filled circle with its children stacked and centred; [ring] draws a progress ring on its edge.
 class Circle extends StatelessWidget {
-  const Circle({
-    super.key,
-    required this.size,
-    this.fill,
-    this.gradient,
-    this.ring,
-    this.glow,
-    this.children = const [],
-  });
+  const Circle({super.key, required this.size, this.fill, this.gradient, this.ring, this.glow, this.children = const []});
 
   final double size;
   final Color? fill;
@@ -43,7 +35,9 @@ class Circle extends StatelessWidget {
         children: [
           if (glow != null) Positioned.fill(child: glow!),
           Positioned.fill(
-            child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, color: fill, gradient: gradient)),
+            child: DecoratedBox(
+              decoration: BoxDecoration(shape: BoxShape.circle, color: fill, gradient: gradient),
+            ),
           ),
           if (ring != null) Positioned.fill(child: ring!),
           ...children,
@@ -62,7 +56,13 @@ const gradientFill = RadialGradient(
 
 /// A track and a value arc from twelve o'clock, as widgets.js ring(): r 46 in a 100 box, stroke 6 (SPEC 9).
 class Ring extends StatelessWidget {
-  const Ring({super.key, this.fraction = 1, this.track = VisageColors.accentDim, this.value = VisageColors.accent, this.stroke = ringStroke});
+  const Ring({
+    super.key,
+    this.fraction = 1,
+    this.track = VisageColors.accentDim,
+    this.value = VisageColors.accent,
+    this.stroke = ringStroke,
+  });
 
   final double fraction;
   final Color track;
@@ -170,7 +170,10 @@ class StaggerEnter extends StatelessWidget {
       children: [
         for (var i = 0; i < children.length; i++) ...[
           if (i > 0) SizedBox(height: gap),
-          _Enter(delay: Duration(milliseconds: 60 * math.min(i, 5)), child: children[i]),
+          _Enter(
+            delay: Duration(milliseconds: 60 * math.min(i, 5)),
+            child: children[i],
+          ),
         ],
       ],
     );
@@ -185,7 +188,10 @@ class RiseIn extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => _Enter(delay: Duration(milliseconds: 60 * index), child: child);
+  Widget build(BuildContext context) => _Enter(
+    delay: Duration(milliseconds: 60 * index),
+    child: child,
+  );
 }
 
 class _Enter extends StatelessWidget {
@@ -202,7 +208,10 @@ class _Enter extends StatelessWidget {
       curve: Interval(delay.inMilliseconds / (260 + delay.inMilliseconds), 1, curve: Curves.easeOut),
       builder: (context, t, child) => Opacity(
         opacity: t,
-        child: Transform.translate(offset: Offset(0, 12 * (1 - t)), child: Transform.scale(scale: 0.97 + 0.03 * t, child: child)),
+        child: Transform.translate(
+          offset: Offset(0, 12 * (1 - t)),
+          child: Transform.scale(scale: 0.97 + 0.03 * t, child: child),
+        ),
       ),
       child: child,
     );

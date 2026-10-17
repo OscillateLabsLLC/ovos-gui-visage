@@ -41,12 +41,19 @@ class DatePage extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(capitalize(text(data['weekday_string'])), style: VisageText.base.copyWith(color: VisageColors.accent, fontSize: 26)),
+                Text(
+                  capitalize(text(data['weekday_string'])),
+                  style: VisageText.base.copyWith(color: VisageColors.accent, fontSize: 26),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 270),
-                    child: Text(capitalize(dayMonth), textAlign: TextAlign.center, style: VisageText.fg(54, weight: FontWeight.w300, height: 1.1)),
+                    child: Text(
+                      capitalize(dayMonth),
+                      textAlign: TextAlign.center,
+                      style: VisageText.fg(54, weight: FontWeight.w300, height: 1.1),
+                    ),
                   ),
                 ),
                 Text(text(data['year_string']), style: VisageText.muted(26).copyWith(fontFeatures: VisageText.tabular)),

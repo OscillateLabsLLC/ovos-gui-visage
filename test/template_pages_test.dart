@@ -12,7 +12,11 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 
 const ctx = PageContext(namespace: 'some.skill', page: 'SYSTEM_TextFrame', events: {});
 
-Widget host(Widget page) => MaterialApp(home: Material(child: Center(child: SizedBox(width: 432, height: 736, child: page))));
+Widget host(Widget page) => MaterialApp(
+  home: Material(
+    child: Center(child: SizedBox(width: 432, height: 736, child: page)),
+  ),
+);
 
 const longText =
     'A teaspoon is about five millilitres, a tablespoon is three teaspoons, and a cup is sixteen tablespoons. '

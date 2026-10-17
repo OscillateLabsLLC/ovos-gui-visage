@@ -27,13 +27,7 @@ class FaceGeometry {
 
 /// One animation frame's worth of state, in frame coordinates.
 class FaceFrame {
-  const FaceFrame({
-    required this.mode,
-    required this.eyeOpen,
-    required this.eyeScale,
-    required this.lips,
-    required this.elapsed,
-  });
+  const FaceFrame({required this.mode, required this.eyeOpen, required this.eyeScale, required this.lips, required this.elapsed});
 
   final FaceMode mode;
 

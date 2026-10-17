@@ -15,10 +15,10 @@ const syncPlayer = 'OVOSSyncPlayer';
 enum PlaybackState { playing, paused, stopped }
 
 PlaybackState playbackState(Object? status) => switch (text(status).toLowerCase()) {
-      'playing' => PlaybackState.playing,
-      'paused' => PlaybackState.paused,
-      _ => PlaybackState.stopped,
-    };
+  'playing' => PlaybackState.playing,
+  'paused' => PlaybackState.paused,
+  _ => PlaybackState.stopped,
+};
 
 final _loadable = RegExp(r'^(data:|https?://|/)');
 const _overshoot = 1.05;
@@ -70,9 +70,20 @@ class Track {
   final bool live, canPrev, canNext, repeat, shuffle;
 
   Track withPosition(double ms, {PlaybackState? state}) => Track(
-        id: id, title: title, artist: artist, cover: cover, state: state ?? this.state, durationMs: durationMs,
-        lengthMs: lengthMs, positionMs: ms, live: live, canPrev: canPrev, canNext: canNext, repeat: repeat, shuffle: shuffle,
-      );
+    id: id,
+    title: title,
+    artist: artist,
+    cover: cover,
+    state: state ?? this.state,
+    durationMs: durationMs,
+    lengthMs: lengthMs,
+    positionMs: ms,
+    live: live,
+    canPrev: canPrev,
+    canNext: canNext,
+    repeat: repeat,
+    shuffle: shuffle,
+  );
 }
 
 /// The buffer `length` growing in step with `position` marks a live stream even when a duration is claimed.
@@ -126,7 +137,10 @@ Progress progressAt(Track track, [double sinceUpdateMs = 0]) {
 typedef Anchor = ({String id, double positionMs, double reportedMs, PlaybackState state, double at});
 
 bool _restarts(Anchor? previous, Track track) =>
-    previous == null || track.id != previous.id || track.state == PlaybackState.stopped || track.positionMs != previous.reportedMs;
+    previous == null ||
+    track.id != previous.id ||
+    track.state == PlaybackState.stopped ||
+    track.positionMs != previous.reportedMs;
 
 /// A new track, a stop or a new reported position restarts the clock at the reported position; any other update
 /// (pause, resume, unrelated keys) carries the running estimate forward, so pausing freezes it in place.
@@ -144,11 +158,11 @@ typedef StatusParts = ({PlaybackState state, String time, bool live, List<String
 
 /// The pieces of the status line: state word, time text, whether to show the live dot, and the capability flags.
 StatusParts statusParts(Track track, Progress progress) => (
-      state: track.state,
-      time: track.live ? progress.elapsed : '${progress.elapsed} / ${progress.total}',
-      live: track.live,
-      flags: [if (track.canPrev) '⏮', if (track.canNext) '⏭', if (track.repeat) 'repeat', if (track.shuffle) 'shuffle'],
-    );
+  state: track.state,
+  time: track.live ? progress.elapsed : '${progress.elapsed} / ${progress.total}',
+  live: track.live,
+  flags: [if (track.canPrev) '⏮', if (track.canNext) '⏭', if (track.repeat) 'repeat', if (track.shuffle) 'shuffle'],
+);
 
 /// The upright angle a paused record eases to from [degrees]: back to 0 in the first half turn, on to 360 in the second.
 double uprightTarget(num degrees) {

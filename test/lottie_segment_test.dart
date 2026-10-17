@@ -15,7 +15,14 @@ void main() {
   });
 
   test('layers without op use the composition end', () {
-    expect(liveSegment({'ip': 0, 'op': 70, 'layers': [{}]}), (start: 0.0, end: 70.0));
+    expect(
+      liveSegment({
+        'ip': 0,
+        'op': 70,
+        'layers': [{}],
+      }),
+      (start: 0.0, end: 70.0),
+    );
     expect(liveSegment({'ip': 0, 'op': 70}), (start: 0.0, end: 0.0));
   });
 }

@@ -1,5 +1,5 @@
 name: ovos_gui_visage
-description: "A new Flutter project."
+description: "Flutter GUI client for OpenVoiceOS in the style of the 2018 Mycroft Mark II Kickstarter concept"
 publish_to: 'none'
 version: 0.1.0+1
 

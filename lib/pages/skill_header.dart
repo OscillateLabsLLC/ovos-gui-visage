@@ -17,7 +17,12 @@ class SkillHeader extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (heading.isNotEmpty) Text(heading, textAlign: TextAlign.center, style: VisageText.fg(22, weight: FontWeight.w500, height: 1.3)),
+        if (heading.isNotEmpty)
+          Text(
+            heading,
+            textAlign: TextAlign.center,
+            style: VisageText.fg(22, weight: FontWeight.w500, height: 1.3),
+          ),
         if (location.isNotEmpty) Text(location, textAlign: TextAlign.center, style: VisageText.muted(15).copyWith(height: 1.3)),
       ],
     );

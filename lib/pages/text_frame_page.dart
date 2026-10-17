@@ -47,10 +47,13 @@ class _TextFramePageState extends State<TextFramePage> {
     _timer?.cancel();
     if (_pages.length < 2) return;
     final words = _pages[_index].split(RegExp(r'\s+')).length;
-    _timer = Timer(Duration(milliseconds: pageDurationMs(words)), () => setState(() {
-          _index = (_index + 1) % _pages.length;
-          _step();
-        }));
+    _timer = Timer(
+      Duration(milliseconds: pageDurationMs(words)),
+      () => setState(() {
+        _index = (_index + 1) % _pages.length;
+        _step();
+      }),
+    );
   }
 
   /// Pages the long text against the available height; re-run only when the text or the frame changes.
@@ -95,7 +98,11 @@ class _TextFramePageState extends State<TextFramePage> {
           glow: const Glow(),
           ring: const Ring(),
           children: [
-            Text(lines.join('\n'), textAlign: TextAlign.center, style: VisageText.fg(px.toDouble(), weight: FontWeight.w300, height: 1.1)),
+            Text(
+              lines.join('\n'),
+              textAlign: TextAlign.center,
+              style: VisageText.fg(px.toDouble(), weight: FontWeight.w300, height: 1.1),
+            ),
           ],
         ),
       ],
@@ -126,7 +133,10 @@ class PageDots extends StatelessWidget {
                       duration: const Duration(milliseconds: 400),
                       width: i == active ? 10.8 : 8,
                       height: i == active ? 10.8 : 8,
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: i == active ? VisageColors.accent : VisageColors.accentDim),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: i == active ? VisageColors.accent : VisageColors.accentDim,
+                      ),
                     ),
                   ),
               ],

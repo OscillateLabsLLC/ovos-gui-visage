@@ -13,7 +13,11 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 const alerts = 'ovos-skill-alerts.openvoiceos';
 const ctx = PageContext(namespace: alerts, page: 'Timer', events: {});
 
-Widget host(Widget page) => MaterialApp(home: Material(child: Center(child: SizedBox(width: 432, height: 736, child: page))));
+Widget host(Widget page) => MaterialApp(
+  home: Material(
+    child: Center(child: SizedBox(width: 432, height: 736, child: page)),
+  ),
+);
 
 /// Every distinct Timer page state in a fixture, in order.
 List<Json> timerStates(String fixture) {
@@ -73,13 +77,31 @@ void main() {
   });
 
   testWidgets('alarms: chips up to two, a grid beyond, ringing label, +n more', (tester) async {
-    Map alarm(int i, {bool expired = false}) =>
-        {'alarmIndex': '$i', 'alarmTime': '7:0$i', 'alarmAmPm': 'AM', 'alarmName': 'wake $i', 'alarmRepeatStr': 'Once', 'alarmExpired': expired};
-    await tester.pumpWidget(host(AlarmsPage.page({'activeAlarms': [alarm(1, expired: true)]}, ctx)));
+    Map alarm(int i, {bool expired = false}) => {
+      'alarmIndex': '$i',
+      'alarmTime': '7:0$i',
+      'alarmAmPm': 'AM',
+      'alarmName': 'wake $i',
+      'alarmRepeatStr': 'Once',
+      'alarmExpired': expired,
+    };
+    await tester.pumpWidget(
+      host(
+        AlarmsPage.page({
+          'activeAlarms': [alarm(1, expired: true)],
+        }, ctx),
+      ),
+    );
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('RINGING'), findsOneWidget);
     expect(find.text('ALARMS'), findsOneWidget);
-    await tester.pumpWidget(host(AlarmsPage.page({'activeAlarms': [for (var i = 1; i <= 6; i++) alarm(i)]}, ctx)));
+    await tester.pumpWidget(
+      host(
+        AlarmsPage.page({
+          'activeAlarms': [for (var i = 1; i <= 6; i++) alarm(i)],
+        }, ctx),
+      ),
+    );
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('+3 more'), findsOneWidget);
     expect(find.byType(Bell), findsNWidgets(3));
@@ -88,7 +110,13 @@ void main() {
   });
 
   testWidgets('the list page shows the count, header and rows', (tester) async {
-    final data = {'header': 'Reminders', 'items': [{'main': 'stretch', 'secondary': '11:00 PM'}, 'water']};
+    final data = {
+      'header': 'Reminders',
+      'items': [
+        {'main': 'stretch', 'secondary': '11:00 PM'},
+        'water',
+      ],
+    };
     await tester.pumpWidget(host(AlertListPage.page(data, ctx)));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('2'), findsOneWidget);

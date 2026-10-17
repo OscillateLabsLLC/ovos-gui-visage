@@ -55,8 +55,8 @@ class _TurningArc extends StatefulWidget {
 }
 
 class _TurningArcState extends State<_TurningArc> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
+    ..repeat();
 
   @override
   void dispose() {
@@ -71,7 +71,10 @@ class _TurningArcState extends State<_TurningArc> with SingleTickerProviderState
       builder: (context, _) => Stack(
         alignment: Alignment.center,
         children: [
-          Transform.rotate(angle: _controller.value * 1.5 * math.pi, child: const Ring(fraction: 0.25, track: Colors.transparent)),
+          Transform.rotate(
+            angle: _controller.value * 1.5 * math.pi,
+            child: const Ring(fraction: 0.25, track: Colors.transparent),
+          ),
           Row(
             mainAxisSize: MainAxisSize.min,
             spacing: 14,

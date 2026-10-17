@@ -35,8 +35,6 @@ class HtmlFramePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Text(htmlToText(text(data['html'])), style: VisageText.fg(20, height: 1.4)),
-    );
+    return SingleChildScrollView(child: Text(htmlToText(text(data['html'])), style: VisageText.fg(20, height: 1.4)));
   }
 }

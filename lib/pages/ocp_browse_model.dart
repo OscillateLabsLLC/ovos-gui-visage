@@ -14,11 +14,32 @@ import 'page.dart';
 const searching = 'Searching media';
 // ovos_utils.ocp.MediaType values a skill card can list; 0 (GENERIC) says nothing and is left out.
 const mediaTypeNames = {
-  1: 'audio', 2: 'music', 3: 'video', 4: 'audiobooks', 5: 'games', 6: 'podcasts', 7: 'radio', 8: 'news', 9: 'tv',
-  10: 'movies', 11: 'trailers', 15: 'documentaries', 16: 'radio theatre', 17: 'short films', 19: 'series', 21: 'cartoons',
-  22: 'anime', 23: 'asmr',
+  1: 'audio',
+  2: 'music',
+  3: 'video',
+  4: 'audiobooks',
+  5: 'games',
+  6: 'podcasts',
+  7: 'radio',
+  8: 'news',
+  9: 'tv',
+  10: 'movies',
+  11: 'trailers',
+  15: 'documentaries',
+  16: 'radio theatre',
+  17: 'short films',
+  19: 'series',
+  21: 'cartoons',
+  22: 'anime',
+  23: 'asmr',
 };
-final _skillAffixes = [RegExp(r'\.openvoiceos$'), RegExp(r'\.[a-z0-9_-]+$'), RegExp(r'^ovos-skill-'), RegExp(r'^skill-ovos-'), RegExp(r'^skill-')];
+final _skillAffixes = [
+  RegExp(r'\.openvoiceos$'),
+  RegExp(r'\.[a-z0-9_-]+$'),
+  RegExp(r'^ovos-skill-'),
+  RegExp(r'^skill-ovos-'),
+  RegExp(r'^skill-'),
+];
 const maxRows = 7;
 // Home's skill chips: two columns of three fit above the attention strip.
 const maxChips = 6;
@@ -39,7 +60,14 @@ String busyLabel(Json data) {
 }
 
 class BrowseRow {
-  const BrowseRow({required this.title, required this.subtitle, required this.cover, required this.current, this.section, this.hue});
+  const BrowseRow({
+    required this.title,
+    required this.subtitle,
+    required this.cover,
+    required this.current,
+    this.section,
+    this.hue,
+  });
 
   final String title;
   final String subtitle;
@@ -53,7 +81,13 @@ class BrowseRow {
 
   @override
   bool operator ==(Object other) =>
-      other is BrowseRow && other.title == title && other.subtitle == subtitle && other.cover == cover && other.current == current && other.section == section && other.hue == hue;
+      other is BrowseRow &&
+      other.title == title &&
+      other.subtitle == subtitle &&
+      other.cover == cover &&
+      other.current == current &&
+      other.section == section &&
+      other.hue == hue;
 
   @override
   int get hashCode => Object.hash(title, subtitle, cover, current, section, hue);
@@ -94,10 +128,17 @@ BrowseModel suggestionsModel(Json data) {
   final inPlaylist = {for (final entry in playlist) entry['uri']};
   final results = _entries(data['searchModel']).where((entry) => !inPlaylist.contains(entry['uri'])).toList();
   final uri = text(data['uri']);
-  final rows = [for (final entry in [...playlist, ...results]) _entryRow(entry, uri)];
+  final rows = [
+    for (final entry in [...playlist, ...results]) _entryRow(entry, uri),
+  ];
   if (playlist.isNotEmpty && results.isNotEmpty) rows[playlist.length] = rows[playlist.length].withSection('Search results');
   final window = windowRows(rows);
-  return (heading: playlist.isNotEmpty ? 'Playlist' : 'Search results', layout: BrowseLayout.rows, rows: window.rows, hidden: window.hidden);
+  return (
+    heading: playlist.isNotEmpty ? 'Playlist' : 'Search results',
+    layout: BrowseLayout.rows,
+    rows: window.rows,
+    hidden: window.hidden,
+  );
 }
 
 String mediaTypes(Object? types) {

@@ -31,7 +31,11 @@ Json weatherData(String fixture, String page) {
   return shown ?? (throw StateError('$page never shown in $fixture'));
 }
 
-Widget host(Widget page) => MaterialApp(home: Material(child: Center(child: SizedBox(width: 432, height: 736, child: page))));
+Widget host(Widget page) => MaterialApp(
+  home: Material(
+    child: Center(child: SizedBox(width: 432, height: 736, child: page)),
+  ),
+);
 
 void main() {
   test('animated codes follow WeatherDelegate and every icon is bundled', () {

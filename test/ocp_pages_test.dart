@@ -14,7 +14,11 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 const ocp = 'ovos.common_play';
 PageContext ctx(String page) => PageContext(namespace: ocp, page: page, events: const {});
 
-Widget host(Widget page) => MaterialApp(home: Material(child: Center(child: SizedBox(width: 432, height: 736, child: page))));
+Widget host(Widget page) => MaterialApp(
+  home: Material(
+    child: Center(child: SizedBox(width: 432, height: 736, child: page)),
+  ),
+);
 
 /// OCP's data each time a given page was on screen in a fixture, in order (distinct states only).
 List<Json> statesOf(String fixture, String page) {
@@ -59,7 +63,14 @@ void main() {
   });
 
   testWidgets('a live stream shows elapsed time and the live word', (tester) async {
-    final data = {'title': 'Groove Salad', 'artist': 'SomaFM', 'status': 'Playing', 'duration': 0, 'position': 14, 'length': 43284};
+    final data = {
+      'title': 'Groove Salad',
+      'artist': 'SomaFM',
+      'status': 'Playing',
+      'duration': 0,
+      'position': 14,
+      'length': 43284,
+    };
     await tester.pumpWidget(host(NowPlayingPage.page(data, ctx('PlayerLoader'))));
     await tester.pump(const Duration(milliseconds: 700));
     expect(find.text('0:14 · live'), findsOneWidget);

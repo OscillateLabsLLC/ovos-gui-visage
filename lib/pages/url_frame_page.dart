@@ -27,7 +27,13 @@ class UrlFramePage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 14),
-          child: Circle(size: 180, gradient: gradientFill, glow: const Glow(), ring: const Ring(), children: [icon('globe', size: 104)]),
+          child: Circle(
+            size: 180,
+            gradient: gradientFill,
+            glow: const Glow(),
+            ring: const Ring(),
+            children: [icon('globe', size: 104)],
+          ),
         ),
         Text(model.url, textAlign: TextAlign.center, style: VisageText.fg(24)),
         TemplateHint(model.frameable ? 'no web view on this platform' : 'not a web address'),

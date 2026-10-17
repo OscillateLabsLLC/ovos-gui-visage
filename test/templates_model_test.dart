@@ -5,7 +5,11 @@ import 'package:ovos_gui_visage/pages/templates_model.dart';
 
 void main() {
   test('every model tolerates null and missing keys', () {
-    for (final data in [null, <String, dynamic>{}, {'title': null, 'text': null, 'label': null, 'image': null, 'url': null}]) {
+    for (final data in [
+      null,
+      <String, dynamic>{},
+      {'title': null, 'text': null, 'label': null, 'image': null, 'url': null},
+    ]) {
       expect(textFrameModel(data), (title: '', text: ''));
       expect(loadingLabel(data), '');
       expect(statusModel(data), (ok: false, label: ''));
@@ -45,8 +49,13 @@ void main() {
     for (final bad in ['relative.png', 'file:///tmp/a.png', 'javascript:alert(1)', 'data:text/html,<b>x</b>']) {
       expect(imageSource(bad), isNull, reason: bad);
     }
-    expect(['fit', 'crop', 'stretch', 'CROP', 'zoom'].map((fill) => imageModel({'fill': fill}).fit),
-        [BoxFit.contain, BoxFit.cover, BoxFit.fill, BoxFit.cover, BoxFit.contain]);
+    expect(['fit', 'crop', 'stretch', 'CROP', 'zoom'].map((fill) => imageModel({'fill': fill}).fit), [
+      BoxFit.contain,
+      BoxFit.cover,
+      BoxFit.fill,
+      BoxFit.cover,
+      BoxFit.contain,
+    ]);
   });
 
   test('url frames only http(s)', () {

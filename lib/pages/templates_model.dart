@@ -18,6 +18,7 @@ const _wrapBelowPx = 48;
 const _minShortPx = 40;
 final _breakAfter = RegExp(r'[\s.,:;/-]');
 final _safeUrl = RegExp(r'^https?://', caseSensitive: false);
+
 /// data:image, http(s), the middle layer's /res/ URLs, and (same-host display) absolute file paths; resources.dart
 /// decides whether a path is a loadable image.
 final _safeImage = RegExp(r'^(data:image/|https?://|/)', caseSensitive: false);
@@ -92,12 +93,12 @@ String? imageSource(Object? value) {
 }
 
 ({String? src, BoxFit fit, String background, String title, String caption}) imageModel(Json? data) => (
-      src: imageSource(data?['image']),
-      fit: _fillToFit[text(data?['fill']).toLowerCase()] ?? BoxFit.contain,
-      background: text(data?['background_color']),
-      title: text(data?['title']),
-      caption: text(data?['caption']),
-    );
+  src: imageSource(data?['image']),
+  fit: _fillToFit[text(data?['fill']).toLowerCase()] ?? BoxFit.contain,
+  background: text(data?['background_color']),
+  title: text(data?['title']),
+  caption: text(data?['caption']),
+);
 
 ({String url, bool frameable}) urlModel(Json? data) {
   final url = text(data?['url']).trim();
@@ -105,8 +106,8 @@ String? imageSource(Object? value) {
 }
 
 ({String title, String placeholder, String confirm, String exit}) inputBoxModel(Json? data) => (
-      title: text(data?['title']),
-      placeholder: text(data?['placeholder']),
-      confirm: text(data?['confirm_text']),
-      exit: text(data?['exit_text']),
-    );
+  title: text(data?['title']),
+  placeholder: text(data?['placeholder']),
+  confirm: text(data?['confirm_text']),
+  exit: text(data?['exit_text']),
+);

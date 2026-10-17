@@ -8,7 +8,9 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 
 const ctx = PageContext(namespace: 'ovos-skill-date-time.openvoiceos', page: 'time', events: {});
 
-Widget host(Widget page) => MaterialApp(home: Material(child: SizedBox(width: 480, height: 800, child: page)));
+Widget host(Widget page) => MaterialApp(
+  home: Material(child: SizedBox(width: 480, height: 800, child: page)),
+);
 
 void main() {
   test('date-time pages are routed', () {
@@ -33,7 +35,12 @@ void main() {
   });
 
   testWidgets('date page hides the Python None location', (tester) async {
-    final data = {'weekday_string': 'saturday', 'daymonth_string': 'october 17', 'year_string': '2026', 'location_string': 'None'};
+    final data = {
+      'weekday_string': 'saturday',
+      'daymonth_string': 'october 17',
+      'year_string': '2026',
+      'location_string': 'None',
+    };
     await tester.pumpWidget(host(DatePage.page(data, ctx)));
     expect(find.text('Saturday'), findsOneWidget);
     expect(find.text('October 17'), findsOneWidget);

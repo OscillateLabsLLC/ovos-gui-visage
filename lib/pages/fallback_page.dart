@@ -39,7 +39,10 @@ class FallbackPage extends StatelessWidget {
             const SizedBox(height: 14),
             for (final key in keys) ...[
               Text(key, style: VisageText.base.copyWith(color: VisageColors.accent, fontSize: 13)),
-              Padding(padding: const EdgeInsets.only(left: 12, bottom: 6), child: Text(describe(data[key]), style: _mono)),
+              Padding(
+                padding: const EdgeInsets.only(left: 12, bottom: 6),
+                child: Text(describe(data[key]), style: _mono),
+              ),
             ],
           ],
         ),

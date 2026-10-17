@@ -20,11 +20,11 @@ Json announcement(String guiId) => {'gui_id': guiId, 'framework': framework};
 
 /// ovos-gui reads `parameters` (not `data`) from client events and takes the namespace from `skillId`.
 Json focusMessage(String namespace, int number) => {
-      'type': 'mycroft.events.triggered',
-      'namespace': namespace,
-      'event_name': 'page_gained_focus',
-      'parameters': {'number': number, 'skillId': namespace},
-    };
+  'type': 'mycroft.events.triggered',
+  'namespace': namespace,
+  'event_name': 'page_gained_focus',
+  'parameters': {'number': number, 'skillId': namespace},
+};
 
 class GuiClient {
   GuiClient({required this.bus, required this.guiId, required this.onMessage, required this.onStatus, this.log}) {

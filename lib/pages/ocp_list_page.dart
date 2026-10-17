@@ -14,7 +14,11 @@ import 'page.dart';
 
 const _thumbPx = 56.0;
 const _discPx = 124.0;
-const _thumbFill = RadialGradient(center: Alignment(-0.3, -0.4), colors: [Color(0xFF1D2A3A), Color(0xFF0B1118)], stops: [0, 0.75]);
+const _thumbFill = RadialGradient(
+  center: Alignment(-0.3, -0.4),
+  colors: [Color(0xFF1D2A3A), Color(0xFF0B1118)],
+  stops: [0, 0.75],
+);
 
 class OcpListPage extends StatelessWidget {
   const OcpListPage({super.key, required this.data, required this.page});
@@ -46,7 +50,10 @@ class OcpListPage extends StatelessWidget {
             if (i > 0) const SizedBox(height: 12),
             RiseIn(index: i, child: _Row(row)),
           ],
-        if (model.hidden > 0) ...[const SizedBox(height: 12), Text('+${model.hidden} more', textAlign: TextAlign.center, style: VisageText.muted(14))],
+        if (model.hidden > 0) ...[
+          const SizedBox(height: 12),
+          Text('+${model.hidden} more', textAlign: TextAlign.center, style: VisageText.muted(14)),
+        ],
         if (model.rows.isEmpty) Text('Nothing here yet', textAlign: TextAlign.center, style: VisageText.muted(14)),
       ],
     );
@@ -63,7 +70,10 @@ class _Thumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vinyl = Padding(padding: EdgeInsets.all(size * 0.07), child: icon('vinyl', size: size));
+    final vinyl = Padding(
+      padding: EdgeInsets.all(size * 0.07),
+      child: icon('vinyl', size: size),
+    );
     final image = imageFor(cover, fit: BoxFit.cover, broken: vinyl);
     return Container(
       width: size,
@@ -72,7 +82,10 @@ class _Thumb extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: _thumbFill,
         boxShadow: ringed
-            ? const [BoxShadow(color: VisageColors.accent, spreadRadius: 3), BoxShadow(color: VisageColors.accentSoft, blurRadius: 22, spreadRadius: 4)]
+            ? const [
+                BoxShadow(color: VisageColors.accent, spreadRadius: 3),
+                BoxShadow(color: VisageColors.accentSoft, blurRadius: 22, spreadRadius: 4),
+              ]
             : null,
       ),
       child: ClipOval(child: image ?? vinyl),
@@ -95,8 +108,17 @@ class _Row extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(row.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: VisageText.fg(20).copyWith(color: row.current ? VisageColors.accent : VisageColors.fg)),
-              if (row.subtitle.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text(row.subtitle, style: VisageText.muted(14))),
+              Text(
+                row.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: VisageText.fg(20).copyWith(color: row.current ? VisageColors.accent : VisageColors.fg),
+              ),
+              if (row.subtitle.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(row.subtitle, style: VisageText.muted(14)),
+                ),
             ],
           ),
         ),
@@ -107,7 +129,10 @@ class _Row extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(top: 14, bottom: 10), child: Text(section.toUpperCase(), style: VisageText.muted(13).copyWith(letterSpacing: 1))),
+        Padding(
+          padding: const EdgeInsets.only(top: 14, bottom: 10),
+          child: Text(section.toUpperCase(), style: VisageText.muted(13).copyWith(letterSpacing: 1)),
+        ),
         line,
       ],
     );
@@ -139,11 +164,21 @@ class _SkillChip extends StatelessWidget {
               gradient: RadialGradient(center: const Alignment(-0.3, -0.4), colors: [light, dark], stops: const [0, 0.72]),
               boxShadow: [BoxShadow(color: glow, blurRadius: 30, spreadRadius: 2)],
             ),
-            child: Center(child: SizedBox(width: _discPx * 0.58, height: _discPx * 0.58, child: image ?? icon('vinyl', size: _discPx * 0.58))),
+            child: Center(
+              child: SizedBox(
+                width: _discPx * 0.58,
+                height: _discPx * 0.58,
+                child: image ?? icon('vinyl', size: _discPx * 0.58),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Text(row.title, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: VisageText.fg(19)),
-          if (row.subtitle.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text(row.subtitle, textAlign: TextAlign.center, style: VisageText.muted(13))),
+          if (row.subtitle.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(row.subtitle, textAlign: TextAlign.center, style: VisageText.muted(13)),
+            ),
         ],
       ),
     );

@@ -73,7 +73,13 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
             return Stack(
               clipBehavior: Clip.none,
               children: [
-                Positioned(left: fit.left * side, top: fit.top * side, width: fit.width * side, height: fit.height * side, child: lottie),
+                Positioned(
+                  left: fit.left * side,
+                  top: fit.top * side,
+                  width: fit.width * side,
+                  height: fit.height * side,
+                  child: lottie,
+                ),
               ],
             );
           },

@@ -9,9 +9,9 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 final fixtures = Directory('test/fixtures');
 
 List<Json> loadFixture(File file) => [
-      for (final line in file.readAsLinesSync())
-        if (line.trim().isNotEmpty) jsonDecode(line) as Json,
-    ];
+  for (final line in file.readAsLinesSync())
+    if (line.trim().isNotEmpty) jsonDecode(line) as Json,
+];
 
 GuiState replay(List<Json> messages, [GuiState? state]) {
   state ??= GuiState();

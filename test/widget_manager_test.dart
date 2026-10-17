@@ -5,6 +5,7 @@ import 'package:ovos_gui_visage/widgets/widget_manager.dart';
 
 class RecordingBus extends CoreBus {
   final Map<String, BusHandler> handlers = {};
+
   /// [type, data] pairs; lists so the matchers compare them structurally (records would compare maps by identity).
   final List<List<Object?>> emitted = [];
 
@@ -41,8 +42,14 @@ void main() {
       bus.send('ovos.widgets.update', {'type': kind, 'data': widget});
       bus.send('ovos.widgets.remove', {'type': kind, 'data': widget});
       expect(bus.emitted, [
-        ['ovos.widgets.$typed.display', {'widget': widget}],
-        ['ovos.widgets.$typed.update', {'widget': widget}],
+        [
+          'ovos.widgets.$typed.display',
+          {'widget': widget},
+        ],
+        [
+          'ovos.widgets.$typed.update',
+          {'widget': widget},
+        ],
         ['ovos.widgets.$typed.remove', null],
       ]);
     });
@@ -58,11 +65,7 @@ void main() {
     final note = {'sender': 'alerts', 'text': 'Missed timer', 'duration': 5};
     bus.send('ovos.notification.api.set', note);
     bus.send('ovos.notification.api.set', note);
-    expect(bus.types, [
-      'ovos.notification.update_counter',
-      'ovos.notification.notification_data',
-      'ovos.notification.show',
-    ]);
+    expect(bus.types, ['ovos.notification.update_counter', 'ovos.notification.notification_data', 'ovos.notification.show']);
     expect(bus.data(0), {'notification_counter': 1});
     final record = bus.data(1)!['notification'] as Json;
     expect(record['style'], 'info');
@@ -81,7 +84,10 @@ void main() {
         if (e[0] == 'ovos.notification.update_storage_model') e[1] as Json,
     ];
     expect(models.length, 2);
-    expect(models.last['notification_model'], {'storedmodel': [note], 'count': 1});
+    expect(models.last['notification_model'], {
+      'storedmodel': [note],
+      'count': 1,
+    });
     bus.send('ovos.notification.api.storage.clear.item', {'notification': note});
     expect((bus.data(bus.emitted.length - 1)!['notification_model'] as Json)['count'], 0);
     bus.send('ovos.notification.api.storage.clear');
@@ -95,7 +101,10 @@ void main() {
     bus.send('ovos.notification.api.pop.clear.delete', {});
     bus.send('ovos.notification.api.storage.clear.item', {});
     bus.send('ovos.notification.api.set', note);
-    expect(bus.emitted[bus.emitted.length - 3], ['ovos.notification.update_counter', {'notification_counter': 1}]);
+    expect(bus.emitted[bus.emitted.length - 3], [
+      'ovos.notification.update_counter',
+      {'notification_counter': 1},
+    ]);
     bus.send('ovos.notification.api.set.controlled', {'sender': 's', 'text': 'busy'});
     bus.send('ovos.notification.api.remove.controlled');
     expect(bus.types[bus.types.length - 2], 'ovos.notification.controlled.type.show');

@@ -44,5 +44,4 @@ Widget? _dataImage(String src, BoxFit fit) {
 }
 
 /// A bundled icon from assets/icons (the ovos-visage icon set with its CSS animation stripped; motion is a widget).
-Widget icon(String name, {double size = 64}) =>
-    SvgPicture.asset('assets/icons/$name.svg', width: size, height: size);
+Widget icon(String name, {double size = 64}) => SvgPicture.asset('assets/icons/$name.svg', width: size, height: size);

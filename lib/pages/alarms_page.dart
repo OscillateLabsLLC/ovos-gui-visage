@@ -47,7 +47,12 @@ class AlarmsPage extends StatelessWidget {
     final (:shown, :more, :next) = alarmGrid(alarms);
     final cells = [
       for (final alarm in shown) _AlarmCell(alarm: alarm, isNext: alarm.id == next),
-      if (more > 0) Circle(size: 170, gradient: gradientFill, children: [Text('+$more more', style: VisageText.muted(22).copyWith(fontWeight: FontWeight.w300))]),
+      if (more > 0)
+        Circle(
+          size: 170,
+          gradient: gradientFill,
+          children: [Text('+$more more', style: VisageText.muted(22).copyWith(fontWeight: FontWeight.w300))],
+        ),
     ];
     return Wrap(
       spacing: 22,
@@ -72,7 +77,13 @@ Widget _timeText(AlarmView alarm, double px) {
   return Text.rich(
     TextSpan(
       text: alarm.time,
-      children: [if (alarm.ampm.isNotEmpty) TextSpan(text: '  ${alarm.ampm}', style: TextStyle(fontSize: px * 0.35, color: VisageColors.muted))],
+      children: [
+        if (alarm.ampm.isNotEmpty)
+          TextSpan(
+            text: '  ${alarm.ampm}',
+            style: TextStyle(fontSize: px * 0.35, color: VisageColors.muted),
+          ),
+      ],
     ),
     maxLines: 1,
     style: VisageText.fg(px, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),

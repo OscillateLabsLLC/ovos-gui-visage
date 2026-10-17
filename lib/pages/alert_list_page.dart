@@ -36,7 +36,10 @@ class AlertListPage extends StatelessWidget {
               children: [
                 icon('reminder', size: 104),
                 const SizedBox(height: 4),
-                Text('${model.items.length}', style: VisageText.fg(28, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular)),
+                Text(
+                  '${model.items.length}',
+                  style: VisageText.fg(28, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),
+                ),
               ],
             ),
           ],
@@ -47,7 +50,11 @@ class AlertListPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(item.main, textAlign: TextAlign.center, style: VisageText.fg(24)),
-              if (item.secondary.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text(item.secondary, style: VisageText.muted(15))),
+              if (item.secondary.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(item.secondary, style: VisageText.muted(15)),
+                ),
             ],
           ),
       ],

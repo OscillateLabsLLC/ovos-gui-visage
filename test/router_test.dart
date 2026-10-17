@@ -18,10 +18,32 @@ void main() {
 
   testWidgets('PageHost shows the fallback with the namespace, page and data', (tester) async {
     final state = GuiState();
-    state.apply({'type': 'mycroft.session.list.insert', 'namespace': activeSkills, 'position': 0, 'data': [{'skill_id': 'x.skill'}]});
-    state.apply({'type': 'mycroft.session.set', 'namespace': 'x.skill', 'data': {'greeting': 'hi', 'n': 2}});
-    state.apply({'type': 'mycroft.gui.list.insert', 'namespace': 'x.skill', 'position': 0, 'data': [{'page': 'Odd'}]});
-    await tester.pumpWidget(MaterialApp(home: Material(child: PageHost(state: state))));
+    state.apply({
+      'type': 'mycroft.session.list.insert',
+      'namespace': activeSkills,
+      'position': 0,
+      'data': [
+        {'skill_id': 'x.skill'},
+      ],
+    });
+    state.apply({
+      'type': 'mycroft.session.set',
+      'namespace': 'x.skill',
+      'data': {'greeting': 'hi', 'n': 2},
+    });
+    state.apply({
+      'type': 'mycroft.gui.list.insert',
+      'namespace': 'x.skill',
+      'position': 0,
+      'data': [
+        {'page': 'Odd'},
+      ],
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: PageHost(state: state)),
+      ),
+    );
     expect(find.text('Odd'), findsOneWidget);
     expect(find.text('x.skill'), findsOneWidget);
     expect(find.text('hi'), findsOneWidget);

@@ -13,8 +13,7 @@ class TemplateTitle extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) =>
-      Text(title.toUpperCase(), textAlign: TextAlign.center, style: templateTitleStyle);
+  Widget build(BuildContext context) => Text(title.toUpperCase(), textAlign: TextAlign.center, style: templateTitleStyle);
 }
 
 class TemplateHint extends StatelessWidget {
@@ -33,14 +32,17 @@ class TemplateLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Text(label, textAlign: TextAlign.center, style: VisageText.fg(22)),
-      );
+    constraints: const BoxConstraints(maxWidth: 400),
+    child: Text(label, textAlign: TextAlign.center, style: VisageText.fg(22)),
+  );
 }
 
 /// Laid-out height of [text] at [style] within [maxWidth].
 double measureText(String text, TextStyle style, double maxWidth) {
-  final painter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr, textAlign: TextAlign.center)
-    ..layout(maxWidth: maxWidth);
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: TextDirection.ltr,
+    textAlign: TextAlign.center,
+  )..layout(maxWidth: maxWidth);
   return painter.height;
 }

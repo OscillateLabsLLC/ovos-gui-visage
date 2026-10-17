@@ -36,16 +36,15 @@ class WeatherNowPage extends StatelessWidget {
               children: [
                 WeatherIcon(model.icon, size: 120),
                 const SizedBox(height: 2),
-                Text(model.big, style: VisageText.fg(76, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular)),
+                Text(
+                  model.big,
+                  style: VisageText.fg(76, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),
+                ),
               ],
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 18,
-          children: [for (final chip in model.chips) _chip(chip)],
-        ),
+        Row(mainAxisAlignment: MainAxisAlignment.center, spacing: 18, children: [for (final chip in model.chips) _chip(chip)]),
         SkillDetails(model.details),
       ],
     );

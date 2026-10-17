@@ -105,7 +105,13 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
         Text(_track.title, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: VisageText.fg(30)),
         if (_track.artist.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(_track.artist, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: VisageText.muted(20)),
+          Text(
+            _track.artist,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: VisageText.muted(20),
+          ),
         ],
         const SizedBox(height: 12),
         Row(
@@ -115,7 +121,10 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
             if (state != PlaybackState.stopped) _Equaliser(running: state == PlaybackState.playing),
             Text(parts.state.name, style: VisageText.muted(15).copyWith(letterSpacing: 0.5)),
             if (parts.live) _LiveDot(running: state == PlaybackState.playing),
-            Text(parts.live ? '${parts.time} · live' : parts.time, style: VisageText.muted(15).copyWith(fontFeatures: VisageText.tabular)),
+            Text(
+              parts.live ? '${parts.time} · live' : parts.time,
+              style: VisageText.muted(15).copyWith(fontFeatures: VisageText.tabular),
+            ),
             if (parts.flags.isNotEmpty) Text(parts.flags.join('  '), style: VisageText.muted(15)),
           ],
         ),
@@ -136,8 +145,17 @@ class _Stage extends StatelessWidget {
   Widget build(BuildContext context) {
     final playing = track.state == PlaybackState.playing;
     final paused = track.state == PlaybackState.paused;
-    final cover = imageFor(track.cover, fit: BoxFit.cover, broken: icon('vinyl', size: _stagePx));
-    final art = cover ?? Padding(padding: const EdgeInsets.all(24), child: icon('vinyl', size: _stagePx));
+    final cover = imageFor(
+      track.cover,
+      fit: BoxFit.cover,
+      broken: icon('vinyl', size: _stagePx),
+    );
+    final art =
+        cover ??
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: icon('vinyl', size: _stagePx),
+        );
     final ringColour = switch (track.state) {
       PlaybackState.playing => VisageColors.accent,
       PlaybackState.paused => VisageColors.muted,
@@ -152,11 +170,19 @@ class _Stage extends StatelessWidget {
         children: [
           if (cover != null)
             Positioned(
-              left: -_washInset, top: -_washInset, right: -_washInset, bottom: -_washInset,
+              left: -_washInset,
+              top: -_washInset,
+              right: -_washInset,
+              bottom: -_washInset,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 600),
                 opacity: playing ? 0.42 : (paused ? 0.2 : 0),
-                child: ClipOval(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38), child: SizedBox.expand(child: imageFor(track.cover, fit: BoxFit.cover)))),
+                child: ClipOval(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
+                    child: SizedBox.expand(child: imageFor(track.cover, fit: BoxFit.cover)),
+                  ),
+                ),
               ),
             ),
           Circle(
@@ -251,8 +277,8 @@ class _LiveDot extends StatefulWidget {
 }
 
 class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..repeat(reverse: true);
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
+    ..repeat(reverse: true);
 
   @override
   void dispose() {

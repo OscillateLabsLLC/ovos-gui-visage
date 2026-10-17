@@ -49,11 +49,13 @@ List<Offset> shapePoints(int code, {double openScale = 1}) {
   return [...upper, ...lower];
 }
 
-Map<int, List<Offset>> mouthShapes({double openScale = 1}) =>
-    {for (final code in mouthShapeSpecs.keys) code: shapePoints(code, openScale: openScale)};
+Map<int, List<Offset>> mouthShapes({double openScale = 1}) => {
+  for (final code in mouthShapeSpecs.keys) code: shapePoints(code, openScale: openScale),
+};
 
-List<Offset> lerpPoints(List<Offset> from, List<Offset> to, double k) =>
-    [for (var i = 0; i < from.length; i++) from[i] + (to[i] - from[i]) * k];
+List<Offset> lerpPoints(List<Offset> from, List<Offset> to, double k) => [
+  for (var i = 0; i < from.length; i++) from[i] + (to[i] - from[i]) * k,
+];
 
 /// Closed Catmull-Rom spline through the points, as cubic Beziers.
 Path toPath(List<Offset> points) {

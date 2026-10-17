@@ -49,7 +49,13 @@ class CoreBus {
       log?.call('bus not connected; dropping $type');
       return false;
     }
-    channel.sink.add(jsonEncode({'type': type, 'data': data ?? {}, 'context': {'source': _source}}));
+    channel.sink.add(
+      jsonEncode({
+        'type': type,
+        'data': data ?? {},
+        'context': {'source': _source},
+      }),
+    );
     return true;
   }
 

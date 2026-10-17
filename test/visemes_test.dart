@@ -7,9 +7,10 @@ import 'package:ovos_gui_visage/face/visemes.dart';
 
 List<dynamic> recordedVisemes() {
   final lines = File('test/fixtures/corebus/visemes_what_time_is_it.jsonl').readAsLinesSync();
-  final message = lines.where((l) => l.isNotEmpty).map((l) => jsonDecode(l) as Map<String, dynamic>).firstWhere(
-        (m) => m['type'] == 'enclosure.mouth.viseme_list',
-      );
+  final message = lines
+      .where((l) => l.isNotEmpty)
+      .map((l) => jsonDecode(l) as Map<String, dynamic>)
+      .firstWhere((m) => m['type'] == 'enclosure.mouth.viseme_list');
   return message['data']['visemes'] as List;
 }
 

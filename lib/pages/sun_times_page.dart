@@ -60,9 +60,11 @@ class _SunCircle extends StatefulWidget {
 }
 
 class _SunCircleState extends State<_SunCircle> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(seconds: 8), value: widget.rising ? 0 : 1)
-        ..repeat(reverse: true);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 8),
+    value: widget.rising ? 0 : 1,
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -86,7 +88,10 @@ class _SunCircleState extends State<_SunCircle> with SingleTickerProviderStateMi
               child: const WeatherIcon('sun', size: 64),
             ),
             const SizedBox(height: 6),
-            Text(widget.value, style: VisageText.fg(40, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular)),
+            Text(
+              widget.value,
+              style: VisageText.fg(40, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),
+            ),
             const SizedBox(height: 4),
             Text(widget.kind.toUpperCase(), style: VisageText.muted(16).copyWith(letterSpacing: 2)),
           ],

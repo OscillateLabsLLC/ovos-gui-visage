@@ -39,7 +39,10 @@ List<Ring> _layerRings(Map layer) {
     final el = find('el');
     final size = _fixed(el?['s']);
     if (size == null || size[0] != size[1]) continue;
-    final at = [_fixed(el!['p']) ?? [0, 0], _fixed(find('tr')?['p']) ?? [0, 0]];
+    final at = [
+      _fixed(el!['p']) ?? [0, 0],
+      _fixed(find('tr')?['p']) ?? [0, 0],
+    ];
     final offset = [at[0][0] + at[1][0] - a[0], at[0][1] + at[1][1] - a[1]];
     final moved = offset[0] != 0 || offset[1] != 0;
     if (moved && (ks?['r'] is! Map || (ks!['r'] as Map)['k'] is! num)) continue;
@@ -66,10 +69,5 @@ Ring? ringOf(Map<String, dynamic> data) {
   final ring = ringOf(data);
   if (ring == null) return null;
   final k = fill / 2 / ring.r;
-  return (
-    width: (data['w'] as num) * k,
-    height: (data['h'] as num) * k,
-    left: 0.5 - ring.cx * k,
-    top: 0.5 - ring.cy * k,
-  );
+  return (width: (data['w'] as num) * k, height: (data['h'] as num) * k, left: 0.5 - ring.cx * k, top: 0.5 - ring.cy * k);
 }

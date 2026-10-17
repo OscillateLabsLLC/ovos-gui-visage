@@ -10,12 +10,21 @@ import '../widgets/circle.dart';
 
 const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const _months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
-String clockLine(DateTime now) =>
-    '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+String clockLine(DateTime now) => '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
 String dateLine(DateTime now) => '${_weekdays[now.weekday - 1]}, ${now.day} ${_months[now.month - 1]}';
 
@@ -66,7 +75,14 @@ class _BlankPageState extends State<BlankPage> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(clockLine(now), style: VisageText.fg(92, weight: FontWeight.w300, height: 1).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular)),
+                Text(
+                  clockLine(now),
+                  style: VisageText.fg(
+                    92,
+                    weight: FontWeight.w300,
+                    height: 1,
+                  ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
+                ),
                 const SizedBox(height: 10),
                 Text(dateLine(now), style: VisageText.muted(20)),
               ],
