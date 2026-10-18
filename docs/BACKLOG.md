@@ -5,18 +5,17 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 ## From a community user running ovos-visage on a Mac (2026-10-18)
 
-1. **Weather shows NaN in Celsius.** ovos-visage was tested in Celsius, so the unit is not the cause.
-   Hypothesis: a locale that formats decimals with a comma (`"21,5"`), which `Number()` in the browser
-   turns into NaN. The Dart port parses with `double.tryParse`, which also fails on a comma and would
-   show the blank fallback instead. Needs the user's recorded session data (`ovos-visage --record`)
-   to confirm before changing either client; the fix is a locale-aware number parse in the weather
-   model, with the recorded value as a fixture.
-2. **No duration for OCP YouTube tracks.** The user's patch to `trackModel()` treats any `duration`
-   under 10000 as seconds and falls back to `length`. That is a heuristic with two holes: a real
-   track under ten seconds is multiplied by 1000, and a live stream with a `length` is no longer
-   caught by the `duration == 0` check (`lib/pages/ocp_model.dart` documents both units as measured).
-   The right fix starts from what the YouTube stream plugin actually sends: record a YouTube
-   session, add it as a fixture, and normalise by source, not by magnitude.
+1. **Weather shows NaN in Celsius.** Done: the user is in the Netherlands, a comma-decimal locale.
+   Both clients now parse `"21,5"` (ovos-visage branch `fix/comma-decimals`; the wind line was the
+   unguarded `Number()` that rendered NaN).
+2. **No duration for OCP YouTube tracks.** Done, from source and recordings rather than the user's
+   magnitude heuristic: the yt-dlp extractor reports `duration` in seconds and ovos-utils' MediaEntry
+   drops that key, so OCP sends `duration` 0 and the page read the track as live forever. mpv still
+   reports the real length with every seek-bar position, so with no declared duration a length that
+   holds across reports becomes the total (ovos-visage branch `fix/ocp-length-total`). A real YouTube
+   recording was not possible on the development stack: yt-dlp now lists only split audio and video
+   formats and the plugin asks for a merged `best`, and ovos-audio's mpv plugin raises on every play;
+   both are upstream or environment matters, noted in Engram.
 3. **Viseme-capable TTS plugin.** The face's mouth needs `enclosure.mouth.viseme_list`; without a TTS
    plugin that emits it the mouth stays still. Out of this repo's scope, but the README should say
    which plugins send visemes.

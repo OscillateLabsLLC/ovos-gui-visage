@@ -74,6 +74,22 @@ void main() {
     expect(progressAt(models[3], 1500).elapsed, '0:21');
   });
 
+  test('no declared duration: mpv\'s steady length becomes the total once it has held, through a pause', () {
+    // The yt-dlp path: the media entry carries no length, so OCP sends duration 0, while mpv reports the real total.
+    const stream = {'uri': 'https://www.youtube.com/watch?v=x', 'title': 'Big Buck Bunny', 'duration': 0, 'status': 'Playing'};
+    final first = trackModel({...stream, 'position': 2.0, 'length': 634000.0});
+    expect(first.live, isTrue, reason: 'one report cannot tell a finite stream from a live buffer');
+    final second = trackModel({...stream, 'position': 4.0, 'length': 634000.0}, first);
+    expect(second.live, isFalse);
+    expect(second.durationMs, 634000);
+    expect(progressAt(second).total, '10:34');
+    final paused = trackModel({...stream, 'status': 'Paused', 'position': 4.0, 'length': 634000.0}, second);
+    expect(paused.live, isFalse, reason: 'a pause keeps the total');
+    final resumed = trackModel({...stream, 'position': 6.1, 'length': 634000.0}, paused);
+    expect(resumed.durationMs, 634000);
+    expect(trackModel({...stream, 'position': 4.0, 'length': 636000.0}, first).live, isTrue, reason: 'a growing buffer');
+  });
+
   test('a claimed duration with a buffer length that grows in step with position still reads as live', () {
     final claimed = {...song, 'duration': 600000};
     final first = trackModel({...claimed, 'position': 14, 'length': 43284});

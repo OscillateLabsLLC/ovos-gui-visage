@@ -1,8 +1,10 @@
 /// View model for the OCP now-playing page (SPEC 8.6), port of ocp_model.js. Pure.
 ///
-/// Units, measured: `duration` is the track's own length in ms (0 for a live stream). `position` is mpv `time-pos`
-/// in seconds, about every 2 s, except after an OCP seek, which writes ms. `length` is mpv duration in ms, which on
-/// a live stream is the growing buffer, so it is never used as the total.
+/// Units, measured: `duration` is the track's own length in ms, 0 for a live stream and for any stream whose media
+/// entry carried no length (the yt-dlp path reports `duration` in seconds and ovos-utils' MediaEntry drops that
+/// key). `position` is mpv `time-pos` in seconds, about every 2 s, except after an OCP seek, which writes ms.
+/// `length` is mpv's duration in ms, reported with `position`: on a live stream it is the growing buffer, on a
+/// finite stream it holds steady, so with no declared duration it becomes the total once it has held.
 library;
 
 import 'dart:math' as math;
@@ -94,13 +96,22 @@ bool _lengthTracksPosition(Track? previous, double lengthMs, double position) {
   return (lengthMs - previous.lengthMs - (position - previous.positionMs)).abs() < _trackingSlackMs;
 }
 
+/// With no declared duration, mpv's `length` is the total once it has held while position advanced, and it stays
+/// the total through a pause (the previous model already took it).
+bool _lengthHolds(Track? previous, double lengthMs, double position) {
+  if (previous == null || lengthMs <= 0 || lengthMs != previous.lengthMs) return false;
+  return position > previous.positionMs || previous.durationMs == lengthMs;
+}
+
 /// Everything the page shows except the clock-driven position, which [progressAt] adds. [previous] is the last model.
 Track trackModel(Json data, [Track? previous]) {
-  final duration = math.max(0.0, number(data['duration']));
+  final declared = math.max(0.0, number(data['duration']));
   final lengthMs = math.max(0.0, number(data['length']));
-  final position = positionMs(data['position'], duration);
-  final id = [text(data['uri']), text(data['title']), duration].join('|');
-  final live = duration == 0 || _lengthTracksPosition(previous?.id == id ? previous : null, lengthMs, position);
+  final position = positionMs(data['position'], declared);
+  final id = [text(data['uri']), text(data['title']), declared].join('|');
+  final last = previous?.id == id ? previous : null;
+  final live = declared == 0 ? !_lengthHolds(last, lengthMs, position) : _lengthTracksPosition(last, lengthMs, position);
+  final duration = declared > 0 ? declared : lengthMs;
   final title = text(data['title']);
   return Track(
     id: id,
