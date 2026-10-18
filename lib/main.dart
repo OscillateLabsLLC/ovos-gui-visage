@@ -26,6 +26,7 @@ import 'window/window_remote.dart';
 import 'window/window_shell.dart';
 
 const _pageBg = VisageColors.pageBg;
+const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible);
 const _dimBg = Color(0xEB05070A);
 const _badgeHeight = 104.0;
 const _badgeGap = 7.0;
@@ -75,7 +76,14 @@ class _ScreenState extends State<Screen> {
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
   late final FaceRemote remote = FaceRemote(bus, face, initial: widget.config.face, persist: saveFaceConfig, log: _log);
   late final PeekController peek = PeekController(enabled: widget.config.window.peeks);
-  late final WindowRemote window = WindowRemote(bus, peek, initial: widget.config.window, persist: saveWindowConfig, log: _log);
+  late final WindowRemote window = WindowRemote(
+    bus,
+    peek,
+    initial: widget.config.window,
+    persist: saveWindowConfig,
+    effects: _effects,
+    log: _log,
+  );
   late bool windowExpanded;
   late final GuiClient gui = GuiClient(
     bus: bus,

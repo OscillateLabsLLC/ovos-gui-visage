@@ -9,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import '../app_config.dart';
 import '../face/face_spec.dart';
 import '../faults.dart';
+import 'window_channel.dart';
 import 'window_config.dart';
 
 File configFile() {
@@ -36,11 +37,13 @@ Future<AppConfig> loadAppConfig() async {
 /// the device or over the bus is the face at the next start.
 Future<void> saveFaceConfig(FaceSpec spec) => _editConfigFile((json) => json['face'] = spec.toJson());
 
-/// Writes `peek` into the config file's `window` object, keeping every other key; the rest of the window config may
-/// come from the environment and is not written back.
+/// Writes `peek` and `mode` into the config file's `window` object, keeping every other key; the rest of the window
+/// config may come from the environment and is not written back.
 Future<void> saveWindowConfig(WindowConfig config) => _editConfigFile((json) {
   final window = json['window'] is Map ? Map<String, dynamic>.from(json['window'] as Map) : <String, dynamic>{};
-  json['window'] = window..['peek'] = config.peek;
+  json['window'] = window
+    ..['peek'] = config.peek
+    ..['mode'] = config.mode.name;
 });
 
 Future<void> _editConfigFile(void Function(Map<String, dynamic> json) edit) async {
@@ -61,6 +64,7 @@ Future<Rect> _workArea() async {
 Future<void> applyWindowConfig(WindowConfig config) async {
   if (!config.isWidget) return;
   await windowManager.ensureInitialized();
+  if (Platform.isMacOS) await _invoke('setActivationPolicy', 'accessory');
   final bounds = config.boundsIn(await _workArea(), expanded: !config.peeks);
   final options = WindowOptions(
     size: bounds.size,
@@ -74,7 +78,7 @@ Future<void> applyWindowConfig(WindowConfig config) async {
     await windowManager.setHasShadow(false);
     await windowManager.setResizable(false);
     await windowManager.setVisibleOnAllWorkspaces(true);
-    if (config.mode == WindowMode.desktop) await _setDesktopLevel();
+    if (config.mode == WindowMode.desktop) await _invoke('setWindowLevel', 'desktop');
     await windowManager.setPosition(bounds.topLeft);
     await windowManager.show();
   });
@@ -91,14 +95,24 @@ Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) as
   }
 }
 
-const _native = MethodChannel('ovos_gui_visage/window');
+/// Moves a widget above (`float`) or beneath (`desktop`) every other window while running.
+Future<void> setWindowMode(WindowMode mode) async {
+  await windowManager.setAlwaysOnTop(mode == WindowMode.float);
+  await _invoke('setWindowLevel', mode.name);
+}
 
-/// window_manager has no always-on-bottom on macOS, so the runner provides the desktop level (MainFlutterWindow.swift).
-/// Where no runner implements it, the window stays at its normal level and the fault is reported.
-Future<void> _setDesktopLevel() async {
+/// Orders the window out or back in front; a desktop-level window must not become key, so this is not
+/// windowManager.show.
+Future<void> setWindowVisible(bool visible) => _invoke('setVisible', visible);
+
+Future<void> quitApp() => windowManager.destroy();
+
+/// The runner implements these on macOS (MainFlutterWindow.swift); where it does not, the window stays as it was and
+/// the fault is reported.
+Future<void> _invoke(String method, Object arguments) async {
   try {
-    await _native.invokeMethod<void>('setDesktopLevel');
+    await windowChannel.invokeMethod<void>(method, arguments);
   } on MissingPluginException catch (err, stack) {
-    reportFault('desktop mode is not implemented by this platform runner', err, stack);
+    reportFault('$method is not implemented by this platform runner', err, stack);
   }
 }

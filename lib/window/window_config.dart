@@ -59,8 +59,14 @@ class WindowConfig {
 
   Size get peekWindowSize => Size.square(peekSize);
 
-  WindowConfig copyWith({bool? peek}) =>
-      WindowConfig(mode: mode, corner: corner, height: height, margin: margin, peek: peek ?? this.peek, peekSize: peekSize);
+  WindowConfig copyWith({WindowMode? mode, bool? peek}) => WindowConfig(
+    mode: mode ?? this.mode,
+    corner: corner,
+    height: height,
+    margin: margin,
+    peek: peek ?? this.peek,
+    peekSize: peekSize,
+  );
 
   /// The window's frame within [workArea]: the full widget, or the badge when collapsed, in the same corner.
   Rect boundsIn(Rect workArea, {required bool expanded}) {

@@ -13,3 +13,9 @@ Future<void> saveWindowConfig(WindowConfig config) async {}
 Future<void> applyWindowConfig(WindowConfig config) async {}
 
 Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {}
+
+Future<void> setWindowMode(WindowMode mode) async {}
+
+Future<void> setWindowVisible(bool visible) async {}
+
+Future<void> quitApp() async {}
