@@ -4,8 +4,9 @@
 [![Unit Tests](https://github.com/OscillateLabsLLC/ovos-gui-visage/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/OscillateLabsLLC/ovos-gui-visage/actions/workflows/unit_tests.yml)
 
 <p align="center">
-  <img src="docs/screenshots/templates/text-short-speaking.png" alt="A short answer in a ring chip with the face speaking in a badge at the bottom" width="360">
-  <img src="docs/screenshots/ocp/now-playing-live-stream.png" alt="Now playing: a turning station logo inside the progress ring" width="360">
+  <img src="docs/screenshots/templates/text-short-speaking.png" alt="A short answer in a ring chip with the face speaking in a badge at the bottom" width="300">
+  <img src="docs/screenshots/face/picker-aperture-orb-speaking.png" alt="Aperture eyes and an orb mouth chosen from the picker page, speaking over the idle page" width="300">
+  <img src="docs/screenshots/face/try-on-pixel-bars-regular.png" alt="Try-on mode: pixel eyes and a bars mouth with the swipe labels" width="300">
 </p>
 
 A Flutter GUI client for [OpenVoiceOS](https://openvoiceos.org) that expands the 2018
@@ -58,16 +59,41 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
   `lib/faults.dart` first, so a missing animation or image is in the log, never silent.
 - **Pages.** One widget per page, routed by `namespace/page` (system templates by page name),
   with pure view models under `flutter test`. Circles, rings and plain text on black; no cards.
-- **Face.** `lib/face/` draws the face through a `FaceTheme`: the eyes and the mouth are
-  separate painters, so a new look is a new theme. Two ship: `visage`, the Kickstarter concept
-  face whose mouth tweens between seven viseme outlines timed by `enclosure.mouth.viseme_list`,
-  and `mark1`, the Mycroft Mark 1 faceplate with its two 12-pixel eye rings and 32 × 8 LED
-  mouth, drawn from the firmware's own bitmaps and timings. Pick one with `"face": "mark1"` in
-  the config file or `VISAGE_FACE=mark1`.
+- **Face.** `lib/face/` composes the face from an eye style, a mouth style and a backdrop, each
+  drawing into slots a layout hands it, so any eyes pair with any mouth. Nine eye styles and
+  eight mouth styles ship (`docs/FACE_PALETTES.md`), the mouth tweens between seven viseme
+  outlines timed by `enclosure.mouth.viseme_list`, and two backdrops: the bare screen, and the
+  Mycroft Mark 1 faceplate with its ring wells and 32 × 8 LED window. `visage` (the Kickstarter
+  concept face) and `mark1` are presets of the same parts.
 
 `docs/SCOPE.md` records the port's decisions, the platform gating and the phases; `docs/BACKLOG.md`
 holds feedback and ideas queued behind them.
 ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
+
+## Changing the face
+
+The face is `"face"` in the config file: a preset name, `eyes+mouth` tokens with an optional
+`large`, or an object. `VISAGE_FACE` takes the string forms.
+
+```json
+{"face": "mark1"}
+{"face": "aperture+grille+large"}
+{"face": {"eyes": "oval", "mouth": "none", "mouthSize": "large", "backdrop": "none"}}
+```
+
+It changes while running, three ways, and every change is written back to the config file:
+
+- **From a browser.** `docs/face-palettes.html` previews every pairing in every attention state;
+  served by the sidecar at `/faces.html`, or opened with `?bus=ws://host:8181`, it connects to
+  the OVOS bus and every tap changes the device's face. It follows changes made any other way.
+- **On the screen.** Long-press anywhere to try faces on: the face comes up full and speaks a demo
+  loop; swipe across the eyes or across the mouth to cycle styles, swipe the mouth up or down for
+  a large or regular mouth, tap when done. A pointer works as well as touch, so this works in
+  `window` and `float` modes; the desktop widget sits beneath every window and gets no input.
+- **Over the bus.** `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize` and
+  `backdrop` changes those parts; `visage.face.get` asks; `visage.face.state` answers both and
+  announces every change, with the names available for each part. A voice skill that maps "give
+  yourself oval eyes" to that message is all a voice interface needs; nothing in OVOS changes.
 
 ## As a desktop widget
 
@@ -89,8 +115,9 @@ widget extensions get no sockets and only a handful of timeline refreshes an hou
 ## Web build and sidecar
 
 For a display on another machine, the web build runs in a browser served by a sidecar on the
-OVOS host. The sidecar serves the app, the GUI cache under `/res/`, the host's files under
-`/res-abs/`, and proxies the two websockets, so port 8080 is the only one to expose. Anyone
+OVOS host. The sidecar serves the app, the face picker at `/faces.html`, the GUI cache under `/res/`, the
+host's files under `/res-abs/`, and proxies the two websockets, so port 8080 is the only one to
+expose. Anyone
 who reaches it can drive the OVOS bus through the proxy: keep it on a trusted network, or put
 authentication and TLS in front of it.
 
@@ -102,7 +129,7 @@ To try the web build against a local OVOS without the sidecar:
 
 ```bash
 flutter build web --release
-python3 tool/serve_web.py          # http://127.0.0.1:8099/?bus=ws://127.0.0.1:8181
+python3 tool/serve_web.py          # http://127.0.0.1:8099/?bus=ws://127.0.0.1:8181 and /faces.html?bus=…
 ```
 
 ## Development

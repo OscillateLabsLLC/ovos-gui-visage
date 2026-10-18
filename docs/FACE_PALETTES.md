@@ -1,6 +1,9 @@
 # Face palettes: swappable eyes and mouths
 
-A proposal for backlog item 5 (face customisation). Today a `FaceTheme` bundles its eyes painter,
+The design for backlog item 5 (face customisation), now built: `lib/face/styles/` holds the
+painters, `lib/face/styles.dart` the names and presets, `lib/face/face_spec.dart` the config form.
+The sections below are the design as agreed; where the code settled a detail differently it is
+noted in place. Today a `FaceTheme` bundles its eyes painter,
 its mouth painter and its geometry, so a new face is a whole theme. This splits the face into two
 palettes, nine eye styles and eight mouth styles, any eye with any mouth, so seventy-two faces
 come out of seventeen painters. Colour is a later layer: every style reads the same colour tokens, so a palette
@@ -114,6 +117,21 @@ and neither needs OVOS changes.
 Every style reads five tokens and nothing else: `eye`, `eyeDim`, `mouth`, `accent`, `glow`. The
 visage and Mark 1 values are the first two colourways. Parameterising those tokens is a config
 field on the same `"face"` object and no new painting.
+
+## Changing the face in the interface
+
+The first pass is the picker page and direct manipulation, with the bus as the one path.
+
+- `docs/face-palettes.html` connects to the bus when served by the sidecar (`/faces.html`) or
+  opened with `?bus=`, sends `visage.face.set` on every tap and follows `visage.face.state`, so
+  it is a remote for the device and stays in step with any other way of changing the face.
+- Try-on mode (`lib/face/try_on.dart`): long-press to enter, swipe across the eyes or the mouth
+  to cycle, swipe the mouth up or down for size, tap when done. The mouth speaks a demo loop
+  while trying on. Settled differently from the proposal: a vertical swipe sizes the mouth, not
+  a pinch, because a pan recogniser and a scale recogniser fight over the same drag.
+- `FaceRemote` (`lib/face/face_remote.dart`) is the bus side; every change, from either surface
+  or from the bus, is written back to the config file as the `face` object.
+- Voice is the next layer: a companion skill mapping phrases to `visage.face.set`.
 
 ## Order of work
 

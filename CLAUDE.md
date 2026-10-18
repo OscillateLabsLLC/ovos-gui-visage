@@ -40,7 +40,12 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
 - Pages are `StatelessWidget`s or small `StatefulWidget`s with a static `page(Json, PageContext)`
   builder registered in `lib/pages/router.dart`. Pure view models live beside them and are
   unit tested; widget tests pump the pages from the recorded fixtures.
-- The face is themed through `FaceTheme` (eyes painter, mouth painter, geometry). `VisageTheme`
-  and `Mark1Theme` ship; `lib/face/themes.dart` picks by the configured name. Mark 1 bitmaps are
-  generated into `mark1_images.g.dart` by `tool/port_mark1_images.py`; never edit them by hand.
-- Display-only. Touch is a later, additive scope: no gesture plumbing in pages yet.
+- The face is a `ComposedTheme`: a backdrop hands slots to an `EyeStyle` and a `MouthStyle`
+  (`lib/face/styles/`), named in `lib/face/styles.dart` and chosen by a `FaceSpec`. `visage` and
+  `mark1` are presets and have goldens (`test/goldens`, macOS only); every pairing must paint
+  every frame without a fault (`test/styles_test.dart`). Mark 1 bitmaps are generated into
+  `mark1_images.g.dart` by `tool/port_mark1_images.py`; never edit them by hand. New styles get
+  a sketch in `docs/face-palettes.html` first; that page is also the device's picker over the bus.
+- The face changes at runtime through `FaceRemote` (`visage.face.*` on the bus) and try-on mode
+  (`lib/face/try_on.dart`, long-press); both persist through `saveFaceConfig`.
+- Pages are display-only. Try-on mode is the only gesture surface; no gesture plumbing in pages.

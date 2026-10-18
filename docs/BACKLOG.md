@@ -23,10 +23,12 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
    bitmaps and timings (via ovos-virtual-mark1), with the stacked compact badge. Not emulated: eye
    colour and brightness commands, look/spin animations, text and icons on the mouth, since the
    GUI client sees attention events rather than enclosure commands.
-5. **Face customisation, switchable in the app on demand.** Half done: `face` in the config file or
-   `VISAGE_FACE` picks the theme at start. Still to do: switching while running (a key or a bus
-   message), and a parameterised look. Proposal: `FACE_PALETTES.md`, four eye styles and four
-   mouth styles that pair freely, with `face-palettes.html` as an animated preview of all sixteen.
+5. **Face customisation, switchable in the app on demand.** Done: nine eye styles and eight mouth
+   styles that pair freely with a regular or large mouth (`FACE_PALETTES.md`), chosen in config,
+   from the picker page over the bus, or by hand on the screen in try-on mode. Still open: colour
+   (the styles read five tokens; a colourway is a config field away), a voice skill that maps
+   phrases to `visage.face.set`, and pinch-to-size on touch screens (a vertical swipe sizes the
+   mouth for now).
 6. **Run on a real Mark II.** Linux build on the Mark II's hardware, fullscreen on the framebuffer or
    under a minimal compositor. Nothing is benchmarked; memory and GPU are the open questions.
 7. **Widget and fullscreen modes.** The user pins the browser page beneath the desktop. A WidgetKit

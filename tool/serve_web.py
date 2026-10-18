@@ -1,5 +1,6 @@
-"""Serve the web build for development without the sidecar: build/web at /, ~/.cache/ovos_gui at /res/ and the
-host's files at /res-abs/. Open http://127.0.0.1:8099/?bus=ws://127.0.0.1:8181 so the app talks to OVOS directly.
+"""Serve the web build for development without the sidecar: build/web at /, ~/.cache/ovos_gui at /res/, the
+host's files at /res-abs/, and the face picker at /faces.html. Open http://127.0.0.1:8099/?bus=ws://127.0.0.1:8181
+so the app talks to OVOS directly, and /faces.html?bus=ws://127.0.0.1:8181 to change the face from the browser.
 
 usage: python3 tool/serve_web.py [port]
 """
@@ -10,6 +11,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "build" / "web"
+FACES = Path(__file__).resolve().parent.parent / "docs" / "face-palettes.html"
 CACHE = Path.home() / ".cache" / "ovos_gui"
 
 
@@ -20,6 +22,8 @@ class Handler(SimpleHTTPRequestHandler):
             return path[len("/res-abs") :]
         if path.startswith("/res/"):
             return str(CACHE / path[len("/res/") :])
+        if path == "/faces.html":
+            return str(FACES)
         return super().translate_path(path)
 
     def end_headers(self):

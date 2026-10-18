@@ -53,6 +53,11 @@
   .chip[aria-pressed="true"] { border-color: var(--accent); color: #fff; background: #10243a; }
   .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .bus { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .bus::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .bus[data-state="live"] { color: var(--fg); }
+  .bus[data-state="live"]::before { background: #3ddc84; }
+  .bus[data-state="lost"]::before { background: #ff5c5c; }
   .toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
   .name { font-family: var(--display); font-size: 20px; font-weight: 500; }
   .name small { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-left: 8px; }
@@ -82,6 +87,7 @@
   <header>
     <h1>Visage Face Palettes</h1>
     <p class="lede">Nine eye styles and eight mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair, then step through the attention states. Colour comes later; every style here uses the visage and Mark 1 tokens.</p>
+    <p class="bus" id="bus" aria-live="polite">Preview only. Served by the sidecar, or opened with <code>?bus=ws://host:8181</code>, this page changes the face on the device as you tap.</p>
   </header>
 
   <section class="stage">
@@ -684,7 +690,51 @@
     presetsEl.appendChild(b);
   }
 
+  // The device link: visage.face.set on every change, visage.face.state keeps this page in step with the device,
+  // whoever changed it. The bus is ?bus=ws://host:8181, or this page's own origin when the sidecar serves it.
+  const remote = (() => {
+    const param = new URLSearchParams(location.search).get('bus');
+    const served = location.protocol === 'http:' || location.protocol === 'https:';
+    const url = param || (served ? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/core` : null);
+    const status = document.getElementById('bus');
+    let socket = null, applying = false, pushed = '';
+    const show = (state, text) => { status.dataset.state = state; status.textContent = text; };
+    const send = (type, data) => {
+      if (!socket || socket.readyState !== WebSocket.OPEN) return;
+      socket.send(JSON.stringify({ type, data, context: { source: 'face-palettes' } }));
+    };
+    const connect = () => {
+      socket = new WebSocket(url);
+      socket.onopen = () => { show('live', `Connected to ${url}; taps change the device's face.`); send('visage.face.get', {}); };
+      socket.onmessage = (ev) => {
+        let msg;
+        try { msg = JSON.parse(ev.data); } catch (err) { console.warn('face-palettes: unreadable bus frame', err); return; }
+        if (msg.type !== 'visage.face.state') return;
+        const d = msg.data || {};
+        if (!eyeStyles[d.eyes] || !mouthStyles[d.mouth] || !sizes[d.mouthSize]) { console.warn('face-palettes: state names a style this page lacks', d); return; }
+        applying = true;
+        Object.assign(state, { eyes: d.eyes, mouth: d.mouth, size: d.mouthSize });
+        pushed = JSON.stringify({ eyes: d.eyes, mouth: d.mouth, mouthSize: d.mouthSize });
+        sync();
+        applying = false;
+      };
+      socket.onclose = () => { show('lost', `Lost ${url}; retrying.`); setTimeout(connect, 3000); };
+      socket.onerror = () => { show('lost', `Cannot reach ${url}; retrying.`); };
+    };
+    if (url) { show('lost', `Connecting to ${url}…`); connect(); }
+    return {
+      push() {
+        const face = { eyes: state.eyes, mouth: state.mouth, mouthSize: state.size };
+        const key = JSON.stringify(face);
+        if (applying || key === pushed) return;
+        pushed = key;
+        send('visage.face.set', face);
+      },
+    };
+  })();
+
   const sync = () => {
+    remote.push();
     for (const [key, group] of [['eyes', eyeStyles], ['mouth', mouthStyles]]) {
       for (const n of Object.keys(group)) document.getElementById(`${key}-${n}`).setAttribute('aria-pressed', String(state[key] === n));
     }
