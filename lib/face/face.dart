@@ -160,12 +160,13 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
       elapsed: _now.inMicroseconds / 1e6,
       compact: widget.compact,
     );
-    return CustomPaint(size: const Size(frameWidth, frameHeight), painter: _FacePainter(widget.theme, frame));
+    return CustomPaint(size: const Size(frameWidth, frameHeight), painter: FacePainter(widget.theme, frame));
   }
 }
 
-class _FacePainter extends CustomPainter {
-  _FacePainter(this.theme, this.frame);
+/// Paints one [FaceFrame] through a theme; public so goldens can paint a fixed frame without the ticker.
+class FacePainter extends CustomPainter {
+  FacePainter(this.theme, this.frame);
 
   final FaceTheme theme;
   final FaceFrame frame;
@@ -177,5 +178,5 @@ class _FacePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_FacePainter old) => true;
+  bool shouldRepaint(FacePainter old) => true;
 }
