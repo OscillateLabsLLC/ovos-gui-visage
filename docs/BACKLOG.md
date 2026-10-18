@@ -25,8 +25,9 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
    GUI client sees attention events rather than enclosure commands.
 5. **Face customisation, switchable in the app on demand.** Done: nine eye styles and eight mouth
    styles that pair freely with a regular or large mouth (`FACE_PALETTES.md`), chosen in config,
-   from the picker page over the bus, or by hand on the screen in try-on mode. Still open: colour
-   (the styles read five tokens; a colourway is a config field away), a voice skill that maps
+   from the picker page over the bus, or by hand on the screen in try-on mode. Colour is done too:
+   six colourways or your own tokens in the `colours` field, on the picker page and over the bus
+   (no try-on gesture for it yet). Still open: a voice skill that maps
    phrases to `visage.face.set`, and pinch-to-size on touch screens (a vertical swipe sizes the
    mouth for now).
 6. **Run on a real Mark II.** Linux build on the Mark II's hardware, fullscreen on the framebuffer or

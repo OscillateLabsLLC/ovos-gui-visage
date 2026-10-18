@@ -6,8 +6,8 @@ The sections below are the design as agreed; where the code settled a detail dif
 noted in place. Today a `FaceTheme` bundles its eyes painter,
 its mouth painter and its geometry, so a new face is a whole theme. This splits the face into two
 palettes, nine eye styles and eight mouth styles, any eye with any mouth, so seventy-two faces
-come out of seventeen painters. Colour is a later layer: every style reads the same colour tokens, so a palette
-of colours multiplies the set again without new painters.
+come out of seventeen painters. Colour is a layer over that: every style reads the same colour tokens, so each
+colourway multiplies the set again without new painters.
 
 `docs/face-palettes.html` is an animated preview of every combination in all four attention
 states and in the compact badge; open it in a browser (no build, no server).
@@ -112,11 +112,43 @@ Switching at runtime, the other half of backlog item 5, is a `FaceController.the
 widget already almost has; a key in window mode and a client-only bus message would both drive it,
 and neither needs OVOS changes.
 
-## Colour, later
+## Colour
 
-Every style reads five tokens and nothing else: `eye`, `eyeDim`, `mouth`, `accent`, `glow`. The
-visage and Mark 1 values are the first two colourways. Parameterising those tokens is a config
-field on the same `"face"` object and no new painting.
+Built. `FacePalette` (`lib/face/face_palette.dart`) is a value on every `FaceFrame` and on the
+theme; the face widget copies the theme's palette into each frame, and every style reads
+`frame.palette` and nothing else for colour. The tokens are `eye`, `eyeDim`, `mouth`, `accent`,
+`led` (a lit Mark 1 ring LED), `matrix` (a lit matrix LED) and `matrixGlow` (the halo around a lit
+matrix mouth LED; settled differently from the proposal, which had one `glow`, because the Mark 1
+mouth glows a different blue from its LEDs). The dark hardware greys (unlit LEDs, lens housing and
+blades, the matrix panel) are not a colourway and stay fixed as `HardwareColours`, and so do the
+Mark 1 faceplate and the aperture glass.
+
+The colourways, each chosen to read on the black screen with the accent clearly apart from the
+eyes (a test holds that):
+
+| name | eye | accent | idea |
+|---|---|---|---|
+| `visage` | `#F5F5F5` | `#1E9BFF` | today's colours exactly; the goldens prove it |
+| `ember` | `#FFB547` | `#FF5E1A` | warm amber eyes, a hotter red-orange accent |
+| `mint` | `#8FF0C8` | `#B28DFF` | cool mint, a lavender accent on the far side of the wheel |
+| `rose` | `#FFA8C0` | `#3FD3C6` | soft pink, its teal complement |
+| `ice` | `#CDEEFF` | `#8C7BFF` | pale blue-white, a violet accent that does not read as more blue |
+| `mark1` | `#70656A` | `#ADDEFB` | the Mark 1 ring colour on eyes, its matrix colours on mouths |
+
+Every colourway sets `led` and `matrix` from its own family, so the ring and LED styles take the
+colour too. `mark1`'s `led`, `matrix` and `matrixGlow` equal visage's, so the `mark1` preset (which
+brings the `mark1` colourway) paints exactly as before.
+
+Config: `"colours"` on the `"face"` object, a name or an object of `#RRGGBB` / `#AARRGGBB` tokens
+(missing tokens are visage's), or a colourway name as a `+` token. A preset brings its colourway,
+so a preset change resets the colour as it resets the pairing; mouth size is still the one part a
+preset keeps. Over the bus, `visage.face.set` takes `colours` and `visage.face.state` carries it
+(by name when it is a named one) and lists the names under `available.colours`. The picker page
+has a Colour row, paints its canvases in the chosen colourway, sends it and follows it.
+
+Three tints that were literals now derive from the palette: the block eye at rest is `eye` at 95 %
+(on black, the old `#E9E9E9`), the visor ends are `eyeDim` (one step from the old `#6E6E6E`), and
+the oval core is `accent` lifted towards `mouth`. Try-on mode has no colour gesture in this pass.
 
 ## Changing the face in the interface
 

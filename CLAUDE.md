@@ -46,6 +46,9 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   every frame without a fault (`test/styles_test.dart`). Mark 1 bitmaps are generated into
   `mark1_images.g.dart` by `tool/port_mark1_images.py`; never edit them by hand. New styles get
   a sketch in `docs/face-palettes.html` first; that page is also the device's picker over the bus.
+- Colour is a `FacePalette` (`lib/face/face_palette.dart`) on every `FaceFrame`; styles read
+  `frame.palette` for anything a colourway should change; fixed hardware greys stay in `HardwareColours`. The page's
+  `palettes` object must stay in sync with the named colourways.
 - The face changes at runtime through `FaceRemote` (`visage.face.*` on the bus) and try-on mode
   (`lib/face/try_on.dart`, long-press); both persist through `saveFaceConfig`.
 - Peek mode (`lib/window/peek.dart`): a widget idles as a `FaceBadge` and the window grows while

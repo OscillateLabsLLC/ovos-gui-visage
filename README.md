@@ -73,13 +73,33 @@ ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
 ## Changing the face
 
 The face is `"face"` in the config file: a preset name, `eyes+mouth` tokens with an optional
-`large`, or an object. `VISAGE_FACE` takes the string forms.
+`large` and an optional colourway, or an object. `VISAGE_FACE` takes the string forms.
 
 ```json
 {"face": "mark1"}
-{"face": "aperture+grille+large"}
-{"face": {"eyes": "oval", "mouth": "none", "mouthSize": "large", "backdrop": "none"}}
+{"face": "aperture+grille+large+ember"}
+{"face": {"eyes": "oval", "mouth": "none", "mouthSize": "large", "backdrop": "none", "colours": "mint"}}
 ```
+
+`colours` is the colourway, and every style paints in it. The named ones are `visage` (the
+default), `ember` (amber eyes, orange accent), `mint` (mint with a lavender accent), `rose` (pink
+with a teal accent), `ice` (pale blue with a violet accent) and `mark1` (the Mark 1 LED colours on
+every part). A preset brings its own colourway: `mark1` brings `mark1`, the others `visage`, so a
+colourway after the preset wins (`pod+ember`, not `ember+pod`). For your own colours, give an
+object of `#RRGGBB` or `#AARRGGBB` per token; a token you leave out is the visage one, and
+`matrixGlow` follows `matrix` when you give only `matrix`:
+
+```json
+{"face": {"eyes": "lens", "mouth": "outline", "colours": {
+  "eye": "#FFD166", "eyeDim": "#5A4A20", "mouth": "#FFF4D6", "accent": "#EF476F",
+  "led": "#B8963E", "matrix": "#FFE9A8", "matrixGlow": "#FFD166"}}}
+```
+
+A bad hex string or an unknown colourway is logged and falls back to visage for that part.
+
+<p align="center">
+  <img src="docs/screenshots/face/colours-ember-speaking.png" alt="The visage face in the ember colourway while speaking: amber eyes over a warm mouth" width="300">
+</p>
 
 It changes while running, three ways, and every change is written back to the config file:
 
@@ -88,10 +108,11 @@ It changes while running, three ways, and every change is written back to the co
   the OVOS bus and every tap changes the device's face. It follows changes made any other way.
 - **On the screen.** Long-press anywhere to try faces on: the face comes up full and speaks a demo
   loop; swipe across the eyes or across the mouth to cycle styles, swipe the mouth up or down for
-  a large or regular mouth, tap when done. A pointer works as well as touch, so this works in
+  a large or regular mouth, tap when done. There is no colour gesture yet; choose a colourway
+  from the picker page, the bus or the config file. A pointer works as well as touch, so this works in
   `window` and `float` modes; the desktop widget sits beneath every window and gets no input.
-- **Over the bus.** `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize` and
-  `backdrop` changes those parts; `visage.face.get` asks; `visage.face.state` answers both and
+- **Over the bus.** `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize`,
+  `backdrop` and `colours` (a name or a token object) changes those parts; `visage.face.get` asks; `visage.face.state` answers both and
   announces every change, with the names available for each part. A voice skill that maps "give
   yourself oval eyes" to that message is all a voice interface needs; nothing in OVOS changes.
 
