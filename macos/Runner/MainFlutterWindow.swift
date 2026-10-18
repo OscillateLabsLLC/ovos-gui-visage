@@ -3,7 +3,7 @@ import FlutterMacOS
 
 /// The window, plus what the widget modes need that window_manager lacks on macOS (lib/window/window_channel.dart):
 /// a level beneath every other window and the desktop icons, switchable at runtime, ordering in and out without
-/// becoming key, the activation policy, and the menu bar item (StatusMenu.swift).
+/// becoming key, the activation policy, the menu bar item (StatusMenu.swift), and opening a URL (the face picker).
 class MainFlutterWindow: NSWindow {
   private var statusMenu: StatusMenu?
 
@@ -33,6 +33,7 @@ class MainFlutterWindow: NSWindow {
     case "setVisible": return setVisible(call.arguments as? Bool)
     case "setActivationPolicy": return setActivationPolicy(call.arguments as? String)
     case "setMenu": return statusMenu?.update(call.arguments)
+    case "openUrl": return openUrl(call.arguments as? String)
     default: return FlutterMethodNotImplemented
     }
   }
@@ -65,6 +66,15 @@ class MainFlutterWindow: NSWindow {
     case "accessory": NSApp.setActivationPolicy(.accessory)
     case "regular": NSApp.setActivationPolicy(.regular)
     default: return badArgument("setActivationPolicy", name)
+    }
+    return nil
+  }
+
+  private func openUrl(_ text: String?) -> Any? {
+    guard let text = text, let url = URL(string: text) else { return badArgument("openUrl", text) }
+    NSLog("open: %@", text)
+    guard NSWorkspace.shared.open(url) else {
+      return FlutterError(code: "open-failed", message: "the system did not open \(text)", details: nil)
     }
     return nil
   }
