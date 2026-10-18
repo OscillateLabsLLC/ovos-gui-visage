@@ -1,5 +1,5 @@
-/// SYSTEM_UrlFrame (SPEC 8.2) without a webview (SCOPE: webviews are gated per platform, phase 4): the URL beside a
-/// turning globe, the same chip ovos-visage shows for a site that refuses framing.
+/// SYSTEM_UrlFrame (SPEC 8.2): the site in a web view where this platform has one (SCOPE: gated per platform), else
+/// the URL beside a turning globe, the same chip ovos-visage shows for a site that refuses framing.
 library;
 
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import '../widgets/motion_icon.dart';
+import '../widgets/web_frame.dart';
 import 'page.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
@@ -22,6 +23,7 @@ class UrlFramePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = urlModel(data);
+    if (model.frameable && hasWebView) return WebFrame.url(model.url);
     return StaggerEnter(
       gap: 10,
       children: [

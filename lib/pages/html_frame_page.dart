@@ -1,11 +1,12 @@
-/// SYSTEM_HtmlFrame (SPEC 8.2) without a webview (SCOPE phase 4): the skill's HTML reduced to its text, readable on
-/// black. Scripts and styles are dropped.
+/// SYSTEM_HtmlFrame (SPEC 8.2): the skill's HTML in a web view where this platform has one (SCOPE: gated per
+/// platform), else reduced to its text, readable on black, with scripts and styles dropped.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../theme.dart';
+import '../widgets/web_frame.dart';
 import 'page.dart';
 
 final _dropBlocks = RegExp(r'<(script|style)[^>]*>.*?</\1>', caseSensitive: false, dotAll: true);
@@ -35,6 +36,8 @@ class HtmlFramePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(child: Text(htmlToText(text(data['html'])), style: VisageText.fg(20, height: 1.4)));
+    final html = text(data['html']);
+    if (hasWebView) return WebFrame.html(html);
+    return SingleChildScrollView(child: Text(htmlToText(html), style: VisageText.fg(20, height: 1.4)));
   }
 }

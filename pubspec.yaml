@@ -13,6 +13,8 @@ dependencies:
   lottie: ^3.6.1
   path: ^1.9.1
   web_socket_channel: ^3.0.3
+  webview_flutter: ^4.14.1
+  webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_test:
