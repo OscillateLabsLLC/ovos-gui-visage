@@ -187,7 +187,7 @@ class _ScreenState extends State<Screen> {
               ),
               _AttentionOverlay(attention: attention, face: face),
               if (!guiConnected) const _OfflinePill(),
-              FaceTryOn(controller: face, remote: remote),
+              FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: peek.hold),
             ],
           ),
         ),

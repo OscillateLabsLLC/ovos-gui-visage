@@ -88,6 +88,20 @@ void main() {
     expect(off.expanded, isTrue);
   });
 
+  test('a hold keeps the window open through the end of attention and a tap hold; release collapses after the hold', () {
+    peek.tap();
+    peek.hold(true);
+    expect(timers.pending, isEmpty, reason: 'the tap hold is cancelled while held');
+    peek.attention(true);
+    peek.attention(false);
+    timers.fireAll();
+    expect(peek.expanded, isTrue);
+    peek.hold(false);
+    expect(timers.pending.single.after, peekHold);
+    timers.fireAll();
+    expect(peek.expanded, isFalse);
+  });
+
   test('a one-off expand holds until collapsed; a one-off collapse holds until the face is shown', () {
     peek.setExpanded(true);
     expect(peek.expanded, isTrue);

@@ -35,10 +35,16 @@ const demoVisemes = <List<Object>>[
 ];
 
 class FaceTryOn extends StatefulWidget {
-  const FaceTryOn({super.key, required this.controller, required this.remote});
+  const FaceTryOn({super.key, required this.controller, required this.remote, this.enabled = true, this.onActive});
 
   final FaceController controller;
   final FaceRemote remote;
+
+  /// False while the window cannot show the face (a peeking widget collapsed); an active try-on leaves then.
+  final bool enabled;
+
+  /// Told when try-on starts and ends, so a peeking window stays open while it runs.
+  final void Function(bool active)? onActive;
 
   @override
   State<FaceTryOn> createState() => _FaceTryOnState();
@@ -58,8 +64,15 @@ class _FaceTryOnState extends State<FaceTryOn> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(FaceTryOn old) {
+    super.didUpdateWidget(old);
+    if (!widget.enabled && active) _leave();
+  }
+
   void _enter() {
     setState(() => active = true);
+    widget.onActive?.call(true);
     _speak();
     _loop = Timer.periodic(_loopEvery, (_) => _speak());
   }
@@ -74,6 +87,7 @@ class _FaceTryOnState extends State<FaceTryOn> {
     _loop = null;
     widget.controller.setMode(FaceMode.rest);
     setState(() => active = false);
+    widget.onActive?.call(false);
   }
 
   bool _overEyes(Offset at) => at.dy < widget.controller.theme.geometry.centre.dy;
@@ -108,7 +122,7 @@ class _FaceTryOnState extends State<FaceTryOn> {
   Widget build(BuildContext context) {
     if (!active) {
       return Positioned.fill(
-        child: GestureDetector(behavior: HitTestBehavior.translucent, onLongPress: _enter),
+        child: GestureDetector(behavior: HitTestBehavior.translucent, onLongPress: widget.enabled ? _enter : null),
       );
     }
     return Positioned.fill(

@@ -119,7 +119,8 @@ With `"peek": true` (or `VISAGE_PEEK=1`), the widget stays out of the way. At re
 badge, `peekSize` pixels across, in its corner: the resting face, still blinking. When OVOS
 listens, thinks or speaks, the window grows to its full size in the same corner and shows the
 page and the face. Three seconds after the face hides, it shrinks back to the badge. In `float`
-mode, a click or tap on the badge opens the window for ten seconds. Peek mode applies to `float`
+mode, a click or tap on the badge opens the window for ten seconds, and try-on mode keeps it open
+until you tap out. Peek mode applies to `float`
 and `desktop` only; an ordinary `window` ignores it.
 
 <p align="center">

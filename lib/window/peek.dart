@@ -1,6 +1,7 @@
 /// Peek mode's timing: the widget window expands the moment the face is shown and collapses to its badge [peekHold]
-/// after the face hides, unless it is shown again first. A tap on the badge expands it for [tapHold]. Pure; the
-/// screen feeds it attention and resizes the window when [expanded] changes.
+/// after the face hides, unless it is shown again first. A tap on the badge expands it for [tapHold], and a hold
+/// (try-on mode) keeps it open until released. Pure; the screen feeds it attention and resizes the window when
+/// [expanded] changes.
 library;
 
 import 'dart:async';
@@ -19,6 +20,7 @@ class PeekController extends ChangeNotifier {
   bool _enabled;
   bool _collapsed = true;
   bool _attending = false;
+  bool _held = false;
   Timer? _collapseTimer;
 
   bool get enabled => _enabled;
@@ -30,7 +32,7 @@ class PeekController extends ChangeNotifier {
     if (_enabled == on) return;
     _enabled = on;
     _cancel();
-    _collapsed = !_attending;
+    _collapsed = !_attending && !_held;
     notifyListeners();
   }
 
@@ -43,7 +45,15 @@ class PeekController extends ChangeNotifier {
 
   void tap() {
     _expand();
-    if (!_attending) _collapseAfter(tapHold);
+    if (!_attending && !_held) _collapseAfter(tapHold);
+  }
+
+  /// Keeps the window open while something on screen needs it (try-on mode); releasing collapses after the hold
+  /// unless the face is shown.
+  void hold(bool on) {
+    if (_held == on) return;
+    _held = on;
+    on ? _expand() : _collapseAfter(peekHold);
   }
 
   /// A one-off from the bus: expanded stays until it is collapsed or the next attention cycle ends; collapsed stays
@@ -62,7 +72,7 @@ class PeekController extends ChangeNotifier {
     _cancel();
     _collapseTimer = _timer(after, () {
       _collapseTimer = null;
-      if (!_attending) _setCollapsed(true);
+      if (!_attending && !_held) _setCollapsed(true);
     });
   }
 

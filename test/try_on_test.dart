@@ -67,6 +67,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('try-on reports when it is active and leaves when disabled under it', (tester) async {
+    final active = <bool>[];
+    Widget host(bool enabled) => MaterialApp(
+      home: Center(
+        child: SizedBox(
+          width: frameWidth,
+          height: frameHeight,
+          child: Stack(
+            children: [FaceTryOn(controller: controller, remote: remote, enabled: enabled, onActive: active.add)],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(host(true));
+    final at = tester.getRect(find.byType(FaceTryOn)).center;
+    await tester.longPressAt(at);
+    await tester.pump();
+    expect(active, [true]);
+    expect(controller.mode, FaceMode.speaking);
+    await tester.pumpWidget(host(false));
+    await tester.pump();
+    expect(active, [true, false]);
+    expect(controller.mode, FaceMode.rest);
+    expect(find.textContaining('eyes ·'), findsNothing);
+    await tester.longPressAt(at);
+    await tester.pump();
+    expect(find.textContaining('eyes ·'), findsNothing, reason: 'a disabled try-on does not enter');
+    await tester.pump(const Duration(seconds: 2));
+    expect(controller.mode, FaceMode.rest, reason: 'the demo loop stopped');
+  });
+
   testWidgets('the demo loop keeps the mouth speaking while trying on', (tester) async {
     await tester.pumpWidget(host());
     final at = tester.getRect(find.byType(FaceTryOn)).center;
