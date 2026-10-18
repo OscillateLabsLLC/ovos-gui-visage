@@ -27,7 +27,14 @@ Json focusMessage(String namespace, int number) => {
 };
 
 class GuiClient {
-  GuiClient({required this.bus, required this.guiId, required this.onMessage, required this.onStatus, this.log}) {
+  GuiClient({
+    required this.bus,
+    required this.guiId,
+    required this.onMessage,
+    required this.onStatus,
+    this.guiUrlOverride,
+    this.log,
+  }) {
     bus.on('mycroft.gui.port', _onPort);
   }
 
@@ -36,6 +43,7 @@ class GuiClient {
   final GuiMessageHandler onMessage;
   final GuiStatusHandler onStatus;
   final void Function(String)? log;
+  final Uri Function(int port)? guiUrlOverride;
   Completer<int>? _portWaiter;
   WebSocketChannel? _channel;
   bool _running = false;
@@ -63,7 +71,8 @@ class GuiClient {
     return true;
   }
 
-  Uri guiUrl(int port) => Uri.parse(bus.url).replace(port: port, path: guiRoute);
+  /// The GUI socket on the port ovos-gui named, beside the bus unless the platform's endpoints say otherwise.
+  Uri guiUrl(int port) => guiUrlOverride?.call(port) ?? Uri.parse(bus.url).replace(port: port, path: guiRoute);
 
   Future<void> _keepConnected() async {
     while (_running) {

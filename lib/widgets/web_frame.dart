@@ -9,6 +9,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 bool get hasWebView => WebViewPlatform.instance != null;
 
+/// Behind the view: the iframe on the web is transparent, so unstyled skill HTML would be black text on black.
+const _paper = Colors.white;
+
 class WebFrame extends StatefulWidget {
   const WebFrame.url(String this.url, {super.key}) : html = null;
 
@@ -42,7 +45,10 @@ class _WebFrameState extends State<WebFrame> {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: WebViewWidget(controller: _controller),
+      child: ColoredBox(
+        color: _paper,
+        child: WebViewWidget(controller: _controller),
+      ),
     );
   }
 }

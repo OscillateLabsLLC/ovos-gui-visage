@@ -10,8 +10,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
+import '../resources/resources.dart';
 import '../theme.dart';
+import '../widgets/static_icon.dart';
 import '../widgets/circle.dart';
 import 'fallback_page.dart';
 import 'ocp_model.dart';
@@ -148,13 +149,13 @@ class _Stage extends StatelessWidget {
     final cover = imageFor(
       track.cover,
       fit: BoxFit.cover,
-      broken: icon('vinyl', size: _stagePx),
+      broken: staticIcon('vinyl', size: _stagePx),
     );
     final art =
         cover ??
         Padding(
           padding: const EdgeInsets.all(24),
-          child: icon('vinyl', size: _stagePx),
+          child: staticIcon('vinyl', size: _stagePx),
         );
     final ringColour = switch (track.state) {
       PlaybackState.playing => VisageColors.accent,

@@ -5,7 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
+import '../resources/resources.dart';
 import 'page.dart';
 import 'template_text.dart';
 import 'templates_model.dart';

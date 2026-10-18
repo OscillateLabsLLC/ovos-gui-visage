@@ -1,21 +1,22 @@
-/// Plays one of OVOS's own Lottie files from the ovos-gui cache. A one-shot plays its live segment once and holds
-/// the last frame; a missing or unreadable file shows [fallback] instead. With [fitRing] the animation is placed so
+/// Plays one of OVOS's own Lottie files, named by its `/res/...` path in the ovos-gui cache. A one-shot plays its
+/// live segment once and holds the last frame; a missing or unreadable file is reported and shows [fallback] instead. With [fitRing] the animation is placed so
 /// its main ring lands on the chip's ring (fit.dart) instead of filling the box.
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../faults.dart';
+import '../resources/resources.dart';
 import 'fit.dart';
 import 'segment.dart';
 
 class CacheLottie extends StatefulWidget {
-  const CacheLottie({super.key, required this.file, required this.loop, required this.fallback, this.fitRing = false});
+  const CacheLottie({super.key, required this.resource, required this.loop, required this.fallback, this.fitRing = false});
 
-  final File file;
+  final String resource;
   final bool loop;
   final Widget fallback;
   final bool fitRing;
@@ -30,11 +31,12 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
 
   Future<_Loaded?> _load() async {
     try {
-      final bytes = await widget.file.readAsBytes();
+      final bytes = await readResource(widget.resource);
       final composition = await LottieComposition.fromBytes(bytes);
       final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
       return _Loaded(composition, liveSegment(json), widget.fitRing ? ringFit(json) : null);
-    } on Object {
+    } on Object catch (err, stack) {
+      reportFault('loading ${widget.resource}', err, stack);
       return null;
     }
   }

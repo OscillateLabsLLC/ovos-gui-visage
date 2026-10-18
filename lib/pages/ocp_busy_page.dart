@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../lottie/cache_lottie.dart';
-import '../resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'ocp_browse_model.dart';
@@ -35,7 +34,7 @@ class OcpBusyPage extends StatelessWidget {
           glow: const Glow(),
           children: [
             SizedBox.expand(
-              child: CacheLottie(file: cacheFile(installingAnimation), loop: true, fitRing: true, fallback: const _TurningArc()),
+              child: CacheLottie(resource: installingAnimation, loop: true, fitRing: true, fallback: const _TurningArc()),
             ),
           ],
         ),

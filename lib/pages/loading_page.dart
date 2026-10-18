@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../lottie/cache_lottie.dart';
-import '../resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'page.dart';
@@ -31,7 +30,7 @@ class LoadingPage extends StatelessWidget {
         SizedBox(
           width: lottieChipPx,
           height: lottieChipPx,
-          child: CacheLottie(file: cacheFile(loadingAnimation), loop: true, fitRing: true, fallback: const _Dots()),
+          child: CacheLottie(resource: loadingAnimation, loop: true, fitRing: true, fallback: const _Dots()),
         ),
         const SizedBox(height: 28),
         TemplateLabel(loadingLabel(data)),

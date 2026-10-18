@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.3.0
+  http: ^1.6.0
   lottie: ^3.6.1
   path: ^1.9.1
   web_socket_channel: ^3.0.3

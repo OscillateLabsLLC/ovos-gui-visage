@@ -19,7 +19,7 @@ const _minShortPx = 40;
 final _breakAfter = RegExp(r'[\s.,:;/-]');
 final _safeUrl = RegExp(r'^https?://', caseSensitive: false);
 
-/// data:image, http(s), the middle layer's /res/ URLs, and (same-host display) absolute file paths; resources.dart
+/// data:image, http(s), the middle layer's /res/ URLs, and (same-host display) absolute file paths; resources/
 /// decides whether a path is a loadable image.
 final _safeImage = RegExp(r'^(data:image/|https?://|/)', caseSensitive: false);
 const _fillToFit = {'fit': BoxFit.contain, 'crop': BoxFit.cover, 'stretch': BoxFit.fill};

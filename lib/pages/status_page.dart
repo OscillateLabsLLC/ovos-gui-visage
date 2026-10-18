@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../lottie/cache_lottie.dart';
-import '../resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'loading_page.dart' show lottieChipPx;
@@ -34,7 +33,7 @@ class StatusPage extends StatelessWidget {
           width: lottieChipPx,
           height: lottieChipPx,
           // Keyed on ok so a change replays the one-shot from the start.
-          child: CacheLottie(key: ValueKey(ok), file: cacheFile(statusAnimation(ok)), loop: false, fallback: _Glyph(ok)),
+          child: CacheLottie(key: ValueKey(ok), resource: statusAnimation(ok), loop: false, fallback: _Glyph(ok)),
         ),
         const SizedBox(height: 28),
         TemplateLabel(label),

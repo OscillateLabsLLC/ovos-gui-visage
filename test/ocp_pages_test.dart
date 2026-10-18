@@ -11,6 +11,8 @@ import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
+import 'faults.dart';
+
 const ocp = 'ovos.common_play';
 PageContext ctx(String page) => PageContext(namespace: ocp, page: page, events: const {});
 
@@ -46,13 +48,15 @@ void main() {
   testWidgets('the recorded play/pause/resume/stop session drives the player through its states', (tester) async {
     final states = statesOf('ocp_play_pause_resume_stop.jsonl', 'PlayerLoader');
     expect(states.map((s) => s['status']).toSet(), containsAll(['Playing', 'Paused', 'Stopped']));
-    for (final data in states) {
-      await tester.pumpWidget(host(NowPlayingPage.page(data, ctx('PlayerLoader'))));
-      await tester.pump(const Duration(milliseconds: 700));
-      expect(tester.takeException(), isNull);
-      final status = data['status'] as String?;
-      if (status != null) expect(find.text(status.toLowerCase()), findsOneWidget);
-    }
+    final faults = await collectFaults(() async {
+      for (final data in states) {
+        await tester.pumpWidget(host(NowPlayingPage.page(data, ctx('PlayerLoader'))));
+        await tester.pump(const Duration(milliseconds: 700));
+        final status = data['status'] as String?;
+        if (status != null) expect(find.text(status.toLowerCase()), findsOneWidget);
+      }
+    });
+    expect(faults, everyElement(predicate(isUnloadableImage, 'the recorded album art, unreachable here')));
     final title = states.last['title'] as String?;
     expect(find.text(title ?? 'Unknown track'), findsOneWidget);
   });
@@ -80,14 +84,17 @@ void main() {
   testWidgets('the recorded SomaFM browse shows suggestions and home', (tester) async {
     final suggestions = statesOf('ocp_somafm_live_browse.jsonl', 'SuggestionsView');
     expect(suggestions, isNotEmpty);
-    await tester.pumpWidget(host(OcpListPage.build_(suggestions.last, ctx('SuggestionsView'))));
-    await tester.pump(const Duration(seconds: 1));
-    expect(tester.takeException(), isNull);
     final home = statesOf('ocp_somafm_live_browse.jsonl', 'Home');
     expect(home, isNotEmpty);
-    await tester.pumpWidget(host(OcpListPage.build_(home.last, ctx('Home'))));
-    await tester.pump(const Duration(seconds: 1));
+    final faults = await collectFaults(() async {
+      await tester.pumpWidget(host(OcpListPage.build_(suggestions.last, ctx('SuggestionsView'))));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpWidget(host(OcpListPage.build_(home.last, ctx('Home'))));
+      await tester.pump(const Duration(seconds: 1));
+    });
     expect(find.text('MEDIA'), findsOneWidget);
+    expect(faults, isNotEmpty);
+    expect(faults, everyElement(predicate(isUnloadableImage, 'the recorded station art, unreachable here')));
   });
 
   testWidgets('busy shows the label', (tester) async {

@@ -6,8 +6,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../resources.dart';
+import '../resources/resources.dart';
 import '../theme.dart';
+import '../widgets/static_icon.dart';
 import '../widgets/circle.dart';
 import 'ocp_browse_model.dart';
 import 'page.dart';
@@ -72,7 +73,7 @@ class _Thumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final vinyl = Padding(
       padding: EdgeInsets.all(size * 0.07),
-      child: icon('vinyl', size: size),
+      child: staticIcon('vinyl', size: size),
     );
     final image = imageFor(cover, fit: BoxFit.cover, broken: vinyl);
     return Container(
@@ -168,7 +169,7 @@ class _SkillChip extends StatelessWidget {
               child: SizedBox(
                 width: _discPx * 0.58,
                 height: _discPx * 0.58,
-                child: image ?? icon('vinyl', size: _discPx * 0.58),
+                child: image ?? staticIcon('vinyl', size: _discPx * 0.58),
               ),
             ),
           ),

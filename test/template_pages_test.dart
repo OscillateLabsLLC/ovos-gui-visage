@@ -59,8 +59,9 @@ void main() {
     expect(find.text('Microphone muted'), findsOneWidget);
   });
 
-  testWidgets('image frame shows the hint when the image cannot load', (tester) async {
+  testWidgets('image frame shows the hint when the image cannot load, and reports it', (tester) async {
     await tester.pumpWidget(host(ImageFramePage.page({'image': '/nope/missing.png', 'caption': 'cap', 'title': 't'}, ctx)));
+    expect('${tester.takeException()}', contains('no such file /nope/missing.png'));
     expect(find.text(unavailable), findsOneWidget);
     expect(find.text('cap'), findsOneWidget);
     expect(find.text('T'), findsOneWidget);

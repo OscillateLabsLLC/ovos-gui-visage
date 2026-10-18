@@ -8,6 +8,7 @@ import 'face/face_theme.dart';
 import 'face/visage_theme.dart';
 import 'pages/router.dart';
 import 'protocol/core_bus.dart';
+import 'protocol/endpoints.dart';
 import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
@@ -50,10 +51,12 @@ class _ScreenState extends State<Screen> {
   final state = GuiState();
   final face = FaceController();
   late final Attention attention = Attention(face);
-  late final CoreBus bus = CoreBus(log: _log);
+  final sockets = endpoints();
+  late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
   late final GuiClient gui = GuiClient(
     bus: bus,
+    guiUrlOverride: sockets.gui,
     guiId: 'ovos-gui-visage-${DateTime.now().millisecondsSinceEpoch % 100000}',
     onMessage: _onGuiMessage,
     onStatus: _onGuiStatus,
