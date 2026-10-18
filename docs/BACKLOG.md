@@ -37,7 +37,8 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
    always-on-top, corner-snapping window) plus a fullscreen kiosk mode. Done: the corner widget
    (SCOPE phase 6) and peek mode, which collapses it to a badge until OVOS has attention. Done too:
    the macOS menu bar item, which shows and hides the widget, switches peek and mode, and picks the
-   face and colourway without a bus client. Still open: the fullscreen kiosk mode.
+   face and colourway without a bus client, and opens the picker page connected to the bus (Face
+   picker…, or `visage.face.picker` from a voice skill). Still open: the fullscreen kiosk mode.
 
 ## Carried over
 

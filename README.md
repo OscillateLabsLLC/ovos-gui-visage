@@ -104,8 +104,10 @@ A bad hex string or an unknown colourway is logged and falls back to visage for 
 It changes while running, three ways, and every change is written back to the config file:
 
 - **From a browser.** `docs/face-palettes.html` previews every pairing in every attention state;
-  served by the sidecar at `/faces.html`, or opened with `?bus=ws://host:8181`, it connects to
-  the OVOS bus and every tap changes the device's face. It follows changes made any other way.
+  served by the sidecar at `/faces.html`, or opened with `?bus=ws://host:8181` (or
+  `#bus=ws://host:8181`), it connects to the OVOS bus and every tap changes the device's face. It
+  follows changes made any other way. On macOS, **Face picker…** in the menu bar opens it already
+  connected; `visage.face.picker` on the bus does the same.
 - **On the screen.** Long-press anywhere to try faces on: the face comes up full and speaks a demo
   loop; swipe across the eyes or across the mouth to cycle styles, swipe the mouth up or down for
   a large or regular mouth, tap when done. There is no colour gesture yet; choose a colourway
@@ -113,7 +115,8 @@ It changes while running, three ways, and every change is written back to the co
   `window` and `float` modes; the desktop widget sits beneath every window and gets no input.
 - **Over the bus.** `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize`,
   `backdrop` and `colours` (a name or a token object) changes those parts; `visage.face.get` asks; `visage.face.state` answers both and
-  announces every change, with the names available for each part. A voice skill that maps "give
+  announces every change, with the names available for each part. `visage.face.picker` opens the
+  picker page on the display's own machine. A voice skill that maps "give
   yourself oval eyes" to that message is all a voice interface needs; nothing in OVOS changes.
 
 ## As a desktop widget
@@ -172,6 +175,9 @@ that does what the bus does, so the face stays under control without a bus clien
   config file.
 - **Face** and **Colours**: the presets and the colourways, with the current ones checked. A
   colourway keeps the eyes and mouth you have.
+- **Face picker…**: opens the picker page in your default browser, connected to the bus this app
+  uses. Each time, the app writes the page to `~/.config/ovos-gui-visage/faces.html` and a small
+  `open-faces.html` beside it that passes the bus on, since macOS drops a file URL's `#bus=`.
 - **Quit ovos-gui-visage**.
 
 Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. The menu

@@ -56,6 +56,9 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
 - The macOS menu bar item: `lib/window/status_menu.dart` builds the items from the window and face
   state (pure, tested) and acts through `WindowRemote` and `FaceRemote`; `status_menu_host*.dart`
   and `macos/Runner/StatusMenu.swift` draw it over the `ovos_gui_visage/window` channel. Add a
-  menu choice in Dart; the runner draws whatever list it gets.
+  menu choice in Dart; the runner draws whatever list it gets. Face picker… and `visage.face.picker`
+  both call `FaceRemote.openPicker`; `lib/window/face_picker*.dart` writes the bundled
+  `docs/face-palettes.html` to `faces.html` beside the config plus `open-faces.html`, which redirects to
+  `faces.html#bus=…` (macOS drops a file URL's fragment), and the runner's `openUrl` opens the launcher.
 - Pages are display-only. Try-on mode and the collapsed peek badge (a tap) are the only gesture
   surfaces; no gesture plumbing in pages.
