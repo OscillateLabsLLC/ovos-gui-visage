@@ -32,6 +32,14 @@ edge stripes; gradients, glows and motion are welcome. Reuse `lib/widgets/circle
 (`Circle`, `Ring`, `Glow`, `StaggerEnter`, `RiseIn`) rather than inventing per-page effects.
 The fallback debug card is the one exception.
 
+## Icons
+
+The animated icons live as plain SVGs with CSS keyframes in `assets/icon_sources/`. Flutter
+runs no CSS, so `python3 tool/split_icons.py` (stdlib only) splits each one into layer
+assets under `assets/icons/` and regenerates `lib/widgets/icon_layers.g.dart`; the keyframes
+are transcribed by hand into `lib/widgets/icon_motion.dart`, keyed by icon, class and
+ordinal. `test/motion_test.dart` fails if an animated layer has no motion or painter.
+
 ## Verifying a change
 
 A green test run proves the state machine and view models. A visible change needs the stack

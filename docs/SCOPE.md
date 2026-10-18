@@ -83,9 +83,13 @@ test/
    Lottie playback, all against the live stack on macOS.
 1. **Core shell** (done): router, idle page, date-time pages, text/face/loading/status/image
    templates, WidgetManager, offline pill, reconnect.
-2. **Weather and alerts pages** (done). Icons are static SVG with whole-icon motion (the sun
-   turns, clouds drift); per-part motion (rays only, falling drops, the bell's clapper) is a
-   follow-up.
+2. **Weather and alerts pages** (done). Icons move part by part as their SVGs did:
+   `tool/split_icons.py` cuts each source icon into z-ordered layer assets and generates
+   `lib/widgets/icon_layers.g.dart`; `lib/widgets/motion.dart` evaluates CSS-style
+   per-property keyframe tracks (curve per interval, delays, alternate directions);
+   `lib/widgets/icon_motion.dart` transcribes every stylesheet. The globe's meridians and the
+   reminder's ticks animate shape, not transform, so `lib/widgets/icon_painters.dart` paints
+   them. Rerun the splitter after editing anything in `assets/icon_sources/`.
 3. **OCP pages** (done): now playing, busy, suggestions, home. Verified by replaying the
    recorded OCP session data through ovos-gui with `gui.value.set` / `gui.page.show`, since
    OCP need not be installed to test the pages.
