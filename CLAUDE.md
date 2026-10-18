@@ -25,7 +25,7 @@ protocol and visual reference (`../ovos-visage/docs/SPEC.md` in Mike's checkout)
 ```bash
 ~/.venvs/ovos-gui/bin/ovos-gui-service
 ~/.venvs/ovos-gui/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
-flutter run -d macos
+VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget in a corner
 ```
 
 ## Conventions

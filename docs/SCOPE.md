@@ -108,7 +108,7 @@ test/
    CI builds the image and checks the rendered nginx config, since no Docker daemon was
    available locally.
 5. CI matrix (macOS, Linux, Windows, web, sidecar image), packaging, release-please.
-6. **Widget modes** (done on macOS): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
+6. **Widget modes** (done on macOS; `desktop` is the default): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
    (environment on top) and places a frameless window in a corner of the primary display's
    work area, beneath everything (`desktop`) or above (`float`), on every Space, through
    `window_manager` and `screen_retriever`. The window background goes transparent so the

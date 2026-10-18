@@ -1,7 +1,7 @@
-/// How the app's window sits on the desktop (SCOPE phase 6). `window` is an ordinary window; `float` is a frameless
-/// window above everything, `desktop` the same window beneath everything, like a desktop widget, both pinned to a
-/// screen corner on every Space. Read from ~/.config/ovos-gui-visage/config.json, overridden by VISAGE_MODE,
-/// VISAGE_CORNER, VISAGE_HEIGHT and VISAGE_MARGIN.
+/// How the app's window sits on the desktop (SCOPE phase 6). `desktop`, the default, is a frameless window beneath
+/// everything, like a desktop widget; `float` is the same window above everything; both are pinned to a screen
+/// corner on every Space. `window` is an ordinary window. Read from ~/.config/ovos-gui-visage/config.json,
+/// overridden by VISAGE_MODE, VISAGE_CORNER, VISAGE_HEIGHT and VISAGE_MARGIN.
 library;
 
 import 'dart:ui';
@@ -17,7 +17,7 @@ const defaultMargin = 16.0;
 
 class WindowConfig {
   const WindowConfig({
-    this.mode = WindowMode.window,
+    this.mode = WindowMode.desktop,
     this.corner = Corner.topRight,
     this.height = defaultWidgetHeight,
     this.margin = defaultMargin,

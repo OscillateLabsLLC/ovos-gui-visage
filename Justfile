@@ -20,6 +20,10 @@ lint:
 fmt:
     dart format --line-length 130 lib test tool
 
-# Run the app on macOS (core bus 8181, GUI socket 18181)
+# Run the app on macOS as an ordinary window (core bus 8181, GUI socket 18181)
 run *ARGS:
+    VISAGE_MODE=window flutter run -d macos {{ARGS}}
+
+# Run the app on macOS as it ships: a desktop widget in the top-right corner
+widget *ARGS:
     flutter run -d macos {{ARGS}}

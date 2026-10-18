@@ -33,7 +33,7 @@ skills, homescreen                 ▲ ovos.widgets.* translation       reads ~/
 ```bash
 <gui-venv>/bin/ovos-gui-service
 <gui-venv>/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
-flutter run -d macos
+VISAGE_MODE=window flutter run -d macos     # or `just run`; without the variable it starts as a desktop widget
 ```
 
 The window shows the 480 × 800 screen scaled to fit. To try it without a microphone, inject
@@ -68,8 +68,9 @@ ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
 
 ## As a desktop widget
 
-The same app can sit in a screen corner as a frameless widget, beneath every other window
-(`desktop`) or above them (`float`), on every Space. Put this in
+By default the app is a desktop widget: a frameless window in the top-right corner, 400 px
+tall, beneath every other window and above the wallpaper, on every Space. `float` keeps the
+same window above everything instead, and `window` is an ordinary window. Configure it in
 `~/.config/ovos-gui-visage/config.json`:
 
 ```json

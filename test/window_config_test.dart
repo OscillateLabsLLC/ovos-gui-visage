@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/window/window_config.dart';
 
 void main() {
-  test('defaults to an ordinary window', () {
+  test('defaults to a desktop widget in the top-right corner', () {
     final config = WindowConfig.from(null, const {});
-    expect(config.mode, WindowMode.window);
-    expect(config.isWidget, isFalse);
+    expect(config.mode, WindowMode.desktop);
+    expect(config.isWidget, isTrue);
     expect(config.corner, Corner.topRight);
     expect(config.height, defaultWidgetHeight);
   });
@@ -25,13 +25,14 @@ void main() {
       'VISAGE_HEIGHT': '500',
     });
     expect(overridden.mode, WindowMode.float);
+    expect(WindowConfig.from(file, const {'VISAGE_MODE': 'window'}).isWidget, isFalse);
     expect(overridden.corner, Corner.topRight);
     expect(overridden.height, 500);
   });
 
   test('bad values fall back instead of failing', () {
     final config = WindowConfig.from({'mode': 'sideways', 'height': -5, 'margin': 'x'}, const {'VISAGE_CORNER': 'middle'});
-    expect(config.mode, WindowMode.window);
+    expect(config.mode, WindowMode.desktop);
     expect(config.corner, Corner.topRight);
     expect(config.height, defaultWidgetHeight);
     expect(config.margin, defaultMargin);
