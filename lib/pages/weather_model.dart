@@ -26,23 +26,31 @@ String animatedIconName(Object? code) {
 
 bool _isBlank(Object? value) => value == null || value == '';
 
-double? _numberOrNull(Object? value) =>
-    _isBlank(value) ? null : (value is num ? value.toDouble() : double.tryParse(value.toString()));
+final _commaDecimal = RegExp(r'^\s*-?\d+,\d+\s*$');
+
+/// The skill formats numbers in the device locale, so a Dutch install sends "21,5"; a comma between digits is a
+/// decimal point here (nothing the skill sends has a thousands separator).
+double? parseNumber(Object? value) {
+  if (_isBlank(value)) return null;
+  if (value is num) return value.toDouble();
+  final text = value.toString();
+  return double.tryParse(_commaDecimal.hasMatch(text) ? text.replaceFirst(',', '.') : text);
+}
 
 String degrees(Object? value) {
-  final n = _numberOrNull(value);
+  final n = parseNumber(value);
   return n == null ? missing : '${n.round()}°';
 }
 
 String percent(Object? value) {
-  final n = _numberOrNull(value);
+  final n = parseNumber(value);
   return n == null ? missing : '${n.round()}%';
 }
 
 String _details(Json data, bool withHumidity) {
   final parts = <String>[];
   if (withHumidity && !_isBlank(data['humidity'])) parts.add('humidity ${percent(data['humidity'])}');
-  final wind = _numberOrNull(data['windSpeed']);
+  final wind = parseNumber(data['windSpeed']);
   if (wind != null) parts.add('wind ${wind.round()}');
   return parts.join(' · ');
 }

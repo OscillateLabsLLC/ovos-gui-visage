@@ -83,6 +83,10 @@ void main() {
   test('degrees and percent tolerate blanks and strings', () {
     expect(degrees(null), missing);
     expect(degrees('21.6'), '22°');
+    expect(degrees('21,6'), '22°', reason: 'a comma-decimal locale (nl) formats 21.6 as 21,6');
+    expect(parseNumber('-3,5'), -3.5);
+    expect(parseNumber('1,000'), 1.0, reason: 'a comma between digits is a decimal point, never thousands');
+    expect(parseNumber('abc'), isNull);
     expect(percent(''), missing);
     expect(percent(3.4), '3%');
   });
