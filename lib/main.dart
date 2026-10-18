@@ -1,6 +1,9 @@
 // App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the
 // face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
-// while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart).
+// while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart). A peeking widget shows only
+// the badge until the face is shown (window/peek.dart), and the window follows over the bus (window_remote.dart).
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'app_config.dart';
@@ -18,6 +21,8 @@ import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/widget_manager.dart';
+import 'window/peek.dart';
+import 'window/window_remote.dart';
 import 'window/window_shell.dart';
 
 const _pageBg = VisageColors.pageBg;
@@ -69,6 +74,9 @@ class _ScreenState extends State<Screen> {
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
   late final FaceRemote remote = FaceRemote(bus, face, initial: widget.config.face, persist: saveFaceConfig, log: _log);
+  late final PeekController peek = PeekController(enabled: widget.config.window.peeks);
+  late final WindowRemote window = WindowRemote(bus, peek, initial: widget.config.window, persist: saveWindowConfig, log: _log);
+  late bool windowExpanded;
   late final GuiClient gui = GuiClient(
     bus: bus,
     guiUrlOverride: sockets.gui,
@@ -87,8 +95,11 @@ class _ScreenState extends State<Screen> {
     super.initState();
     attention.addListener(_refresh);
     face.addListener(_refresh);
+    windowExpanded = peek.expanded;
+    peek.addListener(_onPeek);
     widgets;
     remote;
+    window;
     bus.start();
     gui.start();
   }
@@ -97,6 +108,7 @@ class _ScreenState extends State<Screen> {
   void dispose() {
     face.removeListener(_refresh);
     attention.dispose();
+    peek.dispose();
     gui.stop();
     bus.stop();
     super.dispose();
@@ -117,8 +129,18 @@ class _ScreenState extends State<Screen> {
     _refresh();
   }
 
+  void _onPeek() {
+    if (peek.expanded != windowExpanded) {
+      windowExpanded = peek.expanded;
+      _log('peek: window ${windowExpanded ? 'expands' : 'collapses'}');
+      unawaited(setWidgetExpanded(window.config, expanded: windowExpanded));
+    }
+    if (mounted) setState(() {});
+  }
+
   void _refresh() {
     if (!mounted) return;
+    peek.attention(attention.shown);
     final target = state.current();
     attention.setCompact(isContentPage(target, state.idleNamespace));
     if (target != null && target != lastFocus) {
@@ -130,29 +152,66 @@ class _ScreenState extends State<Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return FittedBox(
-      child: SizedBox(
-        width: frameWidth,
-        height: frameHeight,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: FaceScope(
-            controller: face,
-            child: Stack(
-              children: [
-                const Positioned.fill(child: ColoredBox(color: _pageBg)),
-                Positioned.fill(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
-                    child: PageHost(state: state),
-                  ),
-                ),
-                _AttentionOverlay(attention: attention, face: face),
-                if (!guiConnected) const _OfflinePill(),
-                FaceTryOn(controller: face, remote: remote),
-              ],
-            ),
+    final collapsed = !peek.expanded;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Offstage(
+          offstage: collapsed,
+          child: TickerMode(
+            enabled: !collapsed,
+            child: FittedBox(child: _frame()),
           ),
+        ),
+        if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
+      ],
+    );
+  }
+
+  Widget _frame() {
+    return SizedBox(
+      width: frameWidth,
+      height: frameHeight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: FaceScope(
+          controller: face,
+          child: Stack(
+            children: [
+              const Positioned.fill(child: ColoredBox(color: _pageBg)),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
+                  child: PageHost(state: state),
+                ),
+              ),
+              _AttentionOverlay(attention: attention, face: face),
+              if (!guiConnected) const _OfflinePill(),
+              FaceTryOn(controller: face, remote: remote),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The collapsed peek window: the resting badge alone in a square frame; a tap expands it for a while.
+class _PeekBadge extends StatelessWidget {
+  const _PeekBadge({required this.face, required this.onTap});
+
+  final FaceController face;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: FittedBox(
+        child: SizedBox.square(
+          dimension: frameWidth,
+          child: FaceBadge(controller: face),
         ),
       ),
     );
