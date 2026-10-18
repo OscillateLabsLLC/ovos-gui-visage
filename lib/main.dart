@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'app_config.dart';
 import 'attention.dart';
 import 'face/face.dart';
+import 'face/face_badge.dart';
 import 'face/face_remote.dart';
 import 'face/face_scope.dart';
 import 'face/face_theme.dart';
@@ -21,7 +22,6 @@ import 'window/window_shell.dart';
 
 const _pageBg = VisageColors.pageBg;
 const _dimBg = Color(0xEB05070A);
-const _badgeDisc = Color(0xEB141B24);
 const _badgeHeight = 104.0;
 const _badgeGap = 7.0;
 
@@ -185,31 +185,12 @@ class _AttentionOverlay extends StatelessWidget {
               ..translateByDouble(geometry.centre.dx, geometry.centre.dy, 0, 1)
               ..scaleByDouble(attention.compact ? scale : 1, attention.compact ? scale : 1, 1, 1)
               ..translateByDouble(-geometry.centre.dx, -geometry.centre.dy, 0, 1),
-            child: Stack(
-              children: [
-                if (attention.compact)
-                  Positioned.fill(child: CustomPaint(painter: _DiscPainter(geometry.centre, geometry.badgeRadius))),
-                Face(controller: face, compact: attention.compact),
-              ],
-            ),
+            child: BadgeFace(controller: face, compact: attention.compact),
           ),
         ),
       ),
     );
   }
-}
-
-class _DiscPainter extends CustomPainter {
-  _DiscPainter(this.centre, this.radius);
-
-  final Offset centre;
-  final double radius;
-
-  @override
-  void paint(Canvas canvas, Size size) => canvas.drawCircle(centre, radius, Paint()..color = _badgeDisc);
-
-  @override
-  bool shouldRepaint(_DiscPainter old) => old.centre != centre || old.radius != radius;
 }
 
 class _OfflinePill extends StatelessWidget {
