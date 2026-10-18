@@ -86,7 +86,7 @@
 <main>
   <header>
     <h1>Visage Face Palettes</h1>
-    <p class="lede">Nine eye styles and eight mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair, then step through the attention states. Colour comes later; every style here uses the visage and Mark 1 tokens.</p>
+    <p class="lede">Nine eye styles and eight mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair and a colourway, then step through the attention states. Every style paints from the same colour tokens, so each colourway works with every pairing.</p>
     <p class="bus" id="bus" aria-live="polite">Preview only. Served by the sidecar, or opened with <code>?bus=ws://host:8181</code>, this page changes the face on the device as you tap.</p>
   </header>
 
@@ -96,6 +96,7 @@
       <div class="name"><span id="pairName">lens + outline</span><small id="pairNote">visage</small></div>
       <div class="picker"><div class="label">Eyes</div><div class="chips" id="eyeChips" role="group" aria-label="Eye style"></div></div>
       <div class="picker"><div class="label">Mouth</div><div class="chips" id="mouthChips" role="group" aria-label="Mouth style"></div></div>
+      <div class="picker"><div class="label">Colour</div><div class="chips" id="coloursChips" role="group" aria-label="Colourway"></div></div>
       <div class="picker"><div class="label">Mouth size</div><div class="chips" id="sizeChips" role="group" aria-label="Mouth size"></div></div>
       <div class="picker"><div class="label">State</div><div class="chips" id="modeChips" role="group" aria-label="Attention state"></div></div>
       <label class="toggle"><input type="checkbox" id="compact"> Compact badge (the face over a content page)</label>
@@ -119,7 +120,7 @@
       <li><code>FaceTheme</code> stays the type the widget consumes; a <code>ComposedTheme(eyes, mouth, frame)</code> implements it and <code>visage</code> and <code>mark1</code> become presets.</li>
       <li>Mouth size is a layout parameter, not a style: large scales the mouth slot by 1.4 (1.25 in the badge, where the disc bounds it), so every mouth has a big version and the stroke weight grows with it.</li>
       <li>Config: <code>"face": "mark1"</code> for a preset, <code>"face": {"eyes": "block", "mouth": "outline", "mouthSize": "large"}</code> for a pair, <code>VISAGE_FACE=block+outline</code> from the shell.</li>
-      <li>Colour later: each style reads <code>eye</code>, <code>eyeDim</code>, <code>mouth</code>, <code>accent</code> and <code>glow</code> and nothing else.</li>
+      <li>Colour: each style reads <code>eye</code>, <code>eyeDim</code>, <code>mouth</code>, <code>accent</code>, <code>led</code>, <code>matrix</code> and <code>matrixGlow</code> from the frame's palette, so a colourway is a value: <code>"colours": "ember"</code>, or an object of <code>#RRGGBB</code> tokens.</li>
     </ul>
     <p class="lede">The full write-up is <code>docs/FACE_PALETTES.md</code> in the repo.</p>
   </section>
@@ -129,7 +130,36 @@
 (() => {
   'use strict';
   const TAU = Math.PI * 2;
-  const colours = { eye: '#f5f5f5', eyeDim: '#6d6d6d', mouth: '#ffffff', accent: '#1e9bff', led: 'rgb(112,101,106)', unlit: '#12171c', matrix: '#e1f3ff' };
+  // Must stay in sync with lib/face/face_palette.dart.
+  const palettes = {
+    visage: { eye: '#F5F5F5', eyeDim: '#6D6D6D', mouth: '#FFFFFF', accent: '#1E9BFF', led: '#70656A', matrix: '#E1F3FF', matrixGlow: '#ADDEFB' },
+    ember: { eye: '#FFB547', eyeDim: '#5C3A12', mouth: '#FFE2B8', accent: '#FF5E1A', led: '#C9862E', matrix: '#FFD49A', matrixGlow: '#FFB25C' },
+    mint: { eye: '#8FF0C8', eyeDim: '#2B5446', mouth: '#DFFFF0', accent: '#B28DFF', led: '#4FA884', matrix: '#C8FFE6', matrixGlow: '#7FE8C0' },
+    rose: { eye: '#FFA8C0', eyeDim: '#5E3341', mouth: '#FFE0EA', accent: '#3FD3C6', led: '#B06A80', matrix: '#FFD6E3', matrixGlow: '#F59AB8' },
+    ice: { eye: '#CDEEFF', eyeDim: '#3A5563', mouth: '#F0FAFF', accent: '#8C7BFF', led: '#6E95AA', matrix: '#D8F1FF', matrixGlow: '#9CD6F5' },
+    mark1: { eye: '#70656A', eyeDim: '#2E292B', mouth: '#E1F3FF', accent: '#ADDEFB', led: '#70656A', matrix: '#E1F3FF', matrixGlow: '#ADDEFB' },
+  };
+  const HEX = /^#?([0-9a-f]{6}|[0-9a-f]{8})$/i;
+  const rgbOf = (hex) => {
+    const d = HEX.exec(hex)[1];
+    const n = parseInt(d.slice(-6), 16), a = d.length === 8 ? parseInt(d.slice(0, 2), 16) / 255 : 1;
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255, a];
+  };
+  const rgba = (hex, alpha) => { const [r, g, b, a] = rgbOf(hex); return `rgba(${r},${g},${b},${a * alpha})`; };
+  const mix = (from, to, k) => {
+    const a = rgbOf(from), b = rgbOf(to);
+    return `rgb(${[0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * k)).join(',')})`;
+  };
+  // A colourway name, or an object of tokens over visage where a given matrix carries the glow (as the app parses it).
+  const paletteOf = (colours) => {
+    if (typeof colours === 'string') return palettes[colours];
+    const valid = Object.fromEntries(Object.entries(colours).filter(([k, v]) => k in palettes.visage && HEX.test(String(v))));
+    return { ...palettes.visage, ...('matrix' in valid ? { matrixGlow: valid.matrix } : {}), ...valid };
+  };
+  const knownColours = (c) => (typeof c === 'string' && c in palettes) || (c !== null && typeof c === 'object');
+  const css = (hex) => rgba(hex, 1);
+  let colours = {};
+  const usePalette = (p) => { colours = { ...Object.fromEntries(Object.entries(p).map(([k, v]) => [k, css(v)])), raw: p, unlit: '#12171c' }; };
 
   // Viseme shapes, a port of lib/face/visemes.dart: 9 cosine-spaced points per lip in a 200 x 100 box.
   const REST = 4, LIP_POINTS = 9, CX = 100, CY = 50;
@@ -266,7 +296,7 @@
           const lift = think ? e.r * 0.1 : 0;
           ctx.save();
           ctx.translate(e.x, e.y - lift);
-          ctx.fillStyle = f.mode === 'listening' ? '#ffffff' : '#e9e9e9';
+          ctx.fillStyle = f.mode === 'listening' ? colours.mouth : rgba(colours.raw.eye, 0.95);
           rr(ctx, -w / 2, -h / 2, w, h, e.r * 0.22);
           ctx.fill();
           if (think) {
@@ -292,7 +322,7 @@
         const pulse = think ? 0.65 + 0.35 * Math.sin(f.t * 5) : 1;
         const h = a.r * 0.5 * Math.max(f.eyeOpen, 0.06) * (think ? 0.8 : 1);
         const g = ctx.createLinearGradient(cx - span / 2, 0, cx + span / 2, 0);
-        g.addColorStop(0, 'rgba(110,110,110,1)'); g.addColorStop(0.5, 'rgba(245,245,245,1)'); g.addColorStop(1, 'rgba(110,110,110,1)');
+        g.addColorStop(0, colours.eyeDim); g.addColorStop(0.5, colours.eye); g.addColorStop(1, colours.eyeDim);
         ctx.globalAlpha = pulse;
         ctx.fillStyle = g;
         rr(ctx, cx - span / 2, cy - h / 2, span, h, h / 2);
@@ -300,7 +330,7 @@
         if (f.mode === 'listening') {
           const x = cx + (span / 2 - h) * Math.sin(f.t * 2.4);
           const s = ctx.createRadialGradient(x, cy, 0, x, cy, h * 1.4);
-          s.addColorStop(0, colours.accent); s.addColorStop(1, 'rgba(30,155,255,0)');
+          s.addColorStop(0, colours.accent); s.addColorStop(1, rgba(colours.raw.accent, 0));
           ctx.fillStyle = s;
           ctx.beginPath(); ctx.arc(x, cy, h * 1.4, 0, TAU); ctx.fill();
         }
@@ -333,7 +363,7 @@
           ctx.fillStyle = colours.accent;
           ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, TAU); ctx.fill();
           ctx.shadowBlur = 0;
-          ctx.fillStyle = '#d9efff';
+          ctx.fillStyle = mix(colours.raw.accent, colours.raw.mouth, 0.835);
           ctx.beginPath(); ctx.ellipse(0, 0, rx * 0.55, ry * 0.7, 0, 0, TAU); ctx.fill();
           ctx.restore();
         });
@@ -403,9 +433,9 @@
     }
     const dart = think ? Math.sin(f.t * 3) * hex * 0.25 : 0;
     ctx.fillStyle = '#0b0c0f'; ctx.beginPath(); ctx.arc(dart, 0, hex * 0.62, 0, TAU); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = e.r * 0.03;
+    ctx.strokeStyle = rgba(colours.raw.mouth, 0.35); ctx.lineWidth = e.r * 0.03;
     ctx.beginPath(); ctx.arc(dart, 0, hex * 0.5, 0, TAU); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(-hex * 0.28 + dart, -hex * 0.3, hex * 0.12, 0, TAU); ctx.fill();
+    ctx.fillStyle = rgba(colours.raw.mouth, 0.85); ctx.beginPath(); ctx.arc(-hex * 0.28 + dart, -hex * 0.3, hex * 0.12, 0, TAU); ctx.fill();
     ctx.restore();
   };
 
@@ -468,7 +498,7 @@
         for (let row = 0; row < 8; row++) {
           for (let col = 0; col < 32; col++) {
             const lit = frame && ((frame[row] >>> col) & 1) === 1;
-            if (lit) { ctx.fillStyle = colours.matrix; ctx.shadowColor = colours.matrix; ctx.shadowBlur = led * 2; }
+            if (lit) { ctx.fillStyle = colours.matrix; ctx.shadowColor = colours.matrixGlow; ctx.shadowBlur = led * 2; }
             else { ctx.fillStyle = colours.unlit; ctx.shadowBlur = 0; }
             ctx.beginPath(); ctx.arc(x0 + col * pitch, y0 + row * pitch, led, 0, TAU); ctx.fill();
           }
@@ -631,10 +661,10 @@
     mouthStyles[mouth].draw(ctx, mouthSlot(L, size), f);
   };
 
-  const state = { eyes: 'lens', mouth: 'outline', mode: 'speaking', compact: false, size: 'regular' };
+  const state = { eyes: 'lens', mouth: 'outline', mode: 'speaking', compact: false, size: 'regular', colours: 'visage' };
   const presets = [
     { eyes: 'lens', mouth: 'outline', name: 'visage', blurb: 'the 2018 concept face, today' },
-    { eyes: 'ring', mouth: 'matrix', name: 'mark1', blurb: 'the Mark 1 LEDs, today' },
+    { eyes: 'ring', mouth: 'matrix', name: 'mark1', blurb: 'the Mark 1 LEDs, today', colours: 'mark1' },
     { eyes: 'visor', mouth: 'matrix', name: 'scanner', blurb: 'one eye over an LED mouth' },
     { eyes: 'block', mouth: 'solid', name: 'robot', blurb: 'eyes and mouth both squash' },
     { eyes: 'ring', mouth: 'waveform', name: 'retro', blurb: 'LED eyes, smooth voice' },
@@ -658,6 +688,7 @@
   };
   chipGroup(document.getElementById('eyeChips'), Object.keys(eyeStyles), 'eyes');
   chipGroup(document.getElementById('mouthChips'), Object.keys(mouthStyles), 'mouth');
+  chipGroup(document.getElementById('coloursChips'), Object.keys(palettes), 'colours');
   chipGroup(document.getElementById('sizeChips'), Object.keys(sizes), 'size');
   chipGroup(document.getElementById('modeChips'), modes, 'mode');
   document.getElementById('compact').addEventListener('change', (ev) => { state.compact = ev.target.checked; sync(); });
@@ -686,7 +717,11 @@
     const b = document.createElement('button');
     b.className = 'preset'; b.type = 'button'; b.id = `preset-${p.name}`;
     b.innerHTML = `<b>${p.name}</b><span>${p.eyes} + ${p.mouth}</span><span>${p.blurb}</span>`;
-    b.addEventListener('click', () => { state.eyes = p.eyes; state.mouth = p.mouth; sync(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    b.addEventListener('click', () => {
+      Object.assign(state, { eyes: p.eyes, mouth: p.mouth, colours: p.colours || 'visage' });
+      sync();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     presetsEl.appendChild(b);
   }
 
@@ -711,10 +746,13 @@
         try { msg = JSON.parse(ev.data); } catch (err) { console.warn('face-palettes: unreadable bus frame', err); return; }
         if (msg.type !== 'visage.face.state') return;
         const d = msg.data || {};
-        if (!eyeStyles[d.eyes] || !mouthStyles[d.mouth] || !sizes[d.mouthSize]) { console.warn('face-palettes: state names a style this page lacks', d); return; }
+        if (!eyeStyles[d.eyes] || !mouthStyles[d.mouth] || !sizes[d.mouthSize] || !knownColours(d.colours)) {
+          console.warn('face-palettes: state names a style or colourway this page lacks', d);
+          return;
+        }
         applying = true;
-        Object.assign(state, { eyes: d.eyes, mouth: d.mouth, size: d.mouthSize });
-        pushed = JSON.stringify({ eyes: d.eyes, mouth: d.mouth, mouthSize: d.mouthSize });
+        Object.assign(state, { eyes: d.eyes, mouth: d.mouth, size: d.mouthSize, colours: d.colours });
+        pushed = JSON.stringify({ eyes: d.eyes, mouth: d.mouth, mouthSize: d.mouthSize, colours: d.colours });
         sync();
         applying = false;
       };
@@ -724,7 +762,7 @@
     if (url) { show('lost', `Connecting to ${url}…`); connect(); }
     return {
       push() {
-        const face = { eyes: state.eyes, mouth: state.mouth, mouthSize: state.size };
+        const face = { eyes: state.eyes, mouth: state.mouth, mouthSize: state.size, colours: state.colours };
         const key = JSON.stringify(face);
         if (applying || key === pushed) return;
         pushed = key;
@@ -740,16 +778,20 @@
     }
     for (const n of modes) document.getElementById(`mode-${n}`).setAttribute('aria-pressed', String(state.mode === n));
     for (const n of Object.keys(sizes)) document.getElementById(`size-${n}`).setAttribute('aria-pressed', String(state.size === n));
+    for (const n of Object.keys(palettes)) document.getElementById(`colours-${n}`).setAttribute('aria-pressed', String(state.colours === n));
+    usePalette(paletteOf(state.colours));
     for (const c of cells) c.cell.setAttribute('aria-pressed', String(c.e === state.eyes && c.m === state.mouth));
     document.getElementById('pairName').textContent = `${state.eyes} + ${state.mouth}`;
     const p = presetFor(state.eyes, state.mouth);
-    document.getElementById('pairNote').textContent = p ? p.name : 'unnamed pairing';
+    const colourName = typeof state.colours === 'string' ? state.colours : 'custom colours';
+    document.getElementById('pairNote').textContent = `${p ? p.name : 'unnamed pairing'} · ${colourName}`;
     document.getElementById('behaviour').innerHTML = `<div><b>${state.eyes}</b> ${eyeStyles[state.eyes].note}</div><div><b>${state.mouth}</b> ${mouthStyles[state.mouth].note}</div>`;
     try { localStorage.setItem('visage-palette', JSON.stringify(state)); } catch (_) { /* per-viewer convenience only */ }
   };
   try {
     const saved = JSON.parse(localStorage.getItem('visage-palette') || 'null');
-    if (saved && eyeStyles[saved.eyes] && mouthStyles[saved.mouth] && modes.includes(saved.mode) && sizes[saved.size]) Object.assign(state, saved);
+    const valid = saved && eyeStyles[saved.eyes] && mouthStyles[saved.mouth] && modes.includes(saved.mode) && sizes[saved.size];
+    if (valid) Object.assign(state, saved, { colours: knownColours(saved.colours) ? saved.colours : 'visage' });
     document.getElementById('compact').checked = state.compact;
   } catch (_) { /* storage unavailable: defaults stand */ }
   sync();
