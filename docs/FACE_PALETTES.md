@@ -52,18 +52,27 @@ look of a Mark 1 face without the faceplate.
 | **outline** (visage today) | hollow round-capped viseme outline, tweened | the closed smile | seven breathing accent bars | the smile, still |
 | **solid** | the same viseme outline, filled | a short filled smile | a dot that breathes | a short line tilted a few degrees |
 | **matrix** (Mark 1 today) | the firmware viseme bitmaps on 32 × 8 LEDs | dark grid | the firmware waveform loop | the dot bouncing end to end |
-| **waveform** | one stroke whose amplitude and width follow the viseme | a flat line | a low accent ripple travelling along the line | three dots pulsing in turn |
+| **waveform** | one stroke on a shallow smile whose amplitude and span follow the viseme; the smile flattens as the viseme opens | the smile line, still | a low accent ripple travelling along the line | three dots pulsing in turn |
 
 `outline` and `solid` draw `frame.lips`, so they cost nothing new in the widget; `matrix` draws
-by `frame.viseme`; `waveform` maps the viseme's opening to an amplitude and its width to a span,
-using the shape table in `visemes.dart` rather than a table of its own.
+by `frame.viseme`; `waveform` maps the viseme's opening to an amplitude, its width to a span and
+its corner lift to the smile, using the shape table in `visemes.dart` rather than a table of its own.
+The smile baseline is there so that the mouth never rests as a bare horizontal bar: paired with
+`visor`, a flat line read as a second visor rather than a face.
+
+## Mouth size
+
+A larger mouth is a layout parameter, not a fifth style: `mouthSize: large` scales the mouth slot
+by 1.4 (1.25 in the badge, where the disc bounds it), so every mouth has a big version and the
+stroke weight grows with the slot. Large `outline` is the visage mouth at 250 px wide instead of
+178, which is the version that reads from across a room.
 
 ## Presets worth naming
 
 The combinations that read as their own character, to ship as named presets beside `visage` and
 `mark1`:
 
-- `visor + waveform`: a single scanner eye over a voice line; the 1980s computer.
+- `visor + matrix`: a single scanner eye over an LED mouth; the 1980s computer.
 - `block + solid`: the toy robot; the most expressive pair, eyes and mouth both squash.
 - `ring + waveform`: Mark 1 eyes with a smooth voice line, for people who want the LEDs without
   the matrix.
@@ -77,11 +86,11 @@ Everything else is still valid, just less distinct; the preview grid shows all s
 
 ```json
 {"face": "mark1"}
-{"face": {"eyes": "block", "mouth": "waveform"}}
+{"face": {"eyes": "block", "mouth": "outline", "mouthSize": "large"}}
 {"face": {"eyes": "ring", "mouth": "matrix", "frame": "mark1-plate"}}
 ```
 
-`VISAGE_FACE` keeps overriding with a preset name or `eyes+mouth` (`VISAGE_FACE=visor+waveform`).
+`VISAGE_FACE` keeps overriding with a preset name or `eyes+mouth` (`VISAGE_FACE=block+outline`).
 Switching at runtime, the other half of backlog item 5, is a `FaceController.theme` setter the
 widget already almost has; a key in window mode and a client-only bus message would both drive it,
 and neither needs OVOS changes.

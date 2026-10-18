@@ -89,6 +89,7 @@
       <div class="name"><span id="pairName">lens + outline</span><small id="pairNote">visage</small></div>
       <div class="picker"><div class="label">Eyes</div><div class="chips" id="eyeChips" role="group" aria-label="Eye style"></div></div>
       <div class="picker"><div class="label">Mouth</div><div class="chips" id="mouthChips" role="group" aria-label="Mouth style"></div></div>
+      <div class="picker"><div class="label">Mouth size</div><div class="chips" id="sizeChips" role="group" aria-label="Mouth size"></div></div>
       <div class="picker"><div class="label">State</div><div class="chips" id="modeChips" role="group" aria-label="Attention state"></div></div>
       <label class="toggle"><input type="checkbox" id="compact"> Compact badge (the face over a content page)</label>
       <div class="behaviour" id="behaviour"></div>
@@ -109,7 +110,8 @@
       <li>The widget keeps the animation state and hands every painter the same <code>FaceFrame</code>; styles only draw.</li>
       <li>A <code>FaceLayout</code> gives each style its slots: two eye circles and a mouth box, full or compact. The layout comes from the frame (bare screen, badge disc, or the Mark 1 plate), never from the style.</li>
       <li><code>FaceTheme</code> stays the type the widget consumes; a <code>ComposedTheme(eyes, mouth, frame)</code> implements it and <code>visage</code> and <code>mark1</code> become presets.</li>
-      <li>Config: <code>"face": "mark1"</code> for a preset, <code>"face": {"eyes": "block", "mouth": "waveform"}</code> for a pair, <code>VISAGE_FACE=visor+waveform</code> from the shell.</li>
+      <li>Mouth size is a layout parameter, not a style: large scales the mouth slot by 1.4 (1.25 in the badge, where the disc bounds it), so every mouth has a big version and the stroke weight grows with it.</li>
+      <li>Config: <code>"face": "mark1"</code> for a preset, <code>"face": {"eyes": "block", "mouth": "outline", "mouthSize": "large"}</code> for a pair, <code>VISAGE_FACE=block+outline</code> from the shell.</li>
       <li>Colour later: each style reads <code>eye</code>, <code>eyeDim</code>, <code>mouth</code>, <code>accent</code> and <code>glow</code> and nothing else.</li>
     </ul>
     <p class="lede">The full write-up is <code>docs/FACE_PALETTES.md</code> in the repo.</p>
@@ -368,7 +370,7 @@
       },
     },
     waveform: {
-      note: 'One stroke. Flat at rest; while speaking its amplitude follows the viseme opening and its span the viseme width. Listening is a low accent ripple; thinking is three dots pulsing in turn.',
+      note: 'One stroke on a shallow smile. While speaking its amplitude follows the viseme opening and its span the viseme width, and the smile flattens as the viseme opens. Listening is a low accent ripple; thinking is three dots pulsing in turn.',
       draw(ctx, m, f) {
         ctx.lineWidth = m.w * 0.05; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         if (f.mode === 'thinking') {
@@ -386,13 +388,14 @@
         const span = listen ? m.w * 0.6 : m.w * 0.6 * (spec.w / 56);
         const amp = listen ? m.h * 0.08 : m.h * 0.42 * ((spec.up + spec.down) / 60);
         const cycles = listen ? 3 : 2.5;
+        const lift = m.h * 0.16 * (listen ? 1 : spec.smile / 7);
         ctx.strokeStyle = listen ? colours.accent : colours.mouth;
         ctx.beginPath();
         const n = 64;
         for (let i = 0; i <= n; i++) {
           const u = i / n * 2 - 1;
           const win = 1 - u * u;
-          const y = m.cy - amp * win * Math.sin(u * cycles * Math.PI + f.t * (listen ? 6 : 14));
+          const y = m.cy - lift * (u * u - 0.5) - amp * win * Math.sin(u * cycles * Math.PI + f.t * (listen ? 6 : 14));
           const x = m.cx + u * span / 2;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
@@ -422,7 +425,13 @@
     return { mode, eyeOpen, eyeScale, viseme, lips, t };
   };
 
-  const paintFace = (canvas, eyes, mouth, f, compact) => {
+  const sizes = { regular: 1, large: 1.4 };
+  const mouthSlot = (L, size) => {
+    const k = L.disc ? Math.min(sizes[size], 1.25) : sizes[size];
+    return { cx: L.mouth.cx, cy: L.mouth.cy, w: L.mouth.w * k, h: L.mouth.h * k };
+  };
+
+  const paintFace = (canvas, eyes, mouth, f, compact, size) => {
     const ctx = canvas.getContext('2d');
     const L = compact ? layouts.compact : layouts.full;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -433,14 +442,14 @@
       ctx.beginPath(); ctx.arc(L.disc.x, L.disc.y, L.disc.r, 0, TAU); ctx.stroke();
     }
     eyeStyles[eyes].draw(ctx, L, f);
-    mouthStyles[mouth].draw(ctx, L.mouth, f);
+    mouthStyles[mouth].draw(ctx, mouthSlot(L, size), f);
   };
 
-  const state = { eyes: 'lens', mouth: 'outline', mode: 'speaking', compact: false };
+  const state = { eyes: 'lens', mouth: 'outline', mode: 'speaking', compact: false, size: 'regular' };
   const presets = [
     { eyes: 'lens', mouth: 'outline', name: 'visage', blurb: 'the 2018 concept face, today' },
     { eyes: 'ring', mouth: 'matrix', name: 'mark1', blurb: 'the Mark 1 LEDs, today' },
-    { eyes: 'visor', mouth: 'waveform', name: 'scanner', blurb: 'one eye over a voice line' },
+    { eyes: 'visor', mouth: 'matrix', name: 'scanner', blurb: 'one eye over an LED mouth' },
     { eyes: 'block', mouth: 'solid', name: 'robot', blurb: 'eyes and mouth both squash' },
     { eyes: 'ring', mouth: 'waveform', name: 'retro', blurb: 'LED eyes, smooth voice' },
     { eyes: 'lens', mouth: 'matrix', name: 'hybrid', blurb: 'concept eyes, matrix mouth' },
@@ -458,6 +467,7 @@
   };
   chipGroup(document.getElementById('eyeChips'), Object.keys(eyeStyles), 'eyes');
   chipGroup(document.getElementById('mouthChips'), Object.keys(mouthStyles), 'mouth');
+  chipGroup(document.getElementById('sizeChips'), Object.keys(sizes), 'size');
   chipGroup(document.getElementById('modeChips'), modes, 'mode');
   document.getElementById('compact').addEventListener('change', (ev) => { state.compact = ev.target.checked; sync(); });
 
@@ -493,6 +503,7 @@
       for (const n of Object.keys(group)) document.getElementById(`${key}-${n}`).setAttribute('aria-pressed', String(state[key] === n));
     }
     for (const n of modes) document.getElementById(`mode-${n}`).setAttribute('aria-pressed', String(state.mode === n));
+    for (const n of Object.keys(sizes)) document.getElementById(`size-${n}`).setAttribute('aria-pressed', String(state.size === n));
     for (const c of cells) c.cell.setAttribute('aria-pressed', String(c.e === state.eyes && c.m === state.mouth));
     document.getElementById('pairName').textContent = `${state.eyes} + ${state.mouth}`;
     const p = presetFor(state.eyes, state.mouth);
@@ -502,7 +513,7 @@
   };
   try {
     const saved = JSON.parse(localStorage.getItem('visage-palette') || 'null');
-    if (saved && eyeStyles[saved.eyes] && mouthStyles[saved.mouth] && modes.includes(saved.mode)) Object.assign(state, saved);
+    if (saved && eyeStyles[saved.eyes] && mouthStyles[saved.mouth] && modes.includes(saved.mode) && sizes[saved.size]) Object.assign(state, saved);
     document.getElementById('compact').checked = state.compact;
   } catch (_) { /* storage unavailable: defaults stand */ }
   sync();
@@ -514,8 +525,8 @@
     if (start === null) start = now;
     const t = reduced ? 1.0 : Math.max(0, now - start) / 1000;
     const f = frameAt(state.mode, t);
-    paintFace(big, state.eyes, state.mouth, f, state.compact);
-    for (const c of cells) paintFace(c.c, c.e, c.m, f, state.compact);
+    paintFace(big, state.eyes, state.mouth, f, state.compact, state.size);
+    for (const c of cells) paintFace(c.c, c.e, c.m, f, state.compact, state.size);
     if (!reduced) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
