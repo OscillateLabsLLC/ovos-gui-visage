@@ -58,7 +58,8 @@
   .name small { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-left: 8px; }
   .behaviour { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
   .behaviour b { color: var(--fg); font-weight: 500; }
-  .grid { display: grid; grid-template-columns: auto repeat(4, minmax(0, 1fr)); gap: 10px; align-items: center; }
+  .grid-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: auto repeat(var(--mouths), minmax(96px, 1fr)); gap: 10px; align-items: center; min-width: max-content; }
   .grid .corner { }
   .grid .head { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: center; }
   .grid .row { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; }
@@ -80,7 +81,7 @@
 <main>
   <header>
     <h1>Visage Face Palettes</h1>
-    <p class="lede">Four eye styles and four mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair, then step through the attention states. Colour comes later; every style here uses the visage and Mark 1 tokens.</p>
+    <p class="lede">Nine eye styles and eight mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair, then step through the attention states. Colour comes later; every style here uses the visage and Mark 1 tokens.</p>
   </header>
 
   <section class="stage">
@@ -98,8 +99,8 @@
 
   <section>
     <h2>Every pairing</h2>
-    <p class="lede" style="margin-top:6px">All sixteen faces in the chosen state. Tap one to bring it to the stage.</p>
-    <div class="grid" id="grid" style="margin-top:16px"></div>
+    <p class="lede" style="margin-top:6px">Every face in the chosen state, eyes down the side and mouths across. Scroll sideways on a phone; tap one to bring it to the stage.</p>
+    <div class="grid-scroll" style="margin-top:16px"><div class="grid" id="grid"></div></div>
   </section>
 
   <section class="notes">
@@ -300,6 +301,106 @@
         ctx.globalAlpha = 1;
       },
     },
+
+    aperture: {
+      note: 'A camera lens with iris blades, the binocular-robot family. Listening opens the iris wide; thinking contracts it and lets the pupil dart; a blink closes the blades.',
+      draw(ctx, L, f) { for (const e of L.eyes) apertureEye(ctx, e, f, '#dfe7ef'); },
+    },
+    mono: {
+      note: 'One aperture lens at the midpoint, the single-eye computer. The same iris behaviour as aperture, bigger, with the accent in the glass.',
+      draw(ctx, L, f) {
+        const [a, b] = L.eyes;
+        apertureEye(ctx, { x: (a.x + b.x) / 2, y: a.y, r: a.r * 1.5 }, f, colours.accent);
+      },
+    },
+    oval: {
+      note: 'Elongated tilted ovals that glow. Expression is tilt and height: listening lifts them, thinking narrows them and tilts them inward, a blink flattens them.',
+      draw(ctx, L, f) {
+        L.eyes.forEach((e, i) => {
+          const side = i === 0 ? 1 : -1;
+          const think = f.mode === 'thinking', listen = f.mode === 'listening';
+          const rx = e.r * 0.42, ry = e.r * 0.72 * (listen ? 1.15 : 1) * Math.max(f.eyeOpen, 0.05) * (think ? 1.2 : 1);
+          ctx.save();
+          ctx.translate(e.x, e.y - (listen ? e.r * 0.12 : 0));
+          ctx.rotate(side * (think ? 0.5 : 0.12));
+          ctx.shadowColor = colours.accent; ctx.shadowBlur = e.r * 0.5;
+          ctx.fillStyle = colours.accent;
+          ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, TAU); ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#d9efff';
+          ctx.beginPath(); ctx.ellipse(0, 0, rx * 0.55, ry * 0.7, 0, 0, TAU); ctx.fill();
+          ctx.restore();
+        });
+      },
+    },
+    pixel: {
+      note: '8 x 8 LED matrix eyes. A blink rolls the rows off from the top and bottom, thinking shifts the pupil up and sideways under a squint, listening brightens the glow.',
+      draw(ctx, L, f) {
+        const think = f.mode === 'thinking', listen = f.mode === 'listening';
+        const open = Math.max(f.eyeOpen, 0.02) * (think ? 1.3 : 1);
+        const px = think ? 1 : 0, py = think ? -1 : 0;
+        for (const e of L.eyes) {
+          const pitch = e.r * 2 / 9, led = pitch * 0.36;
+          ctx.fillStyle = '#0a0c10'; rr(ctx, e.x - pitch * 4.5, e.y - pitch * 4.5, pitch * 9, pitch * 9, pitch); ctx.fill();
+          for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+              const dx = col - 3.5, dy = row - 3.5;
+              const inDisc = dx * dx + dy * dy <= 3.9 * 3.9;
+              const pupil = (col === 3 + px || col === 4 + px) && (row === 3 + py || row === 4 + py);
+              const lit = inDisc && !pupil && Math.abs(dy) < 4 * open;
+              if (lit) { ctx.fillStyle = colours.matrix; ctx.shadowColor = colours.matrix; ctx.shadowBlur = led * (listen ? 3.5 : 1.8); }
+              else { ctx.fillStyle = colours.unlit; ctx.shadowBlur = 0; }
+              ctx.beginPath(); ctx.arc(e.x + (col - 3.5) * pitch, e.y + (row - 3.5) * pitch, led, 0, TAU); ctx.fill();
+            }
+          }
+          ctx.shadowBlur = 0;
+        }
+      },
+    },
+    dot: {
+      note: 'Two small filled dots. Listening grows them, thinking drifts them up and together, a blink turns them into dashes.',
+      draw(ctx, L, f) {
+        L.eyes.forEach((e, i) => {
+          const side = i === 0 ? 1 : -1;
+          const think = f.mode === 'thinking', listen = f.mode === 'listening';
+          const r = e.r * 0.24 * (listen ? 1.35 : 1);
+          const x = e.x + (think ? side * e.r * 0.14 : 0), y = e.y - (think ? e.r * 0.16 : 0);
+          ctx.fillStyle = colours.eye;
+          ctx.beginPath(); ctx.ellipse(x, y, r, r * Math.max(f.eyeOpen, 0.12), 0, 0, TAU); ctx.fill();
+        });
+      },
+    },
+  };
+
+  const apertureEye = (ctx, e, f, glass) => {
+    const think = f.mode === 'thinking', listen = f.mode === 'listening';
+    const open = Math.max(0.03, f.eyeOpen) * (listen ? 1.2 : 1) * (think ? 0.55 : 1);
+    const R = e.r * 0.78, hex = R * 0.92 * Math.min(open, 1);
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.fillStyle = '#1b1e24'; ctx.beginPath(); ctx.arc(0, 0, e.r * 0.92, 0, TAU); ctx.fill();
+    ctx.fillStyle = glass; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill();
+    const BLADES = 8, spin = f.t * 0.3 + open * 1.2;
+    ctx.fillStyle = '#262a31';
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, TAU);
+    for (let k = 0; k < BLADES; k++) {
+      const a = spin + k * TAU / BLADES;
+      if (k === 0) ctx.moveTo(hex * Math.cos(a), hex * Math.sin(a)); else ctx.lineTo(hex * Math.cos(a), hex * Math.sin(a));
+    }
+    ctx.closePath();
+    ctx.fill('evenodd');
+    ctx.strokeStyle = '#0b0c0f'; ctx.lineWidth = e.r * 0.035;
+    for (let k = 0; k < BLADES; k++) {
+      const a = spin + k * TAU / BLADES;
+      ctx.beginPath(); ctx.moveTo(hex * Math.cos(a), hex * Math.sin(a)); ctx.lineTo(R * Math.cos(a + 0.3), R * Math.sin(a + 0.3)); ctx.stroke();
+    }
+    const dart = think ? Math.sin(f.t * 3) * hex * 0.25 : 0;
+    ctx.fillStyle = '#0b0c0f'; ctx.beginPath(); ctx.arc(dart, 0, hex * 0.62, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = e.r * 0.03;
+    ctx.beginPath(); ctx.arc(dart, 0, hex * 0.5, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(-hex * 0.28 + dart, -hex * 0.3, hex * 0.12, 0, TAU); ctx.fill();
+    ctx.restore();
   };
 
   const outlineBars = (ctx, m, t, s) => {
@@ -402,7 +503,84 @@
         ctx.stroke();
       },
     },
+
+    bars: {
+      note: 'A vertical equaliser: the viseme sets the heights, so the whole speech is spectrum-shaped. Listening is the breathing accent bars; thinking is one bar scanning across.',
+      draw(ctx, m, f) {
+        const N = 9, span = m.w * 0.58, pitch = span / (N - 1), bw = pitch * 0.42;
+        const listen = f.mode === 'listening', think = f.mode === 'thinking';
+        const o = opening(f), wr = widthRatio(f);
+        ctx.fillStyle = listen ? colours.accent : colours.mouth;
+        for (let i = 0; i < N; i++) {
+          const u = (i - (N - 1) / 2) / ((N - 1) / 2);
+          const inSpan = Math.abs(u) <= wr + 0.01;
+          let hh = m.h * 0.07;
+          if (listen) hh = m.h * 0.16 * (1 + 0.6 * -Math.cos(((f.t + (i % 3 === 0 ? 0.6 : i % 2 === 0 ? 0.3 : 0)) / 0.9) * TAU));
+          else if (think) hh = Math.round(((f.t * 6) % (2 * (N - 1)))) === (i) || Math.round(((f.t * 6) % (2 * (N - 1)))) === 2 * (N - 1) - i ? m.h * 0.3 : m.h * 0.07;
+          else if (f.mode === 'speaking' && inSpan) hh = m.h * 0.07 + m.h * 0.65 * o * (1 - u * u) * (0.85 + 0.15 * Math.sin(f.t * 22 + i * 1.7));
+          const smile = m.h * 0.14 * (f.mode === 'speaking' ? specs[f.viseme].smile / 7 : 1) * (u * u - 0.5);
+          rr(ctx, m.cx + u * span / 2 - bw / 2, m.cy - smile - hh / 2, bw, hh, bw / 2);
+          ctx.fill();
+        }
+      },
+    },
+    grille: {
+      note: 'Horizontal speaker slats. Speaking lights them outward from the centre by the viseme opening; listening breathes them in the accent; thinking scans one slat up and down.',
+      draw(ctx, m, f) {
+        const N = 7, slat = m.h * 0.075, gap = slat * 0.7;
+        const listen = f.mode === 'listening', think = f.mode === 'thinking';
+        const o = opening(f), wr = widthRatio(f);
+        const span = m.w * 0.5 * (f.mode === 'speaking' ? 0.6 + 0.4 * wr : 1);
+        const scan = Math.floor(f.t * 7) % (2 * (N - 1));
+        const scanRow = scan < N ? scan : 2 * (N - 1) - scan;
+        for (let j = 0; j < N; j++) {
+          const d = Math.abs(j - (N - 1) / 2);
+          let lit = 0.18;
+          if (listen) lit = 0.35 + 0.45 * (0.5 + 0.5 * Math.sin(f.t * 4 - d));
+          else if (think) lit = j === scanRow ? 1 : 0.18;
+          else if (f.mode === 'speaking') lit = d <= o * (N - 1) / 2 + 0.01 ? 1 : 0.18;
+          ctx.globalAlpha = lit;
+          ctx.fillStyle = listen ? colours.accent : colours.mouth;
+          rr(ctx, m.cx - span / 2, m.cy + (j - (N - 1) / 2) * (slat + gap) - slat / 2, span, slat, slat / 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      },
+    },
+    orb: {
+      note: 'A ring that swells with the viseme and throws concentric rings while speaking. Listening is a breathing accent ring; thinking a rotating arc. The voice-assistant cue rather than a mouth.',
+      draw(ctx, m, f) {
+        const r0 = Math.min(m.w, m.h) * 0.3;
+        const listen = f.mode === 'listening', think = f.mode === 'thinking';
+        const o = opening(f);
+        ctx.lineWidth = m.w * 0.04; ctx.lineCap = 'round';
+        if (think) {
+          ctx.strokeStyle = colours.mouth;
+          ctx.beginPath(); ctx.arc(m.cx, m.cy, r0, f.t * 3, f.t * 3 + TAU * 0.7); ctx.stroke();
+          return;
+        }
+        const r = listen ? r0 * (1 + 0.12 * Math.sin(f.t * 3)) : r0 * (1 + 0.35 * o);
+        ctx.strokeStyle = listen ? colours.accent : colours.mouth;
+        ctx.globalAlpha = f.mode === 'rest' ? 0.7 : 1;
+        ctx.beginPath(); ctx.arc(m.cx, m.cy, r, 0, TAU); ctx.stroke();
+        if (f.mode === 'speaking' && o > 0.1) {
+          for (let k = 0; k < 3; k++) {
+            const phase = ((f.t * 1.4 + k / 3) % 1);
+            ctx.globalAlpha = (1 - phase) * 0.6 * o;
+            ctx.beginPath(); ctx.arc(m.cx, m.cy, r + phase * r0 * 1.6, 0, TAU); ctx.stroke();
+          }
+        }
+        ctx.globalAlpha = 1;
+      },
+    },
+    none: {
+      note: 'No mouth. Speaking shows as a brightness pulse on the eyes, listening and thinking are the eyes alone.',
+      draw() {},
+    },
   };
+
+  const opening = (f) => f.mode === 'speaking' ? (specs[f.viseme].up + specs[f.viseme].down) / 60 : 0;
+  const widthRatio = (f) => f.mode === 'speaking' ? specs[f.viseme].w / 56 : 1;
 
   const modes = ['rest', 'listening', 'thinking', 'speaking'];
   const script = [4, 0, 3, 4, 2, 5, 0, 1, 4, 6, 3, 0, 5, 4];
@@ -441,7 +619,9 @@
       ctx.strokeStyle = '#2a2d34'; ctx.lineWidth = 4;
       ctx.beginPath(); ctx.arc(L.disc.x, L.disc.y, L.disc.r, 0, TAU); ctx.stroke();
     }
+    ctx.globalAlpha = mouth === 'none' && f.mode === 'speaking' ? 0.6 + 0.4 * opening(f) : 1;
     eyeStyles[eyes].draw(ctx, L, f);
+    ctx.globalAlpha = 1;
     mouthStyles[mouth].draw(ctx, mouthSlot(L, size), f);
   };
 
@@ -453,6 +633,11 @@
     { eyes: 'block', mouth: 'solid', name: 'robot', blurb: 'eyes and mouth both squash' },
     { eyes: 'ring', mouth: 'waveform', name: 'retro', blurb: 'LED eyes, smooth voice' },
     { eyes: 'lens', mouth: 'matrix', name: 'hybrid', blurb: 'concept eyes, matrix mouth' },
+    { eyes: 'aperture', mouth: 'grille', name: 'camera', blurb: 'binocular lenses, speaker slats' },
+    { eyes: 'oval', mouth: 'none', name: 'pod', blurb: 'glowing ovals, no mouth' },
+    { eyes: 'pixel', mouth: 'matrix', name: 'led', blurb: 'an all-LED face' },
+    { eyes: 'mono', mouth: 'orb', name: 'orbit', blurb: 'one lens, one ring' },
+    { eyes: 'dot', mouth: 'bars', name: 'buddy', blurb: 'dots over an equaliser' },
   ];
   const presetFor = (e, m) => presets.find((p) => p.eyes === e && p.mouth === m);
 
@@ -472,6 +657,7 @@
   document.getElementById('compact').addEventListener('change', (ev) => { state.compact = ev.target.checked; sync(); });
 
   const grid = document.getElementById('grid');
+  grid.style.setProperty('--mouths', String(Object.keys(mouthStyles).length));
   const cells = [];
   grid.appendChild(Object.assign(document.createElement('div'), { className: 'corner' }));
   for (const m of Object.keys(mouthStyles)) grid.appendChild(Object.assign(document.createElement('div'), { className: 'head', textContent: m }));

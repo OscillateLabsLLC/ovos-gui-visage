@@ -2,8 +2,8 @@
 
 A proposal for backlog item 5 (face customisation). Today a `FaceTheme` bundles its eyes painter,
 its mouth painter and its geometry, so a new face is a whole theme. This splits the face into two
-palettes, four eye styles and four mouth styles, any eye with any mouth, so sixteen faces come out
-of eight painters. Colour is a later layer: every style reads the same colour tokens, so a palette
+palettes, nine eye styles and eight mouth styles, any eye with any mouth, so seventy-two faces
+come out of seventeen painters. Colour is a later layer: every style reads the same colour tokens, so a palette
 of colours multiplies the set again without new painters.
 
 `docs/face-palettes.html` is an animated preview of every combination in all four attention
@@ -40,6 +40,11 @@ badge. That is the test for admitting a style, and it is what the preview page s
 | **ring** (Mark 1 today) | 12 LEDs on a dark well | all lit | the firmware squint: top and bottom pairs off | pixel pairs off from the top and bottom inward |
 | **block** | solid rounded square, the Cozmo and Vector family | taller and brighter | shorter, the inner top corner cut away so the eyes slant in | squash to a slit |
 | **visor** | one bar spanning both eye slots, bright at the centre | a scanner highlight sweeps end to end | the bar contracts to its middle and pulses | thins to a line |
+| **aperture** | a camera lens: glass, iris blades, dark pupil with a highlight | the iris opens wide | the iris contracts and the pupil darts | the blades close |
+| **mono** | one aperture lens at the midpoint, accent in the glass | as aperture | as aperture | as aperture |
+| **oval** | elongated glowing ovals, slightly tilted | lifted and taller | narrowed and tilted inward | flattened |
+| **pixel** | 8 × 8 LED matrix eyes with a dark pupil | brighter glow | the pupil shifts up and sideways under a squint | rows off from the top and bottom inward |
+| **dot** | two small filled dots | the dots grow | the dots drift up and together | the dots become dashes |
 
 The eye slots are symmetric, so `block` mirrors its slant and `visor` reads both slots as its
 endpoints. `ring` without the plate frame draws its well on black with the LED glow, which is the
@@ -53,6 +58,10 @@ look of a Mark 1 face without the faceplate.
 | **solid** | the same viseme outline, filled | a short filled smile | a dot that breathes | a short line tilted a few degrees |
 | **matrix** (Mark 1 today) | the firmware viseme bitmaps on 32 × 8 LEDs | dark grid | the firmware waveform loop | the dot bouncing end to end |
 | **waveform** | one stroke on a shallow smile whose amplitude and span follow the viseme; the smile flattens as the viseme opens | the smile line, still | a low accent ripple travelling along the line | three dots pulsing in turn |
+| **bars** | a vertical equaliser: the viseme opening sets the heights and its width how many bars rise | stubs along a shallow smile | the breathing accent bars | one bar scanning across |
+| **grille** | horizontal speaker slats lit outward from the centre by the viseme opening | dim slats | the slats breathe in the accent | one slat scanning up and down |
+| **orb** | a ring that swells with the viseme and throws concentric rings | a dim ring | a breathing accent ring | a rotating arc |
+| **none** | no mouth; the eyes pulse in brightness with the viseme | nothing | the eyes alone | the eyes alone |
 
 `outline` and `solid` draw `frame.lips`, so they cost nothing new in the widget; `matrix` draws
 by `frame.viseme`; `waveform` maps the viseme's opening to an amplitude, its width to a span and
@@ -77,6 +86,11 @@ The combinations that read as their own character, to ship as named presets besi
 - `ring + waveform`: Mark 1 eyes with a smooth voice line, for people who want the LEDs without
   the matrix.
 - `lens + matrix`: the concept face with a retro mouth.
+- `aperture + grille`: binocular lenses over speaker slats; the camera robot.
+- `oval + none`: glowing ovals and no mouth; the pod robot.
+- `pixel + matrix`: an all-LED face.
+- `mono + orb`: one lens, one ring; the ship's computer.
+- `dot + bars`: dots over an equaliser; the desk buddy.
 
 Everything else is still valid, just less distinct; the preview grid shows all sixteen.
 
@@ -107,6 +121,8 @@ field on the same `"face"` object and no new painting.
    must render pixel-identical (compare against `docs/screenshots/face/`).
 2. `waveform` and `block`, the two that add the most range.
 3. `visor` and `solid`.
+3a. `aperture` (with `mono` as its single-lens parameter), `oval`, `bars`, `orb` and `none`; then
+   `pixel`, `dot` and `grille`, which share most of their drawing with `matrix`, `solid` and `bars`.
 4. Config parsing, presets, `VISAGE_FACE` with `+`.
 5. Runtime switching.
 
