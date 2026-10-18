@@ -62,7 +62,8 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
   separate painters, so a new look is a new theme. The mouth tweens between seven viseme
   outlines timed by `enclosure.mouth.viseme_list`.
 
-`docs/SCOPE.md` records the port's decisions, the platform gating and the phases.
+`docs/SCOPE.md` records the port's decisions, the platform gating and the phases; `docs/BACKLOG.md`
+holds feedback and ideas queued behind them.
 ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
 
 ## Web build and sidecar
