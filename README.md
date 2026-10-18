@@ -103,14 +103,37 @@ same window above everything instead, and `window` is an ordinary window. Config
 `~/.config/ovos-gui-visage/config.json`:
 
 ```json
-{"window": {"mode": "desktop", "corner": "top-right", "height": 400, "margin": 16}}
+{"window": {"mode": "desktop", "corner": "top-right", "height": 400, "margin": 16, "peek": false, "peekSize": 96}}
 ```
 
-`VISAGE_MODE`, `VISAGE_CORNER`, `VISAGE_HEIGHT` and `VISAGE_MARGIN` override the file, so a
-launcher script can pick the mode. Corners are `top-left`, `top-right`, `bottom-left`,
-`bottom-right`; the height is in logical pixels and the width follows the 480 × 800 frame. This
-is a real window with the live sockets and animations, which a WidgetKit widget cannot have:
-widget extensions get no sockets and only a handful of timeline refreshes an hour.
+`VISAGE_MODE`, `VISAGE_CORNER`, `VISAGE_HEIGHT`, `VISAGE_MARGIN`, `VISAGE_PEEK` and
+`VISAGE_PEEK_SIZE` override the file, so a launcher script can pick the mode. Corners are
+`top-left`, `top-right`, `bottom-left`, `bottom-right`; the height is in logical pixels and the
+width follows the 480 × 800 frame. This is a real window with the live sockets and animations,
+which a WidgetKit widget cannot have: widget extensions get no sockets and only a handful of
+timeline refreshes an hour.
+
+### Peek mode
+
+With `"peek": true` (or `VISAGE_PEEK=1`), the widget stays out of the way. At rest it is a round
+badge, `peekSize` pixels across, in its corner: the resting face, still blinking. When OVOS
+listens, thinks or speaks, the window grows to its full size in the same corner and shows the
+page and the face. Three seconds after the face hides, it shrinks back to the badge. In `float`
+mode, a click or tap on the badge opens the window for ten seconds. Peek mode applies to `float`
+and `desktop` only; an ordinary `window` ignores it.
+
+<p align="center">
+  <img src="docs/screenshots/shell/peek-collapsed-badge.png" alt="Peek mode at rest: the resting face in a small round badge" width="96">
+  &nbsp;
+  <img src="docs/screenshots/shell/peek-expanded-speaking.png" alt="Peek mode while OVOS speaks: the full widget with the face over the idle page" width="240">
+</p>
+
+The window also changes over the bus. `visage.window.set` with `peek` (true or false) turns peek
+mode on or off and writes it to the config file; with `expanded` (true or false) it opens or
+closes the window once and does not change the config. A one-off open stays open until the next
+listen, think or speak cycle ends. `visage.window.get` asks for the state, and
+`visage.window.state` answers both and announces every change, with `mode`, `corner`, `peek`,
+`peekSize` and `expanded`.
 
 ## Web build and sidecar
 

@@ -48,4 +48,7 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   a sketch in `docs/face-palettes.html` first; that page is also the device's picker over the bus.
 - The face changes at runtime through `FaceRemote` (`visage.face.*` on the bus) and try-on mode
   (`lib/face/try_on.dart`, long-press); both persist through `saveFaceConfig`.
-- Pages are display-only. Try-on mode is the only gesture surface; no gesture plumbing in pages.
+- Peek mode (`lib/window/peek.dart`): a widget idles as a `FaceBadge` and the window grows while
+  `Attention.shown`; `WindowRemote` drives it with `visage.window.*`, `saveWindowConfig` keeps it.
+- Pages are display-only. Try-on mode and the collapsed peek badge (a tap) are the only gesture
+  surfaces; no gesture plumbing in pages.

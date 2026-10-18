@@ -33,7 +33,9 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
    under a minimal compositor. Nothing is benchmarked; memory and GPU are the open questions.
 7. **Widget and fullscreen modes.** The user pins the browser page beneath the desktop. A WidgetKit
    widget cannot hold a websocket or animate, so the native answer is SCOPE phase 6 (frameless,
-   always-on-top, corner-snapping window) plus a fullscreen kiosk mode.
+   always-on-top, corner-snapping window) plus a fullscreen kiosk mode. Done: the corner widget
+   (SCOPE phase 6) and peek mode, which collapses it to a badge until OVOS has attention. Still
+   open: the fullscreen kiosk mode.
 
 ## Carried over
 

@@ -116,7 +116,10 @@ test/
    window. Windows and X11 should work unchanged but are unverified; Wayland does not let apps
    position their own windows, and the web build has no window to move. Why not WidgetKit:
    a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
-   so it could only show slow-changing information from the main app.
+   so it could only show slow-changing information from the main app. Peek mode (`window.peek`)
+   keeps a widget as a small round badge of the resting face in its corner and grows the window
+   only while OVOS listens, thinks or speaks (`lib/window/peek.dart`), switchable over the bus
+   with `visage.window.set`.
 
 7. **Face themes** (done): `lib/face/themes.dart` maps a configured name to a theme. The Mark 1
    theme (`mark1_theme.dart`) draws the faceplate glass, the eye rings with the firmware's
