@@ -46,4 +46,55 @@ void main() {
     expect(at(Corner.bottomLeft), const Offset(16, 900 - 400 - 16));
     expect(at(Corner.bottomRight), const Offset(1440 - 240 - 16, 900 - 400 - 16));
   });
+
+  test('peek is off by default, set by the file, overridden by the environment', () {
+    final defaults = WindowConfig.from(null, const {});
+    expect(defaults.peek, isFalse);
+    expect(defaults.peekSize, defaultPeekSize);
+    final file = {'mode': 'float', 'peek': true, 'peekSize': 120};
+    expect(WindowConfig.from(file, const {}).peek, isTrue);
+    expect(WindowConfig.from(file, const {}).peekWindowSize, const Size(120, 120));
+    expect(WindowConfig.from(file, const {'VISAGE_PEEK': 'off'}).peek, isFalse);
+    expect(WindowConfig.from(null, const {'VISAGE_PEEK': 'Yes', 'VISAGE_PEEK_SIZE': '64'}).peekSize, 64);
+    for (final on in ['1', 'true', 'yes', 'on']) {
+      expect(WindowConfig.from(null, {'VISAGE_PEEK': on}).peek, isTrue, reason: on);
+    }
+    for (final off in ['0', 'false', 'no', 'off']) {
+      expect(WindowConfig.from(file, {'VISAGE_PEEK': off}).peek, isFalse, reason: off);
+    }
+  });
+
+  test('bad peek values fall back to the defaults', () {
+    final config = WindowConfig.from({'peek': 'maybe', 'peekSize': 0}, const {});
+    expect(config.peek, isFalse);
+    expect(config.peekSize, defaultPeekSize);
+  });
+
+  test('peek applies to the widget modes only', () {
+    expect(const WindowConfig(mode: WindowMode.float, peek: true).peeks, isTrue);
+    expect(const WindowConfig(mode: WindowMode.desktop, peek: true).peeks, isTrue);
+    expect(const WindowConfig(mode: WindowMode.window, peek: true).peeks, isFalse);
+    expect(const WindowConfig(mode: WindowMode.float).peeks, isFalse);
+  });
+
+  test('collapsed and expanded bounds share the corner and its margin', () {
+    const area = Rect.fromLTWH(0, 25, 1440, 875);
+    Rect bounds(Corner corner, {required bool expanded}) =>
+        WindowConfig(corner: corner, peek: true).boundsIn(area, expanded: expanded);
+    expect(bounds(Corner.bottomRight, expanded: false), const Rect.fromLTWH(1440 - 96 - 16, 900 - 96 - 16, 96, 96));
+    expect(bounds(Corner.bottomRight, expanded: true), const Rect.fromLTWH(1440 - 240 - 16, 900 - 400 - 16, 240, 400));
+    expect(bounds(Corner.topLeft, expanded: false), const Rect.fromLTWH(16, 41, 96, 96));
+    expect(bounds(Corner.topRight, expanded: false).topRight, const Offset(1440 - 16, 41));
+    expect(bounds(Corner.bottomLeft, expanded: true).bottomLeft, const Offset(16, 900 - 16));
+  });
+
+  test('copyWith changes peek and keeps the rest', () {
+    const config = WindowConfig(mode: WindowMode.float, corner: Corner.bottomLeft, height: 300, margin: 8, peekSize: 80);
+    final changed = config.copyWith(peek: true);
+    expect(changed.peek, isTrue);
+    expect(
+      [changed.mode, changed.corner, changed.height, changed.margin, changed.peekSize],
+      [WindowMode.float, Corner.bottomLeft, 300, 8, 80],
+    );
+  });
 }
