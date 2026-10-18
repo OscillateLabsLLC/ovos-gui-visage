@@ -119,7 +119,9 @@ test/
    so it could only show slow-changing information from the main app. Peek mode (`window.peek`)
    keeps a widget as a small round badge of the resting face in its corner and grows the window
    only while OVOS listens, thinks or speaks (`lib/window/peek.dart`), switchable over the bus
-   with `visage.window.set`.
+   with `visage.window.set`. On macOS a widget is an accessory app with a menu bar item
+   (`lib/window/status_menu.dart`, `macos/Runner/StatusMenu.swift`) that shows or hides it, toggles
+   peek, switches between `float` and `desktop`, and picks the face and colourway.
 
 7. **Face themes** (done): `lib/face/themes.dart` maps a configured name to a theme. The Mark 1
    theme (`mark1_theme.dart`) draws the faceplate glass, the eye rings with the firmware's

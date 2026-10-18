@@ -53,5 +53,9 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   (`lib/face/try_on.dart`, long-press); both persist through `saveFaceConfig`.
 - Peek mode (`lib/window/peek.dart`): a widget idles as a `FaceBadge` and the window grows while
   `Attention.shown`; `WindowRemote` drives it with `visage.window.*`, `saveWindowConfig` keeps it.
+- The macOS menu bar item: `lib/window/status_menu.dart` builds the items from the window and face
+  state (pure, tested) and acts through `WindowRemote` and `FaceRemote`; `status_menu_host*.dart`
+  and `macos/Runner/StatusMenu.swift` draw it over the `ovos_gui_visage/window` channel. Add a
+  menu choice in Dart; the runner draws whatever list it gets.
 - Pages are display-only. Try-on mode and the collapsed peek badge (a tap) are the only gesture
   surfaces; no gesture plumbing in pages.

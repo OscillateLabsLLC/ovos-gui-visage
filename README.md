@@ -155,7 +155,31 @@ mode on or off and writes it to the config file; with `expanded` (true or false)
 closes the window once and does not change the config. A one-off open stays open until the next
 listen, think or speak cycle ends. `visage.window.get` asks for the state, and
 `visage.window.state` answers both and announces every change, with `mode`, `corner`, `peek`,
-`peekSize` and `expanded`.
+`peekSize`, `expanded` and `visible`. `visible` (true or false) hides or shows the window for this
+run only. `mode` (`float` or `desktop`) moves a widget above or beneath other windows and writes
+it to the config file. An ordinary `window` cannot become a widget while it runs, and a widget
+cannot become an ordinary window.
+
+### Menu bar
+
+On macOS, a widget is a menu bar app with no Dock icon. A face icon in the menu bar opens a menu
+that does what the bus does, so the face stays under control without a bus client:
+
+- **Show face** / **Hide face**: removes the window from the screen and puts it back. A hidden widget
+  stays running in the menu bar.
+- **Peek mode**: turns peek on or off and writes it to the config file.
+- **Float above windows** / **Sit on the desktop**: changes the mode at once and writes it to the
+  config file.
+- **Face** and **Colours**: the presets and the colourways, with the current ones checked. A
+  colourway keeps the eyes and mouth you have.
+- **Quit ovos-gui-visage**.
+
+Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. The menu
+follows every change, from the bus, try-on mode or the menu itself.
+
+<p align="center">
+  <img src="docs/screenshots/shell/menu-bar.png" alt="The menu bar with the face icon at the left of the status items" width="600">
+</p>
 
 ## Web build and sidecar
 
