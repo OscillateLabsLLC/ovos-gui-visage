@@ -140,13 +140,11 @@ class _GlowState extends State<Glow> with SingleTickerProviderStateMixin {
         final t = Curves.easeInOut.transform(_controller.value);
         final blur = widget.loop ? 34 + 30 * t : 34.0;
         final spread = widget.loop ? 2 + 12 * t : 2.0;
-        return Opacity(
-          opacity: widget.loop ? 1 : 0.45 + 0.55 * t,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: widget.colour, blurRadius: blur, spreadRadius: spread)],
-            ),
+        final colour = widget.loop ? widget.colour : widget.colour.withValues(alpha: widget.colour.a * (0.45 + 0.55 * t));
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: colour, blurRadius: blur, spreadRadius: spread)],
           ),
         );
       },

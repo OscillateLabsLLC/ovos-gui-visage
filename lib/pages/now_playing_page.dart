@@ -175,12 +175,12 @@ class _Stage extends StatelessWidget {
               top: -_washInset,
               right: -_washInset,
               bottom: -_washInset,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 600),
-                opacity: playing ? 0.42 : (paused ? 0.2 : 0),
-                child: ClipOval(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
+              child: ClipOval(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 600),
+                    opacity: playing ? 0.42 : (paused ? 0.2 : 0),
                     child: SizedBox.expand(child: imageFor(track.cover, fit: BoxFit.cover)),
                   ),
                 ),
