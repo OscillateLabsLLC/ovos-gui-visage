@@ -23,10 +23,19 @@ const _wideEye = 1.18;
 
 /// Drives a [Face] from outside: the attention overlay and the SYSTEM_Face page call these.
 class FaceController extends ChangeNotifier {
-  FaceController({this.theme = const VisageTheme()});
+  // ignore: prefer_initializing_formals, the public name is `theme` and the field backs its setter
+  FaceController({FaceTheme theme = const VisageTheme()}) : _theme = theme;
 
-  /// The look every [Face] on this controller paints with.
-  final FaceTheme theme;
+  FaceTheme _theme;
+
+  /// The look every [Face] on this controller paints with; settable while running, the faces repaint.
+  FaceTheme get theme => _theme;
+
+  set theme(FaceTheme value) {
+    if (identical(value, _theme)) return;
+    _theme = value;
+    notifyListeners();
+  }
 
   /// Monotonic clock for viseme timing, shared by the widget's ticker and whoever anchors a viseme list.
   final Stopwatch clock = Stopwatch()..start();

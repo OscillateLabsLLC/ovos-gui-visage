@@ -1,9 +1,10 @@
-/// SYSTEM_Face (SPEC 8.2): the concept face at its true place on the frame; eyes closed while `sleeping` is true.
+/// SYSTEM_Face (SPEC 8.2): the configured face at its true place on the frame; eyes closed while `sleeping` is true.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../face/face.dart';
+import '../face/face_scope.dart';
 import '../face/face_theme.dart';
 import '../json.dart';
 import 'page.dart';
@@ -26,6 +27,13 @@ class _SystemFacePageState extends State<SystemFacePage> {
   void initState() {
     super.initState();
     controller.setSleeping(truthy(widget.data['sleeping']));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final shell = FaceScope.maybeOf(context);
+    if (shell != null) controller.theme = shell.theme;
   }
 
   @override

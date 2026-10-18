@@ -1,12 +1,15 @@
 // App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the
-// face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3).
+// face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
+// while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart).
 import 'package:flutter/material.dart';
 
 import 'app_config.dart';
 import 'attention.dart';
 import 'face/face.dart';
+import 'face/face_remote.dart';
+import 'face/face_scope.dart';
 import 'face/face_theme.dart';
-import 'face/themes.dart';
+import 'face/try_on.dart';
 import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
@@ -43,16 +46,16 @@ class VisageApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Material(
         color: config.window.isWidget ? Colors.transparent : VisageColors.bg,
-        child: Center(child: Screen(theme: faceThemeNamed(config.face))),
+        child: Center(child: Screen(config: config)),
       ),
     );
   }
 }
 
 class Screen extends StatefulWidget {
-  const Screen({super.key, required this.theme});
+  const Screen({super.key, this.config = const AppConfig()});
 
-  final FaceTheme theme;
+  final AppConfig config;
 
   @override
   State<Screen> createState() => _ScreenState();
@@ -60,11 +63,12 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
   final state = GuiState();
-  late final face = FaceController(theme: widget.theme);
+  late final face = FaceController(theme: widget.config.face.theme());
   late final Attention attention = Attention(face);
   final sockets = endpoints();
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
+  late final FaceRemote remote = FaceRemote(bus, face, initial: widget.config.face, persist: saveFaceConfig, log: _log);
   late final GuiClient gui = GuiClient(
     bus: bus,
     guiUrlOverride: sockets.gui,
@@ -82,13 +86,16 @@ class _ScreenState extends State<Screen> {
   void initState() {
     super.initState();
     attention.addListener(_refresh);
+    face.addListener(_refresh);
     widgets;
+    remote;
     bus.start();
     gui.start();
   }
 
   @override
   void dispose() {
+    face.removeListener(_refresh);
     attention.dispose();
     gui.stop();
     bus.stop();
@@ -129,18 +136,22 @@ class _ScreenState extends State<Screen> {
         height: frameHeight,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
-          child: Stack(
-            children: [
-              const Positioned.fill(child: ColoredBox(color: _pageBg)),
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
-                  child: PageHost(state: state),
+          child: FaceScope(
+            controller: face,
+            child: Stack(
+              children: [
+                const Positioned.fill(child: ColoredBox(color: _pageBg)),
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
+                    child: PageHost(state: state),
+                  ),
                 ),
-              ),
-              _AttentionOverlay(attention: attention, face: face),
-              if (!guiConnected) const _OfflinePill(),
-            ],
+                _AttentionOverlay(attention: attention, face: face),
+                if (!guiConnected) const _OfflinePill(),
+                FaceTryOn(controller: face, remote: remote),
+              ],
+            ),
           ),
         ),
       ),

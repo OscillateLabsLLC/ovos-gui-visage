@@ -7,6 +7,7 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../app_config.dart';
+import '../face/face_spec.dart';
 import '../faults.dart';
 import 'window_config.dart';
 
@@ -29,6 +30,17 @@ Future<AppConfig> loadAppConfig() async {
     }
   }
   return AppConfig.from(json, Platform.environment);
+}
+
+/// Writes the face into the config file's `face` object, keeping everything else in the file, so a face chosen on
+/// the device or over the bus is the face at the next start.
+Future<void> saveFaceConfig(FaceSpec spec) async {
+  final file = configFile();
+  var json = <String, dynamic>{};
+  if (file.existsSync()) json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+  json['face'] = spec.toJson();
+  await file.create(recursive: true);
+  await file.writeAsString('${const JsonEncoder.withIndent('  ').convert(json)}\n');
 }
 
 Future<void> applyWindowConfig(WindowConfig config) async {
