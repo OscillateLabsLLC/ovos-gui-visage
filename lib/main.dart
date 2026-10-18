@@ -22,6 +22,9 @@ import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/widget_manager.dart';
 import 'window/peek.dart';
+import 'window/status_menu.dart';
+import 'window/status_menu_binding.dart';
+import 'window/status_menu_host.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
 
@@ -84,6 +87,14 @@ class _ScreenState extends State<Screen> {
     effects: _effects,
     log: _log,
   );
+  late final StatusMenuHost menuHost = StatusMenuHost(onSelected: (id) => menu.dispatch(id));
+  late final StatusMenuController menu = bindStatusMenu(
+    face: remote,
+    faceController: face,
+    window: window,
+    show: menuHost.show,
+    quit: quitApp,
+  );
   late bool windowExpanded;
   late final GuiClient gui = GuiClient(
     bus: bus,
@@ -108,12 +119,14 @@ class _ScreenState extends State<Screen> {
     widgets;
     remote;
     window;
+    menu;
     bus.start();
     gui.start();
   }
 
   @override
   void dispose() {
+    menu.dispose();
     face.removeListener(_refresh);
     attention.dispose();
     peek.dispose();
