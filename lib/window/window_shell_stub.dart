@@ -7,4 +7,9 @@ Future<AppConfig> loadAppConfig() async => const AppConfig();
 /// The web build has no config file; a face chosen there lasts the page's lifetime, by design.
 Future<void> saveFaceConfig(FaceSpec spec) async {}
 
+/// Nor a window config to write back, nor a window to place or resize.
+Future<void> saveWindowConfig(WindowConfig config) async {}
+
 Future<void> applyWindowConfig(WindowConfig config) async {}
+
+Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {}

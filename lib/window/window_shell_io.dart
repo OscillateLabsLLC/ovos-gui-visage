@@ -34,22 +34,36 @@ Future<AppConfig> loadAppConfig() async {
 
 /// Writes the face into the config file's `face` object, keeping everything else in the file, so a face chosen on
 /// the device or over the bus is the face at the next start.
-Future<void> saveFaceConfig(FaceSpec spec) async {
+Future<void> saveFaceConfig(FaceSpec spec) => _editConfigFile((json) => json['face'] = spec.toJson());
+
+/// Writes `peek` into the config file's `window` object, keeping every other key; the rest of the window config may
+/// come from the environment and is not written back.
+Future<void> saveWindowConfig(WindowConfig config) => _editConfigFile((json) {
+  final window = json['window'] is Map ? Map<String, dynamic>.from(json['window'] as Map) : <String, dynamic>{};
+  json['window'] = window..['peek'] = config.peek;
+});
+
+Future<void> _editConfigFile(void Function(Map<String, dynamic> json) edit) async {
   final file = configFile();
   var json = <String, dynamic>{};
   if (file.existsSync()) json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-  json['face'] = spec.toJson();
+  edit(json);
   await file.create(recursive: true);
   await file.writeAsString('${const JsonEncoder.withIndent('  ').convert(json)}\n');
 }
 
+Future<Rect> _workArea() async {
+  final display = await screenRetriever.getPrimaryDisplay();
+  return (display.visiblePosition ?? Offset.zero) & (display.visibleSize ?? display.size);
+}
+
+/// Starts a peeking widget collapsed to its badge; [setWidgetExpanded] grows and shrinks it in its corner.
 Future<void> applyWindowConfig(WindowConfig config) async {
   if (!config.isWidget) return;
   await windowManager.ensureInitialized();
-  final display = await screenRetriever.getPrimaryDisplay();
-  final workArea = (display.visiblePosition ?? Offset.zero) & (display.visibleSize ?? display.size);
+  final bounds = config.boundsIn(await _workArea(), expanded: !config.peeks);
   final options = WindowOptions(
-    size: config.size,
+    size: bounds.size,
     backgroundColor: Colors.transparent,
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
@@ -61,9 +75,20 @@ Future<void> applyWindowConfig(WindowConfig config) async {
     await windowManager.setResizable(false);
     await windowManager.setVisibleOnAllWorkspaces(true);
     if (config.mode == WindowMode.desktop) await _setDesktopLevel();
-    await windowManager.setPosition(config.placeIn(workArea));
+    await windowManager.setPosition(bounds.topLeft);
     await windowManager.show();
   });
+}
+
+/// Animates the widget window between its badge and its full size, anchored at its corner. A failure leaves the
+/// window as it was and is reported.
+Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {
+  if (!config.isWidget) return;
+  try {
+    await windowManager.setBounds(config.boundsIn(await _workArea(), expanded: expanded), animate: true);
+  } on Object catch (err, stack) {
+    reportFault('resizing the widget window (expanded: $expanded)', err, stack);
+  }
 }
 
 const _native = MethodChannel('ovos_gui_visage/window');
