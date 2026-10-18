@@ -23,6 +23,11 @@ const _wideEye = 1.18;
 
 /// Drives a [Face] from outside: the attention overlay and the SYSTEM_Face page call these.
 class FaceController extends ChangeNotifier {
+  FaceController({this.theme = const VisageTheme()});
+
+  /// The look every [Face] on this controller paints with.
+  final FaceTheme theme;
+
   /// Monotonic clock for viseme timing, shared by the widget's ticker and whoever anchors a viseme list.
   final Stopwatch clock = Stopwatch()..start();
   FaceMode _mode = FaceMode.rest;
@@ -82,10 +87,12 @@ class FaceController extends ChangeNotifier {
 }
 
 class Face extends StatefulWidget {
-  const Face({super.key, required this.controller, this.theme = const VisageTheme()});
+  const Face({super.key, required this.controller, this.compact = false});
 
   final FaceController controller;
-  final FaceTheme theme;
+  final bool compact;
+
+  FaceTheme get theme => controller.theme;
 
   @override
   State<Face> createState() => _FaceState();
@@ -94,6 +101,7 @@ class Face extends StatefulWidget {
 class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
   late final Ticker _ticker;
   late List<Offset> _lips = widget.theme.mouthShapes[restCode]!;
+  int _viseme = restCode;
   double _eyeOpen = 1;
   double _eyeScale = 1;
   Duration _now = Duration.zero;
@@ -134,7 +142,8 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
     final kEye = _ease(dt, _eyeEaseMs);
     setState(() {
       final shapes = widget.theme.mouthShapes;
-      _lips = lerpPoints(_lips, shapes[c.targetCode(c.clock.elapsed)] ?? shapes[restCode]!, k);
+      _viseme = c.targetCode(c.clock.elapsed);
+      _lips = lerpPoints(_lips, shapes[_viseme] ?? shapes[restCode]!, k);
       _eyeOpen += (c.targetEyeOpen - _eyeOpen) * kEye;
       _eyeScale += (c.targetEyeScale - _eyeScale) * kEye;
     });
@@ -147,7 +156,9 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
       eyeOpen: _eyeOpen,
       eyeScale: _eyeScale,
       lips: _lips,
+      viseme: _viseme,
       elapsed: _now.inMicroseconds / 1e6,
+      compact: widget.compact,
     );
     return CustomPaint(size: const Size(frameWidth, frameHeight), painter: _FacePainter(widget.theme, frame));
   }

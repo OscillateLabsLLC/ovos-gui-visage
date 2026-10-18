@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../app_config.dart';
 import '../faults.dart';
 import 'window_config.dart';
 
@@ -15,20 +16,19 @@ File configFile() {
   return File('$base/ovos-gui-visage/config.json');
 }
 
-/// The `window` object of the config file, with the environment on top; a file that will not parse is reported
-/// and treated as absent, so a typo never leaves the display without a window.
-Future<WindowConfig> loadWindowConfig() async {
+/// The config file with the environment on top; a file that will not parse is reported and treated as absent, so
+/// a typo never leaves the display without a window.
+Future<AppConfig> loadAppConfig() async {
   final file = configFile();
-  Map<String, dynamic>? window;
+  Map<String, dynamic>? json;
   if (file.existsSync()) {
     try {
-      final json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-      window = json['window'] as Map<String, dynamic>?;
+      json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
     } on Object catch (err, stack) {
       reportFault('reading ${file.path}', err, stack);
     }
   }
-  return WindowConfig.from(window, Platform.environment);
+  return AppConfig.from(json, Platform.environment);
 }
 
 Future<void> applyWindowConfig(WindowConfig config) async {

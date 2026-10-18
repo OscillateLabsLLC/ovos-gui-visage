@@ -59,8 +59,11 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 - **Pages.** One widget per page, routed by `namespace/page` (system templates by page name),
   with pure view models under `flutter test`. Circles, rings and plain text on black; no cards.
 - **Face.** `lib/face/` draws the face through a `FaceTheme`: the eyes and the mouth are
-  separate painters, so a new look is a new theme. The mouth tweens between seven viseme
-  outlines timed by `enclosure.mouth.viseme_list`.
+  separate painters, so a new look is a new theme. Two ship: `visage`, the Kickstarter concept
+  face whose mouth tweens between seven viseme outlines timed by `enclosure.mouth.viseme_list`,
+  and `mark1`, the Mycroft Mark 1 faceplate with its two 12-pixel eye rings and 32 × 8 LED
+  mouth, drawn from the firmware's own bitmaps and timings. Pick one with `"face": "mark1"` in
+  the config file or `VISAGE_FACE=mark1`.
 
 `docs/SCOPE.md` records the port's decisions, the platform gating and the phases; `docs/BACKLOG.md`
 holds feedback and ideas queued behind them.

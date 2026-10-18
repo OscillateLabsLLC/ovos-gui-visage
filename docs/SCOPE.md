@@ -15,7 +15,7 @@ visual reference; this file records what changes in the port and why.
 | Remote use | The web build, served from a sidecar container on the OVOS host, instead of a phone app. The sidecar proxies the two websockets, so its port is the only one exposed and the place to put authentication and TLS; the bus itself stays off the LAN. |
 | Middle layer | None on desktop. The Dart app is the GUI client, the state mirror and the WidgetManager. The web build needs the sidecar (`sidecar/`) to serve the cache, since ovos-gui 1.5.3a1 has no file server. |
 | Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required; Windows waits for a maintained WebView2 package. |
-| Face | Themeable: eyes and mouth are swappable painters behind `FaceTheme`. First pass ships only the current visage look; no new themes. |
+| Face | Themeable: eyes and mouth are swappable painters behind `FaceTheme`. Two themes ship: `visage` (the concept face) and `mark1` (the Mycroft Mark 1 faceplate, from the firmware bitmaps via ovos-virtual-mark1), chosen by `face` in the config file or `VISAGE_FACE`. |
 | Input | Display-only, as before. Touch is additive later; pages are plain widgets with no gesture plumbing. |
 | macOS sandbox | Off. The app opens local sockets and reads the GUI cache; it is a kiosk display, not an App Store app. Signed with the Oscillate Labs LLC team. |
 | Linux, Windows | Built and tested in CI only until a desktop is available; the workflow pattern comes from neon-node-flutter-app. |
@@ -117,6 +117,14 @@ test/
    position their own windows, and the web build has no window to move. Why not WidgetKit:
    a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
    so it could only show slow-changing information from the main app.
+
+7. **Face themes** (done): `lib/face/themes.dart` maps a configured name to a theme. The Mark 1
+   theme (`mark1_theme.dart`) draws the faceplate glass, the eye rings with the firmware's
+   narrow and blink pixel order, and the mouth matrix from `mark1_images.g.dart`, which
+   `tool/port_mark1_images.py` generates from ovos-virtual-mark1's firmware tables (listen,
+   talk, think and viseme frames with their step times). The frame now carries the current
+   viseme code and a compact flag, so a theme whose full layout does not fit the badge disc can
+   stack itself. Switching themes while running is a later step; the config is read at start.
 
 ## Verifying a change
 

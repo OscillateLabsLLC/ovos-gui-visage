@@ -2,10 +2,11 @@
 // face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3).
 import 'package:flutter/material.dart';
 
+import 'app_config.dart';
 import 'attention.dart';
 import 'face/face.dart';
 import 'face/face_theme.dart';
-import 'face/visage_theme.dart';
+import 'face/themes.dart';
 import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
@@ -13,7 +14,6 @@ import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/widget_manager.dart';
-import 'window/window_config.dart';
 import 'window/window_shell.dart';
 
 const _pageBg = VisageColors.pageBg;
@@ -27,30 +27,32 @@ const _attentionStrip = _badgeHeight + 2 * _badgeGap;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final window = await loadWindowConfig();
-  await applyWindowConfig(window);
-  runApp(VisageApp(window: window));
+  final config = await loadAppConfig();
+  await applyWindowConfig(config.window);
+  runApp(VisageApp(config: config));
 }
 
 class VisageApp extends StatelessWidget {
-  const VisageApp({super.key, this.window = const WindowConfig()});
+  const VisageApp({super.key, this.config = const AppConfig()});
 
-  final WindowConfig window;
+  final AppConfig config;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
-        color: window.isWidget ? Colors.transparent : VisageColors.bg,
-        child: const Center(child: Screen()),
+        color: config.window.isWidget ? Colors.transparent : VisageColors.bg,
+        child: Center(child: Screen(theme: faceThemeNamed(config.face))),
       ),
     );
   }
 }
 
 class Screen extends StatefulWidget {
-  const Screen({super.key});
+  const Screen({super.key, required this.theme});
+
+  final FaceTheme theme;
 
   @override
   State<Screen> createState() => _ScreenState();
@@ -58,7 +60,7 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
   final state = GuiState();
-  final face = FaceController();
+  late final face = FaceController(theme: widget.theme);
   late final Attention attention = Attention(face);
   final sockets = endpoints();
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
@@ -155,7 +157,7 @@ class _AttentionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final geometry = const VisageTheme().geometry;
+    final geometry = face.theme.geometry;
     final scale = _badgeHeight / (2 * geometry.badgeRadius);
     final badgeCentre = Offset(frameWidth / 2, frameHeight - _badgeGap - _badgeHeight / 2);
     final shift = attention.compact ? badgeCentre - geometry.centre : Offset.zero;
@@ -176,7 +178,7 @@ class _AttentionOverlay extends StatelessWidget {
               children: [
                 if (attention.compact)
                   Positioned.fill(child: CustomPaint(painter: _DiscPainter(geometry.centre, geometry.badgeRadius))),
-                Face(controller: face),
+                Face(controller: face, compact: attention.compact),
               ],
             ),
           ),

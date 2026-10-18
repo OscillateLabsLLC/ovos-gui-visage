@@ -1,4 +1,4 @@
-/// Reads the window configuration and applies it to the native window on the desktop; the web build has no window
+/// Reads the configuration and applies the window part of it to the native window on the desktop; the web build has no window
 /// to place and keeps the defaults.
 library;
 

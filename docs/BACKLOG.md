@@ -19,11 +19,13 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 3. **Viseme-capable TTS plugin.** The face's mouth needs `enclosure.mouth.viseme_list`; without a TTS
    plugin that emits it the mouth stays still. Out of this repo's scope, but the README should say
    which plugins send visemes.
-4. **Mark 1 face as a second theme.** Mike: not planned; the Mark 1 has a virtual Arduino in the loop.
-   The `FaceTheme` contract makes a Mark 1 look a theme, but the eyes-as-LED-matrix behaviour is a
-   different animation model. Park until face customisation (next) exists.
-5. **Face customisation, switchable in the app on demand.** Mike's first planned feature after parity:
-   a theme picker over `FaceTheme`, persisted, with the visage look as the default.
+4. **Mark 1 face as a second theme.** Done: `mark1` draws the faceplate from the firmware's own
+   bitmaps and timings (via ovos-virtual-mark1), with the stacked compact badge. Not emulated: eye
+   colour and brightness commands, look/spin animations, text and icons on the mouth, since the
+   GUI client sees attention events rather than enclosure commands.
+5. **Face customisation, switchable in the app on demand.** Half done: `face` in the config file or
+   `VISAGE_FACE` picks the theme at start. Still to do: switching while running (a key or a bus
+   message), and a parameterised visage look (eye colour, ring weight, mouth colour).
 6. **Run on a real Mark II.** Linux build on the Mark II's hardware, fullscreen on the framebuffer or
    under a minimal compositor. Nothing is benchmarked; memory and GPU are the open questions.
 7. **Widget and fullscreen modes.** The user pins the browser page beneath the desktop. A WidgetKit

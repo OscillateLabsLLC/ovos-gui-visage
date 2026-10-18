@@ -40,6 +40,7 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
 - Pages are `StatelessWidget`s or small `StatefulWidget`s with a static `page(Json, PageContext)`
   builder registered in `lib/pages/router.dart`. Pure view models live beside them and are
   unit tested; widget tests pump the pages from the recorded fixtures.
-- The face is themed through `FaceTheme` (eyes painter, mouth painter, geometry). First pass
-  ships only `VisageTheme`.
+- The face is themed through `FaceTheme` (eyes painter, mouth painter, geometry). `VisageTheme`
+  and `Mark1Theme` ship; `lib/face/themes.dart` picks by the configured name. Mark 1 bitmaps are
+  generated into `mark1_images.g.dart` by `tool/port_mark1_images.py`; never edit them by hand.
 - Display-only. Touch is a later, additive scope: no gesture plumbing in pages yet.

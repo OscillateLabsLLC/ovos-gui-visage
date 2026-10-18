@@ -1,5 +1,6 @@
+import '../app_config.dart';
 import 'window_config.dart';
 
-Future<WindowConfig> loadWindowConfig() async => const WindowConfig();
+Future<AppConfig> loadAppConfig() async => const AppConfig();
 
 Future<void> applyWindowConfig(WindowConfig config) async {}

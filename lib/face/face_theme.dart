@@ -27,9 +27,23 @@ class FaceGeometry {
 
 /// One animation frame's worth of state, in frame coordinates.
 class FaceFrame {
-  const FaceFrame({required this.mode, required this.eyeOpen, required this.eyeScale, required this.lips, required this.elapsed});
+  const FaceFrame({
+    required this.mode,
+    required this.eyeOpen,
+    required this.eyeScale,
+    required this.lips,
+    required this.viseme,
+    required this.elapsed,
+    this.compact = false,
+  });
 
   final FaceMode mode;
+
+  /// The viseme code (visemes.dart) the mouth is heading for; the rest code outside speech.
+  final int viseme;
+
+  /// True inside the compact attention badge, for a theme whose full layout does not fit a disc.
+  final bool compact;
 
   /// 1 fully open, towards 0 closed (blink, sleeping) or narrowed (thinking).
   final double eyeOpen;
