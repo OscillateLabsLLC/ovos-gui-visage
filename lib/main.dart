@@ -13,6 +13,8 @@ import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/widget_manager.dart';
+import 'window/window_config.dart';
+import 'window/window_shell.dart';
 
 const _pageBg = VisageColors.pageBg;
 const _dimBg = Color(0xEB05070A);
@@ -23,18 +25,25 @@ const _badgeGap = 7.0;
 /// Content pages keep this much of the bottom free for the badge (SPEC 5.3: badge plus a 7 px gap above and below).
 const _attentionStrip = _badgeHeight + 2 * _badgeGap;
 
-void main() => runApp(const VisageApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final window = await loadWindowConfig();
+  await applyWindowConfig(window);
+  runApp(VisageApp(window: window));
+}
 
 class VisageApp extends StatelessWidget {
-  const VisageApp({super.key});
+  const VisageApp({super.key, this.window = const WindowConfig()});
+
+  final WindowConfig window;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
-        color: VisageColors.bg,
-        child: Center(child: Screen()),
+        color: window.isWidget ? Colors.transparent : VisageColors.bg,
+        child: const Center(child: Screen()),
       ),
     );
   }

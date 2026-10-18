@@ -108,11 +108,15 @@ test/
    CI builds the image and checks the rendered nginx config, since no Docker daemon was
    available locally.
 5. CI matrix (macOS, Linux, Windows, web, sidecar image), packaging, release-please.
-6. Floating widget mode (later, about a day): a frameless always-on-top window that snaps
-   to a screen corner, via `window_manager` plus the display bounds. Works on macOS,
-   Windows and X11; Wayland does not let apps position their own windows, and the web
-   build has no window to move. Nothing in the pages changes, since the frame already
-   scales to the window.
+6. **Widget modes** (done on macOS): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
+   (environment on top) and places a frameless window in a corner of the primary display's
+   work area, beneath everything (`desktop`) or above (`float`), on every Space, through
+   `window_manager` and `screen_retriever`. The window background goes transparent so the
+   rounded frame floats. Nothing in the pages changes, since the frame already scales to the
+   window. Windows and X11 should work unchanged but are unverified; Wayland does not let apps
+   position their own windows, and the web build has no window to move. Why not WidgetKit:
+   a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
+   so it could only show slow-changing information from the main app.
 
 ## Verifying a change
 

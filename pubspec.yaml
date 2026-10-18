@@ -13,9 +13,11 @@ dependencies:
   http: ^1.6.0
   lottie: ^3.6.1
   path: ^1.9.1
+  screen_retriever: ^0.2.0
   web_socket_channel: ^3.0.3
   webview_flutter: ^4.14.1
   webview_flutter_web: ^0.2.3+4
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:

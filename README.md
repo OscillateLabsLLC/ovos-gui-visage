@@ -66,6 +66,22 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 holds feedback and ideas queued behind them.
 ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
 
+## As a desktop widget
+
+The same app can sit in a screen corner as a frameless widget, beneath every other window
+(`desktop`) or above them (`float`), on every Space. Put this in
+`~/.config/ovos-gui-visage/config.json`:
+
+```json
+{"window": {"mode": "desktop", "corner": "top-right", "height": 400, "margin": 16}}
+```
+
+`VISAGE_MODE`, `VISAGE_CORNER`, `VISAGE_HEIGHT` and `VISAGE_MARGIN` override the file, so a
+launcher script can pick the mode. Corners are `top-left`, `top-right`, `bottom-left`,
+`bottom-right`; the height is in logical pixels and the width follows the 480 × 800 frame. This
+is a real window with the live sockets and animations, which a WidgetKit widget cannot have:
+widget extensions get no sockets and only a handful of timeline refreshes an hour.
+
 ## Web build and sidecar
 
 For a display on another machine, the web build runs in a browser served by a sidecar on the
