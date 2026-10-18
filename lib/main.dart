@@ -22,6 +22,7 @@ import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/offline_pill.dart';
 import 'widgets/widget_manager.dart';
+import 'window/face_picker.dart';
 import 'window/peek.dart';
 import 'window/status_menu.dart';
 import 'window/status_menu_binding.dart';
@@ -78,7 +79,14 @@ class _ScreenState extends State<Screen> {
   final sockets = endpoints();
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
-  late final FaceRemote remote = FaceRemote(bus, face, initial: widget.config.face, persist: saveFaceConfig, log: _log);
+  late final FaceRemote remote = FaceRemote(
+    bus,
+    face,
+    initial: widget.config.face,
+    persist: saveFaceConfig,
+    picker: () => openFacePicker(sockets.core),
+    log: _log,
+  );
   late final PeekController peek = PeekController(enabled: widget.config.window.peeks);
   late final WindowRemote window = WindowRemote(
     bus,

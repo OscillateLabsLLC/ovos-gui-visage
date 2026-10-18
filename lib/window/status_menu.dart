@@ -17,6 +17,7 @@ const visibleItem = 'visible';
 const peekItem = 'peek';
 const floatItem = 'mode.float';
 const desktopItem = 'mode.desktop';
+const pickerItem = 'picker';
 const quitItem = 'quit';
 const facePrefix = 'face.';
 const coloursPrefix = 'colours.';
@@ -60,6 +61,7 @@ class StatusMenuActions {
     required this.setMode,
     required this.applyPreset,
     required this.applyColours,
+    required this.openPicker,
     required this.quit,
   });
 
@@ -68,6 +70,7 @@ class StatusMenuActions {
   final void Function(WindowMode mode) setMode;
   final void Function(String preset) applyPreset;
   final void Function(String colours) applyColours;
+  final VoidCallback openPicker;
   final VoidCallback quit;
 }
 
@@ -82,6 +85,7 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
     const MenuEntry.separator(),
     MenuEntry('face', 'Face', children: _choices(facePresets.keys, facePrefix, state.face.presetName)),
     MenuEntry('colours', 'Colours', children: _choices(facePalettes.keys, coloursPrefix, state.face.colours.name)),
+    const MenuEntry(pickerItem, 'Face picker…'),
     const MenuEntry.separator(),
     const MenuEntry(quitItem, 'Quit ovos-gui-visage'),
   ];
@@ -132,6 +136,8 @@ class StatusMenuController {
         actions.setMode(WindowMode.float);
       case desktopItem:
         actions.setMode(WindowMode.desktop);
+      case pickerItem:
+        actions.openPicker();
       case quitItem:
         actions.quit();
       default:

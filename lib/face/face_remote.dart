@@ -6,6 +6,7 @@
 /// - `visage.face.get` asks for the state.
 /// - `visage.face.state` is the answer to both and to every change: the spec, its preset name if it has one, and the
 ///   names available for each part.
+/// - `visage.face.picker` opens the picker page on this display, as the menu bar item's Face picker… does.
 library;
 
 import 'dart:async';
@@ -20,19 +21,26 @@ import 'styles.dart';
 const faceSetMessage = 'visage.face.set';
 const faceGetMessage = 'visage.face.get';
 const faceStateMessage = 'visage.face.state';
+const facePickerMessage = 'visage.face.picker';
 
 typedef FacePersist = Future<void> Function(FaceSpec spec);
 
+/// Opens the picker page; face_picker.dart on the app, a fake in tests.
+typedef FacePicker = Future<void> Function();
+
 class FaceRemote {
-  FaceRemote(this.bus, this.controller, {required FaceSpec initial, required this.persist, this.log}) : _spec = initial {
+  FaceRemote(this.bus, this.controller, {required FaceSpec initial, required this.persist, this.picker, this.log})
+    : _spec = initial {
     bus.on(faceSetMessage, _onSet);
     bus.on(faceGetMessage, (_) => announce());
+    bus.on(facePickerMessage, (_) => openPicker());
     unawaited(bus.whenConnected.then((_) => announce()));
   }
 
   final CoreBus bus;
   final FaceController controller;
   final FacePersist persist;
+  final FacePicker? picker;
   final void Function(String)? log;
   FaceSpec _spec;
 
@@ -54,6 +62,14 @@ class FaceRemote {
     log?.call('face is now $next');
     persist(next).catchError((Object err, StackTrace stack) => reportFault('saving the face to the config file', err, stack));
     announce();
+  }
+
+  /// Opens the picker page; a display without one, or a picker that fails, is reported.
+  void openPicker() {
+    final picker = this.picker;
+    if (picker == null) return reportFault('opening the face picker', StateError('this display has no face picker'));
+    log?.call('face picker: opening');
+    picker().catchError((Object err, StackTrace stack) => reportFault('opening the face picker', err, stack));
   }
 
   void announce() => bus.emit(faceStateMessage, state());

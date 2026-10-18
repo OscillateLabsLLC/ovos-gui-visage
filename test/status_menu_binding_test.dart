@@ -26,10 +26,11 @@ void main() {
     late List<List<MenuEntry>> shown;
     late StatusMenuController menu;
     var quits = 0;
+    var pickers = 0;
 
     setUp(() {
       bus = RecordingBus();
-      face = FaceRemote(bus, FaceController(), initial: FaceSpec.visage, persist: (_) async {});
+      face = FaceRemote(bus, FaceController(), initial: FaceSpec.visage, persist: (_) async {}, picker: () async => pickers++);
       const config = WindowConfig(mode: WindowMode.float, peek: true);
       final peek = PeekController(enabled: true, timer: ManualTimers().create);
       const effects = WindowEffects(mode: _noMode, visible: _noVisible);
@@ -44,6 +45,7 @@ void main() {
       menu.dispatch(desktopItem);
       menu.dispatch(visibleItem);
       menu.dispatch(peekItem);
+      menu.dispatch(pickerItem);
       menu.dispatch(quitItem);
       expect(face.spec.presetName, 'mark1');
       expect(face.spec.colours, FacePalette.ice);
@@ -51,6 +53,7 @@ void main() {
       expect(window.visible, isFalse);
       expect(window.config.peek, isFalse);
       expect(quits, 1);
+      expect(pickers, 1);
       expect(bus.types.toSet(), {faceStateMessage, windowStateMessage});
       expect(shown, hasLength(6));
       expect(shown.last.first.title, 'Show face');

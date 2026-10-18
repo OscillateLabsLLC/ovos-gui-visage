@@ -38,6 +38,7 @@ void main() {
         '-',
         'Face',
         'Colours',
+        'Face picker…',
         '-',
         'Quit ovos-gui-visage',
       ],
@@ -131,6 +132,7 @@ void main() {
           setMode: (m) => calls.add('mode ${m.name}'),
           applyPreset: (n) => calls.add('preset $n'),
           applyColours: (n) => calls.add('colours $n'),
+          openPicker: () => calls.add('picker'),
           quit: () => calls.add('quit'),
         ),
       );
@@ -151,10 +153,10 @@ void main() {
     });
 
     test('dispatches every id', () {
-      for (final id in [visibleItem, peekItem, floatItem, desktopItem, 'face.mark1', 'colours.mint', quitItem]) {
+      for (final id in [visibleItem, peekItem, floatItem, desktopItem, 'face.mark1', 'colours.mint', pickerItem, quitItem]) {
         menu.dispatch(id);
       }
-      expect(calls, ['visible', 'peek', 'mode float', 'mode desktop', 'preset mark1', 'colours mint', 'quit']);
+      expect(calls, ['visible', 'peek', 'mode float', 'mode desktop', 'preset mark1', 'colours mint', 'picker', 'quit']);
     });
 
     test('an unknown id, preset or colourway is reported and does nothing', () async {

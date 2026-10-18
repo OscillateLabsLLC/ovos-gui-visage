@@ -15,12 +15,20 @@ void main() {
   late FaceController controller;
   late List<FaceSpec> saved;
   late FaceRemote remote;
+  late int pickers;
 
   setUp(() {
     bus = RecordingBus();
     controller = FaceController();
     saved = [];
-    remote = FaceRemote(bus, controller, initial: FaceSpec.parse('visage'), persist: (spec) async => saved.add(spec));
+    pickers = 0;
+    remote = FaceRemote(
+      bus,
+      controller,
+      initial: FaceSpec.parse('visage'),
+      persist: (spec) async => saved.add(spec),
+      picker: () async => pickers++,
+    );
   });
 
   test('set changes the parts named, repaints the controller, saves and announces', () {
@@ -93,5 +101,26 @@ void main() {
     });
     expect(faults, hasLength(1));
     expect(failing.spec.presetName, 'pod');
+  });
+
+  test('picker opens the picker page and changes nothing', () {
+    bus.send(facePickerMessage);
+    expect(pickers, 1);
+    expect(bus.types, isEmpty);
+    expect(saved, isEmpty);
+  });
+
+  test('picker on a display without one, or a picker that fails, is reported', () async {
+    final none = RecordingBus();
+    FaceRemote(none, controller, initial: FaceSpec.visage, persist: (_) async {});
+    final failing = RecordingBus();
+    FaceRemote(failing, controller, initial: FaceSpec.visage, persist: (_) async {}, picker: () async => throw StateError('no'));
+    final faults = await collectFaults(() async {
+      none.send(facePickerMessage);
+      failing.send(facePickerMessage);
+      await Future<void>.delayed(Duration.zero);
+    });
+    expect([for (final f in faults) f.exception.runtimeType], [StateError, StateError]);
+    expect('${faults.last.exception}', contains('no'));
   });
 }

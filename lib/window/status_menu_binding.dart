@@ -23,6 +23,7 @@ StatusMenuController bindStatusMenu({
     setMode: window.setMode,
     applyPreset: (name) => face.apply(face.spec.merge({'preset': name})),
     applyColours: (name) => face.apply(face.spec.merge({'colours': name})),
+    openPicker: face.openPicker,
     quit: quit,
   ),
 );
