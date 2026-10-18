@@ -1,7 +1,8 @@
 /// The face over the bus: anyone on the OVOS messagebus can read and change it, which is how the picker page and a
 /// voice skill drive it without touching the display. Client-only message names; nothing in OVOS sends them.
 ///
-/// - `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize`, `backdrop` changes those parts.
+/// - `visage.face.set` with any of `preset`, `eyes`, `mouth`, `mouthSize`, `backdrop`, `colours` changes those parts;
+///   `colours` is a colourway name or an object of `#RRGGBB` tokens.
 /// - `visage.face.get` asks for the state.
 /// - `visage.face.state` is the answer to both and to every change: the spec, its preset name if it has one, and the
 ///   names available for each part.
@@ -12,6 +13,7 @@ import 'dart:async';
 import '../faults.dart';
 import '../protocol/core_bus.dart';
 import 'face.dart';
+import 'face_palette.dart';
 import 'face_spec.dart';
 import 'styles.dart';
 
@@ -64,6 +66,7 @@ class FaceRemote {
       'mouth': mouthStyles.keys.toList(),
       'mouthSize': mouthSizes.keys.toList(),
       'backdrop': backdrops.keys.toList(),
+      'colours': facePalettes.keys.toList(),
       'preset': facePresets.keys.toList(),
     },
   };

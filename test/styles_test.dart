@@ -44,6 +44,29 @@ void main() {
     }
   }
 
+  /// Every mode in and out of the badge, mid-speech, with the eyes open.
+  for (final colours in facePalettes.keys.where((name) => name != 'visage')) {
+    testWidgets('every pairing paints every frame in $colours', (tester) async {
+      final faults = await collectFaults(() async {
+        for (final backdrop in backdrops.keys) {
+          for (final eyes in eyeStyles.keys) {
+            for (final mouth in mouthStyles.keys) {
+              final theme = FaceSpec(eyes: eyes, mouth: mouth, backdrop: backdrop, colours: facePalettes[colours]!).theme();
+              for (final frame in frames.where((f) => f.eyeOpen == 1 && f.viseme == 0)) {
+                final painted = frame.withPalette(theme.palette);
+                await tester.pumpWidget(
+                  CustomPaint(size: const Size(frameWidth, frameHeight), painter: FacePainter(theme, painted)),
+                );
+              }
+            }
+          }
+        }
+      });
+      expect(faults, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   test('every preset names real styles', () {
     for (final preset in facePresets.values) {
       expect(eyeStyles, contains(preset.eyes));

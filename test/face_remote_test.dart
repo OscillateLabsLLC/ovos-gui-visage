@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/composed_theme.dart';
 import 'package:ovos_gui_visage/face/face.dart';
+import 'package:ovos_gui_visage/face/face_palette.dart';
 import 'package:ovos_gui_visage/face/face_remote.dart';
 import 'package:ovos_gui_visage/face/face_spec.dart';
 import 'package:ovos_gui_visage/face/styles/line_mouths.dart';
@@ -49,6 +50,27 @@ void main() {
     expect(state['preset'], 'visage');
     expect((state['available'] as Map)['eyes'], contains('aperture'));
     expect((state['available'] as Map)['preset'], contains('mark1'));
+    expect((state['available'] as Map)['colours'], ['visage', 'ember', 'mint', 'rose', 'ice', 'mark1']);
+    expect(state['colours'], 'visage');
+  });
+
+  test('set with a colourway name repaints in it, saves it and announces it', () {
+    bus.send(faceSetMessage, {'colours': 'ember'});
+    expect(remote.spec.colours, FacePalette.ember);
+    expect(controller.theme.palette, FacePalette.ember);
+    expect(saved.single.colours, FacePalette.ember);
+    expect(bus.data(0)!['colours'], 'ember');
+    expect(bus.data(0)!['preset'], 'visage');
+  });
+
+  test('set with a colours object announces the tokens', () {
+    bus.send(faceSetMessage, {
+      'colours': {'eye': '#FFB547', 'accent': '#3FD3C6'},
+    });
+    expect(controller.theme.palette.accent, FacePalette.parse({'accent': '#3FD3C6'}).accent);
+    final colours = bus.data(0)!['colours'] as Map;
+    expect(colours['eye'], '#FFB547');
+    expect(colours['mouth'], '#FFFFFF');
   });
 
   test('a payload that is not an object is reported and ignored', () async {

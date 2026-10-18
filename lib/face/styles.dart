@@ -41,18 +41,19 @@ const backdrops = <String, FaceBackdrop>{'none': PlainBackdrop(), 'mark1': Plate
 /// Mouth size names and the slot scale each means.
 const mouthSizes = <String, double>{'regular': 1, 'large': 1.4};
 
-/// A named pairing: eyes, mouth and, where it is part of the look, the backdrop.
+/// A named pairing: eyes, mouth and, where they are part of the look, the backdrop and the colourway.
 class FacePreset {
-  const FacePreset(this.eyes, this.mouth, {this.backdrop = 'none'});
+  const FacePreset(this.eyes, this.mouth, {this.backdrop = 'none', this.colours = FacePalette.visage});
 
   final String eyes;
   final String mouth;
   final String backdrop;
+  final FacePalette colours;
 }
 
 const facePresets = <String, FacePreset>{
   'visage': FacePreset('lens', 'outline'),
-  'mark1': FacePreset('ring', 'matrix', backdrop: 'mark1'),
+  'mark1': FacePreset('ring', 'matrix', backdrop: 'mark1', colours: FacePalette.mark1),
   'scanner': FacePreset('visor', 'matrix'),
   'robot': FacePreset('block', 'solid'),
   'retro': FacePreset('ring', 'waveform'),
