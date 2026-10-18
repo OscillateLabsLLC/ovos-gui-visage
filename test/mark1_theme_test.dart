@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/face_theme.dart';
 import 'package:ovos_gui_visage/face/mark1_images.g.dart';
 import 'package:ovos_gui_visage/face/mark1_theme.dart';
+import 'package:ovos_gui_visage/face/composed_theme.dart';
+import 'package:ovos_gui_visage/face/styles/matrix_mouth.dart';
+import 'package:ovos_gui_visage/face/styles/ring_eyes.dart';
 import 'package:ovos_gui_visage/face/themes.dart';
 
 import 'faults.dart';
@@ -74,9 +77,23 @@ void main() {
   });
 
   test('themes are picked by name and an unknown name reports and falls back', () async {
-    expect(faceThemeNamed('mark1'), isA<Mark1Theme>());
+    final mark1 = faceThemeNamed('mark1') as ComposedTheme;
+    expect(mark1.backdrop, isA<PlateBackdrop>());
+    expect(mark1.eyeStyle, isA<RingEyes>());
+    expect(mark1.mouthStyle, isA<MatrixMouth>());
     expect(faceThemeNamed('visage').geometry.top, 75);
     final faults = await collectFaults(() async => expect(faceThemeNamed('mark2').geometry.top, 75));
     expect(faults, hasLength(1));
+  });
+
+  test('the plate layout puts the styles in the ring wells and the matrix window', () {
+    final layout = const PlateBackdrop().layout(false);
+    final leds = Mark1Layout.full;
+    expect(layout.left.centre, leds.rings[1]);
+    expect(layout.right.centre, leds.rings[0]);
+    expect(layout.left.radius, leds.ringRadius + leds.eyeLed);
+    expect(layout.mouth.width, mouthCols * leds.pitch);
+    expect(layout.mouth.centre.dx, closeTo(frameWidth / 2, 0.5));
+    expect(const PlateBackdrop().maxMouthScale(false), 1, reason: 'the matrix window is hardware');
   });
 }

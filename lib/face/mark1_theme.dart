@@ -1,15 +1,17 @@
-/// The Mycroft Mark 1 face: two 12-pixel NeoPixel eye rings and a 32 x 8 LED mouth behind the dark faceplate glass,
-/// drawn from the firmware's own bitmaps (mark1_images.g.dart) with its timings and its narrow/blink pixel order,
-/// as ported in ovos-virtual-mark1. The full layout is the faceplate at its true proportions; the compact badge
-/// stacks the eyes over the mouth so both fit the disc.
+/// The Mycroft Mark 1 face: the faceplate backdrop with its two ring wells and matrix window, drawn as ported in
+/// ovos-virtual-mark1, plus the firmware's timings and narrow/blink pixel order that the ring and matrix styles use
+/// (styles/ring_eyes.dart, styles/matrix_mouth.dart). The full layout is the faceplate at its true proportions; the
+/// compact badge stacks the eyes over the mouth so both fit the disc.
 library;
 
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'composed_theme.dart';
 import 'face_theme.dart';
 import 'mark1_images.g.dart';
-import 'visage_theme.dart';
+import 'styles/matrix_mouth.dart';
+import 'styles/ring_eyes.dart';
 
 const ringSize = 12;
 const mouthCols = 32;
@@ -36,31 +38,81 @@ const _micRadius = 4.4;
 const _micDotRadius = 0.46;
 const _goldenAngle = 2.399963;
 
-const _eyeColour = Color(0xFF70656A); // the firmware's default (112, 101, 106) at full brightness
-const _eyeOff = Color(0xFF12171C);
-const _mouthOn = Color(0xF5E1F3FF);
-const _mouthOff = Color(0x09E1F3FF);
-const _mouthGlow = Color(0xFFADDEFB);
-const _trackIdle = Color(0x0DFFFFFF);
 const _reflection = Color(0x17FFFFFF);
 const _grille = Color(0xFF070B0D);
 
-class Mark1Theme implements FaceTheme {
-  const Mark1Theme();
+class Mark1Theme extends ComposedTheme {
+  const Mark1Theme() : super(backdrop: const PlateBackdrop(), eyeStyle: const RingEyes(), mouthStyle: const MatrixMouth());
+}
+
+/// The faceplate: it places the styles in the ring wells and the matrix window and paints the plate behind them in
+/// the full layout. The window is hardware, so the mouth cannot grow.
+class PlateBackdrop implements FaceBackdrop {
+  const PlateBackdrop();
 
   @override
   FaceGeometry get geometry =>
       const FaceGeometry(top: 300 - _plateHeight * _plateScale / 2, height: _plateHeight * _plateScale, badgeRadius: 115);
 
   @override
-  EyesPainter get eyes => const Mark1Eyes();
+  FaceLayout layout(bool compact) {
+    final leds = compact ? Mark1Layout.compact : Mark1Layout.full;
+    final well = leds.ringRadius + leds.eyeLed;
+    return FaceLayout(
+      left: EyeSlot(leds.rings[1], well),
+      right: EyeSlot(leds.rings[0], well),
+      mouth: MouthSlot(
+        leds.mouthOrigin + Offset((mouthCols - 1) / 2 * leds.pitch, (mouthRows - 1) / 2 * leds.pitch),
+        mouthCols * leds.pitch,
+        mouthRows * leds.pitch,
+      ),
+    );
+  }
 
   @override
-  MouthPainter get mouth => const Mark1Mouth();
+  double maxMouthScale(bool compact) => 1;
 
-  /// The widget tweens outlines for every theme; this one paints bitmaps by viseme code and ignores them.
   @override
-  Map<int, List<Offset>> get mouthShapes => visageMouthShapes;
+  void paint(Canvas canvas, FaceFrame frame) {
+    final plate = Mark1Layout.of(frame).plate;
+    if (plate != null) _paintPlate(canvas, plate.$1, plate.$2);
+  }
+
+  void _paintPlate(Canvas canvas, Offset origin, double scale) {
+    canvas.save();
+    canvas.translate(origin.dx, origin.dy);
+    canvas.scale(scale, scale);
+    final rim = svgPath('M82.19 0C124 0 164.38 3 164.38 28.69S124 57.37 82.19 57.37S0 54.37 0 28.69S40.4 0 82.19 0Z');
+    final glass = svgPath('M82.19 2C123 2 162.38 5 162.38 28.69S123 55.37 82.19 55.37S2 52.37 2 28.69S41.4 2 82.19 2Z');
+    canvas.drawPath(
+      rim,
+      Paint()..shader = Gradient.linear(Offset.zero, const Offset(0, _plateHeight), const [Color(0xFFFFFFFF), Color(0xFFA6B1BD)]),
+    );
+    canvas.drawPath(
+      glass,
+      Paint()
+        ..shader = Gradient.linear(
+          Offset.zero,
+          const Offset(_plateWidth * 0.8, _plateHeight),
+          const [Color(0xFF303940), Color(0xFF12191E), Color(0xFF263039)],
+          const [0, 0.5, 1],
+        ),
+    );
+    canvas.drawPath(
+      svgPath('M15 10C47 2 115 2 148 11'),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5
+        ..color = _reflection,
+    );
+    final grille = Paint()..color = _grille;
+    for (var i = 0; i < _micDots; i++) {
+      final angle = i * _goldenAngle;
+      final r = _micRadius * math.sqrt((i + 0.5) / _micDots);
+      canvas.drawCircle(_micCentre + Offset(math.cos(angle) * r, math.sin(angle) * r), _micDotRadius, grille);
+    }
+    canvas.restore();
+  }
 }
 
 /// Where the LEDs sit, in frame pixels. [rings] is right then left, as the firmware numbers them.
@@ -148,103 +200,6 @@ List<int>? mouthFrame(FaceMode mode, int viseme, double elapsed) {
       return visemeFrames[viseme.clamp(0, visemeFrames.length - 1)];
     case FaceMode.rest:
       return null;
-  }
-}
-
-class Mark1Eyes implements EyesPainter {
-  const Mark1Eyes();
-
-  @override
-  void paint(Canvas canvas, FaceFrame frame) {
-    final layout = Mark1Layout.of(frame);
-    final plate = layout.plate;
-    if (plate != null) _paintPlate(canvas, plate.$1, plate.$2);
-    final depth = narrowDepth(frame.eyeOpen);
-    for (final centre in layout.rings) {
-      _paintRing(canvas, centre, layout, depth);
-    }
-  }
-
-  void _paintRing(Canvas canvas, Offset centre, Mark1Layout layout, int depth) {
-    final anyLit = depth < narrowDepthMax;
-    final track = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.5 * layout.ringRadius / _ringRadius
-      ..color = anyLit ? _eyeColour.withValues(alpha: 0.09) : _trackIdle;
-    canvas.drawCircle(centre, layout.ringRadius, track);
-    final glow = Paint()
-      ..color = _eyeColour.withValues(alpha: 0.9)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, layout.eyeLed * 0.75);
-    final on = Paint()..color = _eyeColour;
-    final off = Paint()..color = _eyeOff;
-    for (var slot = 0; slot < ringSize; slot++) {
-      final at = ringPixel(centre, layout.ringRadius, slot);
-      if (pixelLit(slot, depth)) {
-        canvas.drawCircle(at, layout.eyeLed, glow);
-        canvas.drawCircle(at, layout.eyeLed, on);
-      } else {
-        canvas.drawCircle(at, layout.eyeLed, off);
-      }
-    }
-  }
-
-  void _paintPlate(Canvas canvas, Offset origin, double scale) {
-    canvas.save();
-    canvas.translate(origin.dx, origin.dy);
-    canvas.scale(scale, scale);
-    final rim = svgPath('M82.19 0C124 0 164.38 3 164.38 28.69S124 57.37 82.19 57.37S0 54.37 0 28.69S40.4 0 82.19 0Z');
-    final glass = svgPath('M82.19 2C123 2 162.38 5 162.38 28.69S123 55.37 82.19 55.37S2 52.37 2 28.69S41.4 2 82.19 2Z');
-    canvas.drawPath(
-      rim,
-      Paint()..shader = Gradient.linear(Offset.zero, const Offset(0, _plateHeight), const [Color(0xFFFFFFFF), Color(0xFFA6B1BD)]),
-    );
-    canvas.drawPath(
-      glass,
-      Paint()
-        ..shader = Gradient.linear(
-          Offset.zero,
-          const Offset(_plateWidth * 0.8, _plateHeight),
-          const [Color(0xFF303940), Color(0xFF12191E), Color(0xFF263039)],
-          const [0, 0.5, 1],
-        ),
-    );
-    canvas.drawPath(
-      svgPath('M15 10C47 2 115 2 148 11'),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.5
-        ..color = _reflection,
-    );
-    final grille = Paint()..color = _grille;
-    for (var i = 0; i < _micDots; i++) {
-      final angle = i * _goldenAngle;
-      final r = _micRadius * math.sqrt((i + 0.5) / _micDots);
-      canvas.drawCircle(_micCentre + Offset(math.cos(angle) * r, math.sin(angle) * r), _micDotRadius, grille);
-    }
-    canvas.restore();
-  }
-}
-
-class Mark1Mouth implements MouthPainter {
-  const Mark1Mouth();
-
-  @override
-  void paint(Canvas canvas, FaceFrame frame) {
-    final layout = Mark1Layout.of(frame);
-    final rows = mouthFrame(frame.mode, frame.viseme, frame.elapsed);
-    final off = Paint()..color = _mouthOff;
-    final on = Paint()..color = _mouthOn;
-    final glow = Paint()
-      ..color = _mouthGlow
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, layout.mouthLed * 0.6);
-    for (var y = 0; y < mouthRows; y++) {
-      for (var x = 0; x < mouthCols; x++) {
-        final at = layout.mouthOrigin + Offset(x * layout.pitch, y * layout.pitch);
-        final lit = rows != null && (rows[y] >> x) & 1 == 1;
-        if (lit) canvas.drawCircle(at, layout.mouthLed, glow);
-        canvas.drawCircle(at, layout.mouthLed, lit ? on : off);
-      }
-    }
   }
 }
 

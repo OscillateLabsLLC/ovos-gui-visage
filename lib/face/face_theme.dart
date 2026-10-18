@@ -62,6 +62,74 @@ abstract class EyesPainter {
   void paint(Canvas canvas, FaceFrame frame);
 }
 
+/// Where one eye goes: a style draws inside the circle, scaling its own proportions from the radius.
+class EyeSlot {
+  const EyeSlot(this.centre, this.radius);
+
+  final Offset centre;
+  final double radius;
+}
+
+/// Where the mouth goes: a style maps its drawing onto this box, so a bigger box is a bigger mouth.
+class MouthSlot {
+  const MouthSlot(this.centre, this.width, this.height);
+
+  final Offset centre;
+  final double width;
+  final double height;
+
+  MouthSlot scaled(double k) => MouthSlot(centre, width * k, height * k);
+}
+
+/// The slots a backdrop hands to the styles: a left eye, a right eye and a mouth.
+class FaceLayout {
+  const FaceLayout({required this.left, required this.right, required this.mouth});
+
+  final EyeSlot left;
+  final EyeSlot right;
+  final MouthSlot mouth;
+
+  List<EyeSlot> get eyes => [left, right];
+
+  FaceLayout withMouth(MouthSlot slot) => FaceLayout(left: left, right: right, mouth: slot);
+}
+
+/// An eye look that works in any [FaceLayout]: it reads both slots, so a single-eye style can span them.
+abstract class EyeStyle {
+  void paint(Canvas canvas, FaceLayout layout, FaceFrame frame);
+}
+
+/// A mouth look that works in any [MouthSlot].
+abstract class MouthStyle {
+  void paint(Canvas canvas, MouthSlot slot, FaceFrame frame);
+}
+
+/// What sits behind the styles and decides where they go: the bare screen, or a faceplate with wells and a window.
+abstract class FaceBackdrop {
+  FaceGeometry get geometry;
+
+  FaceLayout layout(bool compact);
+
+  /// The largest mouth scale the slot can take here; a hardware window cannot grow.
+  double maxMouthScale(bool compact);
+
+  void paint(Canvas canvas, FaceFrame frame);
+}
+
+/// The colour tokens every style reads, so a colourway later is a value change and no new painting.
+abstract final class FaceColours {
+  static const eye = Color(0xFFF5F5F5);
+  static const eyeDim = Color(0xFF6D6D6D);
+  static const mouth = Color(0xFFFFFFFF);
+  static const accent = Color(0xFF1E9BFF);
+  static const led = Color(0xFF70656A);
+  static const unlit = Color(0xFF12171C);
+  static const matrix = Color(0xFFE1F3FF);
+  static const housing = Color(0xFF1B1E24);
+  static const blade = Color(0xFF262A31);
+  static const panel = Color(0xFF0A0C10);
+}
+
 abstract class MouthPainter {
   /// Draws the mouth for [frame]; [frame.lips] is already tweened, so a painter only maps it onto the screen.
   void paint(Canvas canvas, FaceFrame frame);
