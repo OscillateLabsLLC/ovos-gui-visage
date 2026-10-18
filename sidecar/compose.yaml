@@ -1,0 +1,17 @@
+# docker compose -f sidecar/compose.yaml up --build, on the OVOS host; then open http://<host>:8080/.
+# Anyone who can reach port 8080 can drive the OVOS bus through the proxy, so keep it on a trusted network or put
+# authentication and TLS in front of it (nginx basic auth, or a reverse proxy you already run).
+services:
+  visage:
+    build:
+      context: ..
+      dockerfile: sidecar/Dockerfile
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ~/.cache/ovos_gui:/srv/ovos_gui:ro
+      # Skills name OCP album art by absolute path; mirror the directories they write to under /srv/host.
+      - ~/.cache:/srv/host${HOME}/.cache:ro
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+.dart_tool
+.git
+.idea
+build
+docs/screenshots
+linux
+macos
+windows

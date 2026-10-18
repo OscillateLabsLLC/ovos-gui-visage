@@ -1,0 +1,40 @@
+# Rendered by the nginx image's entrypoint with OVOS_HOST, OVOS_BUS_PORT and OVOS_GUI_PORT substituted.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 8080;
+    root /usr/share/nginx/html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ~/.cache/ovos_gui on the OVOS host, mounted read-only.
+    location /res/ {
+        alias /srv/ovos_gui/;
+    }
+
+    # Absolute paths skills send (OCP album art): /res-abs/home/ovos/x reads /srv/host/home/ovos/x.
+    location /res-abs/ {
+        alias /srv/host/;
+    }
+
+    location /core {
+        proxy_pass http://${OVOS_HOST}:${OVOS_BUS_PORT}/core;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 1h;
+    }
+
+    location /gui {
+        proxy_pass http://${OVOS_HOST}:${OVOS_GUI_PORT}/gui;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 1h;
+    }
+}

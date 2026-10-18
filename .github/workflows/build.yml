@@ -1,6 +1,6 @@
 name: Build
 
-# Pre-built, unsigned desktop bundles (the web build joins once the resource layer has no dart:io, SCOPE phase 4) so a change can be tried without a Flutter toolchain per platform.
+# Pre-built, unsigned desktop bundles, the web build and the sidecar image, so a change can be tried without a Flutter toolchain per platform.
 # Linux and Windows are CI-only targets for now (docs/SCOPE.md), so PRs build them too. Artifacts keep 3 days.
 
 on:
@@ -94,3 +94,35 @@ jobs:
           path: build/windows/x64/runner/Release/
           retention-days: 3
 
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build web --release
+      - name: Tar web bundle
+        run: |
+          cd build/web
+          tar -czf "$GITHUB_WORKSPACE/ovos-gui-visage-web.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ovos-gui-visage-web
+          path: ovos-gui-visage-web.tar.gz
+          retention-days: 3
+
+  # Builds the sidecar image to prove the Dockerfile and nginx template; publishing is a release concern (SCOPE phase 5).
+  build-sidecar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f sidecar/Dockerfile -t ovos-gui-visage-sidecar .
+      - name: Render the nginx config and check its syntax
+        run: |
+          docker run --rm ovos-gui-visage-sidecar sh -c \
+            '/docker-entrypoint.d/20-envsubst-on-templates.sh >/dev/null && nginx -t'
