@@ -726,9 +726,10 @@
   }
 
   // The device link: visage.face.set on every change, visage.face.state keeps this page in step with the device,
-  // whoever changed it. The bus is ?bus=ws://host:8181, or this page's own origin when the sidecar serves it.
+  // whoever changed it. The bus is #bus=ws://host:8181 (the app opens its copy so, since a file URL's query may not
+  // survive the launcher) or ?bus=, the hash winning, else this page's own origin when the sidecar serves it.
   const remote = (() => {
-    const param = new URLSearchParams(location.search).get('bus');
+    const param = new URLSearchParams(location.hash.slice(1)).get('bus') || new URLSearchParams(location.search).get('bus');
     const served = location.protocol === 'http:' || location.protocol === 'https:';
     const url = param || (served ? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/core` : null);
     const status = document.getElementById('bus');
