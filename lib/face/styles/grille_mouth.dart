@@ -23,7 +23,7 @@ class GrilleMouth implements MouthStyle {
     final span = slot.width * 0.5 * (frame.mode == FaceMode.speaking ? 0.6 + 0.4 * widthRatio(frame) : 1);
     final scan = (frame.elapsed * 7).floor() % (2 * (_slats - 1));
     final scanRow = scan < _slats ? scan : 2 * (_slats - 1) - scan;
-    final colour = listen ? FaceColours.accent : FaceColours.mouth;
+    final colour = listen ? frame.palette.accent : frame.palette.mouth;
     for (var j = 0; j < _slats; j++) {
       final d = (j - (_slats - 1) / 2).abs();
       var lit = 0.18;
@@ -54,7 +54,7 @@ class OrbMouth implements MouthStyle {
       ..style = PaintingStyle.stroke
       ..strokeWidth = slot.width * 0.04
       ..strokeCap = StrokeCap.round
-      ..color = listen ? FaceColours.accent : FaceColours.mouth;
+      ..color = listen ? frame.palette.accent : frame.palette.mouth;
     if (frame.mode == FaceMode.thinking) {
       canvas.drawArc(Rect.fromCircle(center: slot.centre, radius: r0), frame.elapsed * 3, _tau * 0.7, false, stroke);
       return;
@@ -69,7 +69,7 @@ class OrbMouth implements MouthStyle {
       final ripple = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke.strokeWidth
-        ..color = FaceColours.mouth.withValues(alpha: (1 - phase) * 0.6 * open);
+        ..color = frame.palette.mouth.withValues(alpha: (1 - phase) * 0.6 * open);
       canvas.drawCircle(slot.centre, r + phase * r0 * 1.6, ripple);
     }
   }

@@ -19,24 +19,24 @@ class RingEyes implements EyeStyle {
   void paint(Canvas canvas, FaceLayout layout, FaceFrame frame) {
     final depth = narrowDepth(frame.eyeOpen);
     for (final slot in layout.eyes) {
-      _paintRing(canvas, slot, depth);
+      _paintRing(canvas, slot, depth, frame.palette);
     }
   }
 
-  void _paintRing(Canvas canvas, EyeSlot slot, int depth) {
+  void _paintRing(Canvas canvas, EyeSlot slot, int depth, FacePalette palette) {
     final radius = slot.radius * _ringRatio;
     final led = slot.radius * _ledRatio;
     final anyLit = depth < narrowDepthMax;
     final track = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 3
-      ..color = anyLit ? FaceColours.led.withValues(alpha: 0.09) : _trackIdle;
+      ..color = anyLit ? palette.led.withValues(alpha: 0.09) : _trackIdle;
     canvas.drawCircle(slot.centre, radius, track);
     final glow = Paint()
-      ..color = FaceColours.led.withValues(alpha: 0.9)
+      ..color = palette.led.withValues(alpha: 0.9)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, led * 0.75);
-    final on = Paint()..color = FaceColours.led;
-    final off = Paint()..color = FaceColours.unlit;
+    final on = Paint()..color = palette.led;
+    final off = Paint()..color = HardwareColours.unlit;
     for (var slotIndex = 0; slotIndex < ringSize; slotIndex++) {
       final at = ringPixel(slot.centre, radius, slotIndex);
       if (pixelLit(slotIndex, depth)) {
@@ -66,9 +66,9 @@ class PixelEyes implements EyeStyle {
       final pitch = slot.radius * 2 / (_cells + 1);
       final led = pitch * 0.36;
       final panel = Rect.fromCenter(center: slot.centre, width: pitch * 9, height: pitch * 9);
-      canvas.drawRRect(RRect.fromRectAndRadius(panel, Radius.circular(pitch)), Paint()..color = FaceColours.panel);
+      canvas.drawRRect(RRect.fromRectAndRadius(panel, Radius.circular(pitch)), Paint()..color = HardwareColours.panel);
       final glow = Paint()
-        ..color = FaceColours.matrix
+        ..color = frame.palette.matrix
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, led * glowSize);
       for (var row = 0; row < _cells; row++) {
         for (var col = 0; col < _cells; col++) {
@@ -78,7 +78,7 @@ class PixelEyes implements EyeStyle {
           final lit = inDisc && !pupil && dy.abs() < 4 * open;
           final at = slot.centre + Offset(dx * pitch, dy * pitch);
           if (lit) canvas.drawCircle(at, led, glow);
-          canvas.drawCircle(at, led, Paint()..color = lit ? FaceColours.matrix : FaceColours.unlit);
+          canvas.drawCircle(at, led, Paint()..color = lit ? frame.palette.matrix : HardwareColours.unlit);
         }
       }
     }

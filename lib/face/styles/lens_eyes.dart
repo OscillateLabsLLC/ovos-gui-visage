@@ -29,13 +29,13 @@ class LensEyes implements EyeStyle {
     final ring = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = slot.radius * _strokeRatio
-      ..color = FaceColours.eyeDim;
+      ..color = frame.palette.eyeDim;
     canvas.drawCircle(Offset.zero, radius, ring);
     final arc = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = slot.radius * _strokeRatio
       ..strokeCap = StrokeCap.round
-      ..color = FaceColours.eye;
+      ..color = frame.palette.eye;
     canvas.drawArc(Rect.fromCircle(center: Offset.zero, radius: radius), math.pi, math.pi, false, arc);
     canvas.restore();
   }

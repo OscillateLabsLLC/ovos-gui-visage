@@ -168,6 +168,7 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
       viseme: _viseme,
       elapsed: _now.inMicroseconds / 1e6,
       compact: widget.compact,
+      palette: widget.theme.palette,
     );
     return CustomPaint(size: const Size(frameWidth, frameHeight), painter: FacePainter(widget.theme, frame));
   }

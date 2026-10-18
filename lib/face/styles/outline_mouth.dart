@@ -21,8 +21,8 @@ void _enterSlot(Canvas canvas, MouthSlot slot) {
 }
 
 /// Seven accent bars where the mouth is, each breathing between 0.4 and 1.6 of its height on a 0.9 s cycle.
-void paintListenBars(Canvas canvas, double elapsed) {
-  final paint = Paint()..color = FaceColours.accent;
+void paintListenBars(Canvas canvas, double elapsed, Color accent) {
+  final paint = Paint()..color = accent;
   for (var i = 0; i < _listenBars; i++) {
     final delay = i % 3 == 0 ? 0.6 : (i % 2 == 0 ? 0.3 : 0.0);
     final phase = ((elapsed + delay) / 0.9) * 2 * math.pi;
@@ -40,14 +40,14 @@ class OutlineMouth implements MouthStyle {
     canvas.save();
     _enterSlot(canvas, slot);
     if (frame.mode == FaceMode.listening) {
-      paintListenBars(canvas, frame.elapsed);
+      paintListenBars(canvas, frame.elapsed, frame.palette.accent);
     } else {
       final lips = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = _outlineStroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
-        ..color = FaceColours.mouth;
+        ..color = frame.palette.mouth;
       canvas.drawPath(toPath(frame.lips), lips);
     }
     canvas.restore();
@@ -62,7 +62,7 @@ class SolidMouth implements MouthStyle {
   void paint(Canvas canvas, MouthSlot slot, FaceFrame frame) {
     canvas.save();
     _enterSlot(canvas, slot);
-    final fill = Paint()..color = FaceColours.mouth;
+    final fill = Paint()..color = frame.palette.mouth;
     switch (frame.mode) {
       case FaceMode.listening:
         canvas.drawCircle(const Offset(mouthCx, mouthCy), 9 + 5 * math.sin(frame.elapsed * 3.2), fill);
@@ -79,7 +79,7 @@ class SolidMouth implements MouthStyle {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 8
             ..strokeJoin = StrokeJoin.round
-            ..color = FaceColours.mouth,
+            ..color = frame.palette.mouth,
         );
         canvas.drawPath(path, fill);
     }

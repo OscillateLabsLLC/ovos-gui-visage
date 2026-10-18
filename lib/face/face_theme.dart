@@ -5,7 +5,10 @@ library;
 
 import 'dart:ui';
 
+import 'face_palette.dart';
 import 'visemes.dart';
+
+export 'face_palette.dart';
 
 enum FaceMode { rest, listening, thinking, speaking }
 
@@ -35,9 +38,13 @@ class FaceFrame {
     required this.viseme,
     required this.elapsed,
     this.compact = false,
+    this.palette = FacePalette.visage,
   });
 
   final FaceMode mode;
+
+  /// The colours every style paints in.
+  final FacePalette palette;
 
   /// The viseme code (visemes.dart) the mouth is heading for; the rest code outside speech.
   final int viseme;
@@ -56,6 +63,17 @@ class FaceFrame {
 
   /// Seconds since the widget started, for self-running motion such as the listening bars.
   final double elapsed;
+
+  FaceFrame withPalette(FacePalette palette) => FaceFrame(
+    mode: mode,
+    eyeOpen: eyeOpen,
+    eyeScale: eyeScale,
+    lips: lips,
+    viseme: viseme,
+    elapsed: elapsed,
+    compact: compact,
+    palette: palette,
+  );
 }
 
 abstract class EyesPainter {
@@ -116,20 +134,6 @@ abstract class FaceBackdrop {
   void paint(Canvas canvas, FaceFrame frame);
 }
 
-/// The colour tokens every style reads, so a colourway later is a value change and no new painting.
-abstract final class FaceColours {
-  static const eye = Color(0xFFF5F5F5);
-  static const eyeDim = Color(0xFF6D6D6D);
-  static const mouth = Color(0xFFFFFFFF);
-  static const accent = Color(0xFF1E9BFF);
-  static const led = Color(0xFF70656A);
-  static const unlit = Color(0xFF12171C);
-  static const matrix = Color(0xFFE1F3FF);
-  static const housing = Color(0xFF1B1E24);
-  static const blade = Color(0xFF262A31);
-  static const panel = Color(0xFF0A0C10);
-}
-
 abstract class MouthPainter {
   /// Draws the mouth for [frame]; [frame.lips] is already tweened, so a painter only maps it onto the screen.
   void paint(Canvas canvas, FaceFrame frame);
@@ -139,6 +143,9 @@ abstract class FaceTheme {
   FaceGeometry get geometry;
   EyesPainter get eyes;
   MouthPainter get mouth;
+
+  /// The colourway the face widget puts into every [FaceFrame].
+  FacePalette get palette;
 
   /// The viseme outlines this theme tweens between; a theme may rescale the open shapes.
   Map<int, List<Offset>> get mouthShapes;

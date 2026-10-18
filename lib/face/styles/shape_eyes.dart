@@ -11,6 +11,8 @@ import '../face_theme.dart';
 class BlockEyes implements EyeStyle {
   const BlockEyes();
 
+  static const _restAlpha = 0.95;
+
   @override
   void paint(Canvas canvas, FaceLayout layout, FaceFrame frame) {
     final think = frame.mode == FaceMode.thinking;
@@ -33,7 +35,7 @@ class BlockEyes implements EyeStyle {
           ..close();
         shape = Path.combine(PathOperation.difference, box, cut);
       }
-      canvas.drawPath(shape, Paint()..color = listen ? FaceColours.mouth : const Color(0xFFE9E9E9));
+      canvas.drawPath(shape, Paint()..color = listen ? frame.palette.mouth : frame.palette.eye.withValues(alpha: _restAlpha));
     }
   }
 }
@@ -42,6 +44,9 @@ class BlockEyes implements EyeStyle {
 /// them inward, a blink flattens them.
 class OvalEyes implements EyeStyle {
   const OvalEyes();
+
+  /// How far the bright core sits from the accent towards the mouth colour.
+  static const _coreLift = 0.835;
 
   @override
   void paint(Canvas canvas, FaceLayout layout, FaceFrame frame) {
@@ -59,13 +64,13 @@ class OvalEyes implements EyeStyle {
       canvas.drawOval(
         oval,
         Paint()
-          ..color = FaceColours.accent
+          ..color = frame.palette.accent
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.25),
       );
-      canvas.drawOval(oval, Paint()..color = FaceColours.accent);
+      canvas.drawOval(oval, Paint()..color = frame.palette.accent);
       canvas.drawOval(
         Rect.fromCenter(center: Offset.zero, width: rx * 1.1, height: ry * 1.4),
-        Paint()..color = const Color(0xFFD9EFFF),
+        Paint()..color = Color.lerp(frame.palette.accent, frame.palette.mouth, _coreLift)!,
       );
       canvas.restore();
     }
@@ -86,7 +91,7 @@ class DotEyes implements EyeStyle {
       final radius = r * 0.24 * (listen ? 1.35 : 1);
       final centre = slot.centre + Offset(think ? side * r * 0.14 : 0, think ? -r * 0.16 : 0);
       final dot = Rect.fromCenter(center: centre, width: radius * 2, height: radius * 2 * math.max(frame.eyeOpen, 0.12));
-      canvas.drawOval(dot, Paint()..color = FaceColours.eye);
+      canvas.drawOval(dot, Paint()..color = frame.palette.eye);
     }
   }
 }

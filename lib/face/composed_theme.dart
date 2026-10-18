@@ -15,7 +15,13 @@ import 'visemes.dart';
 final composedMouthShapes = mouthShapes();
 
 class ComposedTheme implements FaceTheme {
-  const ComposedTheme({required this.backdrop, required this.eyeStyle, required this.mouthStyle, this.mouthScale = 1});
+  const ComposedTheme({
+    required this.backdrop,
+    required this.eyeStyle,
+    required this.mouthStyle,
+    this.mouthScale = 1,
+    this.palette = FacePalette.visage,
+  });
 
   final FaceBackdrop backdrop;
   final EyeStyle eyeStyle;
@@ -23,6 +29,9 @@ class ComposedTheme implements FaceTheme {
 
   /// 1 regular; larger grows the mouth slot, up to what the backdrop allows.
   final double mouthScale;
+
+  @override
+  final FacePalette palette;
 
   @override
   FaceGeometry get geometry => backdrop.geometry;

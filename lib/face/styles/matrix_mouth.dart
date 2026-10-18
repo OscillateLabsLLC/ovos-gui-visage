@@ -6,9 +6,8 @@ import 'dart:ui';
 import '../face_theme.dart';
 import '../mark1_theme.dart';
 
-const _mouthOn = Color(0xF5E1F3FF);
-const _mouthOff = Color(0x09E1F3FF);
-const _mouthGlow = Color(0xFFADDEFB);
+const _onAlpha = 0xF5;
+const _offAlpha = 0x09;
 
 class MatrixMouth implements MouthStyle {
   const MatrixMouth();
@@ -22,10 +21,10 @@ class MatrixMouth implements MouthStyle {
     final led = pitch * _ledRatio;
     final origin = slot.centre - Offset((mouthCols - 1) / 2 * pitch, (mouthRows - 1) / 2 * pitch);
     final rows = mouthFrame(frame.mode, frame.viseme, frame.elapsed);
-    final off = Paint()..color = _mouthOff;
-    final on = Paint()..color = _mouthOn;
+    final off = Paint()..color = frame.palette.matrix.withAlpha(_offAlpha);
+    final on = Paint()..color = frame.palette.matrix.withAlpha(_onAlpha);
     final glow = Paint()
-      ..color = _mouthGlow
+      ..color = frame.palette.matrixGlow
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, led * 0.6);
     for (var y = 0; y < mouthRows; y++) {
       for (var x = 0; x < mouthCols; x++) {

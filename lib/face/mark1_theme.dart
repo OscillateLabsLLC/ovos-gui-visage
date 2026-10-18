@@ -42,7 +42,13 @@ const _reflection = Color(0x17FFFFFF);
 const _grille = Color(0xFF070B0D);
 
 class Mark1Theme extends ComposedTheme {
-  const Mark1Theme() : super(backdrop: const PlateBackdrop(), eyeStyle: const RingEyes(), mouthStyle: const MatrixMouth());
+  const Mark1Theme()
+    : super(
+        backdrop: const PlateBackdrop(),
+        eyeStyle: const RingEyes(),
+        mouthStyle: const MatrixMouth(),
+        palette: FacePalette.mark1,
+      );
 }
 
 /// The faceplate: it places the styles in the ring wells and the matrix window and paints the plate behind them in

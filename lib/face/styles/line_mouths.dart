@@ -30,7 +30,7 @@ class WaveformMouth implements MouthStyle {
   @override
   void paint(Canvas canvas, MouthSlot slot, FaceFrame frame) {
     if (frame.mode == FaceMode.thinking) {
-      _paintDots(canvas, slot, frame.elapsed);
+      _paintDots(canvas, slot, frame.elapsed, frame.palette.mouth);
       return;
     }
     final listen = frame.mode == FaceMode.listening;
@@ -59,15 +59,15 @@ class WaveformMouth implements MouthStyle {
         ..strokeWidth = slot.width * 0.05
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
-        ..color = listen ? FaceColours.accent : FaceColours.mouth,
+        ..color = listen ? frame.palette.accent : frame.palette.mouth,
     );
   }
 
-  void _paintDots(Canvas canvas, MouthSlot slot, double elapsed) {
+  void _paintDots(Canvas canvas, MouthSlot slot, double elapsed, Color colour) {
     for (var i = -1; i <= 1; i++) {
       final alpha = 0.35 + 0.65 * math.max(0, math.sin(elapsed * 4 - i * 1.1));
       final at = slot.centre + Offset(i * slot.width * 0.13, 0);
-      canvas.drawCircle(at, slot.width * 0.035, Paint()..color = FaceColours.mouth.withValues(alpha: alpha));
+      canvas.drawCircle(at, slot.width * 0.035, Paint()..color = colour.withValues(alpha: alpha));
     }
   }
 }
@@ -83,7 +83,7 @@ class BarsMouth implements MouthStyle {
   void paint(Canvas canvas, MouthSlot slot, FaceFrame frame) {
     final span = slot.width * 0.58, pitch = span / (_bars - 1), barWidth = pitch * 0.42;
     final listen = frame.mode == FaceMode.listening, think = frame.mode == FaceMode.thinking;
-    final paint = Paint()..color = listen ? FaceColours.accent : FaceColours.mouth;
+    final paint = Paint()..color = listen ? frame.palette.accent : frame.palette.mouth;
     final scan = (frame.elapsed * 6).round() % (2 * (_bars - 1));
     for (var i = 0; i < _bars; i++) {
       final u = (i - (_bars - 1) / 2) / ((_bars - 1) / 2);

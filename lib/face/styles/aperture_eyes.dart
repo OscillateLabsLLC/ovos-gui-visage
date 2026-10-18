@@ -25,7 +25,7 @@ class ApertureEyes implements EyeStyle {
   void paint(Canvas canvas, FaceLayout layout, FaceFrame frame) {
     if (single) {
       final a = layout.left, b = layout.right;
-      _paintLens(canvas, EyeSlot((a.centre + b.centre) / 2, a.radius * 1.5), frame, FaceColours.accent);
+      _paintLens(canvas, EyeSlot((a.centre + b.centre) / 2, a.radius * 1.5), frame, frame.palette.accent);
       return;
     }
     for (final slot in layout.eyes) {
@@ -42,13 +42,13 @@ class ApertureEyes implements EyeStyle {
     final spin = frame.elapsed * 0.3 + open * 1.2;
     canvas.save();
     canvas.translate(slot.centre.dx, slot.centre.dy);
-    canvas.drawCircle(Offset.zero, r * 0.92, Paint()..color = FaceColours.housing);
+    canvas.drawCircle(Offset.zero, r * 0.92, Paint()..color = HardwareColours.housing);
     canvas.drawCircle(Offset.zero, radius, Paint()..color = glass);
     final blades = Path()
       ..fillType = PathFillType.evenOdd
       ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
       ..addPolygon(_corners(iris, spin), true);
-    canvas.drawPath(blades, Paint()..color = FaceColours.blade);
+    canvas.drawPath(blades, Paint()..color = HardwareColours.blade);
     final seam = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = r * 0.035
@@ -65,12 +65,12 @@ class ApertureEyes implements EyeStyle {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = r * 0.03
-        ..color = FaceColours.mouth.withValues(alpha: 0.35),
+        ..color = frame.palette.mouth.withValues(alpha: 0.35),
     );
     canvas.drawCircle(
       Offset(-iris * 0.28 + dart, -iris * 0.3),
       iris * 0.12,
-      Paint()..color = FaceColours.mouth.withValues(alpha: 0.85),
+      Paint()..color = frame.palette.mouth.withValues(alpha: 0.85),
     );
     canvas.restore();
   }
@@ -98,7 +98,7 @@ class VisorEyes implements EyeStyle {
       ..shader = Gradient.linear(
         bar.centerLeft,
         bar.centerRight,
-        const [Color(0xFF6E6E6E), FaceColours.eye, Color(0xFF6E6E6E)],
+        [frame.palette.eyeDim, frame.palette.eye, frame.palette.eyeDim],
         const [0, 0.5, 1],
       )
       ..color = Color.fromRGBO(0, 0, 0, pulse);
@@ -109,7 +109,7 @@ class VisorEyes implements EyeStyle {
       canvas.drawCircle(
         at,
         h * 1.4,
-        Paint()..shader = Gradient.radial(at, h * 1.4, [FaceColours.accent, FaceColours.accent.withValues(alpha: 0)]),
+        Paint()..shader = Gradient.radial(at, h * 1.4, [frame.palette.accent, frame.palette.accent.withValues(alpha: 0)]),
       );
     }
   }
