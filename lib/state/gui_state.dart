@@ -64,14 +64,15 @@ class GuiState {
 
   Namespace namespace(String skillId) => namespaces.putIfAbsent(skillId, () => Namespace(skillId));
 
-  /// Applies one GUI protocol message; false for an unknown or malformed one (the caller logs the payload).
+  /// Applies one GUI protocol message; false for an unknown type (the caller logs the payload). A malformed message
+  /// throws [MalformedMessage] with its cause, so the fault reaches the log instead of passing as unknown.
   bool apply(Json message) {
     final handler = _handlers[message['type']];
     if (handler == null) return false;
     try {
       handler(message);
-    } on Object {
-      return false;
+    } on Object catch (cause) {
+      throw MalformedMessage(message, cause);
     }
     return true;
   }
@@ -188,3 +189,7 @@ List<T> _remove<T>(List<T> items, int position, int count) {
 }
 
 void _move<T>(List<T> items, int from, int to, int count) => items.insertAll(to, _remove(items, from, count));
+
+class MalformedMessage extends FormatException {
+  MalformedMessage(Json message, Object cause) : super('malformed ${message['type']}: $cause', message);
+}

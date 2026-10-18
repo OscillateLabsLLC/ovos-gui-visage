@@ -43,10 +43,10 @@ void main() {
     expect(state.current(), const Target(defaultIdleNamespace, 'idle', 0));
   });
 
-  test('unknown and malformed messages are refused, not thrown', () {
+  test('unknown messages are refused; malformed ones throw with their cause', () {
     final state = GuiState();
     expect(state.apply({'type': 'nope'}), isFalse);
-    expect(state.apply({'type': 'mycroft.session.set', 'namespace': 'x'}), isFalse);
+    expect(() => state.apply({'type': 'mycroft.session.set', 'namespace': 'x'}), throwsA(isA<MalformedMessage>()));
     expect(state.current(), isNull);
   });
 }
