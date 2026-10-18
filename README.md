@@ -26,7 +26,7 @@ skills, homescreen                 ▲ ovos.widgets.* translation       reads ~/
 - A running OVOS install on the same machine (core bus on `ws://127.0.0.1:8181/core`).
 - `ovos-gui` and `ovos-skill-homescreen` in their own virtualenv, as ovos-visage's
   `docs/SPEC.md` section 3.1 describes.
-- Flutter 3.47 or newer to build.
+- Flutter 3.47 or newer to build; Docker to build the sidecar image.
 
 ## Running
 
@@ -50,7 +50,12 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 - **Widgets.** `lib/widgets/widget_manager.dart` plays the shell companion's role for the
   alerts skill's `ovos.widgets.*` messages.
 - **Resources.** Session values that are image paths are read straight from
-  `~/.cache/ovos_gui` or wherever the skill put them; no file server.
+  `~/.cache/ovos_gui` or wherever the skill put them; no file server. The web build fetches
+  the same paths from the sidecar instead (`lib/resources/`).
+- **Web views.** `SYSTEM_UrlFrame` and `SYSTEM_HtmlFrame` open a web view where the platform
+  has one (macOS, and an iframe on the web); elsewhere they show the URL or the page's text.
+- **Faults.** Anything the display survives by showing a fallback is reported through
+  `lib/faults.dart` first, so a missing animation or image is in the log, never silent.
 - **Pages.** One widget per page, routed by `namespace/page` (system templates by page name),
   with pure view models under `flutter test`. Circles, rings and plain text on black; no cards.
 - **Face.** `lib/face/` draws the face through a `FaceTheme`: the eyes and the mouth are
@@ -59,6 +64,25 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 
 `docs/SCOPE.md` records the port's decisions, the platform gating and the phases.
 ovos-visage's `docs/SPEC.md` remains the protocol and visual reference.
+
+## Web build and sidecar
+
+For a display on another machine, the web build runs in a browser served by a sidecar on the
+OVOS host. The sidecar serves the app, the GUI cache under `/res/`, the host's files under
+`/res-abs/`, and proxies the two websockets, so port 8080 is the only one to expose. Anyone
+who reaches it can drive the OVOS bus through the proxy: keep it on a trusted network, or put
+authentication and TLS in front of it.
+
+```bash
+docker compose -f sidecar/compose.yaml up --build   # on the OVOS host, then open http://<host>:8080/
+```
+
+To try the web build against a local OVOS without the sidecar:
+
+```bash
+flutter build web --release
+python3 tool/serve_web.py          # http://127.0.0.1:8099/?bus=ws://127.0.0.1:8181
+```
 
 ## Development
 

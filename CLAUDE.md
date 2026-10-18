@@ -15,6 +15,10 @@ protocol and visual reference (`../ovos-visage/docs/SPEC.md` in Mike's checkout)
   drivers (`docs/spike_say.py`, `tests/manual/demo.py`, `tests/manual/show_templates.py`) only
   talk to the bus, so they drive this app unchanged. Paste the evidence in the PR.
 - One logical action per Bash call; no `;`-chained unrelated commands.
+- **Never swallow a failure.** No empty catch, no silent `return null`. Where the display
+  survives by showing a fallback, call `reportFault` (`lib/faults.dart`) first; protocol
+  faults are logged with payload and stack. A test that exercises a fallback asserts the
+  report (`test/faults.dart`).
 
 ## Running the stack (two processes plus OVOS)
 
@@ -26,7 +30,9 @@ flutter run -d macos
 
 ## Conventions
 
-- Targets: macOS first; Linux, Windows and web build in CI. No iOS, no Android.
+- Targets: macOS first; Linux, Windows and web build in CI; the web build runs behind `sidecar/`.
+  No iOS, no Android. `dart:io` lives only in `lib/resources/platform_io.dart` and
+  `lib/protocol/endpoints_io.dart` (conditional exports), or the web build stops compiling.
 - macOS app sandbox is off (local sockets, reads `~/.cache/ovos_gui`); signed with the
   Oscillate Labs LLC team.
 - `flutter analyze --fatal-infos` and `dart format --line-length 130` are clean; `flutter test`

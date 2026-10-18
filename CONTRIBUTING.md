@@ -40,11 +40,27 @@ assets under `assets/icons/` and regenerates `lib/widgets/icon_layers.g.dart`; t
 are transcribed by hand into `lib/widgets/icon_motion.dart`, keyed by icon, class and
 ordinal. `test/motion_test.dart` fails if an animated layer has no motion or painter.
 
+## Platform halves
+
+`lib/resources/` and `lib/protocol/endpoints*.dart` are the only places that know whether they
+run on a desktop or in a browser: a conditional `export` picks `platform_io.dart` or
+`platform_web.dart`. Keep `dart:io` out of everything else, or `flutter build web` stops
+compiling. Web views come from webview_flutter and exist only where it registered an
+implementation (`hasWebView`), which is also why the test runner sees the text fallbacks.
+
+## Faults
+
+Never swallow a failure. Where the display survives by showing a fallback, call
+`reportFault` from `lib/faults.dart` first; it goes through `FlutterError.onError`, so it is
+in the log and a test fails unless it expects the report (`test/faults.dart` collects them).
+Protocol faults are logged by the clients with the payload and stack.
+
 ## Verifying a change
 
 A green test run proves the state machine and view models. A visible change needs the stack
 running and eyes on the screen: ovos-visage's `docs/spike_say.py`, `tests/manual/demo.py`
-and `tests/manual/show_templates.py` drive this app unchanged. Paste what you saw in the PR.
+and `tests/manual/show_templates.py` drive this app unchanged, on the desktop and in a browser
+served by `tool/serve_web.py`. Paste what you saw in the PR.
 
 ## Pull Requests
 

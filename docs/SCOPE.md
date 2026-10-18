@@ -12,9 +12,9 @@ visual reference; this file records what changes in the port and why.
 |---|---|
 | Targets | macOS first, then Linux, Windows, web. No iOS, no Android. |
 | Deployment | Same-host display: the app runs on the machine that runs OVOS and reads `~/.cache/ovos_gui` directly. |
-| Remote use | The web build, served from a sidecar container on the OVOS host, instead of a phone app. This keeps the unauthenticated core bus off the LAN. |
-| Middle layer | None on desktop. The Dart app is the GUI client, the state mirror and the WidgetManager. The web build needs a sidecar to serve the cache (ovos-gui 1.5.3a1 has no file server). |
-| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort. No Linux webview is required. |
+| Remote use | The web build, served from a sidecar container on the OVOS host, instead of a phone app. The sidecar proxies the two websockets, so its port is the only one exposed and the place to put authentication and TLS; the bus itself stays off the LAN. |
+| Middle layer | None on desktop. The Dart app is the GUI client, the state mirror and the WidgetManager. The web build needs the sidecar (`sidecar/`) to serve the cache, since ovos-gui 1.5.3a1 has no file server. |
+| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required; Windows waits for a maintained WebView2 package. |
 | Face | Themeable: eyes and mouth are swappable painters behind `FaceTheme`. First pass ships only the current visage look; no new themes. |
 | Input | Display-only, as before. Touch is additive later; pages are plain widgets with no gesture plumbing. |
 | macOS sandbox | Off. The app opens local sockets and reads the GUI cache; it is a kiosk display, not an App Store app. Signed with the Oscillate Labs LLC team. |
@@ -43,8 +43,13 @@ lib/
   attention.dart       listen/think/speak state machine (port of attention.js)
   face/                face_theme.dart (contract), visage_theme.dart (current look), face.dart (widget), visemes.dart
   lottie/              segment.dart (liveSegment), cache_lottie.dart (OVOS animations from the cache)
-  widgets/             WidgetManager port (to do)
-  pages/               one widget per page plus pure view models (to do)
+  resources/           locate.dart (pure), platform_io.dart (disk) and platform_web.dart (sidecar routes) behind a conditional export
+  protocol/endpoints*  where the sockets are per platform: the host (desktop) or the page's origin (web)
+  faults.dart          reportFault: a survivable fault reaches the log before its fallback shows
+  widgets/             WidgetManager port, shared circle/ring/glow widgets, icon motion, WebFrame
+  pages/               one widget per page plus pure view models
+sidecar/               Dockerfile, nginx template and compose file for the web build on the OVOS host
+tool/                  split_icons.py, serve_web.py (the web build against a local OVOS, no sidecar)
 test/
   fixtures/*.jsonl     the recorded protocol traffic from ovos-visage, unchanged
   fixtures/expected/   the Python reference's state snapshot per fixture; gui_state_test requires a match
@@ -57,8 +62,8 @@ test/
 | `state.py` + `mirror.js` | `GuiState` | One model instead of two; the parity test now compares against Python goldens. |
 | `bus.py`, `gui_client.py` | `CoreBus`, `GuiClient` | Verified live: port negotiation, re-announce, boot sync. |
 | `widgets.py` | `WidgetManager` | Same translation on the core bus. One app per host, so no double translation. |
-| `resources.py`, `web.py` | direct file reads | Session paths under the cache become `File`s; OCP's absolute image paths are read directly, since the trust boundary (session data from skills) is the same. The web build keeps the `/res/` and `/res-abs/` URL scheme via the sidecar. |
-| `framing.py`, `/frameable` | not needed with a webview | A webview loads pages top-level, so sites that refuse framing work. The refused-site chip stays as the fallback where there is no webview. |
+| `resources.py`, `web.py` | `lib/resources/` | `locate` classifies a value (data URI, http, `/res/` cache path, absolute path). The desktop reads cache and absolute paths from disk, since the trust boundary (session data from skills) is the same; the web build fetches `/res/` and `/res-abs/` from the sidecar. Conditional exports pick the half; nothing else touches `dart:io`. |
+| `framing.py`, `/frameable` | not needed with a webview | A webview loads pages top-level, so sites that refuse framing work (verified with google.com on macOS). The web build's iframe cannot tell a refusal from inside the page, so it shows the browser's own refusal there; the URL chip stays as the fallback where there is no webview. |
 | `face.js`, `visemes.js` | `Face`, `FaceTheme`, `visemes.dart` | Same geometry and shapes; Catmull-Rom path in a `CustomPainter`. |
 | `attention.js` | `Attention` | Same events and timings. |
 | `lottie.js`, vendored lottie-web | `lottie` package | All six platforms. `liveSegment` ported. Fidelity on OVOS's files checked in the spike. |
@@ -71,10 +76,10 @@ test/
 
 | Capability | macOS | Linux | Windows | web |
 |---|---|---|---|---|
-| Core bus and GUI socket | yes | yes | yes | yes (same origin or CORS-free websocket) |
-| Read `~/.cache/ovos_gui` | yes | yes | yes | no, via sidecar `/res/` |
-| `SYSTEM_HtmlFrame` with scripts | webview | no (styled text) | webview | iframe |
-| `SYSTEM_UrlFrame` | webview | URL chip | webview | iframe, refused sites show the chip |
+| Core bus and GUI socket | yes | yes | yes | through the sidecar's `/core` and `/gui` proxies, or `?bus=ws://host:8181` straight to OVOS |
+| Read `~/.cache/ovos_gui` | yes | yes | yes | no, via sidecar `/res/` and `/res-abs/` |
+| `SYSTEM_HtmlFrame` with scripts | WKWebView | no (plain text) | no (plain text) | iframe |
+| `SYSTEM_UrlFrame` | WKWebView | URL chip | URL chip | iframe; a refused site shows the browser's refusal |
 | Lottie | yes | yes | yes | yes |
 
 ## Phases
@@ -93,11 +98,16 @@ test/
 3. **OCP pages** (done): now playing, busy, suggestions, home. Verified by replaying the
    recorded OCP session data through ovos-gui with `gui.value.set` / `gui.page.show`, since
    OCP need not be installed to test the pages.
-4. Webviews with platform gating; the web build and its sidecar. The web build does not
-   compile yet: `lib/resources.dart` and `lib/lottie/cache_lottie.dart` read files with
-   `dart:io`, so the resource layer needs a web implementation that fetches the sidecar's
-   `/res/` URLs instead (conditional imports).
-5. CI matrix (macOS, Linux, Windows, web), packaging, release-please.
+4. **Webviews and the web build** (done). `WebFrame` exists where webview_flutter has a
+   registered implementation (WKWebView on macOS, an iframe on the web) and the pages keep
+   their text fallbacks elsewhere. Windows stays on the fallbacks: webview_windows and
+   flutter_inappwebview were both two years without a release and need NuGet at build time.
+   The resource layer and the socket endpoints are split per platform behind conditional
+   exports, so the web build compiles and was verified in Chrome against the local OVOS with
+   `tool/serve_web.py`. `sidecar/` serves the build, the cache and proxies both websockets;
+   CI builds the image and checks the rendered nginx config, since no Docker daemon was
+   available locally.
+5. CI matrix (macOS, Linux, Windows, web, sidecar image), packaging, release-please.
 6. Floating widget mode (later, about a day): a frameless always-on-top window that snaps
    to a screen corner, via `window_manager` plus the display bounds. Works on macOS,
    Windows and X11; Wayland does not let apps position their own windows, and the web
