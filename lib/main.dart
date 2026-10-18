@@ -20,6 +20,7 @@ import 'protocol/endpoints.dart';
 import 'protocol/gui_client.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
+import 'widgets/offline_pill.dart';
 import 'widgets/widget_manager.dart';
 import 'window/peek.dart';
 import 'window/status_menu.dart';
@@ -207,7 +208,7 @@ class _ScreenState extends State<Screen> {
                 ),
               ),
               _AttentionOverlay(attention: attention, face: face),
-              if (!guiConnected) const _OfflinePill(),
+              if (!guiConnected) const OfflinePill(),
               FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: peek.hold),
             ],
           ),
@@ -267,26 +268,6 @@ class _AttentionOverlay extends StatelessWidget {
               ..translateByDouble(-geometry.centre.dx, -geometry.centre.dy, 0, 1),
             child: BadgeFace(controller: face, compact: attention.compact),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OfflinePill extends StatelessWidget {
-  const _OfflinePill();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 12,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-          decoration: BoxDecoration(color: const Color(0xFF3A1D1D), borderRadius: BorderRadius.circular(10)),
-          child: const Text('GUI offline', style: TextStyle(color: Color(0xFFFFB4B4), fontSize: 12)),
         ),
       ),
     );
