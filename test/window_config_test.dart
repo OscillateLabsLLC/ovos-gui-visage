@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/window/window_config.dart';
 
 void main() {
+  _nearestCornerTests();
   test('defaults to a desktop widget in the top-right corner', () {
     final config = WindowConfig.from(null, const {});
     expect(config.mode, WindowMode.desktop);
@@ -124,5 +125,16 @@ void main() {
       [changed.mode, changed.corner, changed.height, changed.margin, changed.peekSize],
       [WindowMode.float, Corner.bottomLeft, 300, 8, 80],
     );
+  });
+}
+
+void _nearestCornerTests() {
+  const area = Rect.fromLTWH(0, 0, 1920, 1080);
+  test('a dropped widget belongs to the corner its centre is nearest to', () {
+    expect(nearestCorner(const Rect.fromLTWH(10, 10, 240, 400), area), Corner.topLeft);
+    expect(nearestCorner(const Rect.fromLTWH(1500, 10, 240, 400), area), Corner.topRight);
+    expect(nearestCorner(const Rect.fromLTWH(10, 600, 240, 400), area), Corner.bottomLeft);
+    expect(nearestCorner(const Rect.fromLTWH(900, 500, 240, 400), area), Corner.bottomRight);
+    expect(nearestCorner(const Rect.fromLTWH(700, 300, 240, 400), area), Corner.topLeft);
   });
 }
