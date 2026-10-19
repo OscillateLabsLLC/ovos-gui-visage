@@ -157,9 +157,10 @@ timeline refreshes an hour.
 
 The widget modes were checked on Kubuntu 24.04 (X11, KWin, Plasma): `window`, `float`, `desktop`,
 peek and kiosk all place correctly, the rounded frame floats on the desktop, and `desktop` stays
-beneath other windows through the window manager's keep-below flag. Differences from macOS: there is
-no menu bar item, so the mode and the face change through the config file, the environment or the
-bus; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
+beneath other windows through the window manager's keep-below flag. Differences from macOS: the menu lives in a
+system tray item (an app indicator, which needs `libayatana-appindicator3-1` installed; Plasma shows it,
+GNOME needs the AppIndicator extension), and a widget can be dragged to another corner, where it snaps and
+the corner is saved; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
 the log reports it once); kiosk covers the panel through the window manager's fullscreen state but does
 not keep the display awake, and leaving it shows the window at its ordinary size for a moment before the
 widget settles in its corner; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
