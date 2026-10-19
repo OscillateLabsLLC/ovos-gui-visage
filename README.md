@@ -118,7 +118,8 @@ A bad hex string or an unknown colourway is logged and falls back to visage for 
 
 It changes while running, three ways, and every change is written back to the config file:
 
-- **From a browser.** `docs/face-palettes.html` previews every pairing in every attention state;
+- **From a browser.** `docs/face-palettes.html` shows the presets as cards, with eyes, mouth,
+  size and colour under "Customise this face" and every pairing behind "Show every combination";
   served by the sidecar at `/faces.html`, or opened with `?bus=ws://host:8181` (or
   `#bus=ws://host:8181`), it connects to the OVOS bus and every tap changes the device's face. It
   follows changes made any other way. On macOS, **Face picker…** in the menu bar opens it already

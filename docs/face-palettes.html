@@ -3,124 +3,153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Visage Face Palettes</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Choose a face</title>
+<meta name="description" content="Pick the face your voice assistant shows on its screen.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-  /* Layout: one big live face with the pickers beside it, then the 4 x 4 grid of every pairing, then the notes.
-     Single dark theme by choice: the faces live on the black 480 x 800 screen, so the page is that screen. */
+  /* One dark theme by choice: the faces live on a black screen, so the page is that screen.
+     Layout: status, the preset cards, a closed "Customise" section, and the full grid behind a button. */
   :root {
     --bg: #0b0c0f;
-    --panel: #14161b;
-    --line: #23262d;
-    --fg: #e8e5de;
-    --muted: #8f8c85;
+    --panel: #15171c;
+    --edge: #6b707b;
+    --fg: #ece9e2;
+    --muted: #a9a59d;
     --accent: #1e9bff;
+    --focus: #9fd3ff;
+    --ok: #5fe39a;
+    --warn: #ffb4a8;
     --display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", sans-serif;
     --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-    --mono: "IBM Plex Mono", "SF Mono", Menlo, monospace;
     color-scheme: dark;
   }
+  * { box-sizing: border-box; }
   body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--body);
-    font-size: 16px;
-    line-height: 1.5;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-    padding-block: 24px 48px;
+    margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 24px 64px;
   }
-  main { max-width: 1040px; margin: 0 auto; display: grid; gap: 40px; }
-  h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.1; }
-  h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; }
-  h2 { font-size: 22px; font-weight: 500; }
-  p { max-width: 62ch; margin: 0; }
-  .lede { color: var(--muted); }
-  header { display: grid; gap: 10px; }
-  .stage { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 28px; align-items: start; }
-  @media (max-width: 680px) { .stage { grid-template-columns: 1fr; } }
-  .screen { background: #000; border-radius: 28px; border: 1px solid var(--line); padding: 12px; }
-  .screen canvas { display: block; width: 100%; height: auto; }
-  .pickers { display: grid; gap: 22px; min-width: 0; }
-  .picker { display: grid; gap: 8px; }
-  .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    font: 500 14px var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line);
-    border-radius: 999px; padding: 7px 14px; cursor: pointer;
+  main { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.15; text-wrap: balance; }
+  h1 { font-size: clamp(30px, 6vw, 42px); font-weight: 700; }
+  h2 { font-size: 24px; font-weight: 500; }
+  h3 { font-size: 18px; font-weight: 500; }
+  p { margin: 0; max-width: 60ch; }
+  .hint { color: var(--muted); font-size: 15px; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  header { display: grid; gap: 12px; }
+  .status { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+  .status::before { content: ''; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+  .status[data-state="live"] { color: var(--fg); }
+  .status[data-state="live"]::before { background: var(--ok); border-color: var(--ok); }
+  .feedback { display: flex; align-items: center; gap: 14px; min-height: 44px; flex-wrap: wrap; }
+  .saved { font-weight: 600; color: var(--ok); }
+  .saved[data-tone="warn"] { color: var(--warn); }
+  .link {
+    font: inherit; font-weight: 600; color: var(--focus); background: none; border: 0; padding: 10px 4px;
+    min-height: 44px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
   }
-  .chip[aria-pressed="true"] { border-color: var(--accent); color: #fff; background: #10243a; }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-  .bus { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .bus::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
-  .bus[data-state="live"] { color: var(--fg); }
-  .bus[data-state="live"]::before { background: #3ddc84; }
-  .bus[data-state="lost"]::before { background: #ff5c5c; }
-  .toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
-  .name { font-family: var(--display); font-size: 20px; font-weight: 500; }
-  .name small { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-left: 8px; }
-  .behaviour { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
-  .behaviour b { color: var(--fg); font-weight: 500; }
-  .grid-scroll { overflow-x: auto; padding-bottom: 8px; }
-  .grid { display: grid; grid-template-columns: auto repeat(var(--mouths), minmax(96px, 1fr)); gap: 10px; align-items: center; min-width: max-content; }
-  .grid .corner { }
-  .grid .head { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: center; }
-  .grid .row { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; }
-  .cell { background: #000; border: 1px solid var(--line); border-radius: 14px; padding: 4px; cursor: pointer; min-width: 0; }
-  .cell[aria-pressed="true"] { border-color: var(--accent); }
-  .cell canvas { display: block; width: 100%; height: auto; }
-  .notes { display: grid; gap: 18px; }
-  .notes ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 62ch; }
-  code { font-family: var(--mono); font-size: 0.92em; background: var(--panel); padding: 1px 5px; border-radius: 4px; }
-  .presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .preset { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: left; color: var(--fg); font-family: var(--body); display: grid; gap: 4px; }
-  .preset b { font-family: var(--display); font-weight: 500; font-size: 17px; }
-  .preset span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  @media (prefers-reduced-motion: reduce) { .chip, .cell { transition: none; } }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  @media (max-width: 600px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+  .card, .opt {
+    position: relative; background: var(--panel); border: 2px solid var(--edge); border-radius: 18px; cursor: pointer;
+    color: var(--fg); user-select: none;
+  }
+  .card { display: grid; gap: 4px; padding: 10px 10px 14px; }
+  .card canvas, .opt canvas, .cell canvas, .preview canvas { display: block; width: 100%; height: auto; background: #000; }
+  .card canvas { border-radius: 12px; }
+  .card .title { font-family: var(--display); font-size: 20px; font-weight: 500; padding: 4px 4px 0; }
+  .card .desc { color: var(--muted); font-size: 15px; padding: 0 4px; }
+  .card[aria-checked="true"], .opt[aria-checked="true"] { border-color: var(--accent); background: #10233a; box-shadow: 0 0 0 1px var(--accent); }
+  .current {
+    position: absolute; top: 18px; left: 18px; background: var(--accent); color: #000; font-weight: 600; font-size: 14px;
+    padding: 2px 10px; border-radius: 999px;
+  }
+  .card[aria-checked="false"] .current, .opt[aria-checked="false"] .check { display: none; }
+  details { border-top: 1px solid var(--edge); padding-top: 8px; }
+  summary { display: flex; align-items: center; gap: 12px; min-height: 52px; cursor: pointer; list-style: none; border-radius: 10px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: '▸'; font-size: 20px; color: var(--focus); transition: transform 0.15s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  .customise { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 28px; align-items: start; padding-top: 18px; }
+  @media (max-width: 720px) { .customise { grid-template-columns: 1fr; } }
+  .preview { display: grid; gap: 12px; position: sticky; top: 16px; }
+  @media (max-width: 720px) { .preview { position: static; max-width: 280px; } }
+  .preview canvas { border-radius: 20px; border: 1px solid #2a2d34; }
+  .groups { display: grid; gap: 26px; min-width: 0; }
+  .group { display: grid; gap: 10px; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+  .opts.words { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { display: grid; gap: 4px; padding: 6px 6px 8px; text-align: center; font-size: 15px; min-height: 44px; }
+  .opt canvas { border-radius: 10px; }
+  .words .opt { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px; }
+  .check { position: absolute; top: 4px; right: 6px; color: var(--accent); font-weight: 700; }
+  .words .check { position: static; }
+  .button {
+    font: 600 17px var(--body); color: var(--fg); background: var(--panel); border: 2px solid var(--edge); border-radius: 12px;
+    padding: 10px 18px; min-height: 48px; cursor: pointer; justify-self: start;
+  }
+  .everything { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .grid-scroll { overflow-x: auto; padding: 6px 4px 10px; }
+  .grid { display: grid; grid-template-columns: auto repeat(8, 104px); gap: 10px; align-items: center; width: max-content; }
+  .grid .head { color: var(--muted); font-size: 14px; text-align: center; }
+  .grid .side { color: var(--muted); font-size: 14px; text-align: right; padding-right: 4px; }
+  .cell { position: relative; background: #000; border: 2px solid #3a3e47; border-radius: 14px; padding: 4px; cursor: pointer; }
+  .cell[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .cell[aria-pressed="false"] .check { display: none; }
+  @media (prefers-reduced-motion: reduce) { summary::before { transition: none; } }
 </style>
-
 </head>
 <body>
 <main>
   <header>
-    <h1>Visage Face Palettes</h1>
-    <p class="lede">Nine eye styles and eight mouth styles for ovos-gui-visage, each drawn into the same slots, so any eye pairs with any mouth. Pick a pair and a colourway, then step through the attention states. Every style paints from the same colour tokens, so each colourway works with every pairing.</p>
-    <p class="bus" id="bus" aria-live="polite">Preview only. Served by the sidecar, or opened with <code>?bus=ws://host:8181</code>, this page changes the face on the device as you tap.</p>
+    <h1>Choose a face</h1>
+    <p class="status" id="status" aria-live="polite" tabindex="-1">Preview only. Open this page from the menu bar to change your assistant.</p>
+    <div class="feedback">
+      <span class="saved" id="saved" role="status"></span>
+      <button class="link" type="button" id="undo" hidden>Undo</button>
+    </div>
   </header>
 
-  <section class="stage">
-    <div class="screen"><canvas id="big" width="480" height="600" aria-label="The chosen face, animated"></canvas></div>
-    <div class="pickers">
-      <div class="name"><span id="pairName">lens + outline</span><small id="pairNote">visage</small></div>
-      <div class="picker"><div class="label">Eyes</div><div class="chips" id="eyeChips" role="group" aria-label="Eye style"></div></div>
-      <div class="picker"><div class="label">Mouth</div><div class="chips" id="mouthChips" role="group" aria-label="Mouth style"></div></div>
-      <div class="picker"><div class="label">Colour</div><div class="chips" id="coloursChips" role="group" aria-label="Colourway"></div></div>
-      <div class="picker"><div class="label">Mouth size</div><div class="chips" id="sizeChips" role="group" aria-label="Mouth size"></div></div>
-      <div class="picker"><div class="label">State</div><div class="chips" id="modeChips" role="group" aria-label="Attention state"></div></div>
-      <label class="toggle"><input type="checkbox" id="compact"> Compact badge (the face over a content page)</label>
-      <div class="behaviour" id="behaviour"></div>
+  <section aria-labelledby="facesHeading">
+    <h2 id="facesHeading">Faces</h2>
+    <p class="hint" id="facesHint" style="margin:6px 0 16px">Tap a face to use it.</p>
+    <div class="cards" id="cards" role="radiogroup" aria-labelledby="facesHeading"></div>
+  </section>
+
+  <details id="customise">
+    <summary><h2>Customise this face</h2></summary>
+    <div class="customise">
+      <div class="preview">
+        <canvas id="preview" width="480" height="600" aria-hidden="true"></canvas>
+        <div class="group">
+          <h3 id="viewHeading">Preview as</h3>
+          <p class="hint" id="viewHint">This only changes the picture on this page.</p>
+          <div class="opts words" id="views" role="radiogroup" aria-labelledby="viewHeading" aria-describedby="viewHint"></div>
+        </div>
+      </div>
+      <div class="groups">
+        <div class="group"><h3 id="eyesHeading">Eyes</h3><div class="opts" id="eyes" role="radiogroup" aria-labelledby="eyesHeading"></div></div>
+        <div class="group"><h3 id="mouthHeading">Mouth</h3><div class="opts" id="mouth" role="radiogroup" aria-labelledby="mouthHeading"></div></div>
+        <div class="group"><h3 id="sizeHeading">Mouth size</h3><div class="opts" id="size" role="radiogroup" aria-labelledby="sizeHeading"></div></div>
+        <div class="group">
+          <h3 id="coloursHeading">Colour</h3>
+          <p class="hint" id="ownColours" hidden>Your own colours are in use. Pick one here to replace them.</p>
+          <div class="opts" id="colours" role="radiogroup" aria-labelledby="coloursHeading"></div>
+        </div>
+      </div>
     </div>
-  </section>
+  </details>
 
-  <section>
-    <h2>Every pairing</h2>
-    <p class="lede" style="margin-top:6px">Every face in the chosen state, eyes down the side and mouths across. Scroll sideways on a phone; tap one to bring it to the stage.</p>
-    <div class="grid-scroll" style="margin-top:16px"><div class="grid" id="grid"></div></div>
-  </section>
-
-  <section class="notes">
-    <h2>Presets</h2>
-    <div class="presets" id="presets"></div>
-    <h2>Keeping a face</h2>
-    <ul>
-      <li>Connected to the device, every tap here changes the face and saves it, so it is the face at the next start.</li>
-      <li>In the config file: <code>"face": "mark1"</code> for a preset, <code>"face": "retro+large+rose"</code> for names in any order, or an object with <code>eyes</code>, <code>mouth</code>, <code>mouthSize</code>, <code>backdrop</code> and <code>colours</code>.</li>
-      <li>From the shell: <code>VISAGE_FACE=block+outline</code> on top of the file.</li>
-      <li>Over the bus: <code>visage.face.set</code> with any of those keys; <code>visage.face.state</code> answers with the current face and the names available for each part.</li>
-    </ul>
-    <p class="lede">The styles, colourways and config forms are written up in <code>docs/FACE_PALETTES.md</code>.</p>
+  <section class="everything" aria-label="Every combination">
+    <button class="button" type="button" id="showAll" aria-expanded="false" aria-controls="all">Show every combination</button>
+    <div id="all" hidden>
+      <p class="hint">Eyes down the side, mouths across. Tap one to use it.</p>
+      <div class="grid-scroll"><div class="grid" id="grid"></div></div>
+    </div>
   </section>
 </main>
 
@@ -659,152 +688,283 @@
     mouthStyles[mouth].draw(ctx, mouthSlot(L, size), f);
   };
 
-  const state = { eyes: 'lens', mouth: 'outline', mode: 'speaking', compact: false, size: 'regular', colours: 'visage' };
-  const presets = [
-    { eyes: 'lens', mouth: 'outline', name: 'visage', blurb: 'the 2018 concept face, today' },
-    { eyes: 'ring', mouth: 'matrix', name: 'mark1', blurb: 'the Mark 1 LEDs, today', colours: 'mark1' },
-    { eyes: 'visor', mouth: 'matrix', name: 'scanner', blurb: 'one eye over an LED mouth' },
-    { eyes: 'block', mouth: 'solid', name: 'robot', blurb: 'eyes and mouth both squash' },
-    { eyes: 'ring', mouth: 'waveform', name: 'retro', blurb: 'LED eyes, smooth voice' },
-    { eyes: 'lens', mouth: 'matrix', name: 'hybrid', blurb: 'concept eyes, matrix mouth' },
-    { eyes: 'aperture', mouth: 'grille', name: 'camera', blurb: 'binocular lenses, speaker slats' },
-    { eyes: 'oval', mouth: 'none', name: 'pod', blurb: 'glowing ovals, no mouth' },
-    { eyes: 'pixel', mouth: 'matrix', name: 'led', blurb: 'an all-LED face' },
-    { eyes: 'mono', mouth: 'orb', name: 'orbit', blurb: 'one lens, one ring' },
-    { eyes: 'dot', mouth: 'bars', name: 'buddy', blurb: 'dots over an equaliser' },
-  ];
-  const presetFor = (e, m) => presets.find((p) => p.eyes === e && p.mouth === m);
-
-  const chipGroup = (el, names, key) => {
-    el.innerHTML = '';
-    for (const n of names) {
-      const b = document.createElement('button');
-      b.className = 'chip'; b.type = 'button'; b.textContent = n; b.id = `${key}-${n}`;
-      b.addEventListener('click', () => { state[key] = n; sync(); });
-      el.appendChild(b);
-    }
+  // Plain names for every part; the keys must match lib/face/styles.dart and the colour names above.
+  const NAMES = {
+    eyes: { lens: 'Round', ring: 'LED ring', block: 'Square', visor: 'Light bar', aperture: 'Camera', mono: 'One lens', oval: 'Oval', pixel: 'LED grid', dot: 'Dots' },
+    mouth: { outline: 'Outline', solid: 'Filled', matrix: 'LED strip', waveform: 'Wave', bars: 'Bars', grille: 'Slats', orb: 'Ring', none: 'No mouth' },
+    size: { regular: 'Regular', large: 'Large' },
+    colours: { visage: 'White', ember: 'Amber', mint: 'Mint', rose: 'Rose', ice: 'Ice', mark1: 'Grey' },
   };
-  chipGroup(document.getElementById('eyeChips'), Object.keys(eyeStyles), 'eyes');
-  chipGroup(document.getElementById('mouthChips'), Object.keys(mouthStyles), 'mouth');
-  chipGroup(document.getElementById('coloursChips'), Object.keys(palettes), 'colours');
-  chipGroup(document.getElementById('sizeChips'), Object.keys(sizes), 'size');
-  chipGroup(document.getElementById('modeChips'), modes, 'mode');
-  document.getElementById('compact').addEventListener('change', (ev) => { state.compact = ev.target.checked; sync(); });
+  for (const [part, source] of [['eyes', eyeStyles], ['mouth', mouthStyles], ['size', sizes], ['colours', palettes]]) {
+    const missing = Object.keys(source).filter((k) => !(k in NAMES[part]));
+    if (missing.length) console.error(`face picker: no plain name for ${part}`, missing);
+  }
+  // Must stay equal to facePresets in lib/face/styles.dart, in the same order.
+  const presets = [
+    { name: 'visage', title: 'Visage', eyes: 'lens', mouth: 'outline', blurb: 'The classic round-eyed concept face.' },
+    { name: 'mark1', title: 'Mark 1', eyes: 'ring', mouth: 'matrix', backdrop: 'mark1', colours: 'mark1', blurb: 'The original LED ring face.' },
+    { name: 'scanner', title: 'Scanner', eyes: 'visor', mouth: 'matrix', blurb: 'A light bar over LEDs.' },
+    { name: 'robot', title: 'Robot', eyes: 'block', mouth: 'solid', blurb: 'Square toy-robot eyes, solid mouth.' },
+    { name: 'retro', title: 'Retro', eyes: 'ring', mouth: 'waveform', blurb: 'LED eyes with a wave.' },
+    { name: 'hybrid', title: 'Hybrid', eyes: 'lens', mouth: 'matrix', blurb: 'Round eyes over LED mouth.' },
+    { name: 'camera', title: 'Camera', eyes: 'aperture', mouth: 'grille', blurb: 'Camera lenses over speaker slats.' },
+    { name: 'pod', title: 'Pod', eyes: 'oval', mouth: 'none', blurb: 'Glowing ovals and no mouth.' },
+    { name: 'led', title: 'LED', eyes: 'pixel', mouth: 'matrix', blurb: 'Every part made of lights.' },
+    { name: 'orbit', title: 'Orbit', eyes: 'mono', mouth: 'orb', blurb: 'One big lens, one ring.' },
+    { name: 'buddy', title: 'Buddy', eyes: 'dot', mouth: 'bars', blurb: 'Small dots over bouncing bars.' },
+  ];
+  const VIEWS = { rest: 'Resting', listening: 'Listening', thinking: 'Thinking', speaking: 'Talking', badge: 'Small badge' };
+  const BACKDROPS = ['none', 'mark1'];
+  const SAVED_FOR_MS = 2000, ANSWER_WITHIN_MS = 4000, RETRY_MS = 3000;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  let face = { eyes: 'lens', mouth: 'outline', size: 'regular', colours: 'visage', backdrop: 'none' };
+  let view = 'speaking';
+  const presetOf = (f) => presets.find((p) => p.eyes === f.eyes && p.mouth === f.mouth && (p.backdrop || 'none') === f.backdrop);
+  const presetFace = (p, f) => ({ eyes: p.eyes, mouth: p.mouth, size: f.size, colours: p.colours || 'visage', backdrop: p.backdrop || 'none' });
+
+  const el = (tag, props = {}, ...kids) => {
+    const n = Object.assign(document.createElement(tag), props);
+    for (const k of kids) n.append(k);
+    return n;
+  };
+  const faceCanvas = (w) => {
+    const c = el('canvas', { width: w, height: w * 1.25 });
+    c.setAttribute('aria-hidden', 'true');
+    return c;
+  };
+
+  // Frames: a still for every picture, a single open mouth for talking under reduced motion.
+  const STILL_T = 1;
+  const stillFrame = (mode) => mode === 'speaking'
+    ? { ...frameAt('rest', STILL_T), mode, viseme: 0, lips: shapes[0] }
+    : frameAt(mode, STILL_T);
+  // The pictures: mouth a little open, since some mouths show nothing at rest.
+  const PICTURE = { ...frameAt('rest', STILL_T), mode: 'speaking', viseme: 5, lips: shapes[5] };
+  const modeOf = (v) => (v === 'badge' ? 'speaking' : v);
+  const paint = (canvas, f, frame, compact = false) => {
+    usePalette(paletteOf(f.colours));
+    paintFace(canvas, f.eyes, f.mouth, frame, compact, f.size);
+  };
+
+  // A radio group: arrows and Home/End move focus, Space or Enter (or a tap) chooses; one tab stop.
+  const NEXT = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+  const radioGroup = (container, entries, onChoose) => {
+    const nodes = entries.map(([, node]) => node);
+    const moveTo = (i) => {
+      nodes.forEach((n, j) => { n.tabIndex = j === i ? 0 : -1; });
+      nodes[i].focus();
+    };
+    entries.forEach(([value, node], i) => {
+      node.setAttribute('role', 'radio');
+      container.append(node);
+      node.addEventListener('click', () => onChoose(value));
+      node.addEventListener('keydown', (ev) => {
+        const n = nodes.length;
+        if (ev.key in NEXT) moveTo((i + NEXT[ev.key] + n) % n);
+        else if (ev.key === 'Home') moveTo(0);
+        else if (ev.key === 'End') moveTo(n - 1);
+        else if (ev.key === ' ' || ev.key === 'Enter') onChoose(value);
+        else return;
+        ev.preventDefault();
+      });
+    });
+    return (chosen) => {
+      const at = Math.max(0, entries.findIndex(([v]) => v === chosen));
+      entries.forEach(([v, node], i) => { node.setAttribute('aria-checked', String(v === chosen)); node.tabIndex = i === at ? 0 : -1; });
+    };
+  };
+
+  const card = (p) => {
+    const title = el('span', { className: 'title', id: `title-${p.name}`, textContent: p.title });
+    const desc = el('span', { className: 'desc', id: `desc-${p.name}`, textContent: p.blurb });
+    const badge = el('span', { className: 'current', textContent: '✓ Current' });
+    badge.setAttribute('aria-hidden', 'true');
+    const canvas = faceCanvas(320);
+    const node = el('div', { className: 'card' }, canvas, badge, title, desc);
+    node.setAttribute('aria-labelledby', title.id);
+    node.setAttribute('aria-describedby', desc.id);
+    return { p, node, canvas };
+  };
+  const option = (label, withPicture) => {
+    const check = el('span', { className: 'check', textContent: '✓' });
+    check.setAttribute('aria-hidden', 'true');
+    const canvas = withPicture ? faceCanvas(120) : null;
+    const node = el('div', { className: 'opt' }, ...(canvas ? [canvas] : []), check, el('span', { textContent: label }));
+    return { node, canvas };
+  };
+
+  const cards = presets.map(card);
+  const setCards = radioGroup(document.getElementById('cards'), cards.map((c) => [c.p.name, c.node]),
+    (name) => choose(presetFace(presets.find((p) => p.name === name), face), { preset: name }));
+
+  const PARTS = ['eyes', 'mouth', 'size', 'colours'];
+  const options = {};
+  const setters = {};
+  for (const part of PARTS) {
+    options[part] = Object.entries(NAMES[part]).map(([value, label]) => ({ value, ...option(label, true) }));
+    setters[part] = radioGroup(document.getElementById(part), options[part].map((o) => [o.value, o.node]),
+      (value) => choose({ ...face, [part]: value }));
+  }
+  const setView = radioGroup(document.getElementById('views'), Object.entries(VIEWS).map(([v, label]) => [v, option(label, false).node]),
+    (v) => { view = v; setView(v); paintStills(); remember(); });
+
+  // Every combination: stills, except the one under the pointer or with focus.
   const grid = document.getElementById('grid');
-  grid.style.setProperty('--mouths', String(Object.keys(mouthStyles).length));
   const cells = [];
-  grid.appendChild(Object.assign(document.createElement('div'), { className: 'corner' }));
-  for (const m of Object.keys(mouthStyles)) grid.appendChild(Object.assign(document.createElement('div'), { className: 'head', textContent: m }));
+  let activeCell = null;
+  grid.append(el('div'));
+  for (const m of Object.keys(mouthStyles)) grid.append(el('div', { className: 'head', textContent: NAMES.mouth[m] }));
   for (const e of Object.keys(eyeStyles)) {
-    grid.appendChild(Object.assign(document.createElement('div'), { className: 'row', textContent: e }));
+    grid.append(el('div', { className: 'side', textContent: NAMES.eyes[e] }));
     for (const m of Object.keys(mouthStyles)) {
-      const cell = document.createElement('button');
-      cell.className = 'cell'; cell.type = 'button'; cell.id = `cell-${e}-${m}`;
-      cell.setAttribute('aria-label', `${e} eyes with ${m} mouth`);
-      const c = document.createElement('canvas'); c.width = 192; c.height = 240;
-      cell.appendChild(c);
-      cell.addEventListener('click', () => { state.eyes = e; state.mouth = m; sync(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-      grid.appendChild(cell);
-      cells.push({ e, m, cell, c });
+      const check = el('span', { className: 'check', textContent: '✓' });
+      check.setAttribute('aria-hidden', 'true');
+      const canvas = faceCanvas(192);
+      const node = el('button', { className: 'cell', type: 'button' }, canvas, check);
+      node.setAttribute('aria-label', `${NAMES.eyes[e]} eyes, ${NAMES.mouth[m]}`);
+      const cell = { e, m, node, canvas };
+      node.addEventListener('click', () => choose({ ...face, eyes: e, mouth: m }));
+      for (const on of ['pointerenter', 'focus']) node.addEventListener(on, () => { activeCell = reduced ? null : cell; });
+      for (const off of ['pointerleave', 'blur']) node.addEventListener(off, () => { if (activeCell === cell) { activeCell = null; paintCell(cell); } });
+      grid.append(node);
+      cells.push(cell);
     }
   }
+  const allShown = () => !document.getElementById('all').hidden;
+  const paintCell = (c) => paint(c.canvas, { ...face, eyes: c.e, mouth: c.m }, stillFrame(modeOf(view)), view === 'badge');
+  const showAll = (on) => {
+    const button = document.getElementById('showAll');
+    document.getElementById('all').hidden = !on;
+    button.setAttribute('aria-expanded', String(on));
+    button.textContent = on ? 'Hide every combination' : 'Show every combination';
+    if (on) cells.forEach(paintCell);
+  };
+  document.getElementById('showAll').addEventListener('click', () => showAll(!allShown()));
 
-  const presetsEl = document.getElementById('presets');
-  for (const p of presets) {
-    const b = document.createElement('button');
-    b.className = 'preset'; b.type = 'button'; b.id = `preset-${p.name}`;
-    b.innerHTML = `<b>${p.name}</b><span>${p.eyes} + ${p.mouth}</span><span>${p.blurb}</span>`;
-    b.addEventListener('click', () => {
-      Object.assign(state, { eyes: p.eyes, mouth: p.mouth, colours: p.colours || 'visage' });
-      sync();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    presetsEl.appendChild(b);
-  }
+  const paintStills = () => {
+    for (const c of cards) paint(c.canvas, presetFace(c.p, face), PICTURE);
+    for (const part of PARTS) for (const o of options[part]) paint(o.canvas, { ...face, [part]: o.value }, PICTURE);
+    if (allShown()) cells.forEach(paintCell);
+  };
+  const show = () => {
+    const current = presetOf(face);
+    setCards(current ? current.name : null);
+    document.getElementById('facesHint').textContent = current
+      ? 'Tap a face to use it.'
+      : 'Tap a face to use it. Your face now is your own mix; open "Customise this face" to see it.';
+    for (const part of PARTS) setters[part](face[part]);
+    document.getElementById('ownColours').hidden = typeof face.colours === 'string';
+    for (const c of cells) c.node.setAttribute('aria-pressed', String(c.e === face.eyes && c.m === face.mouth));
+    paintStills();
+  };
 
-  // The device link: visage.face.set on every change, visage.face.state keeps this page in step with the device,
-  // whoever changed it. The bus is #bus=ws://host:8181 (the app opens its copy so, since a file URL's query may not
-  // survive the launcher) or ?bus=, the hash winning, else this page's own origin when the sidecar serves it.
+  // The status line, the two-second "Saved", and Undo for the last change.
+  const statusLine = document.getElementById('status');
+  const saved = document.getElementById('saved');
+  const undoButton = document.getElementById('undo');
+  let savedTimer = 0, previous = null;
+  const setStatus = (state, text) => { statusLine.dataset.state = state; statusLine.textContent = text; };
+  const flash = (text, tone = 'ok') => {
+    clearTimeout(savedTimer);
+    saved.dataset.tone = tone;
+    saved.textContent = text;
+    savedTimer = setTimeout(() => { saved.textContent = ''; }, SAVED_FOR_MS);
+  };
+  undoButton.addEventListener('click', () => {
+    const back = previous;
+    previous = null;
+    undoButton.hidden = true;
+    choose(back, { undo: true });
+    statusLine.focus({ preventScroll: true });
+  });
+
+  // The link to the assistant: visage.face.set on every choice, and visage.face.state keeps the page in step with
+  // the device whoever changed it. The bus is #bus= (the app opens its copy so, since a file URL's query may not
+  // survive the launcher) or ?bus=, the hash winning, else this page's own origin's /core when served over http(s).
+  const hashParams = new URLSearchParams(location.hash.slice(1));
   const remote = (() => {
-    const param = new URLSearchParams(location.hash.slice(1)).get('bus') || new URLSearchParams(location.search).get('bus');
+    const param = hashParams.get('bus') || new URLSearchParams(location.search).get('bus');
     const served = location.protocol === 'http:' || location.protocol === 'https:';
     const url = param || (served ? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/core` : null);
-    const status = document.getElementById('bus');
-    let socket = null, applying = false, pushed = '';
-    const show = (state, text) => { status.dataset.state = state; status.textContent = text; };
-    const send = (type, data) => {
-      if (!socket || socket.readyState !== WebSocket.OPEN) return;
-      socket.send(JSON.stringify({ type, data, context: { source: 'face-palettes' } }));
+    let socket = null, waiting = 0;
+    const open = () => socket !== null && socket.readyState === WebSocket.OPEN;
+    const send = (type, data) => socket.send(JSON.stringify({ type, data, context: { source: 'face-palettes' } }));
+    const accept = (d) => {
+      if (!eyeStyles[d.eyes] || !mouthStyles[d.mouth] || !sizes[d.mouthSize] || !knownColours(d.colours) || !BACKDROPS.includes(d.backdrop || 'none')) {
+        console.warn('face picker: the assistant named a part this page does not know', d);
+        return;
+      }
+      face = { eyes: d.eyes, mouth: d.mouth, size: d.mouthSize, colours: d.colours, backdrop: d.backdrop || 'none' };
+      if (waiting) { clearTimeout(waiting); waiting = 0; flash('Saved.'); }
+      show();
+    };
+    const onMessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch (err) { console.warn('face picker: unreadable bus frame', err); return; }
+      if (msg.type === 'visage.face.state') accept(msg.data || {});
     };
     const connect = () => {
       socket = new WebSocket(url);
-      socket.onopen = () => { show('live', `Connected to ${url}; taps change the device's face.`); send('visage.face.get', {}); };
-      socket.onmessage = (ev) => {
-        let msg;
-        try { msg = JSON.parse(ev.data); } catch (err) { console.warn('face-palettes: unreadable bus frame', err); return; }
-        if (msg.type !== 'visage.face.state') return;
-        const d = msg.data || {};
-        if (!eyeStyles[d.eyes] || !mouthStyles[d.mouth] || !sizes[d.mouthSize] || !knownColours(d.colours)) {
-          console.warn('face-palettes: state names a style or colourway this page lacks', d);
-          return;
-        }
-        applying = true;
-        Object.assign(state, { eyes: d.eyes, mouth: d.mouth, size: d.mouthSize, colours: d.colours });
-        pushed = JSON.stringify({ eyes: d.eyes, mouth: d.mouth, mouthSize: d.mouthSize, colours: d.colours });
-        sync();
-        applying = false;
+      socket.onopen = () => {
+        setStatus('live', 'Connected to your assistant. Changes apply right away and are saved.');
+        send('visage.face.get', {});
       };
-      socket.onclose = () => { show('lost', `Lost ${url}; retrying.`); setTimeout(connect, 3000); };
-      socket.onerror = () => { show('lost', `Cannot reach ${url}; retrying.`); };
+      socket.onmessage = onMessage;
+      socket.onclose = () => { setStatus('lost', 'Lost the connection to your assistant. Trying again…'); setTimeout(connect, RETRY_MS); };
     };
-    if (url) { show('lost', `Connecting to ${url}…`); connect(); }
+    if (url) { setStatus('lost', 'Connecting to your assistant…'); connect(); }
     return {
-      push() {
-        const face = { eyes: state.eyes, mouth: state.mouth, mouthSize: state.size, colours: state.colours };
-        const key = JSON.stringify(face);
-        if (applying || key === pushed) return;
-        pushed = key;
-        send('visage.face.set', face);
+      linked: url !== null,
+      push(message) {
+        if (!open()) { flash('Not saved. Your assistant is not connected.', 'warn'); return; }
+        send('visage.face.set', message);
+        clearTimeout(waiting);
+        waiting = setTimeout(() => {
+          waiting = 0;
+          console.error('face picker: no answer to visage.face.set', message);
+          flash('Not saved. Your assistant did not answer.', 'warn');
+        }, ANSWER_WITHIN_MS);
       },
     };
   })();
 
-  const sync = () => {
-    remote.push();
-    for (const [key, group] of [['eyes', eyeStyles], ['mouth', mouthStyles]]) {
-      for (const n of Object.keys(group)) document.getElementById(`${key}-${n}`).setAttribute('aria-pressed', String(state[key] === n));
-    }
-    for (const n of modes) document.getElementById(`mode-${n}`).setAttribute('aria-pressed', String(state.mode === n));
-    for (const n of Object.keys(sizes)) document.getElementById(`size-${n}`).setAttribute('aria-pressed', String(state.size === n));
-    for (const n of Object.keys(palettes)) document.getElementById(`colours-${n}`).setAttribute('aria-pressed', String(state.colours === n));
-    usePalette(paletteOf(state.colours));
-    for (const c of cells) c.cell.setAttribute('aria-pressed', String(c.e === state.eyes && c.m === state.mouth));
-    document.getElementById('pairName').textContent = `${state.eyes} + ${state.mouth}`;
-    const p = presetFor(state.eyes, state.mouth);
-    const colourName = typeof state.colours === 'string' ? state.colours : 'custom colours';
-    document.getElementById('pairNote').textContent = `${p ? p.name : 'unnamed pairing'} · ${colourName}`;
-    document.getElementById('behaviour').innerHTML = `<div><b>${state.eyes}</b> ${eyeStyles[state.eyes].note}</div><div><b>${state.mouth}</b> ${mouthStyles[state.mouth].note}</div>`;
-    try { localStorage.setItem('visage-palette', JSON.stringify(state)); } catch (_) { /* per-viewer convenience only */ }
-  };
-  try {
-    const saved = JSON.parse(localStorage.getItem('visage-palette') || 'null');
-    const valid = saved && eyeStyles[saved.eyes] && mouthStyles[saved.mouth] && modes.includes(saved.mode) && sizes[saved.size];
-    if (valid) Object.assign(state, saved, { colours: knownColours(saved.colours) ? saved.colours : 'visage' });
-    document.getElementById('compact').checked = state.compact;
-  } catch (_) { /* storage unavailable: defaults stand */ }
-  sync();
+  // Every choice: remember the face before it for Undo, show the new one, and send it.
+  function choose(next, { preset = null, undo = false } = {}) {
+    if (!undo) { previous = { ...face }; undoButton.hidden = false; }
+    face = next;
+    show();
+    remember();
+    if (!remote.linked) { flash(undo ? 'Put back, on this page only.' : 'Changed on this page only.'); return; }
+    const parts = { eyes: face.eyes, mouth: face.mouth, mouthSize: face.size, colours: face.colours };
+    remote.push(preset ? { preset } : undo ? { ...parts, backdrop: face.backdrop } : parts);
+  }
 
-  const big = document.getElementById('big');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let start = null;
+  const STORE = 'visage-face-picker';
+  function remember() {
+    try { localStorage.setItem(STORE, JSON.stringify({ view, face: remote.linked ? null : face })); } catch (err) { console.warn('face picker: cannot keep this page\'s settings', err); }
+  }
+  try {
+    const kept = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (kept && kept.view in VIEWS) view = kept.view;
+    const f = kept && kept.face;
+    if (f && eyeStyles[f.eyes] && mouthStyles[f.mouth] && sizes[f.size] && knownColours(f.colours) && BACKDROPS.includes(f.backdrop)) face = f;
+  } catch (err) { console.warn('face picker: cannot read this page\'s settings', err); }
+  setView(view);
+  show();
+
+  const customise = document.getElementById('customise');
+  if (hashParams.has('customise')) { customise.open = true; customise.scrollIntoView(); }
+  if (hashParams.has('all')) { showAll(true); document.getElementById('showAll').scrollIntoView(); }
+
+  // Only the face being customised moves, and the one cell under the pointer or with focus.
+  const preview = document.getElementById('preview');
   const tick = (now) => {
-    if (start === null) start = now;
-    const t = reduced ? 1.0 : Math.max(0, now - start) / 1000;
-    const f = frameAt(state.mode, t);
-    paintFace(big, state.eyes, state.mouth, f, state.compact, state.size);
-    for (const c of cells) paintFace(c.c, c.e, c.m, f, state.compact, state.size);
-    if (!reduced) requestAnimationFrame(tick);
+    const t = now / 1000, mode = modeOf(view);
+    const frame = reduced && mode === 'speaking' ? stillFrame(mode) : frameAt(mode, t);
+    if (customise.open) paint(preview, face, frame, view === 'badge');
+    if (activeCell) paint(activeCell.canvas, { ...face, eyes: activeCell.e, mouth: activeCell.m }, frame, view === 'badge');
+    requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
 })();

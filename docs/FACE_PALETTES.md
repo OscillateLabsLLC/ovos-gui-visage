@@ -7,10 +7,14 @@ with any mouth. The painters live in `lib/face/styles/`, the names in `lib/face/
 colourways in `lib/face/face_palette.dart`, and `lib/face/face_spec.dart` turns a config value
 into a theme.
 
-`docs/face-palettes.html` draws every pairing in every attention state and is also the picker:
-opened from the menu bar (Face picker…), served by the sidecar at `/faces.html`, or opened with
-`#bus=ws://host:8181/core`, it sends `visage.face.set` on every tap and follows
-`visage.face.state`, so it stays in step with the device however the face was changed.
+`docs/face-palettes.html` is the picker. It leads with the presets as cards; "Customise this face"
+(closed by default, `#customise` opens it) holds the eye, mouth, size and colour choices with a
+preview of each attention state and the compact badge, and "Show every combination" (`#all`)
+draws all seventy-two pairings. It names every style in plain words, so a new style needs a name
+there too. Opened from the menu bar (Face picker…), served by the sidecar at `/faces.html`, or
+opened with `#bus=ws://host:8181/core`, it sends `visage.face.set` on every choice, shows "Saved"
+once `visage.face.state` answers, and follows `visage.face.state`, so it stays in step with the
+device however the face was changed.
 
 ## How the pieces fit
 

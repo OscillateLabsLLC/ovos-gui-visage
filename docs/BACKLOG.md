@@ -50,6 +50,10 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 ## Carried over
 
+- The picker page (`docs/face-palettes.html`) has no automated interaction test: arrow keys,
+  Space/Enter, "Saved", Undo and the reduced-motion stills were built to spec but checked only by
+  screenshot, Lighthouse and axe; a small headless test of those would hold them.
+
 - Windows web view once a maintained WebView2 package exists (SCOPE phase 4).
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
   would need more than nginx.
