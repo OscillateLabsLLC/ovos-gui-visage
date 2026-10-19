@@ -1,0 +1,130 @@
+name: Release
+
+# Builds the macOS app signed with the Developer ID certificate, notarises and staples it, attaches the zip and
+# its sha256 to the GitHub release, then points the Homebrew cask at it. docs/PACKAGING.md has the flow and the
+# one-time setup. release-please publishes the release with RELEASE_PLEASE_TOKEN (a PAT); a release made with
+# GITHUB_TOKEN would not trigger this workflow.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build, e.g. v0.1.0"
+        required: true
+
+env:
+  FLUTTER_VERSION: "3.47.4"
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      sha256: ${{ steps.checksum.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ env.TAG }}
+      - name: Read the version and check it matches the tag
+        id: version
+        run: |
+          version="$(sed -n 's/^version: *\([^+[:space:]]*\).*$/\1/p' pubspec.yaml)"
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::pubspec.yaml has version $version but the tag is $TAG"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter config --enable-macos-desktop
+      - name: Import the Developer ID certificate into a temporary keychain
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/release.keychain-db"
+          keychain_password="$(uuidgen)"
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$keychain_password" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$keychain_password" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+      - name: Write the App Store Connect API key
+        env:
+          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+        run: echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/notary_key.p8"
+      - name: Build, sign, notarise, staple and zip
+        env:
+          SIGN_IDENTITY: Developer ID Application
+          NOTARY_KEY_PATH: ${{ runner.temp }}/notary_key.p8
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: tool/release_macos.sh
+      - name: Check Gatekeeper accepts the app
+        run: spctl -a -vv build/macos/derived/Build/Products/Release/ovos_gui_visage.app
+      - name: Record the checksum
+        id: checksum
+        run: |
+          sha256="$(cut -d ' ' -f 1 "build/release/ovos-gui-visage-${{ steps.version.outputs.version }}-macos.zip.sha256")"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+      - name: Upload the zip and checksum to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$TAG" --clobber \
+            "build/release/ovos-gui-visage-${{ steps.version.outputs.version }}-macos.zip" \
+            "build/release/ovos-gui-visage-${{ steps.version.outputs.version }}-macos.zip.sha256"
+      - name: Delete the temporary keychain and API key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/release.keychain-db" ]; then
+            security delete-keychain "$RUNNER_TEMP/release.keychain-db"
+          fi
+          rm -f "$RUNNER_TEMP/notary_key.p8"
+
+  # The tap is the one repository where a bot pushes straight to main: the cask only follows releases
+  # that this workflow has already built, signed and notarised.
+  homebrew-tap:
+    needs: macos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: OscillateLabsLLC/homebrew-tap
+          ref: main
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+      - name: Point the cask at the new release
+        env:
+          VERSION: ${{ needs.macos.outputs.version }}
+          SHA256: ${{ needs.macos.outputs.sha256 }}
+        run: |
+          sed -i -E "s/^  version \"[^\"]*\"/  version \"$VERSION\"/" Casks/ovos-gui-visage.rb
+          sed -i -E "s/^  sha256 \"[0-9a-f]{64}\"/  sha256 \"$SHA256\"/" Casks/ovos-gui-visage.rb
+          grep -q "version \"$VERSION\"" Casks/ovos-gui-visage.rb
+          grep -q "sha256 \"$SHA256\"" Casks/ovos-gui-visage.rb
+          git diff
+      - name: Commit and push to the tap's main
+        env:
+          VERSION: ${{ needs.macos.outputs.version }}
+        run: |
+          if git diff --quiet; then
+            echo "the cask is already at $VERSION with this checksum"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "feat(ovos-gui-visage): $VERSION"
+          git push origin HEAD:main

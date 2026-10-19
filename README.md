@@ -22,6 +22,21 @@ ovos-core ──core bus 8181──▶ ovos-gui-service ──GUI ws 18181──
 skills, homescreen                 ▲ ovos.widgets.* translation       reads ~/.cache/ovos_gui directly
 ```
 
+## Install
+
+On macOS 12 or later, with Homebrew:
+
+```bash
+brew tap oscillatelabsllc/tap
+brew install --cask ovos-gui-visage
+```
+
+The cask installs `OVOS Visage.app` in `/Applications`. Without Homebrew, download
+`ovos-gui-visage-<version>-macos.zip` from the
+[releases](https://github.com/OscillateLabsLLC/ovos-gui-visage/releases), unzip it and move the
+app to `/Applications`. The app is signed with a Developer ID and notarised, so it opens without
+an `xattr` step. `docs/PACKAGING.md` describes how a release is built.
+
 ## Requirements
 
 - A running OVOS install on the same machine (core bus on `ws://127.0.0.1:8181/core`).

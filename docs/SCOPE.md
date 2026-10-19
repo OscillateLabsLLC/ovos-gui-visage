@@ -107,7 +107,15 @@ test/
    `tool/serve_web.py`. `sidecar/` serves the build, the cache and proxies both websockets;
    CI builds the image and checks the rendered nginx config, since no Docker daemon was
    available locally.
-5. CI matrix (macOS, Linux, Windows, web, sidecar image), packaging, release-please.
+5. **CI, packaging, release-please** (built; waits on the owner's Apple and GitHub setup). CI builds
+   macOS, Linux, Windows, web and the sidecar image; release-please tags `v<version>`. macOS ships
+   outside the App Store as a Developer ID app with the hardened runtime, notarised, through a cask
+   in `OscillateLabsLLC/homebrew-tap` (`docs/PACKAGING.md`): `tool/release_macos.sh` builds, signs,
+   notarises and zips, and `.github/workflows/release.yml` runs it on each release, uploads the zip
+   and checksum and bumps the cask. Verified locally with an ad hoc signature only. The first
+   signed release waits on the Developer ID certificate, the App Store Connect API key, the two
+   GitHub repositories and their secrets. Not packaged yet: Linux, Windows, and publishing the
+   sidecar image.
 6. **Widget modes** (done on macOS; `desktop` is the default): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
    (environment on top) and places a frameless window in a corner of the primary display's
    work area, beneath everything (`desktop`) or above (`float`), on every Space, through
