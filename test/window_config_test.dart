@@ -88,6 +88,24 @@ void main() {
     expect(bounds(Corner.bottomLeft, expanded: true).bottomLeft, const Offset(16, 900 - 16));
   });
 
+  test('kiosk comes from the file or the environment, is not a widget and never peeks', () {
+    final kiosk = WindowConfig.from({'mode': 'kiosk', 'peek': true}, const {});
+    expect(kiosk.mode, WindowMode.kiosk);
+    expect(kiosk.isKiosk, isTrue);
+    expect(kiosk.isWidget, isFalse);
+    expect(kiosk.peeks, isFalse);
+    expect(WindowConfig.from(null, const {'VISAGE_MODE': 'KIOSK'}).isKiosk, isTrue);
+  });
+
+  test('leaving kiosk goes to the file mode, float when the file says kiosk, desktop when it says nothing', () {
+    WindowMode exit(Map<String, dynamic>? file) => WindowConfig.from(file, const {'VISAGE_MODE': 'kiosk'}).kioskExit;
+    expect(exit({'mode': 'window'}), WindowMode.window);
+    expect(exit({'mode': 'float'}), WindowMode.float);
+    expect(exit({'mode': 'kiosk'}), WindowMode.float);
+    expect(exit({'mode': 'sideways'}), WindowMode.desktop);
+    expect(exit(null), WindowMode.desktop);
+  });
+
   test('copyWith changes peek and keeps the rest', () {
     const config = WindowConfig(mode: WindowMode.float, corner: Corner.bottomLeft, height: 300, margin: 8, peekSize: 80);
     final changed = config.copyWith(peek: true);

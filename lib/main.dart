@@ -29,6 +29,7 @@ import 'window/status_menu_binding.dart';
 import 'window/status_menu_host.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
+import 'window/window_surface.dart';
 
 const _pageBg = VisageColors.pageBg;
 const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible);
@@ -56,7 +57,7 @@ class VisageApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
-        color: config.window.isWidget ? Colors.transparent : VisageColors.bg,
+        color: Colors.transparent,
         child: Center(child: Screen(config: config)),
       ),
     );
@@ -127,7 +128,7 @@ class _ScreenState extends State<Screen> {
     peek.addListener(_onPeek);
     widgets;
     remote;
-    window;
+    window.addListener(_refresh);
     menu;
     bus.start();
     gui.start();
@@ -183,18 +184,22 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     final collapsed = !peek.expanded;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Offstage(
-          offstage: collapsed,
-          child: TickerMode(
-            enabled: !collapsed,
-            child: FittedBox(child: _frame()),
+    return WindowSurface(
+      mode: window.config.mode,
+      onLeaveKiosk: window.leaveKiosk,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Offstage(
+            offstage: collapsed,
+            child: TickerMode(
+              enabled: !collapsed,
+              child: FittedBox(child: _frame()),
+            ),
           ),
-        ),
-        if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
-      ],
+          if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
+        ],
+      ),
     );
   }
 

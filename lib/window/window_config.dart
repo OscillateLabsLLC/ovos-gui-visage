@@ -1,7 +1,8 @@
 /// How the app's window sits on the desktop (SCOPE phase 6). `desktop`, the default, is a frameless window beneath
 /// everything, like a desktop widget; `float` is the same window above everything; both are pinned to a screen
-/// corner on every Space. `window` is an ordinary window. With `peek`, a widget idles as a small round badge and grows
-/// only while OVOS has attention (peek.dart). Read from ~/.config/ovos-gui-visage/config.json, overridden by
+/// corner on every Space. `window` is an ordinary window. `kiosk` fills the primary display above everything, so the
+/// screen is only the assistant. With `peek`, a widget idles as a small round badge and grows only while OVOS has
+/// attention (peek.dart). Read from ~/.config/ovos-gui-visage/config.json, overridden by
 /// VISAGE_MODE, VISAGE_CORNER, VISAGE_HEIGHT, VISAGE_MARGIN, VISAGE_PEEK and VISAGE_PEEK_SIZE.
 library;
 
@@ -9,7 +10,7 @@ import 'dart:ui';
 
 import '../face/face_theme.dart';
 
-enum WindowMode { window, float, desktop }
+enum WindowMode { window, float, desktop, kiosk }
 
 enum Corner { topLeft, topRight, bottomLeft, bottomRight }
 
@@ -25,6 +26,7 @@ class WindowConfig {
     this.margin = defaultMargin,
     this.peek = false,
     this.peekSize = defaultPeekSize,
+    this.kioskExit = WindowMode.float,
   });
 
   /// [json] is the file's `window` object (or null); [env] wins over it.
@@ -37,6 +39,7 @@ class WindowConfig {
       margin: _positive(env['VISAGE_MARGIN'] ?? json?['margin']) ?? defaults.margin,
       peek: _flag(env['VISAGE_PEEK'] ?? json?['peek']) ?? defaults.peek,
       peekSize: _positive(env['VISAGE_PEEK_SIZE'] ?? json?['peekSize']) ?? defaults.peekSize,
+      kioskExit: _kioskExit(_enumFrom(WindowMode.values, json?['mode']) ?? defaults.mode),
     );
   }
 
@@ -51,7 +54,13 @@ class WindowConfig {
   /// The collapsed badge's diameter in logical pixels.
   final double peekSize;
 
-  bool get isWidget => mode != WindowMode.window;
+  /// The mode leaving kiosk returns to: the file's mode at startup, else the mode kiosk was entered from. Not saved.
+  final WindowMode kioskExit;
+
+  /// A corner widget: `float` or `desktop`. Neither `window` nor `kiosk` is one, so neither peeks.
+  bool get isWidget => mode == WindowMode.float || mode == WindowMode.desktop;
+
+  bool get isKiosk => mode == WindowMode.kiosk;
 
   bool get peeks => peek && isWidget;
 
@@ -59,13 +68,14 @@ class WindowConfig {
 
   Size get peekWindowSize => Size.square(peekSize);
 
-  WindowConfig copyWith({WindowMode? mode, bool? peek}) => WindowConfig(
+  WindowConfig copyWith({WindowMode? mode, bool? peek, WindowMode? kioskExit}) => WindowConfig(
     mode: mode ?? this.mode,
     corner: corner,
     height: height,
     margin: margin,
     peek: peek ?? this.peek,
     peekSize: peekSize,
+    kioskExit: kioskExit ?? this.kioskExit,
   );
 
   /// The window's frame within [workArea]: the full widget, or the badge when collapsed, in the same corner.
@@ -89,6 +99,9 @@ class WindowConfig {
     return Offset(left, top);
   }
 }
+
+/// A file that says `kiosk` leaves kiosk to `float`, so Escape always lands somewhere visible.
+WindowMode _kioskExit(WindowMode fileMode) => fileMode == WindowMode.kiosk ? WindowMode.float : fileMode;
 
 /// "top-right", "topRight" and "TOP_RIGHT" all name [Corner.topRight].
 T? _enumFrom<T extends Enum>(List<T> values, Object? name) {

@@ -23,5 +23,10 @@ void main() {
       'window': {'mode': 'float'},
     }, const {});
     expect(config.window.mode, WindowMode.float);
+    final kiosk = AppConfig.from({
+      'window': {'mode': 'kiosk'},
+    }, const {});
+    expect(kiosk.window.mode, WindowMode.kiosk);
+    expect(kiosk.window.kioskExit, WindowMode.float);
   });
 }

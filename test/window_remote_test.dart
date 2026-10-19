@@ -13,11 +13,18 @@ void main() {
   late PeekController peek;
   late List<WindowConfig> saved;
   late List<Object> applied;
+  late List<String> moves;
   late WindowRemote remote;
 
   WindowRemote make(WindowConfig config, {WindowPersist? persist, WindowEffects? effects}) {
     peek = PeekController(enabled: config.peeks, timer: ManualTimers().create);
-    final recording = WindowEffects(mode: (m) async => applied.add(m), visible: (v) async => applied.add(v));
+    final recording = WindowEffects(
+      mode: (c, {required from, required expanded}) async {
+        applied.add(c.mode);
+        moves.add('${from.name} -> ${c.mode.name}, expanded $expanded');
+      },
+      visible: (v) async => applied.add(v),
+    );
     return WindowRemote(bus, peek, initial: config, persist: persist ?? (c) async => saved.add(c), effects: effects ?? recording);
   }
 
@@ -25,6 +32,7 @@ void main() {
     bus = RecordingBus();
     saved = [];
     applied = [];
+    moves = [];
     remote = make(float);
   });
 
@@ -139,7 +147,10 @@ void main() {
     bus = RecordingBus();
     final failing = make(
       float,
-      effects: WindowEffects(mode: (_) async => throw StateError('no runner'), visible: (_) async => throw StateError('gone')),
+      effects: WindowEffects(
+        mode: (_, {required from, required expanded}) async => throw StateError('no runner'),
+        visible: (_) async => throw StateError('gone'),
+      ),
     );
     final faults = await collectFaults(() async {
       failing.setMode(WindowMode.desktop);
@@ -149,5 +160,74 @@ void main() {
     expect(faults, hasLength(2));
     expect(failing.config.mode, WindowMode.desktop);
     expect(failing.visible, isFalse);
+  });
+
+  group('kiosk', () {
+    test('a peeking widget enters kiosk: peek stops, the window expands, the mode is saved and announced once', () {
+      bus.send(windowSetMessage, {'mode': 'kiosk'});
+      expect(remote.config.mode, WindowMode.kiosk);
+      expect(remote.config.kioskExit, WindowMode.float);
+      expect(peek.enabled, isFalse);
+      expect(moves, ['float -> kiosk, expanded true']);
+      expect(saved.single.mode, WindowMode.kiosk);
+      expect(saved.single.peek, isTrue);
+      expect(bus.types, [windowStateMessage]);
+      expect(bus.data(0)!['mode'], 'kiosk');
+      expect(bus.data(0)!['expanded'], isTrue);
+    });
+
+    test('leaving goes back to the mode it came from, and peek collapses the widget again', () {
+      remote.setMode(WindowMode.kiosk);
+      remote.leaveKiosk();
+      expect(remote.config.mode, WindowMode.float);
+      expect(peek.enabled, isTrue);
+      expect(moves.last, 'kiosk -> float, expanded false');
+      expect(saved.last.mode, WindowMode.float);
+      expect(bus.data(1)!['mode'], 'float');
+    });
+
+    test('toggle enters and leaves; leaving outside kiosk does nothing', () {
+      remote.leaveKiosk();
+      expect(moves, isEmpty);
+      remote.toggleKiosk();
+      remote.toggleKiosk();
+      expect(applied, [WindowMode.kiosk, WindowMode.float]);
+    });
+
+    test('an ordinary window enters and leaves kiosk, though it still cannot become a widget', () async {
+      bus = RecordingBus();
+      final window = make(const WindowConfig(mode: WindowMode.window));
+      window.toggleKiosk();
+      window.toggleKiosk();
+      expect(moves, ['window -> kiosk, expanded true', 'kiosk -> window, expanded true']);
+      final faults = await collectFaults(() async => window.setMode(WindowMode.float));
+      expect(faults, hasLength(1));
+      expect(window.config.mode, WindowMode.window);
+    });
+
+    test('a kiosk started from the config leaves to the mode the file named', () {
+      bus = RecordingBus();
+      final kiosk = make(WindowConfig.from({'mode': 'desktop', 'peek': true}, const {'VISAGE_MODE': 'kiosk'}));
+      expect(peek.enabled, isFalse);
+      kiosk.leaveKiosk();
+      expect(moves, ['kiosk -> desktop, expanded false']);
+      expect(peek.enabled, isTrue);
+    });
+
+    test('peek set in kiosk is saved but does not collapse the window', () {
+      remote.setMode(WindowMode.kiosk);
+      remote.setPeek(false);
+      remote.setPeek(true);
+      expect(saved.last.peek, isTrue);
+      expect(peek.enabled, isFalse);
+      expect(peek.expanded, isTrue);
+    });
+
+    test('asking for the current mode announces it and saves nothing', () {
+      bus.send(windowSetMessage, {'mode': 'float'});
+      expect(saved, isEmpty);
+      expect(moves, isEmpty);
+      expect(bus.data(0)!['mode'], 'float');
+    });
   });
 }
