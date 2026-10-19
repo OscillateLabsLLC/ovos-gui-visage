@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.0.0...v1.0.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* face picker tests pass on Linux ([72492df](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/72492df4310e7c35c7799485198cc7ce6759103d))
+* the macOS app icon is the visage badge instead of the Flutter logo ([ce0f09a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ce0f09adc3b6f0a54c629a5a1142c8abdf1b19dc))
+* the macOS app icon is the visage badge instead of the Flutter logo ([dcd592a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/dcd592aa172a9151c511b93c6be33888bb7346a3))
+
 ## 1.0.0 (2026-10-19)
 
 
