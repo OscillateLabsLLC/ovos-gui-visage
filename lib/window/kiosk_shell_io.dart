@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../face/face_theme.dart';
 import '../faults.dart';
+import 'plugin_calls.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
 
@@ -14,12 +15,7 @@ import 'window_config.dart';
 /// window_manager does what it can on every platform; the macOS runner adds the level above the Dock and
 /// notifications, hides the Dock and the menu bar while the app is frontmost, and keeps the display awake
 /// (macos/Runner/Kiosk.swift). On macOS kiosk is a regular app: an accessory app does not own the menu bar, so it
-/// cannot hide it. A call a platform lacks is reported once and the rest still run.
-final _reported = <String>{};
-
-/// An ordinary window's frame before kiosk, so leaving puts it back where it was.
-Rect? _windowBounds;
-
+/// cannot hide it. A call a platform lacks is reported once and the rest still run (plugin_calls.dart).
 Future<void> enterKiosk({required WindowMode from}) async {
   if (from == WindowMode.window) _windowBounds = await _attempt('getBounds', windowManager.getBounds);
   if (Platform.isMacOS) await _native('setActivationPolicy', 'regular');
@@ -36,6 +32,9 @@ Future<void> enterKiosk({required WindowMode from}) async {
   await _native('setKeepAwake', true);
 }
 
+/// An ordinary window's frame before kiosk, so leaving puts it back where it was.
+Rect? _windowBounds;
+
 /// Back to a corner widget at [bounds], or to an ordinary window with its title bar when [bounds] is null. [bounds]
 /// is read after the Dock and the menu bar come back, so the work area is the one the widget will sit in.
 Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) async {
@@ -44,6 +43,9 @@ Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) 
   if (Platform.isMacOS) await _native('setActivationPolicy', config.isWidget ? 'accessory' : 'regular');
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(config.mode == WindowMode.float));
   await _native('setWindowLevel', config.isWidget ? config.mode.name : 'normal');
+  if (!Platform.isMacOS) {
+    await _attempt('setAlwaysOnBottom', () => windowManager.setAlwaysOnBottom(config.mode == WindowMode.desktop));
+  }
   if (bounds != null) return _placeWidget(bounds);
   await _attempt('setTitleBarStyle', () => windowManager.setTitleBarStyle(TitleBarStyle.normal));
   await _attempt('setResizable', () => windowManager.setResizable(true));
@@ -71,26 +73,15 @@ Future<Rect?> _screen() async {
   return display == null ? null : Offset.zero & display.size;
 }
 
-Future<T?> _attempt<T>(String what, Future<T> Function() call) async {
-  try {
-    return await call();
-  } on Object catch (err, stack) {
-    _reportOnce('$what in kiosk mode', err, stack);
-    return null;
-  }
-}
+Future<T?> _attempt<T>(String what, Future<T> Function() call) => attemptPluginCall('$what in kiosk mode', call);
 
 /// A runner without the method is reported once; a runner that refuses an argument is reported every time.
 Future<void> _native(String method, Object arguments) async {
   try {
     await windowChannel.invokeMethod<void>(method, arguments);
   } on MissingPluginException catch (err, stack) {
-    _reportOnce('$method is not implemented by this platform runner', err, stack);
+    reportPluginFaultOnce('$method is not implemented by this platform runner', err, stack);
   } on PlatformException catch (err, stack) {
     reportFault('$method($arguments) in kiosk mode', err, stack);
   }
-}
-
-void _reportOnce(String what, Object err, StackTrace stack) {
-  if (_reported.add(what)) reportFault(what, err, stack);
 }
