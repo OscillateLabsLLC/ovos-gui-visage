@@ -10,8 +10,13 @@ import '../app_config.dart';
 import '../face/face_spec.dart';
 import '../faults.dart';
 import 'kiosk_shell_io.dart';
+import 'plugin_calls.dart';
+import 'window_bounds_io.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
+
+/// Where the widget goes when the platform cannot describe its display: a 1080p work area, so it still shows.
+const _fallbackWorkArea = Rect.fromLTWH(0, 0, 1920, 1080);
 
 File configFile() {
   final home = Platform.environment['HOME'] ?? '';
@@ -62,13 +67,16 @@ Future<Rect> _workArea() async {
 }
 
 /// Starts a peeking widget collapsed to its badge; [setWidgetExpanded] grows and shrinks it in its corner. Kiosk fills
-/// the screen; an ordinary window is left as the runner made it.
+/// the screen; an ordinary window is left as the runner made it. Every step is attempted in turn: a platform
+/// without one of them (Linux has no window shadow or all-workspaces call) reports it and still places and shows
+/// the widget. The steps run after the plugin's ready call returns, not in its callback, which it does not await.
 Future<void> applyWindowConfig(WindowConfig config) async {
   if (config.isKiosk) return _startKiosk();
   if (!config.isWidget) return;
-  await windowManager.ensureInitialized();
+  await _attempt('ensureInitialized', windowManager.ensureInitialized);
   if (Platform.isMacOS) await _invoke('setActivationPolicy', 'accessory');
-  final bounds = config.boundsIn(await _workArea(), expanded: !config.peeks);
+  final workArea = await _attempt('getPrimaryDisplay', _workArea) ?? _fallbackWorkArea;
+  final bounds = config.boundsIn(workArea, expanded: !config.peeks);
   final options = WindowOptions(
     size: bounds.size,
     backgroundColor: Colors.transparent,
@@ -76,32 +84,39 @@ Future<void> applyWindowConfig(WindowConfig config) async {
     titleBarStyle: TitleBarStyle.hidden,
     alwaysOnTop: config.mode == WindowMode.float,
   );
-  await windowManager.waitUntilReadyToShow(options, () async {
-    await windowManager.setAsFrameless();
-    await windowManager.setHasShadow(false);
-    await windowManager.setResizable(false);
-    await windowManager.setVisibleOnAllWorkspaces(true);
-    if (config.mode == WindowMode.desktop) await _invoke('setWindowLevel', 'desktop');
-    await windowManager.setPosition(bounds.topLeft);
-    await windowManager.show();
-  });
+  await _attempt('waitUntilReadyToShow', () => windowManager.waitUntilReadyToShow(options));
+  await _attempt('setAsFrameless', windowManager.setAsFrameless);
+  await _attempt('setHasShadow', () => windowManager.setHasShadow(false));
+  // GTK sizes a non-resizable window at its default size, not the size asked for, so Linux keeps it resizable.
+  if (Platform.isMacOS) await _attempt('setResizable', () => windowManager.setResizable(false));
+  await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(true));
+  if (config.mode == WindowMode.desktop) await _setLevel(WindowMode.desktop);
+  await _attempt('setPosition', () => windowManager.setPosition(bounds.topLeft));
+  await _attempt('show', windowManager.show);
 }
 
 Future<void> _startKiosk() async {
-  await windowManager.ensureInitialized();
+  await _attempt('ensureInitialized', windowManager.ensureInitialized);
   const options = WindowOptions(backgroundColor: Colors.transparent, skipTaskbar: true, titleBarStyle: TitleBarStyle.hidden);
-  await windowManager.waitUntilReadyToShow(options, () async {
-    await enterKiosk(from: WindowMode.kiosk);
-    await windowManager.show();
-  });
+  await _attempt('waitUntilReadyToShow', () => windowManager.waitUntilReadyToShow(options));
+  await enterKiosk(from: WindowMode.kiosk);
+  await _attempt('show', windowManager.show);
 }
+
+/// `desktop` beneath every window and `float` above: the runner's own level on macOS, GTK keep-below elsewhere.
+Future<void> _setLevel(WindowMode mode) async {
+  if (Platform.isMacOS) return _invoke('setWindowLevel', mode.name);
+  await _attempt('setAlwaysOnBottom', () => windowManager.setAlwaysOnBottom(mode == WindowMode.desktop));
+}
+
+Future<T?> _attempt<T>(String what, Future<T> Function() call) => attemptPluginCall('$what in widget setup', call);
 
 /// Animates the widget window between its badge and its full size, anchored at its corner. A failure leaves the
 /// window as it was and is reported.
 Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {
   if (!config.isWidget) return;
   try {
-    await windowManager.setBounds(config.boundsIn(await _workArea(), expanded: expanded), animate: true);
+    await setWindowBounds(config.boundsIn(await _workArea(), expanded: expanded), growing: expanded, animate: true);
   } on Object catch (err, stack) {
     reportFault('resizing the widget window (expanded: $expanded)', err, stack);
   }
@@ -118,7 +133,7 @@ Future<void> setWindowMode(WindowConfig config, {required WindowMode from, requi
     );
   }
   await windowManager.setAlwaysOnTop(config.mode == WindowMode.float);
-  await _invoke('setWindowLevel', config.mode.name);
+  await _setLevel(config.mode);
 }
 
 /// Orders the window out or back in front; a desktop-level window must not become key, so this is not

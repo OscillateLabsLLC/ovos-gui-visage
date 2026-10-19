@@ -120,8 +120,13 @@ test/
    work area, beneath everything (`desktop`) or above (`float`), on every Space, through
    `window_manager` and `screen_retriever`. The window background goes transparent so the
    rounded frame floats. Nothing in the pages changes, since the frame already scales to the
-   window. X11 should work unchanged but is unverified; Wayland does not let apps
-   position their own windows, and the web build has no window to move. Why not WidgetKit:
+   window. Verified on Kubuntu 24.04 (X11, KWin) on 2026-10-18: every mode places correctly;
+   `desktop` uses the window manager's keep-below since there is no runner level; the two
+   window_manager calls Linux lacks (shadow, all workspaces) are reported once and skipped; GTK
+   applies a resize at its next layout pass, so a collapse waits for the new size before it
+   moves; and a non-resizable GTK window keeps its default size, so Linux windows stay
+   resizable. Wayland does not let apps position their own windows and is untested; the web
+   build has no window to move. Why not WidgetKit:
    a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
    so it could only show slow-changing information from the main app. Peek mode (`window.peek`)
    keeps a widget as a small round badge of the resting face in its corner and grows the window
