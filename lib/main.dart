@@ -43,6 +43,9 @@ Future<void> main() async {
   runApp(VisageApp(config: config));
 }
 
+/// The browser tab and the task switcher show this; without it Flutter web blanks the page title.
+const appTitle = 'OVOS Visage';
+
 class VisageApp extends StatelessWidget {
   const VisageApp({super.key, this.config = const AppConfig()});
 
@@ -51,6 +54,7 @@ class VisageApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: appTitle,
       debugShowCheckedModeBanner: false,
       home: Material(
         color: Colors.transparent,
