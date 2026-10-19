@@ -86,7 +86,8 @@ Future<void> applyWindowConfig(WindowConfig config) async {
   await _attempt('waitUntilReadyToShow', () => windowManager.waitUntilReadyToShow(options));
   await _attempt('setAsFrameless', windowManager.setAsFrameless);
   await _attempt('setHasShadow', () => windowManager.setHasShadow(false));
-  await _attempt('setResizable', () => windowManager.setResizable(false));
+  // GTK sizes a non-resizable window at its default size, not the size asked for, so Linux keeps it resizable.
+  if (Platform.isMacOS) await _attempt('setResizable', () => windowManager.setResizable(false));
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(true));
   if (config.mode == WindowMode.desktop) await _setLevel(WindowMode.desktop);
   await _attempt('setPosition', () => windowManager.setPosition(bounds.topLeft));
