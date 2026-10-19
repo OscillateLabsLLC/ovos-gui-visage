@@ -1,6 +1,7 @@
 # On the OVOS host: docker compose -f sidecar/compose.yaml up -d pulls the released image; add --build to build it
-# from this checkout instead. Then open http://<host>:8080/.
-# Anyone who can reach port 8080 can drive the OVOS bus through the proxy, so keep it on a trusted network or put
+# from this checkout instead. Then open http://<host>:8080/ (VISAGE_PORT changes the port).
+# OVOS listens on 127.0.0.1 by default, so the container shares the host's network to reach it.
+# Anyone who can reach the port can drive the OVOS bus through the proxy, so keep it on a trusted network or put
 # authentication and TLS in front of it (nginx basic auth, or a reverse proxy you already run).
 services:
   visage:
@@ -9,10 +10,10 @@ services:
       context: ..
       dockerfile: sidecar/Dockerfile
     pull_policy: missing
-    ports:
-      - "8080:8080"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    network_mode: host
+    environment:
+      OVOS_HOST: 127.0.0.1
+      VISAGE_PORT: ${VISAGE_PORT:-8080}
     volumes:
       - ~/.cache/ovos_gui:/srv/ovos_gui:ro
       # Skills name OCP album art by absolute path; mirror the directories they write to under /srv/host.

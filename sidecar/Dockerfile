@@ -18,6 +18,7 @@ COPY . .
 RUN flutter build web --release
 
 FROM nginx:1.27-alpine
+ENV VISAGE_PORT=8080
 ENV OVOS_HOST=host.docker.internal
 ENV OVOS_BUS_PORT=8181
 ENV OVOS_GUI_PORT=18181
