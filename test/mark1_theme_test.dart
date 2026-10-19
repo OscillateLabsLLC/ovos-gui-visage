@@ -68,6 +68,18 @@ void main() {
     expect((layout.mouthOrigin - centre).distance + layout.mouthLed, lessThan(radius));
   });
 
+  test('the badge rests on a short bar centred on the two middle rows', () {
+    final lit = [
+      for (var y = 0; y < mouthRows; y++)
+        for (var x = 0; x < mouthCols; x++)
+          if ((compactRestBar[y] >> x) & 1 == 1) (x, y),
+    ];
+    expect(lit, hasLength(20));
+    expect(lit.map((p) => p.$2).toSet(), {3, 4});
+    final xs = lit.map((p) => p.$1);
+    expect(xs.reduce((a, b) => a < b ? a : b) + xs.reduce((a, b) => a > b ? a : b), mouthCols - 1, reason: 'centred');
+  });
+
   test('the faceplate path parses its M, C, S and Z commands', () {
     final bounds = svgPath('M82.19 0C124 0 164.38 3 164.38 28.69S124 57.37 82.19 57.37S0 54.37 0 28.69S40.4 0 82.19 0Z')
         .getBounds();

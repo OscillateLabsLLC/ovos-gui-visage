@@ -32,6 +32,6 @@ Future<void> openFacePicker(Uri bus, {Directory? dir}) async {
 /// browser itself moves on to `faces.html#bus=ws://…`, where the picker reads the bus.
 String launcherHtml(Uri bus) {
   final next = const HtmlEscape(HtmlEscapeMode.attribute).convert('$pickerFileName#bus=$bus');
-  return '<!doctype html>\n<meta charset="utf-8">\n<title>Visage Face Palettes</title>\n'
+  return '<!doctype html>\n<meta charset="utf-8">\n<title>Choose a face</title>\n'
       '<meta http-equiv="refresh" content="0; url=$next">\n<a href="$next">Open the face picker</a>\n';
 }

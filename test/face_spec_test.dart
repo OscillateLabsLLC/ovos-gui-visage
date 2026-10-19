@@ -82,6 +82,14 @@ void main() {
     expect(FaceSpec.parse('pod+ember').toString(), 'oval+none+regular+ember');
   });
 
+  test('the log name leaves out the colourway the preset brings and names any other', () {
+    expect(FaceSpec.parse('mark1').toString(), 'ring+matrix+regular+mark1');
+    expect(FaceSpec.parse('mark1+rose').toString(), 'ring+matrix+regular+mark1+rose');
+    expect(FaceSpec.parse('mark1').copyWith(colours: FacePalette.visage).toString(), 'ring+matrix+regular+mark1+visage');
+    expect(FaceSpec.parse('retro+rose').toString(), 'ring+waveform+regular+rose');
+    expect(FaceSpec.parse('retro').toString(), 'ring+waveform+regular');
+  });
+
   test('an unknown colourway in an object reports and falls back to visage', () async {
     late FaceSpec spec;
     final faults = await collectFaults(() async => spec = FaceSpec.parse({'eyes': 'ring', 'colours': 'teal'}));
