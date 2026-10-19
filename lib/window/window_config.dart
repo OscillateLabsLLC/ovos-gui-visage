@@ -68,9 +68,9 @@ class WindowConfig {
 
   Size get peekWindowSize => Size.square(peekSize);
 
-  WindowConfig copyWith({WindowMode? mode, bool? peek, WindowMode? kioskExit}) => WindowConfig(
+  WindowConfig copyWith({WindowMode? mode, Corner? corner, bool? peek, WindowMode? kioskExit}) => WindowConfig(
     mode: mode ?? this.mode,
-    corner: corner,
+    corner: corner ?? this.corner,
     height: height,
     margin: margin,
     peek: peek ?? this.peek,
@@ -98,6 +98,19 @@ class WindowConfig {
     };
     return Offset(left, top);
   }
+}
+
+/// The corner of [workArea] a window dropped at [window] is nearest to: where its centre sits relative to the
+/// work area's centre, so a widget dragged past the middle of the screen changes corner.
+Corner nearestCorner(Rect window, Rect workArea) {
+  final right = window.center.dx >= workArea.center.dx;
+  final bottom = window.center.dy >= workArea.center.dy;
+  return switch ((right, bottom)) {
+    (false, false) => Corner.topLeft,
+    (true, false) => Corner.topRight,
+    (false, true) => Corner.bottomLeft,
+    (true, true) => Corner.bottomRight,
+  };
 }
 
 /// A file that says `kiosk` leaves kiosk to `float`, so Escape always lands somewhere visible.

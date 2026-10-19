@@ -45,12 +45,11 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 ## Linux desktop (2026-10-18, from a Kubuntu 24.04 laptop)
 
-- **Drag to move the widget.** window_manager supports drag-to-move on Linux (`startDragging`); a
-  drag could move the widget and save the nearest corner. To settle first: how a drag coexists with
-  the try-on gestures on the face (long-press, swipe).
-- **A tray item.** KDE and GNOME use StatusNotifierItem rather than a menu bar; the `tray_manager`
-  package covers it, and the pure menu model behind the macOS item (`status_menu.dart`) could drive
-  it unchanged. The larger of the two.
+- **Drag to move the widget.** Done: a drag hands the window to the window manager, and when it stops the
+  widget snaps to the nearest corner, which is saved. No drag starts while try-on mode is active.
+- **A tray item.** Done: an app indicator (tray_manager 0.5.3, libayatana-appindicator) with the same menu
+  as the macOS item and the resting badge as its icon. tray_manager 0.8 was tried first; its
+  StatusNotifierItem published no menu on Plasma.
 - **Kiosk extras.** Keeping the display awake is macOS-only today; Linux needs a D-Bus inhibit
   (`org.freedesktop.ScreenSaver`). Leaving kiosk shows the window at its ordinary size for a moment
   before the widget settles, since GTK restores the pre-fullscreen size first; hiding the window across

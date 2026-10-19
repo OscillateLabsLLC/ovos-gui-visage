@@ -15,12 +15,23 @@ Color windowBackground(WindowMode mode) => switch (mode) {
 };
 
 /// The whole window around the frame. In kiosk mode Escape calls [onLeaveKiosk] and the pointer hides after
-/// [cursorHideAfter] without movement. The tree is the same in every mode, so switching keeps the page's state.
+/// [cursorHideAfter] without movement. A drag on a widget calls [onDragStart], which hands the window to the window
+/// manager to move. The tree is the same in every mode, so switching keeps the page's state.
 class WindowSurface extends StatefulWidget {
-  const WindowSurface({super.key, required this.mode, required this.onLeaveKiosk, required this.child, this.timer});
+  const WindowSurface({
+    super.key,
+    required this.mode,
+    required this.onLeaveKiosk,
+    required this.child,
+    this.onDragStart,
+    this.timer,
+  });
 
   final WindowMode mode;
   final VoidCallback onLeaveKiosk;
+
+  /// Null where the window cannot be dragged: an ordinary window, kiosk, or while try-on mode owns the gestures.
+  final VoidCallback? onDragStart;
   final Widget child;
 
   /// Tests pass manual timers; the app uses real ones.
@@ -57,6 +68,8 @@ class _WindowSurfaceState extends State<WindowSurface> {
     if (mounted) setState(() {});
   }
 
+  bool get _draggable => widget.onDragStart != null && (widget.mode == WindowMode.float || widget.mode == WindowMode.desktop);
+
   @override
   Widget build(BuildContext context) {
     return CallbackShortcuts(
@@ -66,7 +79,11 @@ class _WindowSurfaceState extends State<WindowSurface> {
         child: MouseRegion(
           cursor: cursor.hidden ? SystemMouseCursors.none : MouseCursor.defer,
           onHover: (_) => cursor.moved(),
-          child: ColoredBox(color: windowBackground(widget.mode), child: widget.child),
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanStart: _draggable ? (_) => widget.onDragStart!() : null,
+            child: ColoredBox(color: windowBackground(widget.mode), child: widget.child),
+          ),
         ),
       ),
     );
