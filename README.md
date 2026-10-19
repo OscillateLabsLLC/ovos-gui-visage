@@ -24,52 +24,72 @@ skills, homescreen                 ▲ ovos.widgets.* translation       reads ~/
 
 ## Install
 
-On macOS 12 or later, with Homebrew:
+Visage runs on the machine where OVOS runs. It needs OVOS's GUI service as well, which is a one-time
+setup (next section).
+
+**macOS 12 or later**, with Homebrew:
 
 ```bash
-brew tap oscillatelabsllc/tap
-brew install --cask ovos-gui-visage
+brew install --cask oscillatelabsllc/tap/ovos-gui-visage
 ```
 
 The cask installs `OVOS Visage.app` in `/Applications`. Without Homebrew, download
 `ovos-gui-visage-<version>-macos.zip` from the
 [releases](https://github.com/OscillateLabsLLC/ovos-gui-visage/releases), unzip it and move the
 app to `/Applications`. The app is signed with a Developer ID and notarised, so it opens without
-an `xattr` step. `docs/PACKAGING.md` describes how a release is built.
+any security prompt. `docs/PACKAGING.md` describes how a release is built.
 
-On Linux, and for a display on another machine, run the web build from its container on the OVOS host,
-for amd64 or arm64 (a Raspberry Pi included):
+**Linux, including a Raspberry Pi** (amd64 or arm64): Visage runs in a browser, served by a small
+container on the OVOS machine:
 
 ```bash
-docker run -d --name visage --restart unless-stopped -p 8080:8080 \
-  --add-host host.docker.internal:host-gateway \
+docker run -d --name visage --restart unless-stopped --network host \
+  -e OVOS_HOST=127.0.0.1 \
   -v ~/.cache/ovos_gui:/srv/ovos_gui:ro \
   ghcr.io/oscillatelabsllc/ovos-gui-visage:latest
 ```
 
-Then open `http://<host>:8080/` in a browser. For a full-screen face on a display, use
-`chromium --kiosk http://<host>:8080/`. `sidecar/compose.yaml` does the same with `docker compose`, and
-[Web build and sidecar](#web-build-and-sidecar) has the details. Native Linux packages are tracked
-under the [`linux` label](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues?q=label%3Alinux).
+Then open `http://<ovos-machine>:8080/` in any browser on your network. For a full-screen face on a
+display attached to the machine, use `chromium --kiosk http://127.0.0.1:8080/`. If port 8080 is taken,
+add `-e VISAGE_PORT=8090`. OVOS listens only on `127.0.0.1` by default, which is why the container
+shares the host's network. `sidecar/compose.yaml` does the same with `docker compose`, and
+[Web build and sidecar](#web-build-and-sidecar) has the details. A native Linux app (the corner widget,
+the tray) builds from source today (see [On Linux](#on-linux)); packages are tracked under the
+[`linux` label](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues?q=label%3Alinux).
 
-## Requirements
+## Set up the OVOS side (once)
 
-- A running OVOS install on the same machine (core bus on `ws://127.0.0.1:8181/core`).
-- `ovos-gui` and `ovos-skill-homescreen` in their own virtualenv, as ovos-visage's
-  `docs/SPEC.md` section 3.1 describes.
-- Flutter 3.47 or newer to build; Docker to build the sidecar image.
+Visage is a client of `ovos-gui`, OVOS's GUI service, and shows the homescreen skill when nothing else
+is on screen. Stock OVOS settings work; nothing in `mycroft.conf` needs to change.
+
+Install both in **their own virtualenv**, never the one OVOS runs from. The homescreen pins an older
+`ovos-workshop`, and installing it next to OVOS would downgrade packages OVOS needs:
+
+```bash
+python3 -m venv ~/.venvs/ovos-gui
+env -u VIRTUAL_ENV -u PIP_CONSTRAINT -u UV_CONSTRAINT \
+  ~/.venvs/ovos-gui/bin/pip install --pre ovos-gui ovos-workshop ovos-skill-homescreen
+```
+
+The `env -u` part clears settings that OVOS alpha installs export and that would otherwise stop pip
+from resolving the homescreen's dependencies.
 
 ## Running
 
+With OVOS running, start the GUI service and the homescreen (two terminals, or as services):
+
 ```bash
-<gui-venv>/bin/ovos-gui-service
-<gui-venv>/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
-VISAGE_MODE=window flutter run -d macos     # or `just run`; without the variable it starts as a desktop widget
+~/.venvs/ovos-gui/bin/ovos-gui-service
+~/.venvs/ovos-gui/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
 ```
 
-The window shows the 480 × 800 screen scaled to fit. To try it without a microphone, inject
-an utterance on the core bus with ovos-visage's `docs/spike_say.py "what time is it"`, or run
-its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this app unchanged.
+Then open **OVOS Visage** from Applications on macOS, or the browser page on Linux. On macOS it
+starts as a small face in a corner of the desktop, with a face icon in the menu bar for everything else
+([As a desktop widget](#as-a-desktop-widget)).
+
+**Is it working?** Say "what time is it" (or ask anything). The face listens, thinks and answers,
+and the clock shows. If the face never reacts, check that the GUI service is listening on port
+18181 (`lsof -iTCP:18181 -sTCP:LISTEN` on macOS, `ss -ltn | grep 18181` on Linux).
 
 ## How it works
 
@@ -270,17 +290,20 @@ kiosk mode only peek is greyed out. The menu follows every change, from the bus,
 
 For a display on another machine, the web build runs in a browser served by a sidecar on the
 OVOS host. The sidecar serves the app, the face picker at `/faces.html`, the GUI cache under `/res/`, the
-host's files under `/res-abs/`, and proxies the two websockets, so port 8080 is the only one to
-expose. Anyone
-who reaches it can drive the OVOS bus through the proxy: keep it on a trusted network, or put
-authentication and TLS in front of it.
+host's files under `/res-abs/`, and proxies the two websockets, so port 8080 (`VISAGE_PORT`) is the only
+one to expose. Anyone who reaches it can drive the OVOS bus through the proxy: keep it on a trusted
+network, or put authentication and TLS in front of it.
+
+The container uses the host's network, because OVOS listens only on `127.0.0.1` by default and a
+container on Docker's own network cannot reach that. On Docker Desktop, turn on host networking in its
+settings first.
 
 ```bash
 docker compose -f sidecar/compose.yaml up -d          # on the OVOS host: pulls ghcr.io/oscillatelabsllc/ovos-gui-visage
 docker compose -f sidecar/compose.yaml up -d --build  # or build the image from this checkout
 ```
 
-Each release publishes the image for amd64 and arm64, tagged with the version (`1.0.1`, `1.0`, `1`) and
+Each release publishes the image for amd64 and arm64, tagged with the version (for example `1.1.0`, `1.1`, `1`) and
 `latest`. Set `VISAGE_TAG` to pin a version with compose.
 
 To try the web build against a local OVOS without the sidecar:
@@ -291,6 +314,18 @@ python3 tool/serve_web.py          # http://127.0.0.1:8099/?bus=ws://127.0.0.1:8
 ```
 
 ## Development
+
+Building needs Flutter 3.47 or newer (on Linux also `ninja-build`, `libgtk-3-dev` and
+`libayatana-appindicator3-dev`), and Docker for the sidecar image. With the GUI service and the
+homescreen running as above:
+
+```bash
+VISAGE_MODE=window flutter run -d macos     # or -d linux; without the variable it starts as a desktop widget
+```
+
+The window shows the 480 × 800 screen scaled to fit. To try it without a microphone, inject
+an utterance on the core bus with ovos-visage's `docs/spike_say.py "what time is it"`, or run
+its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this app unchanged.
 
 ```bash
 just test      # flutter test

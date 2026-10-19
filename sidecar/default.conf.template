@@ -1,11 +1,11 @@
-# Rendered by the nginx image's entrypoint with OVOS_HOST, OVOS_BUS_PORT and OVOS_GUI_PORT substituted.
+# Rendered by the nginx image's entrypoint with VISAGE_PORT, OVOS_HOST, OVOS_BUS_PORT and OVOS_GUI_PORT substituted.
 map $http_upgrade $connection_upgrade {
     default upgrade;
     ''      close;
 }
 
 server {
-    listen 8080;
+    listen ${VISAGE_PORT};
     root /usr/share/nginx/html;
 
     location / {
