@@ -1,7 +1,7 @@
 name: Build
 
 # Pre-built, unsigned desktop bundles, the web build and the sidecar image, so a change can be tried without a Flutter toolchain per platform.
-# Linux and Windows are CI-only targets for now (docs/SCOPE.md), so PRs build them too. Artifacts keep 3 days.
+# Linux is a CI-only target for now (docs/SCOPE.md), so PRs build it too. Artifacts keep 3 days.
 
 on:
   pull_request:
@@ -76,24 +76,6 @@ jobs:
           path: ovos-gui-visage-linux-x64.tar.gz
           retention-days: 3
 
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-      - run: flutter config --enable-windows-desktop
-      - run: flutter pub get
-      - run: flutter build windows --release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ovos-gui-visage-windows-x64
-          path: build/windows/x64/runner/Release/
-          retention-days: 3
-
 
   build-web:
     runs-on: ubuntu-latest
@@ -124,5 +106,7 @@ jobs:
       - run: docker build -f sidecar/Dockerfile -t ovos-gui-visage-sidecar .
       - name: Render the nginx config and check its syntax
         run: |
-          docker run --rm ovos-gui-visage-sidecar sh -c \
+          # nginx resolves the upstream while checking; host.docker.internal only exists on Docker Desktop, so give
+          # the runner's Docker the same name the way compose.yaml does.
+          docker run --rm --add-host host.docker.internal:host-gateway ovos-gui-visage-sidecar sh -c \
             '/docker-entrypoint.d/20-envsubst-on-templates.sh >/dev/null && nginx -t'

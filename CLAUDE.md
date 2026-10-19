@@ -30,7 +30,7 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
 
 ## Conventions
 
-- Targets: macOS first; Linux, Windows and web build in CI; the web build runs behind `sidecar/`.
+- Targets: macOS first; Linux and web build in CI; the web build runs behind `sidecar/`. No Windows.
   No iOS, no Android. `dart:io` lives only in `lib/resources/platform_io.dart` and
   `lib/protocol/endpoints_io.dart` (conditional exports), or the web build stops compiling.
 - macOS app sandbox is off (local sockets, reads `~/.cache/ovos_gui`); signed with the
