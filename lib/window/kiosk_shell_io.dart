@@ -27,8 +27,7 @@ Future<void> enterKiosk({required WindowMode from}) async {
   if (Platform.isMacOS) await _attempt('setResizable', () => windowManager.setResizable(false));
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(true));
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(true));
-  final screen = await _screen();
-  if (screen != null) await _attempt('setBounds', () => setWindowBounds(screen, growing: true));
+  await _fillScreen();
   await _native('setWindowLevel', 'kiosk');
   await _native('setKiosk', true);
   await _native('setKeepAwake', true);
@@ -42,6 +41,10 @@ Rect? _windowBounds;
 Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) async {
   await _native('setKeepAwake', false);
   await _native('setKiosk', false);
+  if (!Platform.isMacOS) {
+    await _attempt('setFullScreen', () => windowManager.setFullScreen(false));
+    await _attempt('unmaximize', windowManager.unmaximize);
+  }
   if (Platform.isMacOS) await _native('setActivationPolicy', config.isWidget ? 'accessory' : 'regular');
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(config.mode == WindowMode.float));
   await _native('setWindowLevel', config.isWidget ? config.mode.name : 'normal');
@@ -67,6 +70,15 @@ Future<void> _placeWidget(Future<Rect> Function() bounds) async {
     target = await _attempt('work area', bounds);
   }
   if (target != null) await _attempt('setBounds', () => setWindowBounds(target!, growing: false));
+}
+
+/// macOS sizes the window to the display itself, since native fullscreen would make its own Space. Elsewhere the
+/// window manager's fullscreen state does it: a plain window sized to the screen gets flagged maximized by KWin and
+/// then refuses to shrink again (measured on Kubuntu 24.04), and fullscreen also covers the panel.
+Future<void> _fillScreen() async {
+  if (!Platform.isMacOS) return _attempt('setFullScreen', () => windowManager.setFullScreen(true));
+  final screen = await _screen();
+  if (screen != null) await _attempt('setBounds', () => setWindowBounds(screen, growing: true));
 }
 
 /// The primary display's whole area, menu bar included; null, reported, where the platform cannot say.
