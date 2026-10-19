@@ -13,7 +13,7 @@ A Flutter GUI client for [OpenVoiceOS](https://openvoiceos.org) that expands the
 Mycroft Mark II Kickstarter concept: a tall portrait screen, big circular widgets, and a
 face that listens, thinks and speaks with a viseme-driven mouth. It is the native port of
 [ovos-visage](https://github.com/OscillateLabsLLC/ovos-visage), built for macOS first, then
-Linux, Windows and the web. It connects to a stock `ovos-gui` service as a GUI client, so no
+Linux and the web. It connects to a stock `ovos-gui` service as a GUI client, so no
 OVOS code is modified, and renders the homescreen, the system templates, and the weather,
 date-time, alerts and OCP media pages. Any other skill page shows as a debug card.
 

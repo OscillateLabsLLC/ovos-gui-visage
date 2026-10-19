@@ -45,8 +45,8 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 - The first signed, notarised release needs the owner's one-time setup (`PACKAGING.md`). The
   Release workflow and the Gatekeeper check have never run with a real certificate; check the first
   run end to end, then run `brew audit --cask --online` when the release URL exists.
-- Linux and Windows have CI builds but no release artifacts; the sidecar image is built but not
-  published to a registry.
+- Linux has a CI build but no release artifact; the sidecar image is built but not published to a
+  registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
 
 ## Carried over
 
@@ -54,7 +54,6 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   Space/Enter, "Saved", Undo and the reduced-motion stills were built to spec but checked only by
   screenshot, Lighthouse and axe; a small headless test of those would hold them.
 
-- Windows web view once a maintained WebView2 package exists (SCOPE phase 4).
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
   would need more than nginx.
 - A Dart recorder for protocol fixtures, so contributors do not need ovos-visage's `--record`.
