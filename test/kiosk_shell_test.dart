@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,8 @@ void main() {
     final contexts = [for (final fault in first) '${fault.context}'];
     expect(contexts, contains('setKiosk is not implemented by this platform runner'));
     expect(contexts, contains('setKeepAwake is not implemented by this platform runner'));
-    expect(contexts, contains('getPrimaryDisplay in kiosk mode'));
+    // macOS sizes the window to the display; elsewhere the window manager's fullscreen state does it.
+    expect(contexts, contains(Platform.isMacOS ? 'getPrimaryDisplay in kiosk mode' : 'setFullScreen in kiosk mode'));
     expect(contexts, contains('setBounds in kiosk mode'));
     expect(contexts.toSet(), hasLength(contexts.length));
     expect(again, isEmpty);
