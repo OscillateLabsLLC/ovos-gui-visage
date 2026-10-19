@@ -140,9 +140,12 @@ Future<void> setWindowMode(WindowConfig config, {required WindowMode from, requi
   await _setLevel(config.mode);
 }
 
-/// Orders the window out or back in front; a desktop-level window must not become key, so this is not
-/// windowManager.show.
-Future<void> setWindowVisible(bool visible) => _invoke('setVisible', visible);
+/// Orders the window out or back in front. On macOS a desktop-level window must not become key, so the runner does
+/// it rather than windowManager.show; elsewhere window_manager hides and shows the GTK window.
+Future<void> setWindowVisible(bool visible) async {
+  if (Platform.isMacOS) return _invoke('setVisible', visible);
+  await _attempt(visible ? 'show' : 'hide', visible ? windowManager.show : windowManager.hide);
+}
 
 Future<void> quitApp() => windowManager.destroy();
 
