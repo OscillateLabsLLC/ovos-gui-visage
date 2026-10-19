@@ -54,6 +54,15 @@ static void my_application_activate(GApplication* application) {
 
   gtk_window_set_default_size(window, 1280, 720);
 
+  // A widget mode floats its rounded frame on the desktop, so under a compositor the window takes the RGBA visual
+  // and a clear background; the Dart side paints an opaque page behind an ordinary window (window_surface.dart).
+  GdkScreen* window_screen = gtk_widget_get_screen(GTK_WIDGET(window));
+  GdkVisual* rgba_visual = gdk_screen_get_rgba_visual(window_screen);
+  if (rgba_visual != nullptr && gdk_screen_is_composited(window_screen)) {
+    gtk_widget_set_visual(GTK_WIDGET(window), rgba_visual);
+  }
+  gtk_widget_set_app_paintable(GTK_WIDGET(window), TRUE);
+
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
       project, self->dart_entrypoint_arguments);
@@ -62,7 +71,7 @@ static void my_application_activate(GApplication* application) {
   GdkRGBA background_color;
   // Background defaults to black, override it here if necessary, e.g. #00000000
   // for transparent.
-  gdk_rgba_parse(&background_color, "#000000");
+  gdk_rgba_parse(&background_color, "#00000000");
   fl_view_set_background_color(view, &background_color);
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
