@@ -39,6 +39,14 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
    the macOS menu bar item, which shows and hides the widget, switches peek and mode, and picks the
    face and colourway without a bus client. Still open: the fullscreen kiosk mode.
 
+## Packaging (2026-10-18)
+
+- The first signed, notarised release needs the owner's one-time setup (`PACKAGING.md`). The
+  Release workflow and the Gatekeeper check have never run with a real certificate; check the first
+  run end to end, then run `brew audit --cask --online` when the release URL exists.
+- Linux and Windows have CI builds but no release artifacts; the sidecar image is built but not
+  published to a registry.
+
 ## Carried over
 
 - Windows web view once a maintained WebView2 package exists (SCOPE phase 4).
