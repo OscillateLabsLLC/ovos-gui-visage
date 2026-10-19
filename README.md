@@ -169,6 +169,16 @@ and `desktop` only; an ordinary `window` ignores it.
   <img src="docs/screenshots/shell/peek-expanded-speaking.png" alt="Peek mode while OVOS speaks: the full widget with the face over the idle page" width="240">
 </p>
 
+The Mark 1 face draws a bolder version of itself in the badge, so it stays easy to see at 96 pixels: the
+ring lights are larger and bright, and the resting mouth is a short bar. The full-size face keeps the
+Mark 1's own dim ring colour.
+
+<p align="center">
+  <img src="docs/screenshots/shell/peek-mark1-badge.png" alt="The Mark 1 face as the peek badge at its real size" width="96">
+  &nbsp;
+  <img src="docs/screenshots/shell/peek-mark1-badge@4x.png" alt="The same Mark 1 badge enlarged four times: two rings of bright lights and a short bar for the mouth" width="192">
+</p>
+
 The window also changes over the bus. `visage.window.set` with `peek` (true or false) turns peek
 mode on or off and writes it to the config file; with `expanded` (true or false) it opens or
 closes the window once and does not change the config. A one-off open stays open until the next
@@ -255,6 +265,15 @@ python3 tool/serve_web.py          # http://127.0.0.1:8099/?bus=ws://127.0.0.1:8
 just test      # flutter test
 just lint      # dart format check + flutter analyze
 just run       # flutter run -d macos
+```
+
+The face picker page has its own test. It opens `docs/face-palettes.html` in headless Chrome
+against a fake message bus. It checks the keyboard, taps, "Saved", "Not saved", Undo, the
+`#customise` and `#all` links, and reduced motion. It needs Google Chrome (or `CHROME` set to
+the path of a Chrome or Chromium) and `pip install websocket-client`:
+
+```bash
+python3 -I tool/test_picker.py     # exit code 0 when every check passes
 ```
 
 See `CONTRIBUTING.md`.

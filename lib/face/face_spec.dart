@@ -127,8 +127,11 @@ class FaceSpec {
   @override
   int get hashCode => Object.hash(eyes, mouth, mouthSize, backdrop, colours);
 
+  /// The colourway is left out when it is the one the spec's preset brings, or visage when it is no preset.
   @override
-  String toString() =>
-      '$eyes+$mouth+$mouthSize${backdrop == defaultBackdrop ? '' : '+$backdrop'}'
-      '${colours == FacePalette.visage ? '' : '+${colours.name ?? 'custom colours'}'}';
+  String toString() {
+    final implied = facePresets[presetName]?.colours ?? FacePalette.visage;
+    return '$eyes+$mouth+$mouthSize${backdrop == defaultBackdrop ? '' : '+$backdrop'}'
+        '${colours == implied ? '' : '+${colours.name ?? 'custom colours'}'}';
+  }
 }

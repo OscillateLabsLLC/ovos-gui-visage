@@ -9,18 +9,21 @@ import '../mark1_theme.dart';
 const _onAlpha = 0xF5;
 const _offAlpha = 0x09;
 
+/// In the compact badge the LEDs are larger, and the resting mouth is a short bar instead of a blank window, so the
+/// mouth reads at 96 px.
 class MatrixMouth implements MouthStyle {
   const MatrixMouth();
 
   /// LED radius 0.72 on a 2.5 pitch, in faceplate units.
   static const _ledRatio = 0.72 / 2.5;
+  static const _compactLedRatio = 0.42;
 
   @override
   void paint(Canvas canvas, MouthSlot slot, FaceFrame frame) {
     final pitch = slot.width / mouthCols;
-    final led = pitch * _ledRatio;
+    final led = pitch * (frame.compact ? _compactLedRatio : _ledRatio);
     final origin = slot.centre - Offset((mouthCols - 1) / 2 * pitch, (mouthRows - 1) / 2 * pitch);
-    final rows = mouthFrame(frame.mode, frame.viseme, frame.elapsed);
+    final rows = mouthFrame(frame.mode, frame.viseme, frame.elapsed) ?? (frame.compact ? compactRestBar : null);
     final off = Paint()..color = frame.palette.matrix.withAlpha(_offAlpha);
     final on = Paint()..color = frame.palette.matrix.withAlpha(_onAlpha);
     final glow = Paint()

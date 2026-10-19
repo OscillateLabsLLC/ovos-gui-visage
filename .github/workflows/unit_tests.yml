@@ -26,3 +26,15 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed --line-length 130 lib test tool
       - run: flutter analyze --fatal-infos
       - run: flutter test
+
+  # The face picker page (docs/face-palettes.html) in headless Chrome against a fake bus; tool/test_picker.py.
+  picker-page:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - run: google-chrome --version
+      - run: python3 -m pip install websocket-client==1.9.2
+      - run: python3 -I tool/test_picker.py
