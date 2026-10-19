@@ -1,10 +1,13 @@
-# macOS packaging and release
+# Packaging and release
 
 The macOS app ships as a zip on each GitHub release, signed with a Developer ID certificate and
 notarised by Apple, and installs through the Homebrew cask in
 [OscillateLabsLLC/homebrew-tap](https://github.com/OscillateLabsLLC/homebrew-tap). It is not a
 Mac App Store app: the sandbox is off, because the app opens local sockets and reads
 `~/.cache/ovos_gui`.
+
+The web build ships as a container image on ghcr.io with each release, for amd64 and arm64; it is the
+way onto Linux until native packages exist.
 
 ## The flow
 
@@ -28,6 +31,11 @@ Mac App Store app: the sandbox is off, because the app opens local sockets and r
    and `sha256` into `Casks/ovos-gui-visage.rb`, and pushes to the tap's `main`. The tap is the
    only repository where a bot pushes to `main`; the cask only follows releases this workflow
    built and notarised.
+5. Alongside, without waiting for the macOS job, the `container` job builds `sidecar/Dockerfile` for
+   `linux/amd64` and `linux/arm64` and pushes `ghcr.io/oscillatelabsllc/ovos-gui-visage` tagged
+   `<version>`, `<major>.<minor>`, `<major>` and `latest`, with `GITHUB_TOKEN`. The Flutter stage runs
+   once on the runner's own platform, since the web build is the same for both; only the nginx stage
+   is per platform, so nothing runs under emulation.
 
 To build a tag again, run the Release workflow by hand (`workflow_dispatch`) with the tag. The
 upload replaces the assets and the tap job does nothing when the checksum did not change.
@@ -99,3 +107,12 @@ script says so.
    ```
 
    `brew audit` needs the release URL to exist, so it can run only after the first release.
+
+5. Check the image on both platforms:
+
+   ```bash
+   docker buildx imagetools inspect ghcr.io/oscillatelabsllc/ovos-gui-visage:<version>   # linux/amd64 and linux/arm64
+   ```
+
+   The first push creates the package as private. Once, under the organisation's Packages, open
+   `ovos-gui-visage`, set its visibility to public, and check that it is linked to this repository.

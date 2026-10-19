@@ -1,9 +1,9 @@
 name: Release
 
 # Builds the macOS app signed with the Developer ID certificate, notarises and staples it, attaches the zip and
-# its sha256 to the GitHub release, then points the Homebrew cask at it. docs/PACKAGING.md has the flow and the
-# one-time setup. release-please publishes the release with RELEASE_PLEASE_TOKEN (a PAT); a release made with
-# GITHUB_TOKEN would not trigger this workflow.
+# its sha256 to the GitHub release, then points the Homebrew cask at it. Alongside, it pushes the sidecar image to
+# ghcr.io for amd64 and arm64. docs/PACKAGING.md has the flow and the one-time setup. release-please publishes the
+# release with RELEASE_PLEASE_TOKEN (a PAT); a release made with GITHUB_TOKEN would not trigger this workflow.
 
 on:
   release:
@@ -128,3 +128,39 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -am "feat(ovos-gui-visage): $VERSION"
           git push origin HEAD:main
+
+  # The web build behind its sidecar (sidecar/Dockerfile), for amd64 and arm64. It does not wait for the macOS job,
+  # so a slow notarisation never holds it back.
+  container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ env.TAG }}
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/oscillatelabsllc/ovos-gui-visage
+          tags: |
+            type=semver,pattern={{version}},value=${{ env.TAG }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.TAG }}
+            type=semver,pattern={{major}},value=${{ env.TAG }}
+            type=raw,value=latest
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: sidecar/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: FLUTTER_VERSION=${{ env.FLUTTER_VERSION }}
