@@ -153,6 +153,17 @@ width follows the 480 × 800 frame. This is a real window with the live sockets 
 which a WidgetKit widget cannot have: widget extensions get no sockets and only a handful of
 timeline refreshes an hour.
 
+### On Linux
+
+The widget modes were checked on Kubuntu 24.04 (X11, KWin, Plasma): `window`, `float`, `desktop`,
+peek and kiosk all place correctly, the rounded frame floats on the desktop, and `desktop` stays
+beneath other windows through the window manager's keep-below flag. Differences from macOS: there is
+no menu bar item, so the mode and the face change through the config file, the environment or the
+bus; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
+the log reports it once); kiosk covers the panel through the window manager's fullscreen state but does
+not keep the display awake, and leaving it shows the window at its ordinary size for a moment before the
+widget settles in its corner; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
+
 ### Peek mode
 
 With `"peek": true` (or `VISAGE_PEEK=1`), the widget stays out of the way. At rest it is a round
