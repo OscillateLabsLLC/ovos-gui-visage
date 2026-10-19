@@ -27,6 +27,7 @@ import 'window/peek.dart';
 import 'window/status_menu.dart';
 import 'window/status_menu_binding.dart';
 import 'window/status_menu_host.dart';
+import 'window/window_config.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
 import 'window/window_surface.dart';
@@ -106,6 +107,7 @@ class _ScreenState extends State<Screen> {
     quit: quitApp,
   );
   late bool windowExpanded;
+  late WindowMode windowMode = widget.config.window.mode;
   late final GuiClient gui = GuiClient(
     bus: bus,
     guiUrlOverride: sockets.gui,
@@ -128,7 +130,7 @@ class _ScreenState extends State<Screen> {
     peek.addListener(_onPeek);
     widgets;
     remote;
-    window.addListener(_refresh);
+    window.addListener(_onWindow);
     menu;
     bus.start();
     gui.start();
@@ -164,9 +166,15 @@ class _ScreenState extends State<Screen> {
     if (peek.expanded != windowExpanded) {
       windowExpanded = peek.expanded;
       _log('peek: window ${windowExpanded ? 'expands' : 'collapses'}');
-      unawaited(setWidgetExpanded(window.config, expanded: windowExpanded));
+      // During a mode switch the mode effect places the window; a second, animated resize would race it.
+      if (window.config.mode == windowMode) unawaited(setWidgetExpanded(window.config, expanded: windowExpanded));
     }
     if (mounted) setState(() {});
+  }
+
+  void _onWindow() {
+    windowMode = window.config.mode;
+    _refresh();
   }
 
   void _refresh() {

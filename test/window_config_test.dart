@@ -97,6 +97,16 @@ void main() {
     expect(WindowConfig.from(null, const {'VISAGE_MODE': 'KIOSK'}).isKiosk, isTrue);
   });
 
+  test('the environment still wins over a file that says kiosk', () {
+    final config = WindowConfig.from(
+      {'mode': 'kiosk', 'peek': true},
+      const {'VISAGE_MODE': 'float', 'VISAGE_CORNER': 'bottom-right'},
+    );
+    expect(config.mode, WindowMode.float);
+    expect(config.corner, Corner.bottomRight);
+    expect(config.peeks, isTrue);
+  });
+
   test('leaving kiosk goes to the file mode, float when the file says kiosk, desktop when it says nothing', () {
     WindowMode exit(Map<String, dynamic>? file) => WindowConfig.from(file, const {'VISAGE_MODE': 'kiosk'}).kioskExit;
     expect(exit({'mode': 'window'}), WindowMode.window);

@@ -12,7 +12,7 @@ void main() {
   test('a runner without the kiosk calls reports each missing call once and carries on', () async {
     Future<void> roundTrip() async {
       await enterKiosk(from: WindowMode.float);
-      await leaveKiosk(const WindowConfig(mode: WindowMode.float), bounds: const Rect.fromLTWH(0, 0, 96, 96));
+      await leaveKiosk(const WindowConfig(mode: WindowMode.float), bounds: () async => const Rect.fromLTWH(0, 0, 96, 96));
     }
 
     final first = await collectFaults(roundTrip);

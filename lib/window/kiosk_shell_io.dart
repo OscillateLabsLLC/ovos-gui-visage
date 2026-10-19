@@ -36,14 +36,15 @@ Future<void> enterKiosk({required WindowMode from}) async {
   await _native('setKeepAwake', true);
 }
 
-/// Back to a corner widget at [bounds], or to an ordinary window with its title bar when [bounds] is null.
-Future<void> leaveKiosk(WindowConfig config, {Rect? bounds}) async {
+/// Back to a corner widget at [bounds], or to an ordinary window with its title bar when [bounds] is null. [bounds]
+/// is read after the Dock and the menu bar come back, so the work area is the one the widget will sit in.
+Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) async {
   await _native('setKeepAwake', false);
   await _native('setKiosk', false);
   if (Platform.isMacOS) await _native('setActivationPolicy', config.isWidget ? 'accessory' : 'regular');
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(config.mode == WindowMode.float));
   await _native('setWindowLevel', config.isWidget ? config.mode.name : 'normal');
-  if (bounds != null) return _attempt('setBounds', () => windowManager.setBounds(bounds));
+  if (bounds != null) return _placeWidget(bounds);
   await _attempt('setTitleBarStyle', () => windowManager.setTitleBarStyle(TitleBarStyle.normal));
   await _attempt('setResizable', () => windowManager.setResizable(true));
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(false));
@@ -51,6 +52,17 @@ Future<void> leaveKiosk(WindowConfig config, {Rect? bounds}) async {
   final centred = screen == null ? null : Rect.fromCenter(center: screen.center, width: frameWidth, height: frameHeight);
   final restore = _windowBounds ?? centred;
   if (restore != null) await _attempt('setBounds', () => windowManager.setBounds(restore));
+}
+
+/// Waits for the work area to grow back from the hidden Dock (at most half a second), then places the widget.
+Future<void> _placeWidget(Future<Rect> Function() bounds) async {
+  final hidden = await _attempt('work area', bounds);
+  var target = hidden;
+  for (var i = 0; i < 10 && target != null && target == hidden; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    target = await _attempt('work area', bounds);
+  }
+  if (target != null) await _attempt('setBounds', () => windowManager.setBounds(target!));
 }
 
 /// The primary display's whole area, menu bar included; null, reported, where the platform cannot say.

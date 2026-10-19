@@ -112,8 +112,10 @@ Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) as
 Future<void> setWindowMode(WindowConfig config, {required WindowMode from, required bool expanded}) async {
   if (config.isKiosk) return enterKiosk(from: from);
   if (from == WindowMode.kiosk) {
-    final bounds = config.isWidget ? config.boundsIn(await _workArea(), expanded: expanded) : null;
-    return leaveKiosk(config, bounds: bounds);
+    return leaveKiosk(
+      config,
+      bounds: config.isWidget ? () async => config.boundsIn(await _workArea(), expanded: expanded) : null,
+    );
   }
   await windowManager.setAlwaysOnTop(config.mode == WindowMode.float);
   await _invoke('setWindowLevel', config.mode.name);
