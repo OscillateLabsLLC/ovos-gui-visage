@@ -11,6 +11,7 @@ import '../face/face_spec.dart';
 import '../faults.dart';
 import 'kiosk_shell_io.dart';
 import 'plugin_calls.dart';
+import 'window_bounds_io.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
 
@@ -115,7 +116,7 @@ Future<T?> _attempt<T>(String what, Future<T> Function() call) => attemptPluginC
 Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {
   if (!config.isWidget) return;
   try {
-    await windowManager.setBounds(config.boundsIn(await _workArea(), expanded: expanded), animate: true);
+    await setWindowBounds(config.boundsIn(await _workArea(), expanded: expanded), growing: expanded, animate: true);
   } on Object catch (err, stack) {
     reportFault('resizing the widget window (expanded: $expanded)', err, stack);
   }

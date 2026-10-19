@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import '../face/face_theme.dart';
 import '../faults.dart';
 import 'plugin_calls.dart';
+import 'window_bounds_io.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
 
@@ -26,7 +27,7 @@ Future<void> enterKiosk({required WindowMode from}) async {
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(true));
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(true));
   final screen = await _screen();
-  if (screen != null) await _attempt('setBounds', () => windowManager.setBounds(screen));
+  if (screen != null) await _attempt('setBounds', () => setWindowBounds(screen, growing: true));
   await _native('setWindowLevel', 'kiosk');
   await _native('setKiosk', true);
   await _native('setKeepAwake', true);
@@ -64,7 +65,7 @@ Future<void> _placeWidget(Future<Rect> Function() bounds) async {
     await Future<void>.delayed(const Duration(milliseconds: 50));
     target = await _attempt('work area', bounds);
   }
-  if (target != null) await _attempt('setBounds', () => windowManager.setBounds(target!));
+  if (target != null) await _attempt('setBounds', () => setWindowBounds(target!, growing: false));
 }
 
 /// The primary display's whole area, menu bar included; null, reported, where the platform cannot say.
