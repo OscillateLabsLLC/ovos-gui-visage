@@ -1,6 +1,6 @@
 {
-    "name": "ovos-gui-visage",
-    "short_name": "visage",
+    "name": "OVOS Visage",
+    "short_name": "Visage",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#05070a",
