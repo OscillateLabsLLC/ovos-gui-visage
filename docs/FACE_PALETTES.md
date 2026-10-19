@@ -14,7 +14,9 @@ draws all seventy-two pairings. It names every style in plain words, so a new st
 there too. Opened from the menu bar (Face picker…), served by the sidecar at `/faces.html`, or
 opened with `#bus=ws://host:8181/core`, it sends `visage.face.set` on every choice, shows "Saved"
 once `visage.face.state` answers, and follows `visage.face.state`, so it stays in step with the
-device however the face was changed.
+device however the face was changed. `tool/test_picker.py` tests the page in headless Chrome
+against a fake bus: the arrow keys, Space and Enter, taps, "Saved" and "Not saved", Undo, the
+two links and reduced motion.
 
 ## How the pieces fit
 

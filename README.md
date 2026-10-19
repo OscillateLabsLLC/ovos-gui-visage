@@ -231,6 +231,15 @@ just lint      # dart format check + flutter analyze
 just run       # flutter run -d macos
 ```
 
+The face picker page has its own test. It opens `docs/face-palettes.html` in headless Chrome
+against a fake message bus. It checks the keyboard, taps, "Saved", "Not saved", Undo, the
+`#customise` and `#all` links, and reduced motion. It needs Google Chrome (or `CHROME` set to
+the path of a Chrome or Chromium) and `pip install websocket-client`:
+
+```bash
+python3 -I tool/test_picker.py     # exit code 0 when every check passes
+```
+
 See `CONTRIBUTING.md`.
 
 ## License
