@@ -108,8 +108,8 @@ class Chrome:
                     pages = [t for t in json.load(r) if t.get("type") == "page"]
                 if pages:
                     return pages[0]["webSocketDebuggerUrl"]
-            except (urllib.error.URLError, ConnectionError):
-                pass  # Not listening yet; the deadline bounds the wait.
+            except (urllib.error.URLError, ConnectionError, TimeoutError):
+                pass  # Not listening yet, or too busy starting to answer; the deadline bounds the wait.
             time.sleep(0.1)
         raise RuntimeError("Chrome's DevTools port did not answer within 20 s")
 
