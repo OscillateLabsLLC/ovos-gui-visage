@@ -8,34 +8,37 @@ import '../mark1_theme.dart';
 
 const _trackIdle = Color(0x0DFFFFFF);
 
-/// A 12-pixel NeoPixel ring; the slot is the ring plus one LED radius (faceplate units 13.5 + 1.6).
+/// A 12-pixel NeoPixel ring; the slot is the ring plus one LED radius (faceplate units 13.5 + 1.6). In the compact
+/// badge the LEDs are larger and lit in the bright matrix colour, since the ring's dim grey does not read at 96 px.
 class RingEyes implements EyeStyle {
   const RingEyes();
 
-  static const _ringRatio = 13.5 / 15.1;
-  static const _ledRatio = 1.6 / 15.1;
+  static const _full = (ring: 13.5 / 15.1, led: 1.6 / 15.1);
+  static const _compact = (ring: 0.85, led: 0.15);
 
   @override
   void paint(Canvas canvas, FaceLayout layout, FaceFrame frame) {
     final depth = narrowDepth(frame.eyeOpen);
+    final lit = frame.compact ? frame.palette.matrix : frame.palette.led;
+    final ratios = frame.compact ? _compact : _full;
     for (final slot in layout.eyes) {
-      _paintRing(canvas, slot, depth, frame.palette);
+      _paintRing(canvas, slot, depth, lit, ratios);
     }
   }
 
-  void _paintRing(Canvas canvas, EyeSlot slot, int depth, FacePalette palette) {
-    final radius = slot.radius * _ringRatio;
-    final led = slot.radius * _ledRatio;
+  void _paintRing(Canvas canvas, EyeSlot slot, int depth, Color lit, ({double ring, double led}) ratios) {
+    final radius = slot.radius * ratios.ring;
+    final led = slot.radius * ratios.led;
     final anyLit = depth < narrowDepthMax;
     final track = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 3
-      ..color = anyLit ? palette.led.withValues(alpha: 0.09) : _trackIdle;
+      ..color = anyLit ? lit.withValues(alpha: 0.09) : _trackIdle;
     canvas.drawCircle(slot.centre, radius, track);
     final glow = Paint()
-      ..color = palette.led.withValues(alpha: 0.9)
+      ..color = lit.withValues(alpha: 0.9)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, led * 0.75);
-    final on = Paint()..color = palette.led;
+    final on = Paint()..color = lit;
     final off = Paint()..color = HardwareColours.unlit;
     for (var slotIndex = 0; slotIndex < ringSize; slotIndex++) {
       final at = ringPixel(slot.centre, radius, slotIndex);
