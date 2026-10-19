@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:tray_manager/tray_manager.dart';
 
 import '../faults.dart';
+import 'plugin_calls.dart';
 import 'status_menu.dart';
 
 const trayIconAsset = 'assets/tray/ovos-gui-visage.png';
@@ -42,9 +43,10 @@ class TrayHost with TrayListener {
     trayManager.destroy();
   }
 
+  /// The icon is required; the tooltip is not implemented by the Linux plugin and is reported once and skipped.
   Future<void> _create() async {
     await trayManager.setIcon(trayIconAsset);
-    await trayManager.setToolTip(trayToolTip);
+    await attemptPluginCall('the tray tooltip', () => trayManager.setToolTip(trayToolTip));
     trayManager.addListener(this);
     _ready = true;
   }
