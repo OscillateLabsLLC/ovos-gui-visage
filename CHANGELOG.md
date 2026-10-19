@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.0.1...v1.1.0) (2026-10-19)
+
+
+### Features
+
+* publish the web build's container image to ghcr.io on each release ([8ca5cbe](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/8ca5cbe4249225cf080bfa78f652f00ba50af494))
+* publish the web build's container image to ghcr.io on each release ([18736ca](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/18736ca47656787293f3bdea0845b1d2e963683c))
+
+
+### Bug Fixes
+
+* the picker test retries Chrome's DevTools probe when a read times out ([2bc128a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/2bc128adc09d69ebf9bdf0d9d08077b6038ba106))
+* the picker test retries Chrome's DevTools probe when a read times out ([a7bc2ed](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/a7bc2edf475da8ac0a4a03a791761cfe7a0a1c3e))
+* the sidecar reaches OVOS on Linux, and the README gets a user quick start ([b82109b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b82109b98e48c1794b2f83e3df111c8cded53c49))
+* the sidecar reaches OVOS on Linux, and the README gets a user quick start ([9a42329](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9a42329efb7a9633dcb92db378f8dfea989c9416))
+* the web build's tab title and icons are OVOS Visage, not the Flutter template ([826881b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/826881b140659a30890fd58c8f16430364c89a60))
+* the web build's tab title and icons are OVOS Visage, not the Flutter template ([8998c2a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/8998c2aa10b7549123a5175b071283945c4c530d))
+
 ## [1.0.1](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.0.0...v1.0.1) (2026-10-19)
 
 
