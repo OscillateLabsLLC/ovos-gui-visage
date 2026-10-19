@@ -34,31 +34,40 @@ void main() {
     expect(launcherHtml(_bus), contains('<title>Choose a face</title>'));
   });
 
-  test('writes the bundled page over an old one and the launcher, and asks the runner to open the launcher', () async {
-    messenger.setMockMethodCallHandler(windowChannel, (call) async => calls.add(call));
+  test('writes the bundled page over an old one and the launcher, and opens the launcher', () async {
+    final opened = <Uri>[];
     final config = Directory('${dir.path}/config');
     File('${config.path}/$pickerFileName')
       ..createSync(recursive: true)
       ..writeAsStringSync('an older page');
-    await openFacePicker(_bus, dir: config);
+    await openFacePicker(_bus, dir: config, open: (page) async => opened.add(page));
     expect(File('${config.path}/$pickerFileName').readAsStringSync(), File('docs/face-palettes.html').readAsStringSync());
     expect(File('${config.path}/$launcherFileName').readAsStringSync(), launcherHtml(_bus));
-    expect(calls.single.method, openUrlMethod);
-    expect(calls.single.arguments, Uri.file('${config.path}/$launcherFileName').toString());
-    expect(calls.single.arguments, contains('face%20picker'));
+    expect(opened.single, Uri.file('${config.path}/$launcherFileName'));
+    expect('${opened.single}', contains('face%20picker'));
   });
 
-  test('a runner that cannot open it is reported, not thrown', () async {
-    messenger.setMockMethodCallHandler(windowChannel, (call) async => throw PlatformException(code: 'open-failed'));
-    final faults = await collectFaults(() => openFacePicker(_bus, dir: dir));
-    expect(faults.single.exception, isA<PlatformException>());
+  test('a browser that cannot open it is reported, not thrown', () async {
+    final faults = await collectFaults(
+      () => openFacePicker(_bus, dir: dir, open: (page) async => throw const ProcessException('xdg-open', [], 'no browser', 3)),
+    );
+    expect(faults.single.exception, isA<ProcessException>());
   });
+
+  test('on macOS the runner opens the page', () async {
+    messenger.setMockMethodCallHandler(windowChannel, (call) async => calls.add(call));
+    await openInBrowser(Uri.file('/tmp/open-faces.html'));
+    expect(calls.single.method, openUrlMethod);
+    expect(calls.single.arguments, 'file:///tmp/open-faces.html');
+  }, skip: !Platform.isMacOS);
 
   test('a page that cannot be written is reported, and nothing is opened', () async {
-    messenger.setMockMethodCallHandler(windowChannel, (call) async => calls.add(call));
+    final opened = <Uri>[];
     final blocker = File('${dir.path}/file')..writeAsStringSync('');
-    final faults = await collectFaults(() => openFacePicker(_bus, dir: Directory(blocker.path)));
+    final faults = await collectFaults(
+      () => openFacePicker(_bus, dir: Directory(blocker.path), open: (page) async => opened.add(page)),
+    );
     expect(faults.single.exception, isA<FileSystemException>());
-    expect(calls, isEmpty);
+    expect(opened, isEmpty);
   });
 }
