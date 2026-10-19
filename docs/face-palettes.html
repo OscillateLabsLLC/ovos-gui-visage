@@ -111,18 +111,16 @@
   </section>
 
   <section class="notes">
-    <h2>Presets worth naming</h2>
+    <h2>Presets</h2>
     <div class="presets" id="presets"></div>
-    <h2>How it fits the code</h2>
+    <h2>Keeping a face</h2>
     <ul>
-      <li>The widget keeps the animation state and hands every painter the same <code>FaceFrame</code>; styles only draw.</li>
-      <li>A <code>FaceLayout</code> gives each style its slots: two eye circles and a mouth box, full or compact. The layout comes from the frame (bare screen, badge disc, or the Mark 1 plate), never from the style.</li>
-      <li><code>FaceTheme</code> stays the type the widget consumes; a <code>ComposedTheme(eyes, mouth, frame)</code> implements it and <code>visage</code> and <code>mark1</code> become presets.</li>
-      <li>Mouth size is a layout parameter, not a style: large scales the mouth slot by 1.4 (1.25 in the badge, where the disc bounds it), so every mouth has a big version and the stroke weight grows with it.</li>
-      <li>Config: <code>"face": "mark1"</code> for a preset, <code>"face": {"eyes": "block", "mouth": "outline", "mouthSize": "large"}</code> for a pair, <code>VISAGE_FACE=block+outline</code> from the shell.</li>
-      <li>Colour: each style reads <code>eye</code>, <code>eyeDim</code>, <code>mouth</code>, <code>accent</code>, <code>led</code>, <code>matrix</code> and <code>matrixGlow</code> from the frame's palette, so a colourway is a value: <code>"colours": "ember"</code>, or an object of <code>#RRGGBB</code> tokens.</li>
+      <li>Connected to the device, every tap here changes the face and saves it, so it is the face at the next start.</li>
+      <li>In the config file: <code>"face": "mark1"</code> for a preset, <code>"face": "retro+large+rose"</code> for names in any order, or an object with <code>eyes</code>, <code>mouth</code>, <code>mouthSize</code>, <code>backdrop</code> and <code>colours</code>.</li>
+      <li>From the shell: <code>VISAGE_FACE=block+outline</code> on top of the file.</li>
+      <li>Over the bus: <code>visage.face.set</code> with any of those keys; <code>visage.face.state</code> answers with the current face and the names available for each part.</li>
     </ul>
-    <p class="lede">The full write-up is <code>docs/FACE_PALETTES.md</code> in the repo.</p>
+    <p class="lede">The styles, colourways and config forms are written up in <code>docs/FACE_PALETTES.md</code>.</p>
   </section>
 </main>
 
