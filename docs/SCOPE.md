@@ -10,15 +10,15 @@ visual reference; this file records what changes in the port and why.
 
 | Decision | Choice |
 |---|---|
-| Targets | macOS first, then Linux, Windows, web. No iOS, no Android. |
+| Targets | macOS first, then Linux and the web. No Windows for now: nobody in the user base runs OVOS on it (decided 2026-10-18; the CI job was removed, the Flutter runner directory stays). No iOS, no Android. |
 | Deployment | Same-host display: the app runs on the machine that runs OVOS and reads `~/.cache/ovos_gui` directly. |
 | Remote use | The web build, served from a sidecar container on the OVOS host, instead of a phone app. The sidecar proxies the two websockets, so its port is the only one exposed and the place to put authentication and TLS; the bus itself stays off the LAN. |
 | Middle layer | None on desktop. The Dart app is the GUI client, the state mirror and the WidgetManager. The web build needs the sidecar (`sidecar/`) to serve the cache, since ovos-gui 1.5.3a1 has no file server. |
-| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required; Windows waits for a maintained WebView2 package. |
+| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required. |
 | Face | Composed from an eye style, a mouth style and a backdrop that places them; nine eye styles, eight mouth styles, a regular or large mouth (`docs/FACE_PALETTES.md`). `visage` and `mark1` are presets. Chosen by `face` in config or `VISAGE_FACE`, and changed while running from the picker page over the bus (`visage.face.*`) or by hand in try-on mode. |
 | Input | Display-only, as before. Touch is additive later; pages are plain widgets with no gesture plumbing. |
 | macOS sandbox | Off. The app opens local sockets and reads the GUI cache; it is a kiosk display, not an App Store app. Signed with the Oscillate Labs LLC team. |
-| Linux, Windows | Built and tested in CI only until a desktop is available; the workflow pattern comes from neon-node-flutter-app. |
+| Linux | Built and tested in CI only until a desktop is available; the workflow pattern comes from neon-node-flutter-app. |
 
 ## Architecture
 
@@ -74,13 +74,13 @@ test/
 
 ## Platform gating
 
-| Capability | macOS | Linux | Windows | web |
-|---|---|---|---|---|
-| Core bus and GUI socket | yes | yes | yes | through the sidecar's `/core` and `/gui` proxies, or `?bus=ws://host:8181` straight to OVOS |
-| Read `~/.cache/ovos_gui` | yes | yes | yes | no, via sidecar `/res/` and `/res-abs/` |
-| `SYSTEM_HtmlFrame` with scripts | WKWebView | no (plain text) | no (plain text) | iframe |
-| `SYSTEM_UrlFrame` | WKWebView | URL chip | URL chip | iframe; a refused site shows the browser's refusal |
-| Lottie | yes | yes | yes | yes |
+| Capability | macOS | Linux | web |
+|---|---|---|---|
+| Core bus and GUI socket | yes | yes | through the sidecar's `/core` and `/gui` proxies, or `?bus=ws://host:8181` straight to OVOS |
+| Read `~/.cache/ovos_gui` | yes | yes | no, via sidecar `/res/` and `/res-abs/` |
+| `SYSTEM_HtmlFrame` with scripts | WKWebView | no (plain text) | iframe |
+| `SYSTEM_UrlFrame` | WKWebView | URL chip | iframe; a refused site shows the browser's refusal |
+| Lottie | yes | yes | yes |
 
 ## Phases
 
@@ -100,28 +100,27 @@ test/
    OCP need not be installed to test the pages.
 4. **Webviews and the web build** (done). `WebFrame` exists where webview_flutter has a
    registered implementation (WKWebView on macOS, an iframe on the web) and the pages keep
-   their text fallbacks elsewhere. Windows stays on the fallbacks: webview_windows and
-   flutter_inappwebview were both two years without a release and need NuGet at build time.
+   their text fallbacks elsewhere.
    The resource layer and the socket endpoints are split per platform behind conditional
    exports, so the web build compiles and was verified in Chrome against the local OVOS with
    `tool/serve_web.py`. `sidecar/` serves the build, the cache and proxies both websockets;
    CI builds the image and checks the rendered nginx config, since no Docker daemon was
    available locally.
 5. **CI, packaging, release-please** (built; waits on the owner's Apple and GitHub setup). CI builds
-   macOS, Linux, Windows, web and the sidecar image; release-please tags `v<version>`. macOS ships
+   macOS, Linux, the web and the sidecar image; release-please tags `v<version>`. macOS ships
    outside the App Store as a Developer ID app with the hardened runtime, notarised, through a cask
    in `OscillateLabsLLC/homebrew-tap` (`docs/PACKAGING.md`): `tool/release_macos.sh` builds, signs,
    notarises and zips, and `.github/workflows/release.yml` runs it on each release, uploads the zip
    and checksum and bumps the cask. Verified locally with an ad hoc signature only. The first
    signed release waits on the Developer ID certificate, the App Store Connect API key, the two
-   GitHub repositories and their secrets. Not packaged yet: Linux, Windows, and publishing the
+   GitHub repositories and their secrets. Not packaged yet: Linux, and publishing the
    sidecar image.
 6. **Widget modes** (done on macOS; `desktop` is the default): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
    (environment on top) and places a frameless window in a corner of the primary display's
    work area, beneath everything (`desktop`) or above (`float`), on every Space, through
    `window_manager` and `screen_retriever`. The window background goes transparent so the
    rounded frame floats. Nothing in the pages changes, since the frame already scales to the
-   window. Windows and X11 should work unchanged but are unverified; Wayland does not let apps
+   window. X11 should work unchanged but is unverified; Wayland does not let apps
    position their own windows, and the web build has no window to move. Why not WidgetKit:
    a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
    so it could only show slow-changing information from the main app. Peek mode (`window.peek`)

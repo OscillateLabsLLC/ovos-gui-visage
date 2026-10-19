@@ -157,15 +157,18 @@ class Mark1Layout {
     );
   }
 
+  /// The badge spreads the rings and the window over most of the disc (radius 115), so the face reads at 96 px.
   static Mark1Layout get compact => Mark1Layout(
-    rings: [_plateCentre + const Offset(58, -46), _plateCentre + const Offset(-58, -46)],
-    ringRadius: 30,
-    eyeLed: 3.6,
-    mouthOrigin: _plateCentre + const Offset(-(mouthCols - 1) * 6 / 2, 38 - (mouthRows - 1) * 6 / 2),
-    pitch: 6,
-    mouthLed: 1.8,
+    rings: [_plateCentre + const Offset(56, -36), _plateCentre + const Offset(-56, -36)],
+    ringRadius: 34,
+    eyeLed: 6,
+    mouthOrigin: _plateCentre + const Offset(-(mouthCols - 1) * _compactPitch / 2, 42 - (mouthRows - 1) * _compactPitch / 2),
+    pitch: _compactPitch,
+    mouthLed: _compactPitch * 0.42,
     plate: null,
   );
+
+  static const _compactPitch = 5.8;
 
   static Mark1Layout of(FaceFrame frame) => frame.compact ? compact : full;
 }
@@ -208,6 +211,10 @@ List<int>? mouthFrame(FaceMode mode, int viseme, double elapsed) {
       return null;
   }
 }
+
+/// The badge's resting mouth: a short bar across the middle two rows, since a blank window does not read at 96 px.
+const compactRestBar = [0, 0, 0, _restBarBits, _restBarBits, 0, 0, 0];
+const _restBarBits = ((1 << 10) - 1) << 11;
 
 /// The subset of SVG path syntax the faceplate uses: absolute M, C, S and Z.
 Path svgPath(String d) {

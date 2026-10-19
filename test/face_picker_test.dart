@@ -27,6 +27,13 @@ void main() {
     expect(launcherHtml(Uri.parse('ws://h:1/core?a="b"&c')), contains('url=faces.html#bus=ws://h:1/core?a=%22b%22&amp;c"'));
   });
 
+  test('the launcher has the picker page\'s own title', () {
+    final title = RegExp('<title>[^<]*</title>');
+    final page = File(pickerAsset).readAsStringSync();
+    expect(title.firstMatch(launcherHtml(_bus))?.group(0), title.firstMatch(page)?.group(0));
+    expect(launcherHtml(_bus), contains('<title>Choose a face</title>'));
+  });
+
   test('writes the bundled page over an old one and the launcher, and asks the runner to open the launcher', () async {
     messenger.setMockMethodCallHandler(windowChannel, (call) async => calls.add(call));
     final config = Directory('${dir.path}/config');

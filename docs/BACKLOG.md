@@ -22,7 +22,9 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 4. **Mark 1 face as a second theme.** Done: `mark1` draws the faceplate from the firmware's own
    bitmaps and timings (via ovos-virtual-mark1), with the stacked compact badge. Not emulated: eye
    colour and brightness commands, look/spin animations, text and icons on the mouth, since the
-   GUI client sees attention events rather than enclosure commands.
+   GUI client sees attention events rather than enclosure commands. Done too (2026-10-18): the Mark 1
+   face was almost invisible as the 96 px peek badge (dim grey rings, a blank mouth); the badge now
+   draws larger, bright ring lights and a short resting bar, and the full-size face is unchanged.
 5. **Face customisation, switchable in the app on demand.** Done: nine eye styles and eight mouth
    styles that pair freely with a regular or large mouth (`FACE_PALETTES.md`), chosen in config,
    from the picker page over the bus, or by hand on the screen in try-on mode. Colour is done too:
@@ -45,12 +47,11 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 - The first signed, notarised release needs the owner's one-time setup (`PACKAGING.md`). The
   Release workflow and the Gatekeeper check have never run with a real certificate; check the first
   run end to end, then run `brew audit --cask --online` when the release URL exists.
-- Linux and Windows have CI builds but no release artifacts; the sidecar image is built but not
-  published to a registry.
+- Linux has a CI build but no release artifact; the sidecar image is built but not published to a
+  registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
 
 ## Carried over
 
-- Windows web view once a maintained WebView2 package exists (SCOPE phase 4).
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
   would need more than nginx.
 - A Dart recorder for protocol fixtures, so contributors do not need ovos-visage's `--record`.

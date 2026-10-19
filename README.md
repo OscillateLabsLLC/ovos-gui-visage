@@ -13,7 +13,7 @@ A Flutter GUI client for [OpenVoiceOS](https://openvoiceos.org) that expands the
 Mycroft Mark II Kickstarter concept: a tall portrait screen, big circular widgets, and a
 face that listens, thinks and speaks with a viseme-driven mouth. It is the native port of
 [ovos-visage](https://github.com/OscillateLabsLLC/ovos-visage), built for macOS first, then
-Linux, Windows and the web. It connects to a stock `ovos-gui` service as a GUI client, so no
+Linux and the web. It connects to a stock `ovos-gui` service as a GUI client, so no
 OVOS code is modified, and renders the homescreen, the system templates, and the weather,
 date-time, alerts and OCP media pages. Any other skill page shows as a debug card.
 
@@ -167,6 +167,16 @@ and `desktop` only; an ordinary `window` ignores it.
   <img src="docs/screenshots/shell/peek-collapsed-badge.png" alt="Peek mode at rest: the resting face in a small round badge" width="96">
   &nbsp;
   <img src="docs/screenshots/shell/peek-expanded-speaking.png" alt="Peek mode while OVOS speaks: the full widget with the face over the idle page" width="240">
+</p>
+
+The Mark 1 face draws a bolder version of itself in the badge, so it stays easy to see at 96 pixels: the
+ring lights are larger and bright, and the resting mouth is a short bar. The full-size face keeps the
+Mark 1's own dim ring colour.
+
+<p align="center">
+  <img src="docs/screenshots/shell/peek-mark1-badge.png" alt="The Mark 1 face as the peek badge at its real size" width="96">
+  &nbsp;
+  <img src="docs/screenshots/shell/peek-mark1-badge@4x.png" alt="The same Mark 1 badge enlarged four times: two rings of bright lights and a short bar for the mouth" width="192">
 </p>
 
 The window also changes over the bus. `visage.window.set` with `peek` (true or false) turns peek
