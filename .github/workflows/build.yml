@@ -98,7 +98,7 @@ jobs:
           path: ovos-gui-visage-web.tar.gz
           retention-days: 3
 
-  # Builds the sidecar image to prove the Dockerfile and nginx template; publishing is a release concern (SCOPE phase 5).
+  # Builds the sidecar image to prove the Dockerfile and nginx template; release.yml publishes it.
   build-sidecar:
     runs-on: ubuntu-latest
     steps:

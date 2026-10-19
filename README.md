@@ -37,6 +37,21 @@ The cask installs `OVOS Visage.app` in `/Applications`. Without Homebrew, downlo
 app to `/Applications`. The app is signed with a Developer ID and notarised, so it opens without
 an `xattr` step. `docs/PACKAGING.md` describes how a release is built.
 
+On Linux, and for a display on another machine, run the web build from its container on the OVOS host,
+for amd64 or arm64 (a Raspberry Pi included):
+
+```bash
+docker run -d --name visage --restart unless-stopped -p 8080:8080 \
+  --add-host host.docker.internal:host-gateway \
+  -v ~/.cache/ovos_gui:/srv/ovos_gui:ro \
+  ghcr.io/oscillatelabsllc/ovos-gui-visage:latest
+```
+
+Then open `http://<host>:8080/` in a browser. For a full-screen face on a display, use
+`chromium --kiosk http://<host>:8080/`. `sidecar/compose.yaml` does the same with `docker compose`, and
+[Web build and sidecar](#web-build-and-sidecar) has the details. Native Linux packages are tracked
+under the [`linux` label](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues?q=label%3Alinux).
+
 ## Requirements
 
 - A running OVOS install on the same machine (core bus on `ws://127.0.0.1:8181/core`).
@@ -261,8 +276,12 @@ who reaches it can drive the OVOS bus through the proxy: keep it on a trusted ne
 authentication and TLS in front of it.
 
 ```bash
-docker compose -f sidecar/compose.yaml up --build   # on the OVOS host, then open http://<host>:8080/
+docker compose -f sidecar/compose.yaml up -d          # on the OVOS host: pulls ghcr.io/oscillatelabsllc/ovos-gui-visage
+docker compose -f sidecar/compose.yaml up -d --build  # or build the image from this checkout
 ```
+
+Each release publishes the image for amd64 and arm64, tagged with the version (`1.0.1`, `1.0`, `1`) and
+`latest`. Set `VISAGE_TAG` to pin a version with compose.
 
 To try the web build against a local OVOS without the sidecar:
 
