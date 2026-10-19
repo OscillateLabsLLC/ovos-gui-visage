@@ -23,7 +23,8 @@ Future<void> enterKiosk({required WindowMode from}) async {
   await _attempt('setAsFrameless', windowManager.setAsFrameless);
   await _attempt('setBackgroundColor', () => windowManager.setBackgroundColor(Colors.transparent));
   await _attempt('setHasShadow', () => windowManager.setHasShadow(false));
-  await _attempt('setResizable', () => windowManager.setResizable(false));
+  // GTK sizes a non-resizable window at its default size, so leaving kiosk on Linux would land at 1280 x 720.
+  if (Platform.isMacOS) await _attempt('setResizable', () => windowManager.setResizable(false));
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(true));
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(true));
   final screen = await _screen();
