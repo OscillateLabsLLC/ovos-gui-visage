@@ -14,7 +14,10 @@ const openUrlMethod = 'openUrl';
 
 /// Writes the page bundled with the app beside the config file, every time so an upgraded app ships its own page,
 /// and a launcher beside it, then opens the launcher in the browser. A failure is reported and never thrown.
-Future<void> openFacePicker(Uri bus, {Directory? dir}) async {
+/// Opens a page in the browser; [openInBrowser] by default, a fake in tests.
+typedef PageOpener = Future<void> Function(Uri page);
+
+Future<void> openFacePicker(Uri bus, {Directory? dir, PageOpener open = openInBrowser}) async {
   final target = dir ?? configFile().parent;
   try {
     final bytes = await rootBundle.load(pickerAsset);
@@ -22,14 +25,14 @@ Future<void> openFacePicker(Uri bus, {Directory? dir}) async {
     await File('${target.path}/$pickerFileName').writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
     final launcher = File('${target.path}/$launcherFileName');
     await launcher.writeAsString(launcherHtml(bus));
-    await _open(Uri.file(launcher.absolute.path));
+    await open(Uri.file(launcher.absolute.path));
   } on Object catch (err, stack) {
     reportFault('opening the face picker in ${target.path}', err, stack);
   }
 }
 
 /// The runner opens it on macOS; elsewhere the desktop's default browser does, through xdg-open.
-Future<void> _open(Uri page) async {
+Future<void> openInBrowser(Uri page) async {
   if (Platform.isMacOS) return windowChannel.invokeMethod<void>(openUrlMethod, page.toString());
   final result = await Process.run('xdg-open', [page.toString()]);
   if (result.exitCode != 0) throw ProcessException('xdg-open', [page.toString()], '${result.stderr}'.trim(), result.exitCode);
