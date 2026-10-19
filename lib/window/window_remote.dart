@@ -29,12 +29,14 @@ typedef WindowPersist = Future<void> Function(WindowConfig config);
 /// Moves the native window into [config]'s mode from [from]; [expanded] is the peek state it lands in.
 typedef WindowModeEffect = Future<void> Function(WindowConfig config, {required WindowMode from, required bool expanded});
 
-/// What the native window does when the state changes: window_shell.dart on the desktop, fakes in tests.
+/// What the native window does when the state changes: window_shell.dart on the desktop, fakes in tests. [place]
+/// puts a widget in its corner at its current peek size, after a drag.
 class WindowEffects {
-  const WindowEffects({required this.mode, required this.visible});
+  const WindowEffects({required this.mode, required this.visible, this.place});
 
   final WindowModeEffect mode;
   final Future<void> Function(bool visible) visible;
+  final Future<void> Function(WindowConfig config, {required bool expanded})? place;
 }
 
 class WindowRemote extends ChangeNotifier {
@@ -60,9 +62,11 @@ class WindowRemote extends ChangeNotifier {
 
   void _onSet(Json message) {
     final data = message['data'];
-    if (data is! Map || !['peek', 'expanded', 'visible'].every((key) => _boolOrAbsent(data[key])) || !_modeOk(data)) {
+    final bools = ['peek', 'expanded', 'visible'];
+    final strings = ['mode', 'corner'];
+    if (data is! Map || !bools.every((key) => _boolOrAbsent(data[key])) || !strings.every((key) => _stringOrAbsent(data[key]))) {
       reportFault(
-        '$windowSetMessage wants an object with bool `peek`, `expanded`, `visible` and string `mode`',
+        '$windowSetMessage wants an object with bool `peek`, `expanded`, `visible` and string `mode`, `corner`',
         FormatException('$message'),
       );
       return;
@@ -71,6 +75,29 @@ class WindowRemote extends ChangeNotifier {
     if (data['expanded'] case final bool expanded) peek.setExpanded(expanded);
     if (data['visible'] case final bool visible) setVisible(visible);
     if (data['mode'] case final String mode) _setModeNamed(mode);
+    if (data['corner'] case final String corner) _setCornerNamed(corner);
+  }
+
+  /// Moves a widget to [corner] and remembers it; the same corner only puts the widget back in place, as after a
+  /// drag that ended short of another corner.
+  void setCorner(Corner corner) {
+    if (!_config.isWidget) return announce();
+    final changed = corner != _config.corner;
+    _config = _config.copyWith(corner: corner);
+    if (changed) {
+      log?.call('window corner is now ${corner.name}');
+      _save();
+    }
+    final place = effects.place;
+    if (place != null) _apply('placing the widget in its ${corner.name} corner', place(_config, expanded: peek.expanded));
+    if (changed) announce();
+    notifyListeners();
+  }
+
+  void _setCornerNamed(String name) {
+    final corner = Corner.values.where((c) => c.name == name).firstOrNull;
+    if (corner != null) return setCorner(corner);
+    reportFault('$windowSetMessage corner "$name"', ArgumentError.value(name, 'corner', 'not a corner name'));
   }
 
   /// Turns peek on or off, remembers it for the next start, and tells the bus.
@@ -146,4 +173,4 @@ bool _switches(WindowMode from, WindowMode to) =>
 
 bool _boolOrAbsent(Object? value) => value == null || value is bool;
 
-bool _modeOk(Map<dynamic, dynamic> data) => data['mode'] == null || data['mode'] is String;
+bool _stringOrAbsent(Object? value) => value == null || value is String;

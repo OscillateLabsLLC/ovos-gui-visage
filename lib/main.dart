@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'app_config.dart';
 import 'attention.dart';
 import 'face/face.dart';
-import 'face/face_badge.dart';
 import 'face/face_remote.dart';
 import 'face/face_scope.dart';
 import 'face/face_theme.dart';
@@ -22,6 +21,8 @@ import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/offline_pill.dart';
 import 'widgets/widget_manager.dart';
+import 'shell_overlays.dart';
+import 'window/desktop_extras.dart';
 import 'window/face_picker.dart';
 import 'window/peek.dart';
 import 'window/status_menu.dart';
@@ -33,13 +34,7 @@ import 'window/window_shell.dart';
 import 'window/window_surface.dart';
 
 const _pageBg = VisageColors.pageBg;
-const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible);
-const _dimBg = Color(0xEB05070A);
-const _badgeHeight = 104.0;
-const _badgeGap = 7.0;
-
-/// Content pages keep this much of the bottom free for the badge (SPEC 5.3: badge plus a 7 px gap above and below).
-const _attentionStrip = _badgeHeight + 2 * _badgeGap;
+const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible, place: setWidgetExpanded);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,11 +94,14 @@ class _ScreenState extends State<Screen> {
     log: _log,
   );
   late final StatusMenuHost menuHost = StatusMenuHost(onSelected: (id) => menu.dispatch(id));
+  late final TrayHost tray = TrayHost(onSelected: (id) => menu.dispatch(id));
+  late final WindowDrag drag = WindowDrag(config: () => window.config, onCorner: window.setCorner);
+  bool tryOnActive = false;
   late final StatusMenuController menu = bindStatusMenu(
     face: remote,
     faceController: face,
     window: window,
-    show: menuHost.show,
+    show: _showMenu,
     quit: quitApp,
   );
   late bool windowExpanded;
@@ -121,6 +119,19 @@ class _ScreenState extends State<Screen> {
 
   void _log(String line) => debugPrint(line);
 
+  /// The macOS menu bar item and the Linux tray item show the same list; each ignores the other platform.
+  void _showMenu(List<MenuEntry> items) {
+    menuHost.show(items);
+    unawaited(tray.show(items));
+  }
+
+  /// Try-on mode owns the gestures while it is active, so the widget cannot be dragged then.
+  void _onTryOn(bool active) {
+    tryOnActive = active;
+    peek.hold(active);
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -132,6 +143,7 @@ class _ScreenState extends State<Screen> {
     remote;
     window.addListener(_onWindow);
     menu;
+    drag.attach();
     bus.start();
     gui.start();
   }
@@ -139,6 +151,8 @@ class _ScreenState extends State<Screen> {
   @override
   void dispose() {
     menu.dispose();
+    drag.dispose();
+    tray.dispose();
     face.removeListener(_refresh);
     attention.dispose();
     peek.dispose();
@@ -195,6 +209,7 @@ class _ScreenState extends State<Screen> {
     return WindowSurface(
       mode: window.config.mode,
       onLeaveKiosk: window.leaveKiosk,
+      onDragStart: tryOnActive ? null : drag.start,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -205,7 +220,7 @@ class _ScreenState extends State<Screen> {
               child: FittedBox(child: _frame()),
             ),
           ),
-          if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
+          if (collapsed) PeekBadge(face: face, onTap: peek.tap),
         ],
       ),
     );
@@ -224,70 +239,14 @@ class _ScreenState extends State<Screen> {
               const Positioned.fill(child: ColoredBox(color: _pageBg)),
               Positioned.fill(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? _attentionStrip : 32),
+                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? attentionStrip : 32),
                   child: PageHost(state: state),
                 ),
               ),
-              _AttentionOverlay(attention: attention, face: face),
+              AttentionOverlay(attention: attention, face: face),
               if (!guiConnected) const OfflinePill(),
-              FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: peek.hold),
+              FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: _onTryOn),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The collapsed peek window: the resting badge alone in a square frame; a tap expands it for a while.
-class _PeekBadge extends StatelessWidget {
-  const _PeekBadge({required this.face, required this.onTap});
-
-  final FaceController face;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: FittedBox(
-        child: SizedBox.square(
-          dimension: frameWidth,
-          child: FaceBadge(controller: face),
-        ),
-      ),
-    );
-  }
-}
-
-/// The face over the page: full and dimming over idle, else scaled into a disc at the bottom centre (SPEC 5.3).
-class _AttentionOverlay extends StatelessWidget {
-  const _AttentionOverlay({required this.attention, required this.face});
-
-  final Attention attention;
-  final FaceController face;
-
-  @override
-  Widget build(BuildContext context) {
-    final geometry = face.theme.geometry;
-    final scale = _badgeHeight / (2 * geometry.badgeRadius);
-    final badgeCentre = Offset(frameWidth / 2, frameHeight - _badgeGap - _badgeHeight / 2);
-    final shift = attention.compact ? badgeCentre - geometry.centre : Offset.zero;
-    return IgnorePointer(
-      child: AnimatedOpacity(
-        opacity: attention.shown ? 1 : 0,
-        duration: const Duration(milliseconds: 400),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          color: attention.compact ? Colors.transparent : _dimBg,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            transform: Matrix4.translationValues(shift.dx, shift.dy, 0)
-              ..translateByDouble(geometry.centre.dx, geometry.centre.dy, 0, 1)
-              ..scaleByDouble(attention.compact ? scale : 1, attention.compact ? scale : 1, 1, 1)
-              ..translateByDouble(-geometry.centre.dx, -geometry.centre.dy, 0, 1),
-            child: BadgeFace(controller: face, compact: attention.compact),
           ),
         ),
       ),

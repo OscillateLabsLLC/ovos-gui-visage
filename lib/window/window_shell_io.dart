@@ -43,14 +43,18 @@ Future<AppConfig> loadAppConfig() async {
 /// the device or over the bus is the face at the next start.
 Future<void> saveFaceConfig(FaceSpec spec) => _editConfigFile((json) => json['face'] = spec.toJson());
 
-/// Writes `peek` and `mode` into the config file's `window` object, keeping every other key; the rest of the window
-/// config may come from the environment and is not written back.
+/// Writes `peek`, `mode` and `corner` into the config file's `window` object, keeping every other key; the rest of
+/// the window config may come from the environment and is not written back.
 Future<void> saveWindowConfig(WindowConfig config) => _editConfigFile((json) {
   final window = json['window'] is Map ? Map<String, dynamic>.from(json['window'] as Map) : <String, dynamic>{};
   json['window'] = window
     ..['peek'] = config.peek
-    ..['mode'] = config.mode.name;
+    ..['mode'] = config.mode.name
+    ..['corner'] = config.corner.name;
 });
+
+/// The primary display minus menu bar, dock or panel, in logical pixels.
+Future<Rect> workArea() => _workArea();
 
 Future<void> _editConfigFile(void Function(Map<String, dynamic> json) edit) async {
   final file = configFile();
