@@ -21,6 +21,7 @@ StatusMenuController bindStatusMenu({
     toggleVisible: () => window.setVisible(!window.visible),
     togglePeek: () => window.setPeek(!window.config.peek),
     setMode: window.setMode,
+    toggleKiosk: window.toggleKiosk,
     applyPreset: (name) => face.apply(face.spec.merge({'preset': name})),
     applyColours: (name) => face.apply(face.spec.merge({'colours': name})),
     openPicker: face.openPicker,

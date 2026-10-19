@@ -35,6 +35,7 @@ void main() {
         'Peek mode',
         'Float above windows',
         'Sit on the desktop',
+        'Full screen',
         '-',
         'Face',
         'Colours',
@@ -84,6 +85,25 @@ void main() {
       [peekItem, floatItem, desktopItem],
     );
     expect(_item(items, floatItem).checked, isFalse);
+    expect(_item(items, kioskItem).enabled, isTrue);
+  });
+
+  test('kiosk checks Full screen, greys out peek and keeps the widget levels as ways out', () {
+    final items = buildStatusMenu(_with(mode: WindowMode.kiosk));
+    expect(
+      [
+        for (final i in items)
+          if (i.checked) i.id,
+      ],
+      [peekItem, kioskItem],
+    );
+    expect(
+      [
+        for (final i in items)
+          if (!i.enabled && !i.separator) i.id,
+      ],
+      [peekItem],
+    );
   });
 
   test('a custom pairing checks no preset; custom colours check no colourway; a preset in other colours keeps both', () {
@@ -107,7 +127,7 @@ void main() {
     final json = [for (final i in buildStatusMenu(_state)) i.toJson()];
     expect(json[0], {'id': 'visible', 'title': 'Hide face', 'checked': false, 'enabled': true});
     expect(json[1], {'separator': true});
-    expect((json[6]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
+    expect((json[7]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
   });
 
   group('controller', () {
@@ -130,6 +150,7 @@ void main() {
           toggleVisible: () => calls.add('visible'),
           togglePeek: () => calls.add('peek'),
           setMode: (m) => calls.add('mode ${m.name}'),
+          toggleKiosk: () => calls.add('kiosk'),
           applyPreset: (n) => calls.add('preset $n'),
           applyColours: (n) => calls.add('colours $n'),
           openPicker: () => calls.add('picker'),
@@ -153,10 +174,20 @@ void main() {
     });
 
     test('dispatches every id', () {
-      for (final id in [visibleItem, peekItem, floatItem, desktopItem, 'face.mark1', 'colours.mint', pickerItem, quitItem]) {
+      for (final id in [
+        visibleItem,
+        peekItem,
+        floatItem,
+        desktopItem,
+        kioskItem,
+        'face.mark1',
+        'colours.mint',
+        pickerItem,
+        quitItem,
+      ]) {
         menu.dispatch(id);
       }
-      expect(calls, ['visible', 'peek', 'mode float', 'mode desktop', 'preset mark1', 'colours mint', 'picker', 'quit']);
+      expect(calls, ['visible', 'peek', 'mode float', 'mode desktop', 'kiosk', 'preset mark1', 'colours mint', 'picker', 'quit']);
     });
 
     test('an unknown id, preset or colourway is reported and does nothing', () async {

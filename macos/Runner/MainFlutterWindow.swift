@@ -3,9 +3,11 @@ import FlutterMacOS
 
 /// The window, plus what the widget modes need that window_manager lacks on macOS (lib/window/window_channel.dart):
 /// a level beneath every other window and the desktop icons, switchable at runtime, ordering in and out without
-/// becoming key, the activation policy, the menu bar item (StatusMenu.swift), and opening a URL (the face picker).
+/// becoming key, the activation policy, the menu bar item (StatusMenu.swift), opening a URL (the face picker), and
+/// kiosk mode (Kiosk.swift).
 class MainFlutterWindow: NSWindow {
   private var statusMenu: StatusMenu?
+  private let kiosk = Kiosk()
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -34,6 +36,8 @@ class MainFlutterWindow: NSWindow {
     case "setActivationPolicy": return setActivationPolicy(call.arguments as? String)
     case "setMenu": return statusMenu?.update(call.arguments)
     case "openUrl": return openUrl(call.arguments as? String)
+    case "setKiosk": return kiosk.setKiosk(call.arguments as? Bool, window: self)
+    case "setKeepAwake": return kiosk.setKeepAwake(call.arguments as? Bool)
     default: return FlutterMethodNotImplemented
     }
   }
@@ -46,6 +50,9 @@ class MainFlutterWindow: NSWindow {
     case "desktop":
       level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) - 1)
       collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+    case "kiosk":
+      level = Kiosk.level
+      collectionBehavior = Kiosk.behaviour
     case "normal":
       level = .normal
       collectionBehavior = []

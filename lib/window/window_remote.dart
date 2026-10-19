@@ -3,8 +3,9 @@
 ///
 /// - `visage.window.set` with `peek` (bool) turns peek mode on or off and saves it; with `expanded` (bool) it
 ///   expands or collapses the window once, without changing the config; with `visible` (bool) it shows or hides the
-///   window for this run; with `mode` (`float` or `desktop`) it moves a widget above or beneath other windows and
-///   saves it. An ordinary window cannot become a widget while running, nor a widget an ordinary window.
+///   window for this run; with `mode` (`float`, `desktop` or `kiosk`) it moves a widget above or beneath other
+///   windows, or fills the screen, and saves it. Any mode can enter and leave `kiosk`; otherwise an ordinary window
+///   cannot become a widget while running, nor a widget an ordinary window.
 /// - `visage.window.get` asks for the state.
 /// - `visage.window.state` answers both and announces every change: `mode`, `corner`, `peek`, `peekSize`,
 ///   `expanded`, `visible`.
@@ -25,11 +26,14 @@ const windowStateMessage = 'visage.window.state';
 
 typedef WindowPersist = Future<void> Function(WindowConfig config);
 
+/// Moves the native window into [config]'s mode from [from]; [expanded] is the peek state it lands in.
+typedef WindowModeEffect = Future<void> Function(WindowConfig config, {required WindowMode from, required bool expanded});
+
 /// What the native window does when the state changes: window_shell.dart on the desktop, fakes in tests.
 class WindowEffects {
   const WindowEffects({required this.mode, required this.visible});
 
-  final Future<void> Function(WindowMode mode) mode;
+  final WindowModeEffect mode;
   final Future<void> Function(bool visible) visible;
 }
 
@@ -88,24 +92,36 @@ class WindowRemote extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Moves a widget between `float` and `desktop` and remembers it; anything else is reported and ignored.
+  /// Changes the mode and remembers it. Peek follows: it stops in kiosk and comes back with a widget. Between an
+  /// ordinary window and a widget is reported and ignored; the current mode only announces.
   void setMode(WindowMode mode) {
-    if (mode == WindowMode.window || !_config.isWidget) {
-      reportFault('window mode ${_config.mode.name} -> ${mode.name}', StateError('only float and desktop switch at runtime'));
+    final from = _config.mode;
+    if (mode == from) return announce();
+    if (!_switches(from, mode)) {
+      reportFault('window mode ${from.name} -> ${mode.name}', StateError('a window and a widget do not switch at runtime'));
       return;
     }
-    _config = _config.copyWith(mode: mode);
+    _config = _config.copyWith(mode: mode, kioskExit: mode == WindowMode.kiosk ? from : null);
     log?.call('window mode is now ${mode.name}');
     _save();
-    _apply('moving the window to ${mode.name}', effects.mode(mode));
-    announce();
+    final peekChanges = peek.enabled != _config.peeks;
+    if (peekChanges) peek.setEnabled(_config.peeks);
+    _apply('moving the window to ${mode.name}', effects.mode(_config, from: from, expanded: peek.expanded));
+    if (!peekChanges) announce();
     notifyListeners();
   }
+
+  /// Escape and the menu: back to the mode kiosk was entered from.
+  void leaveKiosk() {
+    if (_config.isKiosk) setMode(_config.kioskExit);
+  }
+
+  void toggleKiosk() => _config.isKiosk ? leaveKiosk() : setMode(WindowMode.kiosk);
 
   void _setModeNamed(String name) {
     final mode = WindowMode.values.where((m) => m.name == name).firstOrNull;
     if (mode != null) return setMode(mode);
-    reportFault('$windowSetMessage mode "$name"', ArgumentError.value(name, 'mode', 'not float or desktop'));
+    reportFault('$windowSetMessage mode "$name"', ArgumentError.value(name, 'mode', 'not window, float, desktop or kiosk'));
   }
 
   void _save() => _apply('saving the window to the config file', persist(_config));
@@ -124,6 +140,9 @@ class WindowRemote extends ChangeNotifier {
     'visible': _visible,
   };
 }
+
+bool _switches(WindowMode from, WindowMode to) =>
+    from == WindowMode.kiosk || to == WindowMode.kiosk || (from != WindowMode.window && to != WindowMode.window);
 
 bool _boolOrAbsent(Object? value) => value == null || value is bool;
 

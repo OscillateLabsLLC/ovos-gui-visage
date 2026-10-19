@@ -9,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import '../app_config.dart';
 import '../face/face_spec.dart';
 import '../faults.dart';
+import 'kiosk_shell_io.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
 
@@ -60,8 +61,10 @@ Future<Rect> _workArea() async {
   return (display.visiblePosition ?? Offset.zero) & (display.visibleSize ?? display.size);
 }
 
-/// Starts a peeking widget collapsed to its badge; [setWidgetExpanded] grows and shrinks it in its corner.
+/// Starts a peeking widget collapsed to its badge; [setWidgetExpanded] grows and shrinks it in its corner. Kiosk fills
+/// the screen; an ordinary window is left as the runner made it.
 Future<void> applyWindowConfig(WindowConfig config) async {
+  if (config.isKiosk) return _startKiosk();
   if (!config.isWidget) return;
   await windowManager.ensureInitialized();
   if (Platform.isMacOS) await _invoke('setActivationPolicy', 'accessory');
@@ -84,6 +87,15 @@ Future<void> applyWindowConfig(WindowConfig config) async {
   });
 }
 
+Future<void> _startKiosk() async {
+  await windowManager.ensureInitialized();
+  const options = WindowOptions(backgroundColor: Colors.transparent, skipTaskbar: true, titleBarStyle: TitleBarStyle.hidden);
+  await windowManager.waitUntilReadyToShow(options, () async {
+    await enterKiosk(from: WindowMode.kiosk);
+    await windowManager.show();
+  });
+}
+
 /// Animates the widget window between its badge and its full size, anchored at its corner. A failure leaves the
 /// window as it was and is reported.
 Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) async {
@@ -95,10 +107,18 @@ Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) as
   }
 }
 
-/// Moves a widget above (`float`) or beneath (`desktop`) every other window while running.
-Future<void> setWindowMode(WindowMode mode) async {
-  await windowManager.setAlwaysOnTop(mode == WindowMode.float);
-  await _invoke('setWindowLevel', mode.name);
+/// Moves a widget above (`float`) or beneath (`desktop`) every other window while running, or into and out of
+/// kiosk; a widget leaving kiosk lands in its corner at its peek size.
+Future<void> setWindowMode(WindowConfig config, {required WindowMode from, required bool expanded}) async {
+  if (config.isKiosk) return enterKiosk(from: from);
+  if (from == WindowMode.kiosk) {
+    return leaveKiosk(
+      config,
+      bounds: config.isWidget ? () async => config.boundsIn(await _workArea(), expanded: expanded) : null,
+    );
+  }
+  await windowManager.setAlwaysOnTop(config.mode == WindowMode.float);
+  await _invoke('setWindowLevel', config.mode.name);
 }
 
 /// Orders the window out or back in front; a desktop-level window must not become key, so this is not

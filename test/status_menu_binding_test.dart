@@ -103,7 +103,7 @@ void main() {
   });
 }
 
-Future<void> _noMode(WindowMode mode) async {}
+Future<void> _noMode(WindowConfig config, {required WindowMode from, required bool expanded}) async {}
 
 Future<void> _noVisible(bool visible) async {}
 

@@ -27,8 +27,10 @@ import 'window/peek.dart';
 import 'window/status_menu.dart';
 import 'window/status_menu_binding.dart';
 import 'window/status_menu_host.dart';
+import 'window/window_config.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
+import 'window/window_surface.dart';
 
 const _pageBg = VisageColors.pageBg;
 const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible);
@@ -56,7 +58,7 @@ class VisageApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
-        color: config.window.isWidget ? Colors.transparent : VisageColors.bg,
+        color: Colors.transparent,
         child: Center(child: Screen(config: config)),
       ),
     );
@@ -105,6 +107,7 @@ class _ScreenState extends State<Screen> {
     quit: quitApp,
   );
   late bool windowExpanded;
+  late WindowMode windowMode = widget.config.window.mode;
   late final GuiClient gui = GuiClient(
     bus: bus,
     guiUrlOverride: sockets.gui,
@@ -127,7 +130,7 @@ class _ScreenState extends State<Screen> {
     peek.addListener(_onPeek);
     widgets;
     remote;
-    window;
+    window.addListener(_onWindow);
     menu;
     bus.start();
     gui.start();
@@ -163,9 +166,15 @@ class _ScreenState extends State<Screen> {
     if (peek.expanded != windowExpanded) {
       windowExpanded = peek.expanded;
       _log('peek: window ${windowExpanded ? 'expands' : 'collapses'}');
-      unawaited(setWidgetExpanded(window.config, expanded: windowExpanded));
+      // During a mode switch the mode effect places the window; a second, animated resize would race it.
+      if (window.config.mode == windowMode) unawaited(setWidgetExpanded(window.config, expanded: windowExpanded));
     }
     if (mounted) setState(() {});
+  }
+
+  void _onWindow() {
+    windowMode = window.config.mode;
+    _refresh();
   }
 
   void _refresh() {
@@ -183,18 +192,22 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     final collapsed = !peek.expanded;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Offstage(
-          offstage: collapsed,
-          child: TickerMode(
-            enabled: !collapsed,
-            child: FittedBox(child: _frame()),
+    return WindowSurface(
+      mode: window.config.mode,
+      onLeaveKiosk: window.leaveKiosk,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Offstage(
+            offstage: collapsed,
+            child: TickerMode(
+              enabled: !collapsed,
+              child: FittedBox(child: _frame()),
+            ),
           ),
-        ),
-        if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
-      ],
+          if (collapsed) _PeekBadge(face: face, onTap: peek.tap),
+        ],
+      ),
     );
   }
 

@@ -17,6 +17,7 @@ const visibleItem = 'visible';
 const peekItem = 'peek';
 const floatItem = 'mode.float';
 const desktopItem = 'mode.desktop';
+const kioskItem = 'mode.kiosk';
 const pickerItem = 'picker';
 const quitItem = 'quit';
 const facePrefix = 'face.';
@@ -59,6 +60,7 @@ class StatusMenuActions {
     required this.toggleVisible,
     required this.togglePeek,
     required this.setMode,
+    required this.toggleKiosk,
     required this.applyPreset,
     required this.applyColours,
     required this.openPicker,
@@ -68,6 +70,7 @@ class StatusMenuActions {
   final VoidCallback toggleVisible;
   final VoidCallback togglePeek;
   final void Function(WindowMode mode) setMode;
+  final VoidCallback toggleKiosk;
   final void Function(String preset) applyPreset;
   final void Function(String colours) applyColours;
   final VoidCallback openPicker;
@@ -75,13 +78,15 @@ class StatusMenuActions {
 }
 
 List<MenuEntry> buildStatusMenu(StatusMenuState state) {
-  final widget = state.mode != WindowMode.window;
+  final widget = state.mode == WindowMode.float || state.mode == WindowMode.desktop;
+  final levels = state.mode != WindowMode.window;
   return [
     MenuEntry(visibleItem, state.visible ? 'Hide face' : 'Show face'),
     const MenuEntry.separator(),
     MenuEntry(peekItem, 'Peek mode', checked: state.peek, enabled: widget),
-    MenuEntry(floatItem, 'Float above windows', checked: state.mode == WindowMode.float, enabled: widget),
-    MenuEntry(desktopItem, 'Sit on the desktop', checked: state.mode == WindowMode.desktop, enabled: widget),
+    MenuEntry(floatItem, 'Float above windows', checked: state.mode == WindowMode.float, enabled: levels),
+    MenuEntry(desktopItem, 'Sit on the desktop', checked: state.mode == WindowMode.desktop, enabled: levels),
+    MenuEntry(kioskItem, 'Full screen', checked: state.mode == WindowMode.kiosk),
     const MenuEntry.separator(),
     MenuEntry('face', 'Face', children: _choices(facePresets.keys, facePrefix, state.face.presetName)),
     MenuEntry('colours', 'Colours', children: _choices(facePalettes.keys, coloursPrefix, state.face.colours.name)),
@@ -136,6 +141,8 @@ class StatusMenuController {
         actions.setMode(WindowMode.float);
       case desktopItem:
         actions.setMode(WindowMode.desktop);
+      case kioskItem:
+        actions.toggleKiosk();
       case pickerItem:
         actions.openPicker();
       case quitItem:
