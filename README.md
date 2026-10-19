@@ -175,9 +175,34 @@ closes the window once and does not change the config. A one-off open stays open
 listen, think or speak cycle ends. `visage.window.get` asks for the state, and
 `visage.window.state` answers both and announces every change, with `mode`, `corner`, `peek`,
 `peekSize`, `expanded` and `visible`. `visible` (true or false) hides or shows the window for this
-run only. `mode` (`float` or `desktop`) moves a widget above or beneath other windows and writes
-it to the config file. An ordinary `window` cannot become a widget while it runs, and a widget
+run only. `mode` (`float`, `desktop` or `kiosk`) moves a widget above or beneath other windows,
+or fills the screen, and writes it to the config file. Every mode can go into `kiosk` and come
+back out. Apart from that, an ordinary `window` cannot become a widget while it runs, and a widget
 cannot become an ordinary window.
+
+### Kiosk mode
+
+Kiosk mode makes the screen show only the assistant. Start it with `"window": {"mode": "kiosk"}`
+in the config file, with `VISAGE_MODE=kiosk`, with **Full screen** in the menu bar, or with
+`visage.window.set {"mode": "kiosk"}` on the bus. The window fills the primary display. The
+480 × 800 frame is scaled to fit, with black bars at the sides. The window stays above other
+apps and notifications on every Space. While the app is in front, the Dock is hidden and the menu
+bar hides until you move the pointer to the top edge. The menu bar item is still there. The
+pointer hides after 5 seconds without movement.
+
+The display does not go to sleep while kiosk mode is on. The app holds a macOS power assertion,
+"ovos-gui-visage kiosk keeps the display awake" (`pmset -g assertions` shows it), and releases it
+when kiosk mode ends or the app quits.
+
+To leave, press Escape, click **Full screen** again, or send `visage.window.set {"mode": "float"}`.
+Escape and **Full screen** go back to the mode you were in before kiosk. If the app started in
+kiosk, they go to the mode the config file names, or to `float` if the file says `kiosk`. Kiosk
+is saved like the other modes, so a kiosk screen is still a kiosk after a restart. Peek mode does
+not apply in kiosk.
+
+<p align="center">
+  <img src="docs/screenshots/shell/kiosk.png" alt="Kiosk mode on a wide display: the frame centred with black bars at the sides" width="600">
+</p>
 
 ### Menu bar
 
@@ -189,6 +214,7 @@ that does what the bus does, so the face stays under control without a bus clien
 - **Peek mode**: turns peek on or off and writes it to the config file.
 - **Float above windows** / **Sit on the desktop**: changes the mode at once and writes it to the
   config file.
+- **Full screen**: goes into kiosk mode, or comes out of it when checked.
 - **Face** and **Colours**: the presets and the colourways, with the current ones checked. A
   colourway keeps the eyes and mouth you have.
 - **Face picker…**: opens the picker page in your default browser, connected to the bus this app
@@ -196,8 +222,8 @@ that does what the bus does, so the face stays under control without a bus clien
   `open-faces.html` beside it that passes the bus on, since macOS drops a file URL's `#bus=`.
 - **Quit ovos-gui-visage**.
 
-Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. The menu
-follows every change, from the bus, try-on mode or the menu itself.
+Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. In
+kiosk mode only peek is greyed out. The menu follows every change, from the bus, try-on mode or the menu itself.
 
 <p align="center">
   <img src="docs/screenshots/shell/menu-bar.png" alt="The menu bar with the face icon at the left of the status items" width="600">

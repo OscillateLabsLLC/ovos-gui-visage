@@ -53,6 +53,10 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   `palettes` object must stay in sync with the named colourways.
 - The face changes at runtime through `FaceRemote` (`visage.face.*` on the bus) and try-on mode
   (`lib/face/try_on.dart`, long-press); both persist through `saveFaceConfig`.
+- Window modes: `desktop` and `float` are corner widgets, `window` is ordinary, `kiosk` fills the
+  screen (`lib/window/kiosk_*.dart`, `window_surface.dart`, `macos/Runner/Kiosk.swift`). Kiosk is not
+  a widget (`isWidget` is false), never peeks, and can be entered from and left to any mode;
+  `WindowRemote.setMode` owns the rules and `saveWindowConfig` keeps the mode.
 - Peek mode (`lib/window/peek.dart`): a widget idles as a `FaceBadge` and the window grows while
   `Attention.shown`; `WindowRemote` drives it with `visage.window.*`, `saveWindowConfig` keeps it.
 - The macOS menu bar item: `lib/window/status_menu.dart` builds the items from the window and face

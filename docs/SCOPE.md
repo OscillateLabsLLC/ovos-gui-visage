@@ -128,7 +128,12 @@ test/
    only while OVOS listens, thinks or speaks (`lib/window/peek.dart`), switchable over the bus
    with `visage.window.set`. On macOS a widget is an accessory app with a menu bar item
    (`lib/window/status_menu.dart`, `macos/Runner/StatusMenu.swift`) that shows or hides it, toggles
-   peek, switches between `float` and `desktop`, and picks the face and colourway.
+   peek, switches between `float` and `desktop`, and picks the face and colourway. Kiosk mode
+   (`kiosk`) fills the primary display one level below the menu bar, above the Dock and notifications,
+   with the Dock hidden and the menu bar auto-hidden while the app is in front, a power assertion that
+   keeps the display awake, and a pointer that hides after 5 s (`lib/window/kiosk_*.dart`,
+   `macos/Runner/Kiosk.swift`). Escape, the menu's Full screen or `visage.window.set` leaves it for the
+   previous mode; it is not native fullscreen, which makes its own Space and animates.
 
 7. **Face themes** (done): `lib/face/themes.dart` maps a configured name to a theme. The Mark 1
    theme (`mark1_theme.dart`) draws the faceplate glass, the eye rings with the firmware's
