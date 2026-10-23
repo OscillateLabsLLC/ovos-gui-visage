@@ -24,6 +24,8 @@ import 'state/gui_state.dart';
 import 'theme.dart';
 import 'turn_feed.dart';
 import 'widgets/caption_strip.dart';
+import 'widgets/notification_popups.dart';
+import 'widgets/notification_stack.dart';
 import 'widgets/offline_pill.dart';
 import 'widgets/outcome_pill.dart';
 import 'widgets/widget_manager.dart';
@@ -86,7 +88,8 @@ class _ScreenState extends State<Screen> {
   late final Attention attention = Attention(face);
   final sockets = endpoints();
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
-  late final WidgetManager widgets = WidgetManager(bus, log: _log);
+  late final NotificationPopups popups = NotificationPopups(onExpired: (record) => widgets.popClear(record));
+  late final WidgetManager widgets = WidgetManager(bus, log: _log, popups: popups);
   final captions = Captions();
   final outcome = OutcomeModel();
   late final FaceRemote remote = FaceRemote(
@@ -152,6 +155,7 @@ class _ScreenState extends State<Screen> {
     face.addListener(_refresh);
     captions.addListener(_refresh);
     outcome.addListener(_refresh);
+    popups.addListener(_refresh);
     bindTurnFeed(bus, {captions.handle: captionEvents, outcome.handle: outcomeEvents});
     windowExpanded = peek.expanded;
     peek.addListener(_onPeek);
@@ -173,6 +177,7 @@ class _ScreenState extends State<Screen> {
     attention.dispose();
     captions.dispose();
     outcome.dispose();
+    popups.dispose();
     peek.dispose();
     gui.stop();
     bus.stop();
@@ -263,12 +268,7 @@ class _ScreenState extends State<Screen> {
               ),
               AttentionOverlay(attention: attention, face: face),
               if (widget.config.captions) CaptionStrip(captions: captions, compact: attention.compact),
-              TopStatus(
-                children: [
-                  if (!guiConnected) const OfflinePill(),
-                  OutcomePill(outcome: outcome.showing),
-                ],
-              ),
+              _topStatus(),
               FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: _onTryOn),
             ],
           ),
@@ -276,4 +276,12 @@ class _ScreenState extends State<Screen> {
       ),
     );
   }
+
+  Widget _topStatus() => TopStatus(
+    children: [
+      if (!guiConnected) const OfflinePill(),
+      OutcomePill(outcome: outcome.showing),
+      if (popups.all.isNotEmpty) NotificationStack(popups: popups.all),
+    ],
+  );
 }

@@ -196,6 +196,21 @@ The label shows when OVOS ends the request (`ovos.utterance.handled`). If a requ
 cancelled at any point, the label says so, even when a skill completes later. The label never covers
 the page content.
 
+## Notifications
+
+A skill's notification pops up at the top of the screen, under the labels, as in ovos-shell. The
+dot shows the style: blue for `info`, amber for `warning`, green for `success`, red for `error`.
+
+- A **transient** notification (the default) stays for its `duration` in seconds (10 if the skill
+  gives none), then goes to the notification store, and the idle page counts it.
+- A **sticky** notification (`type: "sticky"`) has no timer. It stays until a skill or another client
+  clears it with `ovos.notification.api.pop.clear` or `ovos.notification.api.pop.clear.delete`.
+- A **controlled** notification (`ovos.notification.api.set.controlled`) changes in place each time
+  the skill sends it again, and goes when the skill sends `ovos.notification.api.remove.controlled`.
+
+At most three show at a time; a "+2 more" line counts the rest. Notifications are display-only: you
+cannot tap one to close it or to run its action yet.
+
 ## As a desktop widget
 
 By default the app is a desktop widget: a frameless window in the top-right corner, 400 px

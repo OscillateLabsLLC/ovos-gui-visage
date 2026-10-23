@@ -80,6 +80,17 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 - Linux has a CI build but no release artifact; the sidecar image is built but not published to a
   registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
 
+## Interactive notifications (2026-10-23, left out of the display-only popups)
+
+The popups follow ovos-shell's NotificationPop*.qml except for their input, which SCOPE.md keeps out for now:
+
+- **Tap to dismiss.** The shell's close button sends `ovos.notification.api.pop.clear.delete` with the popup's
+  record. Without it, a sticky popup stays until a skill clears it or the app restarts; no stock skill API clears
+  one, so this matters most for stickies.
+- **Notification actions.** A tap on a transient popup in the shell emits the record's `action` with its
+  `callback_data` as a bus message, then closes the popup. Needs an input decision (touch and pointer) first.
+- **The stored list.** The idle page's count badge opens the shell's notification list; here it is only a count.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
