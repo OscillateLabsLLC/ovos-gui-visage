@@ -15,6 +15,7 @@ import 'face/face_scope.dart';
 import 'face/face_theme.dart';
 import 'face/try_on.dart';
 import 'faults.dart';
+import 'outcome.dart';
 import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
@@ -24,6 +25,7 @@ import 'theme.dart';
 import 'turn_feed.dart';
 import 'widgets/caption_strip.dart';
 import 'widgets/offline_pill.dart';
+import 'widgets/outcome_pill.dart';
 import 'widgets/widget_manager.dart';
 import 'shell_overlays.dart';
 import 'window/desktop_extras.dart';
@@ -86,6 +88,7 @@ class _ScreenState extends State<Screen> {
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final WidgetManager widgets = WidgetManager(bus, log: _log);
   final captions = Captions();
+  final outcome = OutcomeModel();
   late final FaceRemote remote = FaceRemote(
     bus,
     face,
@@ -148,7 +151,8 @@ class _ScreenState extends State<Screen> {
     attention.addListener(_refresh);
     face.addListener(_refresh);
     captions.addListener(_refresh);
-    bindTurnFeed(bus, {captions.handle: captionEvents});
+    outcome.addListener(_refresh);
+    bindTurnFeed(bus, {captions.handle: captionEvents, outcome.handle: outcomeEvents});
     windowExpanded = peek.expanded;
     peek.addListener(_onPeek);
     widgets;
@@ -168,6 +172,7 @@ class _ScreenState extends State<Screen> {
     face.removeListener(_refresh);
     attention.dispose();
     captions.dispose();
+    outcome.dispose();
     peek.dispose();
     gui.stop();
     bus.stop();
@@ -258,7 +263,12 @@ class _ScreenState extends State<Screen> {
               ),
               AttentionOverlay(attention: attention, face: face),
               if (widget.config.captions) CaptionStrip(captions: captions, compact: attention.compact),
-              if (!guiConnected) const OfflinePill(),
+              TopStatus(
+                children: [
+                  if (!guiConnected) const OfflinePill(),
+                  OutcomePill(outcome: outcome.showing),
+                ],
+              ),
               FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: _onTryOn),
             ],
           ),

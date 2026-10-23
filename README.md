@@ -181,6 +181,21 @@ badge. The collapsed peek badge never shows captions.
 Captions are on by default. To turn them off, set `"captions": false` in the config file, or
 `VISAGE_CAPTIONS=0`. The environment wins over the file.
 
+## Outcome
+
+When OVOS finishes a request, a small label shows at the top of the screen for 1.5 seconds:
+
+- **Done**, in the face's accent colour: a skill handled the request.
+- **Didn't work**, in red: no skill understood the request (`complete_intent_failure` or
+  `ovos.intent.unmatched`), or the skill failed (`mycroft.skill.handler.error`, or
+  `mycroft.skill.handler.complete` with an `exception`).
+- **Cancelled**, in grey: you cancelled the request, for example with
+  "forget that" (`ovos.utterance.cancelled`).
+
+The label shows when OVOS ends the request (`ovos.utterance.handled`). If a request fails or is
+cancelled at any point, the label says so, even when a skill completes later. The label never covers
+the page content.
+
 ## As a desktop widget
 
 By default the app is a desktop widget: a frameless window in the top-right corner, 400 px

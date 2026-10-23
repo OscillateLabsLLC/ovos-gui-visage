@@ -1,0 +1,5 @@
+{"type": "recognizer_loop:utterance", "data": {"utterances": ["what time is it"], "lang": "en-US"}, "context": {"source": "hand-written from ovos_workshop/skills/ovos.py _on_event_error and ovos_bus_client/handler.py HandlerLifecycle.error"}}
+{"type": "mycroft.skill.handler.start", "data": {"name": "TimeSkill.handle_query_time"}, "context": {"source": "hand-written"}}
+{"type": "speak", "data": {"utterance": "An error occurred while processing a request in Time Skill", "expect_response": false, "lang": "en-US"}, "context": {"source": "hand-written"}}
+{"type": "mycroft.skill.handler.error", "data": {"name": "TimeSkill.handle_query_time", "exception": "ValueError('no timezone')"}, "context": {"source": "hand-written"}}
+{"type": "ovos.utterance.handled", "data": {}, "context": {"source": "hand-written"}}
