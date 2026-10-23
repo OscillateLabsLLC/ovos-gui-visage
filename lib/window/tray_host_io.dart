@@ -6,7 +6,7 @@ import 'package:tray_manager/tray_manager.dart';
 import '../faults.dart';
 import 'plugin_calls.dart';
 import 'status_menu.dart';
-import 'tray_watch_io.dart';
+import 'tray_watch_dbus_io.dart';
 
 const trayIconAsset = 'assets/tray/ovos-gui-visage.png';
 const trayToolTip = 'ovos-gui-visage';

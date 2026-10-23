@@ -194,7 +194,7 @@ The widget modes were checked on Kubuntu 24.04 (X11, KWin, Plasma): `window`, `f
 peek and kiosk all place correctly, the rounded frame floats on the desktop, and `desktop` stays
 beneath other windows through the window manager's keep-below flag. Differences from macOS: the menu lives in a
 system tray item (an app indicator, which needs `libayatana-appindicator3-1` installed; Plasma shows it,
-GNOME needs the AppIndicator extension), and a widget can be dragged to another corner, where it snaps and
+GNOME needs the AppIndicator extension), and on X11 or Xwayland a widget can be dragged to another corner, where it snaps and
 the corner is saved; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
 the log reports it once); kiosk covers the panel through the window manager's fullscreen state and keeps
 the display awake with an idle inhibit on the session bus.
