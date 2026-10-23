@@ -1,7 +1,7 @@
 import '../faults.dart';
 
 /// Window plugin calls that a platform may lack. window_manager has no `setHasShadow` or `setVisibleOnAllWorkspaces`
-/// on Linux, and the runner's own channel is macOS only, so each call is reported once and the rest of a window
+/// on Linux, and the Linux runner's channel has only `displayBackend`, so each call is reported once and the rest of a window
 /// setup still runs; the widget is placed and shown whatever cosmetics the platform skips.
 final _reported = <String>{};
 

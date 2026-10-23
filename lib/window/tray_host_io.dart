@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:tray_manager/tray_manager.dart';
@@ -5,6 +6,7 @@ import 'package:tray_manager/tray_manager.dart';
 import '../faults.dart';
 import 'plugin_calls.dart';
 import 'status_menu.dart';
+import 'tray_watch_dbus_io.dart';
 
 const trayIconAsset = 'assets/tray/ovos-gui-visage.png';
 const trayToolTip = 'ovos-gui-visage';
@@ -12,13 +14,15 @@ const trayToolTip = 'ovos-gui-visage';
 /// The Linux tray item: an app indicator in the panel with the same menu as the macOS menu bar item. The panel opens
 /// the menu itself on a click and reports the chosen item by key; checked entries become check items and entries
 /// with children become submenus. macOS keeps its runner-drawn item, so the tray is created on Linux only, and a
-/// desktop that cannot host one is reported once. Needs libayatana-appindicator3 at runtime (README).
+/// desktop that cannot host one is reported once. Needs libayatana-appindicator3 at runtime (README). A session bus with
+/// no tray watcher is reported once too (tray_watch.dart), since the plugin then succeeds and nothing shows.
 class TrayHost with TrayListener {
   TrayHost({required this.onSelected});
 
   final void Function(String id) onSelected;
   bool _ready = false;
   bool _unavailable = false;
+  TrayWatcherProbe? _probe;
 
   Future<void> show(List<MenuEntry> items) async {
     if (!Platform.isLinux || _unavailable) return;
@@ -38,6 +42,7 @@ class TrayHost with TrayListener {
   }
 
   void dispose() {
+    unawaited(_probe?.dispose());
     if (!_ready) return;
     trayManager.removeListener(this);
     trayManager.destroy();
@@ -45,6 +50,7 @@ class TrayHost with TrayListener {
 
   /// The icon is required; the tooltip is not implemented by the Linux plugin and is reported once and skipped.
   Future<void> _create() async {
+    unawaited((_probe = TrayWatcherProbe()).start());
     await trayManager.setIcon(trayIconAsset);
     await attemptPluginCall('the tray tooltip', () => trayManager.setToolTip(trayToolTip));
     trayManager.addListener(this);

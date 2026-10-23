@@ -125,7 +125,7 @@ test/
    window_manager calls Linux lacks (shadow, all workspaces) are reported once and skipped; GTK
    applies a resize at its next layout pass, so a collapse waits for the new size before it
    moves; and a non-resizable GTK window keeps its default size, so Linux windows stay
-   resizable. Wayland does not let apps position their own windows and is untested; the web
+   resizable. Wayland does not let apps position their own windows, so the Linux runner prefers X11 through Xwayland and native Wayland only reports that the corner modes cannot be placed (issue #13); the web
    build has no window to move. Why not WidgetKit:
    a widget extension gets no sockets and a refresh budget of a few timeline reloads an hour,
    so it could only show slow-changing information from the main app. Peek mode (`window.peek`)
