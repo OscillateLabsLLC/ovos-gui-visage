@@ -170,6 +170,17 @@ It changes while running, three ways, and every change is written back to the co
   picker page on the display's own machine. A voice skill that maps "give
   yourself oval eyes" to that message is all a voice interface needs; nothing in OVOS changes.
 
+## Captions
+
+While you talk to OVOS, the bottom of the screen shows what it heard, in grey, and its answer under
+that, in white. The answer stays until OVOS stops speaking, or until you speak again, and then fades.
+If the turn ends without speech, the heard line fades after 4 seconds. A long answer wraps and gets
+smaller to fit; no words are cut off. On a page with content, the captions sit above the face
+badge. The collapsed peek badge never shows captions.
+
+Captions are on by default. To turn them off, set `"captions": false` in the config file, or
+`VISAGE_CAPTIONS=0`. The environment wins over the file.
+
 ## As a desktop widget
 
 By default the app is a desktop widget: a frameless window in the top-right corner, 400 px
