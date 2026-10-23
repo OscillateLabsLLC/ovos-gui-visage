@@ -247,6 +247,7 @@ class _ScreenState extends State<Screen> {
       onStep: input.step,
       child: WindowMenu(
         host: input.menu,
+        ready: !collapsed,
         child: Stack(
           fit: StackFit.expand,
           children: [

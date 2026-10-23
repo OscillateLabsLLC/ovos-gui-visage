@@ -12,24 +12,26 @@ final _items = buildStatusMenu(const StatusMenuState(mode: WindowMode.kiosk, pee
 
 List<String> _titles(List<MenuEntry> items) => [for (final i in items) i.separator ? '-' : i.title];
 
-Widget _app(WindowMenuHost host, {double size = 600, void Function(int)? onStep, VoidCallback? onLeave}) => MaterialApp(
-  home: Center(
-    child: SizedBox.square(
-      dimension: size,
-      child: WindowSurface(
-        mode: WindowMode.kiosk,
-        onLeaveKiosk: onLeave ?? () {},
-        onMenu: host.open,
-        onDismiss: host.dismiss,
-        onStep: onStep,
-        child: WindowMenu(
-          host: host,
-          child: const ColoredBox(color: Colors.black),
+Widget _app(WindowMenuHost host, {double size = 600, bool ready = true, void Function(int)? onStep, VoidCallback? onLeave}) =>
+    MaterialApp(
+      home: Center(
+        child: SizedBox.square(
+          dimension: size,
+          child: WindowSurface(
+            mode: WindowMode.kiosk,
+            onLeaveKiosk: onLeave ?? () {},
+            onMenu: host.open,
+            onDismiss: host.dismiss,
+            onStep: onStep,
+            child: WindowMenu(
+              host: host,
+              ready: ready,
+              child: const ColoredBox(color: Colors.black),
+            ),
+          ),
         ),
       ),
-    ),
-  ),
-);
+    );
 
 void main() {
   test('inside the window, the menu has no hide, and no quit in a browser', () {
@@ -56,9 +58,9 @@ void main() {
     expect(opens, [true, false]);
   });
 
-  testWidgets('a request in a window too small for a menu waits until the window grows', (tester) async {
+  testWidgets('a request on a collapsed badge waits until the window has grown and settled', (tester) async {
     final host = WindowMenuHost(onSelected: (_) {}, canQuit: true)..show(_items);
-    await tester.pumpWidget(_app(host, size: 96));
+    await tester.pumpWidget(_app(host, size: 96, ready: false));
     await tester.pump(menuSettle);
     host.open(const Offset(40, 40));
     await tester.pumpAndSettle();
@@ -73,6 +75,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Full screen'), findsOneWidget);
     expect(host.pending, isNull);
+  });
+
+  testWidgets('a small ordinary window still opens the menu at once', (tester) async {
+    final host = WindowMenuHost(onSelected: (_) {}, canQuit: true)..show(_items);
+    await tester.pumpWidget(_app(host, size: 96));
+    await tester.pump(menuSettle);
+    host.open(const Offset(40, 40));
+    await tester.pumpAndSettle();
+    expect(find.text('Full screen'), findsOneWidget);
   });
 
   testWidgets('the menu key opens it, and the arrow keys step pages', (tester) async {

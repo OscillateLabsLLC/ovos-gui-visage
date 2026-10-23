@@ -1,7 +1,7 @@
 /// The menu inside the window, the third host of status_menu.dart beside the macOS menu bar item and the Linux tray, so
 /// a desktop with neither (stock GNOME, a Pi, a browser tab) can still change mode, leave kiosk and quit (issue #14).
 /// [WindowMenuHost] takes the controller's items like the other hosts and holds open requests; [WindowMenu] draws them
-/// with Flutter's MenuAnchor once the window is big enough to hold a menu, so a collapsed peek badge expands first.
+/// with Flutter's MenuAnchor once the window is [WindowMenu.ready], so a collapsed peek badge expands first.
 library;
 
 import 'dart:async';
@@ -75,19 +75,19 @@ class WindowMenuHost extends ChangeNotifier {
   }
 }
 
-/// Below this the window is the collapsed badge, and a menu would not fit; the request waits for the expansion.
-const menuMinWindow = 240.0;
-
 /// A menu closes whenever the view changes size (RawMenuAnchor), so a request waits until the window has held its
 /// size this long: an expanding peek widget animates its growth over several frames.
 const menuSettle = Duration(milliseconds: 250);
 const _menuInset = 12.0;
 
 class WindowMenu extends StatefulWidget {
-  const WindowMenu({super.key, required this.host, required this.child});
+  const WindowMenu({super.key, required this.host, required this.child, this.ready = true});
 
   final WindowMenuHost host;
   final Widget child;
+
+  /// False while the window is a collapsed peek badge, which has no room for a menu; a request waits for the expansion.
+  final bool ready;
 
   @override
   State<WindowMenu> createState() => _WindowMenuState();
@@ -106,6 +106,12 @@ class _WindowMenuState extends State<WindowMenu> {
   }
 
   @override
+  void didUpdateWidget(WindowMenu old) {
+    super.didUpdateWidget(old);
+    if (widget.ready && !old.ready) WidgetsBinding.instance.addPostFrameCallback((_) => _openPending());
+  }
+
+  @override
   void dispose() {
     widget.host.removeListener(_changed);
     _settle?.cancel();
@@ -119,7 +125,7 @@ class _WindowMenuState extends State<WindowMenu> {
   }
 
   void _openPending() {
-    if (!mounted || !_settled || widget.host.pending == null || _size.shortestSide < menuMinWindow) return;
+    if (!mounted || !widget.ready || !_settled || widget.host.pending == null) return;
     final at = widget.host.take()!;
     final inside = Offset(at.dx.clamp(_menuInset, _size.width), at.dy.clamp(_menuInset, _size.height));
     controller.open(position: inside);
