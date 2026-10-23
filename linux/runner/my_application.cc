@@ -14,6 +14,23 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+static const char* kWindowTitle = "OVOS Visage";
+
+// The window icon is the hicolor icon named after the application id, which the desktop entry also names. An
+// installed copy wins; the bundle carries the same theme under share/icons, so an uninstalled build finds it too.
+static void use_app_icon() {
+  g_autofree gchar* exe = g_file_read_link("/proc/self/exe", nullptr);
+  if (exe != nullptr) {
+    g_autofree gchar* dir = g_path_get_dirname(exe);
+    g_autofree gchar* icons = g_build_filename(dir, "share", "icons", nullptr);
+    gtk_icon_theme_append_search_path(gtk_icon_theme_get_default(), icons);
+  }
+  if (!gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), APPLICATION_ID)) {
+    g_warning("No icon named %s in the icon theme; the window keeps the generic icon", APPLICATION_ID);
+  }
+  gtk_window_set_default_icon_name(APPLICATION_ID);
+}
+
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
   gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
@@ -45,11 +62,11 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "ovos_gui_visage");
+    gtk_header_bar_set_title(header_bar, kWindowTitle);
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "ovos_gui_visage");
+    gtk_window_set_title(window, kWindowTitle);
   }
 
   gtk_window_set_default_size(window, 1280, 720);
@@ -110,11 +127,8 @@ static gboolean my_application_local_command_line(GApplication* application,
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  // MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application startup.
-
   G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
+  use_app_icon();
 }
 
 // Implements GApplication::shutdown.
@@ -150,6 +164,8 @@ MyApplication* my_application_new() {
   // corresponding .desktop file. This ensures better integration by allowing
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
+  // The tray item takes its title (Plasma's tooltip) from the application name, which otherwise is the id.
+  g_set_application_name(kWindowTitle);
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID, "flags",
