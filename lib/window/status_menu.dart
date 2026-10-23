@@ -92,7 +92,7 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
     MenuEntry('colours', 'Colours', children: _choices(facePalettes.keys, coloursPrefix, state.face.colours.name)),
     const MenuEntry(pickerItem, 'Face picker…'),
     const MenuEntry.separator(),
-    const MenuEntry(quitItem, 'Quit ovos-gui-visage'),
+    const MenuEntry(quitItem, 'Quit OVOS Visage'),
   ];
 }
 

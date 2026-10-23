@@ -50,6 +50,10 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 - **A tray item.** Done: an app indicator (tray_manager 0.5.3, libayatana-appindicator) with the same menu
   as the macOS item and the resting badge as its icon. tray_manager 0.8 was tried first; its
   StatusNotifierItem published no menu on Plasma.
+- **Launcher, icon and start on login.** Done (2026-10-23): hicolor icons from the badge golden
+  (`test/linux_icon_test.dart`), `linux/net.oscillatelabs.ovosGuiVisage.desktop`, and an optional XDG
+  autostart entry for kiosk, installed per user by `tool/linux_desktop.sh` until a package installs them (#17).
+  Checked on Plasma 5.27 only; GNOME and Raspberry Pi OS are untested.
 - **Kiosk extras.** Keeping the display awake is macOS-only today; Linux needs a D-Bus inhibit
   (`org.freedesktop.ScreenSaver`). Leaving kiosk shows the window at its ordinary size for a moment
   before the widget settles, since GTK restores the pre-fullscreen size first; hiding the window across

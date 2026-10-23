@@ -27,3 +27,15 @@ run *ARGS:
 # Run the app on macOS as it ships: a desktop widget in the top-right corner
 widget *ARGS:
     flutter run -d macos {{ARGS}}
+
+# Add the Linux launcher and icons for this user, pointing at the release bundle (flutter build linux --release)
+linux-install:
+    tool/linux_desktop.sh install
+
+# Remove the Linux launcher and icons for this user
+linux-uninstall:
+    tool/linux_desktop.sh uninstall
+
+# Start the Linux app in kiosk mode when this user logs in: `just linux-autostart on` or `just linux-autostart off`
+linux-autostart STATE:
+    tool/linux_desktop.sh autostart-{{STATE}}

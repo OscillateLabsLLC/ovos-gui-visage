@@ -200,6 +200,41 @@ the log reports it once); kiosk covers the panel through the window manager's fu
 not keep the display awake, and leaving it shows the window at its ordinary size for a moment before the
 widget settles in its corner; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
 
+#### Launcher and icon
+
+Until there is a package, add the launcher by hand after a release build. The launcher and the
+icons go in your home folder only:
+
+```bash
+flutter build linux --release
+just linux-install      # or: tool/linux_desktop.sh install
+```
+
+This writes `~/.local/share/applications/net.oscillatelabs.ovosGuiVisage.desktop`, with `Exec`
+set to the bundle under `build/linux/<arch>/release/bundle`, and copies the icons from
+`linux/icons/hicolor` to `~/.local/share/icons/hicolor`. Then it runs `update-desktop-database`
+and `gtk-update-icon-cache`. **OVOS Visage** then shows in the application menu, and the panel
+shows the face icon for its window. The file name, the icon name and the GTK application id are
+all `net.oscillatelabs.ovosGuiVisage`, which is how the desktop matches the window to the
+launcher. `just linux-uninstall` removes the launcher and the icons. If you move the checkout,
+run `just linux-install` again.
+
+#### Start in kiosk mode when you log in
+
+This is off by default. To turn it on:
+
+```bash
+just linux-autostart on     # or: tool/linux_desktop.sh autostart-on
+```
+
+This writes `~/.config/autostart/net.oscillatelabs.ovosGuiVisage-kiosk.desktop`, which starts
+the app with `VISAGE_MODE=kiosk`. To turn it off, run `just linux-autostart off`, or delete that
+file. Plasma also lists the entry in System Settings, Autostart, where you can turn it off.
+
+If the app starts before OVOS is ready, it shows the clock with a **GUI offline** label. It tries
+to connect again every 3 seconds, and shows the OVOS screens as soon as OVOS answers. You do not
+need to add a delay.
+
 ### Peek mode
 
 With `"peek": true` (or `VISAGE_PEEK=1`), the widget stays out of the way. At rest it is a round
@@ -277,7 +312,7 @@ that does what the bus does, so the face stays under control without a bus clien
 - **Face picker…**: opens the picker page in your default browser, connected to the bus this app
   uses. Each time, the app writes the page to `~/.config/ovos-gui-visage/faces.html` and a small
   `open-faces.html` beside it that passes the bus on, since macOS drops a file URL's `#bus=`.
-- **Quit ovos-gui-visage**.
+- **Quit OVOS Visage**.
 
 Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. In
 kiosk mode only peek is greyed out. The menu follows every change, from the bus, try-on mode or the menu itself.

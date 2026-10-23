@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=OVOS Visage
+GenericName=Voice assistant display
+Comment=The face and screens of your OpenVoiceOS assistant
+Exec=ovos_gui_visage
+Icon=net.oscillatelabs.ovosGuiVisage
+Terminal=false
+Categories=Utility;
+Keywords=OVOS;OpenVoiceOS;voice;assistant;
+StartupWMClass=net.oscillatelabs.ovosGuiVisage
