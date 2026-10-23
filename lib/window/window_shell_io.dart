@@ -11,6 +11,7 @@ import '../face/face_spec.dart';
 import '../faults.dart';
 import 'kiosk_shell_io.dart';
 import 'plugin_calls.dart';
+import 'widget_placement_io.dart';
 import 'window_bounds_io.dart';
 import 'window_channel.dart';
 import 'window_config.dart';
@@ -77,6 +78,7 @@ Future<Rect> _workArea() async {
 Future<void> applyWindowConfig(WindowConfig config) async {
   if (config.isKiosk) return _startKiosk();
   if (!config.isWidget) return;
+  await reportUnplaceableWidget(config);
   await _attempt('ensureInitialized', windowManager.ensureInitialized);
   if (Platform.isMacOS) await _invoke('setActivationPolicy', 'accessory');
   final workArea = await _attempt('getPrimaryDisplay', _workArea) ?? _fallbackWorkArea;
@@ -97,6 +99,7 @@ Future<void> applyWindowConfig(WindowConfig config) async {
   if (config.mode == WindowMode.desktop) await _setLevel(WindowMode.desktop);
   await _attempt('setPosition', () => windowManager.setPosition(bounds.topLeft));
   await _attempt('show', windowManager.show);
+  if (Platform.isLinux) await _attempt('correcting the widget size once mapped', () => correctMappedSize(bounds.size));
 }
 
 Future<void> _startKiosk() async {
@@ -131,6 +134,7 @@ Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) as
 Future<void> setWindowMode(WindowConfig config, {required WindowMode from, required bool expanded}) async {
   if (config.isKiosk) return enterKiosk(from: from);
   if (from == WindowMode.kiosk) {
+    await reportUnplaceableWidget(config);
     return leaveKiosk(
       config,
       bounds: config.isWidget ? () async => config.boundsIn(await _workArea(), expanded: expanded) : null,
