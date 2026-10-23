@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.0.0...v2.1.0) (2026-10-23)
+
+
+### Features
+
+* captions, turn outcome and notification popups ([92bd22c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/92bd22c4144ed30bf77cd0623a2d4e4ac05512a2))
+* pop up skill notifications, display-only ([8c4304d](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/8c4304d1aac4f71b6b541cd31dd702f008b8bb0a))
+* show a brief success, failure or cancelled outcome per turn ([f0a84c2](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/f0a84c2a353a7bca616329b9974af0881abb8e50))
+* show captions of the heard utterance and the spoken reply ([7974662](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7974662e1677deaf28b1f11230d3da5c7ca72626))
+
 ## [2.0.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.1.0...v2.0.0) (2026-10-23)
 
 
