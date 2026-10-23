@@ -170,6 +170,47 @@ It changes while running, three ways, and every change is written back to the co
   picker page on the display's own machine. A voice skill that maps "give
   yourself oval eyes" to that message is all a voice interface needs; nothing in OVOS changes.
 
+## Captions
+
+While you talk to OVOS, the bottom of the screen shows what it heard, in grey, and its answer under
+that, in white. The answer stays until OVOS stops speaking, or until you speak again, and then fades.
+If the turn ends without speech, the heard line fades after 4 seconds. A long answer wraps and gets
+smaller to fit; no words are cut off. On a page with content, the captions sit above the face
+badge. The collapsed peek badge never shows captions.
+
+Captions are on by default. To turn them off, set `"captions": false` in the config file, or
+`VISAGE_CAPTIONS=0`. The environment wins over the file.
+
+## Outcome
+
+When OVOS finishes a request, a small label shows at the top of the screen for 1.5 seconds:
+
+- **Done**, in the face's accent colour: a skill handled the request.
+- **Didn't work**, in red: no skill understood the request (`complete_intent_failure` or
+  `ovos.intent.unmatched`), or the skill failed (`mycroft.skill.handler.error`, or
+  `mycroft.skill.handler.complete` with an `exception`).
+- **Cancelled**, in grey: you cancelled the request, for example with
+  "forget that" (`ovos.utterance.cancelled`).
+
+The label shows when OVOS ends the request (`ovos.utterance.handled`). If a request fails or is
+cancelled at any point, the label says so, even when a skill completes later. The label never covers
+the page content.
+
+## Notifications
+
+A skill's notification pops up at the top of the screen, under the labels, as in ovos-shell. The
+dot shows the style: blue for `info`, amber for `warning`, green for `success`, red for `error`.
+
+- A **transient** notification (the default) stays for its `duration` in seconds (10 if the skill
+  gives none), then goes to the notification store, and the idle page counts it.
+- A **sticky** notification (`type: "sticky"`) has no timer. It stays until a skill or another client
+  clears it with `ovos.notification.api.pop.clear` or `ovos.notification.api.pop.clear.delete`.
+- A **controlled** notification (`ovos.notification.api.set.controlled`) changes in place each time
+  the skill sends it again, and goes when the skill sends `ovos.notification.api.remove.controlled`.
+
+At most three show at a time; a "+2 more" line counts the rest. Notifications are display-only: you
+cannot tap one to close it or to run its action yet.
+
 ## As a desktop widget
 
 By default the app is a desktop widget: a frameless window in the top-right corner, 400 px

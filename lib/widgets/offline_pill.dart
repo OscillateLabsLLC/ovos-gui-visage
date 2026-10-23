@@ -1,8 +1,48 @@
 import 'package:flutter/material.dart';
 
-/// The pill at the top of the frame while the GUI socket is down.
+/// A small rounded label at the top of the frame; [TopStatus] stacks them.
+class StatusPill extends StatelessWidget {
+  const StatusPill({super.key, required this.label, required this.colour, required this.background, this.icon});
+
+  final String label;
+  final Color colour;
+  final Color background;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(10)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          if (icon != null) Icon(icon, size: 14, color: colour),
+          Text(
+            label,
+            style: TextStyle(color: colour, fontSize: 12, decoration: TextDecoration.none),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown while the GUI socket is down.
 class OfflinePill extends StatelessWidget {
   const OfflinePill({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      const StatusPill(label: 'GUI offline', colour: Color(0xFFFFB4B4), background: Color(0xFF3A1D1D));
+}
+
+/// The pills at the top centre of the frame, one under the other.
+class TopStatus extends StatelessWidget {
+  const TopStatus({super.key, required this.children});
+
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -10,12 +50,8 @@ class OfflinePill extends StatelessWidget {
       top: 12,
       left: 0,
       right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-          decoration: BoxDecoration(color: const Color(0xFF3A1D1D), borderRadius: BorderRadius.circular(10)),
-          child: const Text('GUI offline', style: TextStyle(color: Color(0xFFFFB4B4), fontSize: 12)),
-        ),
+      child: IgnorePointer(
+        child: Column(mainAxisSize: MainAxisSize.min, spacing: 6, children: children),
       ),
     );
   }

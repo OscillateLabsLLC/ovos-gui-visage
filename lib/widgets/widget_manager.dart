@@ -6,6 +6,7 @@ library;
 import 'dart:convert';
 
 import '../protocol/core_bus.dart';
+import 'notification_popups.dart';
 
 const widgetTypes = {'timer': 'timer', 'alarm': 'alarm', 'audio': 'media'};
 const notificationDefaults = <String, Object>{
@@ -26,7 +27,7 @@ bool _contains(List<Json> items, Json record) {
 }
 
 class WidgetManager {
-  WidgetManager(this.bus, {double Function()? clock, this.log}) : _clock = clock ?? _epochSeconds {
+  WidgetManager(this.bus, {double Function()? clock, this.log, this.popups}) : _clock = clock ?? _epochSeconds {
     for (final verb in const ['display', 'update', 'remove']) {
       bus.on('ovos.widgets.$verb', (m) => _widget(verb, m));
     }
@@ -38,13 +39,16 @@ class WidgetManager {
       'storage.clear': (_) => _onStorageClear(),
       'storage.clear.item': _onStorageClearItem,
       'set.controlled': _onSetControlled,
-      'remove.controlled': (_) => bus.emit('ovos.notification.controlled.type.remove'),
+      'remove.controlled': (_) => _onRemoveControlled(),
     };
     handlers.forEach((suffix, handler) => bus.on('ovos.notification.api.$suffix', handler));
   }
 
   final CoreBus bus;
   final void Function(String)? log;
+
+  /// The popups this display shows for what it translates; null where nothing pops up (tests of the translation).
+  final NotificationPopups? popups;
   final double Function() _clock;
   final List<Json> notifications = [];
   List<Json> storage = [];
@@ -78,6 +82,7 @@ class WidgetManager {
     bus.emit('ovos.notification.update_counter', {'notification_counter': notifications.length});
     bus.emit('ovos.notification.notification_data', {'notification': record});
     bus.emit('ovos.notification.show');
+    popups?.show(record);
   }
 
   void _dropPending(Json notification) {
@@ -92,7 +97,13 @@ class WidgetManager {
 
   void _onPopClear(Json message) {
     final notification = _notificationOf(message);
-    if (notification == null || _contains(storage, notification)) return;
+    if (notification != null) popClear(notification);
+  }
+
+  /// Moves [notification] from pending to storage, as ovos-shell's transient popup asks when its time is up.
+  void popClear(Json notification) {
+    popups?.cleared(notification);
+    if (_contains(storage, notification)) return;
     storage.add(notification);
     _dropPending(notification);
     emitStorageModel();
@@ -101,7 +112,9 @@ class WidgetManager {
 
   void _onPopClearDelete(Json message) {
     final notification = _notificationOf(message);
-    if (notification != null) _dropPending(notification);
+    if (notification == null) return;
+    popups?.cleared(notification);
+    _dropPending(notification);
   }
 
   void _onStorageClear() {
@@ -128,5 +141,11 @@ class WidgetManager {
       'timestamp': _clock(),
     };
     bus.emit('ovos.notification.controlled.type.show', {'notification': record});
+    popups?.showControlled(record);
+  }
+
+  void _onRemoveControlled() {
+    bus.emit('ovos.notification.controlled.type.remove');
+    popups?.removeControlled();
   }
 }

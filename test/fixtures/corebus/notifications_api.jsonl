@@ -1,0 +1,5 @@
+{"type": "ovos.notification.api.set", "data": {"duration": 10, "sender": "ovos-skill-alerts.openvoiceos", "text": "Missed timer: pasta", "action": null, "type": "transient", "style": "info", "callback_data": {}}, "context": {"source": "busrec"}, "received": 1792791527.8473458}
+{"type": "ovos.notification.api.set", "data": {"duration": 10, "sender": "ovos-skill-alerts.openvoiceos", "text": "Battery low", "action": null, "type": "sticky", "style": "warning", "callback_data": {}}, "context": {"source": "busrec"}, "received": 1792791528.250568}
+{"type": "ovos.notification.api.set.controlled", "data": {"sender": "ovos-skill-update.openvoiceos", "text": "Downloading update 40%", "style": "info"}, "context": {"source": "busrec"}, "received": 1792791528.656087}
+{"type": "ovos.notification.api.set.controlled", "data": {"sender": "ovos-skill-update.openvoiceos", "text": "Downloading update 80%", "style": "info"}, "context": {"source": "busrec"}, "received": 1792791529.059011}
+{"type": "ovos.notification.api.remove.controlled", "data": {}, "context": {"source": "busrec"}, "received": 1792791529.462163}

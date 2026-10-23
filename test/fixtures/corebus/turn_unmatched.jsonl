@@ -1,0 +1,5 @@
+{"type": "recognizer_loop:utterance", "data": {"utterances": ["qwxz vrrk plimth"], "lang": "en-US"}, "context": {"source": "hand-written from ovos_core/intent_services/service.py send_complete_intent_failure"}}
+{"type": "mycroft.audio.play_sound", "data": {"uri": "snd/error.mp3"}, "context": {"source": "hand-written"}}
+{"type": "ovos.intent.unmatched", "data": {"utterances": ["qwxz vrrk plimth"], "lang": "en-US"}, "context": {"source": "hand-written"}}
+{"type": "complete_intent_failure", "data": {"utterances": ["qwxz vrrk plimth"], "lang": "en-US"}, "context": {"source": "hand-written", "_namespace_compat_twin": true}}
+{"type": "ovos.utterance.handled", "data": {}, "context": {"source": "hand-written"}}
