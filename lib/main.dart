@@ -13,6 +13,7 @@ import 'face/face_remote.dart';
 import 'face/face_scope.dart';
 import 'face/face_theme.dart';
 import 'face/try_on.dart';
+import 'faults.dart';
 import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
@@ -38,6 +39,7 @@ const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible, p
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  logFaultsPlainly();
   final config = await loadAppConfig();
   await applyWindowConfig(config.window);
   runApp(VisageApp(config: config));
