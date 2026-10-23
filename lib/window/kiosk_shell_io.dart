@@ -17,8 +17,9 @@ import 'window_config.dart';
 /// Kiosk mode on the native window: frameless, the size of the primary display, above everything on every Space.
 /// window_manager does what it can on every platform; the macOS runner adds the level above the Dock and
 /// notifications, hides the Dock and the menu bar while the app is frontmost, and keeps the display awake
-/// (macos/Runner/Kiosk.swift); on Linux a session-bus idle inhibit keeps it awake (idle_inhibit.dart). On macOS kiosk is a regular app: an accessory app does not own the menu bar, so it
-/// cannot hide it. A call a platform lacks is reported once and the rest still run (plugin_calls.dart).
+/// (macos/Runner/Kiosk.swift); on Linux a session-bus idle inhibit keeps it awake (idle_inhibit.dart). On macOS kiosk
+/// is a regular app: an accessory app does not own the menu bar, so it cannot hide it. A call a platform lacks is
+/// reported once and the rest still run (plugin_calls.dart).
 Future<void> enterKiosk({required WindowMode from}) async {
   if (from == WindowMode.window) _windowBounds = await _attempt('getBounds', windowManager.getBounds);
   if (Platform.isMacOS) await _native('setActivationPolicy', 'regular');
