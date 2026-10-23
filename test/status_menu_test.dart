@@ -41,7 +41,7 @@ void main() {
         'Colours',
         'Face picker…',
         '-',
-        'Quit ovos-gui-visage',
+        'Quit OVOS Visage',
       ],
     );
     expect(

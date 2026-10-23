@@ -312,7 +312,7 @@ that does what the bus does, so the face stays under control without a bus clien
 - **Face picker…**: opens the picker page in your default browser, connected to the bus this app
   uses. Each time, the app writes the page to `~/.config/ovos-gui-visage/faces.html` and a small
   `open-faces.html` beside it that passes the bus on, since macOS drops a file URL's `#bus=`.
-- **Quit ovos-gui-visage**.
+- **Quit OVOS Visage**.
 
 Peek and the two modes are greyed out in an ordinary `window`, which keeps its Dock icon. In
 kiosk mode only peek is greyed out. The menu follows every change, from the bus, try-on mode or the menu itself.
