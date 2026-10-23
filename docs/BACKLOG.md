@@ -58,9 +58,11 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   `org.freedesktop.ScreenSaver` idle inhibit over the session bus (package:dbus), falls back to
   `org.freedesktop.portal.Inhibit`, and releases it on leaving kiosk and on quit; Plasma lists it in
   PowerDevil's `ListInhibitions`. Not checked on GNOME or labwc; wlroots compositors may need the
-  `zwp_idle_inhibit_manager_v1` Wayland protocol instead (issue #20). Leaving kiosk shows the window at its ordinary size for a moment
-  before the widget settles, since GTK restores the pre-fullscreen size first; hiding the window across
-  the switch would need care, because a re-shown window is placed by the window manager again.
+  `zwp_idle_inhibit_manager_v1` Wayland protocol instead (issue #20). Leaving kiosk without a flash:
+  done (issue #16). KWin gives the window back at its pre-fullscreen frame, GTK's 1280 x 720 default in
+  the middle when the app started in kiosk; the widget is now hidden across the switch, placed, shown,
+  and placed again (KWin maps a re-shown window at 0,0 when it last sat in that corner). Measured at
+  30 fps on a headless KWin: 27 frames in the wrong place before, none after.
 - **Wayland.** Untested. Apps cannot place their own windows there, so the corner modes need a
   layer-shell or compositor rule instead.
 - Not a bug: under a headless KWin with no desktop shell the widget surround renders opaque; on the
