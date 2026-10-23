@@ -54,8 +54,11 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   (`test/linux_icon_test.dart`), `linux/net.oscillatelabs.ovosGuiVisage.desktop`, and an optional XDG
   autostart entry for kiosk, installed per user by `tool/linux_desktop.sh` until a package installs them (#17).
   Checked on Plasma 5.27 only; GNOME and Raspberry Pi OS are untested.
-- **Kiosk extras.** Keeping the display awake is macOS-only today; Linux needs a D-Bus inhibit
-  (`org.freedesktop.ScreenSaver`). Leaving kiosk shows the window at its ordinary size for a moment
+- **Kiosk extras.** Keeping the display awake: done (2026-10-23, issue #15). Kiosk takes an
+  `org.freedesktop.ScreenSaver` idle inhibit over the session bus (package:dbus), falls back to
+  `org.freedesktop.portal.Inhibit`, and releases it on leaving kiosk and on quit; Plasma lists it in
+  PowerDevil's `ListInhibitions`. Not checked on GNOME or labwc; wlroots compositors may need the
+  `zwp_idle_inhibit_manager_v1` Wayland protocol instead (issue #20). Leaving kiosk shows the window at its ordinary size for a moment
   before the widget settles, since GTK restores the pre-fullscreen size first; hiding the window across
   the switch would need care, because a re-shown window is placed by the window manager again.
 - **Wayland.** Untested. Apps cannot place their own windows there, so the corner modes need a

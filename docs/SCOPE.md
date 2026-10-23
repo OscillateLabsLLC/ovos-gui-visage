@@ -136,7 +136,8 @@ test/
    peek, switches between `float` and `desktop`, and picks the face and colourway. Kiosk mode
    (`kiosk`) fills the primary display one level below the menu bar, above the Dock and notifications,
    with the Dock hidden and the menu bar auto-hidden while the app is in front, a power assertion that
-   keeps the display awake, and a pointer that hides after 5 s (`lib/window/kiosk_*.dart`,
+   keeps the display awake (on Linux an `org.freedesktop.ScreenSaver` idle inhibit over the session bus,
+   or the desktop portal's, `lib/window/idle_inhibit*.dart`), and a pointer that hides after 5 s (`lib/window/kiosk_*.dart`,
    `macos/Runner/Kiosk.swift`). Escape, the menu's Full screen or `visage.window.set` leaves it for the
    previous mode; it is not native fullscreen, which makes its own Space and animates.
 

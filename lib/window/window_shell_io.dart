@@ -147,7 +147,10 @@ Future<void> setWindowVisible(bool visible) async {
   await _attempt(visible ? 'show' : 'hide', visible ? windowManager.show : windowManager.hide);
 }
 
-Future<void> quitApp() => windowManager.destroy();
+Future<void> quitApp() async {
+  await releaseKioskIdleInhibit();
+  await windowManager.destroy();
+}
 
 /// The runner implements these on macOS (MainFlutterWindow.swift); where it does not, the window stays as it was and
 /// the fault is reported.
