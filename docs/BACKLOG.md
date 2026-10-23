@@ -86,17 +86,21 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 ## Interactive notifications (2026-10-23, left out of the display-only popups)
 
-The popups follow ovos-shell's NotificationPop*.qml except for their input. Input is decided now (SCOPE.md, Input,
-2026-10-23); tap to dismiss and actions follow the input foundation in the skill-controls work:
+The popups follow ovos-shell's NotificationPop*.qml.
 
-- **Tap to dismiss.** The shell's close button sends `ovos.notification.api.pop.clear.delete` with the popup's
-  record. Without it, a sticky popup stays until a skill clears it or the app restarts; no stock skill API clears
-  one, so this matters most for stickies.
-- **Notification actions.** A tap on a transient popup in the shell emits the record's `action` with its
-  `callback_data` as a bus message, then closes the popup.
+- **Tap to dismiss.** Done (2026-10-23): the close button sends `ovos.notification.api.pop.clear.delete` with
+  the popup's record.
+- **Notification actions.** Done (2026-10-23): a tap on the text sends the record's `action` with its
+  `callback_data`, then closes the popup.
 - **The stored list.** The idle page's count badge opens the shell's notification list; here it is only a count.
 
 ## Input (2026-10-23)
+
+- **Skill controls not ported yet.** OCP's Home skill chips (GridSkillCard.qml sends `featured_tracks.play`,
+  which the installed OCP registers as `skill.play`, so the Qt page itself may not work), OCP's Search page
+  (`search` and `play_search` with typed text), repeat and shuffle (the Qt buttons send nothing), and the alerts
+  ListView's `neon.alerts.converse` (nothing in ovos-skill-alerts 0.6.6a2 handles it; its items carry no `ident`).
+- **Seek lands between reports.** After a seek, the bar runs from the old position until OCP reports the new one.
 
 - **On-screen keyboard.** The command box and SYSTEM_InputBox take a hardware keyboard, or the system's own
   on-screen keyboard where the desktop shows one for a focused text field (GNOME can; a bare Pi kiosk or labwc
