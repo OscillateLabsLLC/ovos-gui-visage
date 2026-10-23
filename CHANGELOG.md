@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.0.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.1.0...v2.0.0) (2026-10-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **linux:** the desktop file and icon names change. Nothing has shipped on Linux yet, so no one is affected; a checkout that ran just linux-install before this change should run just linux-uninstall first, then install again.
+
+### Features
+
+* keep the display awake in kiosk mode on Linux ([f7e4685](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/f7e4685cc7eec7c55f55fdfef584ac2b086051c6))
+* keep the display awake in kiosk mode on Linux ([ecd0a36](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ecd0a36fbc32ca5d502724f960b543a7c65bd075)), closes [#15](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/15)
+* **linux:** add a desktop entry and a per-user install recipe ([c40f979](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/c40f9793ecc88cd2565fdf7c735c1640aadee922))
+* **linux:** app icon, desktop entry and optional kiosk autostart ([0152d66](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0152d666a08526f6a39bb0f925c184203809d2ce))
+* **linux:** generate hicolor app icons from the face badge ([0916fe8](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0916fe8a5d91eac0a878cbd9593ef092eedcf0a5))
+* **linux:** make native Wayland honest about the widget modes ([6e23025](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/6e23025d475ec42b2902417d01d1b0b339668afd))
+* **linux:** optional kiosk start on login through XDG autostart ([55fa607](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/55fa607ade0553400be800811e686183e69981e5))
+* **linux:** prefer X11 through Xwayland in the runner ([c1adcba](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/c1adcba1aefe1de51328aabe378745c0fea4e54c))
+* **linux:** prefer X11 through Xwayland, make native Wayland honest, detect a missing tray ([7f3b570](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7f3b570d817fed58737efcbf44983255ab604ddf))
+* **linux:** report a session bus with no tray watcher ([bc127bd](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/bc127bdcb7334fb93837aad10931f8a3c379a7e2)), closes [#14](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/14)
+* **linux:** the application id matches the macOS bundle id ([8357791](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/83577913dbb4384e68240901f5180e9069d26580))
+* **linux:** title the window OVOS Visage and give it the app icon ([8dd192a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/8dd192aa4e84762cf786b875bb0996b97a8c9450))
+
+
+### Bug Fixes
+
+* **faults:** print each fault's context in release builds ([8a06777](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/8a06777af875194dcfe884b0ac5c137d594ff61e))
+* leaving kiosk on Linux no longer flashes the window in the middle ([f175752](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/f17575281fc858a173005b88e2db57f20bcf7817))
+* leaving kiosk on Linux no longer flashes the window in the middle ([0279e61](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0279e612f6ea7248c885c405bf3267eb8c16be39)), closes [#16](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/16)
+* **window:** the Quit item names the app as OVOS Visage ([0e46db7](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0e46db7ef7cb7a179ef915078f83c46454ee7bde))
+
 ## [1.1.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v1.0.1...v1.1.0) (2026-10-19)
 
 
