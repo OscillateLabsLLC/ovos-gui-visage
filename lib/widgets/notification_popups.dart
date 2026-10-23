@@ -3,7 +3,8 @@
 /// cleared to storage as the shell's timer does with `ovos.notification.api.pop.clear`; a `sticky` one has no timer
 /// and stays until something clears it (`pop.clear` or `pop.clear.delete` for the same sender and text); the one
 /// `controlled` notification is created or updated in place by `set.controlled` and removed by `remove.controlled`.
-/// The shell's close buttons are left out: Visage takes no input on notifications yet.
+/// A tap closes or acts on a popup (notification_actions.dart); [NotificationPopups.dismiss] then takes it off this
+/// display at once, as the shell's `popbox.destroy()` does.
 library;
 
 import 'dart:async';
@@ -72,6 +73,14 @@ class NotificationPopups extends ChangeNotifier {
   void removeControlled() {
     if (controlled == null) return;
     controlled = null;
+    notifyListeners();
+  }
+
+  /// Off this display now, without moving to storage: a close button or an action, as the shell's popbox.destroy().
+  void dismiss(Popup popup) {
+    if (popup.kind == PopupKind.controlled) return removeControlled();
+    if (!_stacked.contains(popup)) return;
+    _drop(popup);
     notifyListeners();
   }
 

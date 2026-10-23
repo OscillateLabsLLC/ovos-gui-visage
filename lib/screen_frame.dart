@@ -21,6 +21,7 @@ import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/caption_strip.dart';
 import 'widgets/command_box.dart';
+import 'widgets/notification_actions.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/notification_stack.dart';
 import 'widgets/offline_pill.dart';
@@ -42,6 +43,7 @@ class FrameParts {
     required this.captions,
     required this.outcome,
     required this.popups,
+    required this.notifications,
     required this.expanded,
     required this.kiosk,
     required this.typeOnHome,
@@ -62,6 +64,9 @@ class FrameParts {
   final Captions? captions;
   final OutcomeModel outcome;
   final NotificationPopups popups;
+
+  /// What a tap on a popup or its close button sends.
+  final NotificationActions notifications;
   final bool expanded;
   final bool kiosk;
 
@@ -121,10 +126,12 @@ class ScreenFrame extends StatelessWidget {
   }
 
   Widget _topStatus() => TopStatus(
+    interactive: parts.popups.all.isEmpty
+        ? null
+        : NotificationStack(popups: parts.popups.all, onTap: parts.notifications.act, onClose: parts.notifications.close),
     children: [
       if (!parts.connected) const OfflinePill(),
       OutcomePill(outcome: parts.outcome.showing),
-      if (parts.popups.all.isNotEmpty) NotificationStack(popups: parts.popups.all),
     ],
   );
 
