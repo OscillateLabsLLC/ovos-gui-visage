@@ -7,6 +7,8 @@ import 'package:window_manager/window_manager.dart';
 
 import '../face/face_theme.dart';
 import '../faults.dart';
+import 'idle_inhibit.dart';
+import 'idle_inhibit_dbus_io.dart';
 import 'plugin_calls.dart';
 import 'window_bounds_io.dart';
 import 'window_channel.dart';
@@ -15,7 +17,7 @@ import 'window_config.dart';
 /// Kiosk mode on the native window: frameless, the size of the primary display, above everything on every Space.
 /// window_manager does what it can on every platform; the macOS runner adds the level above the Dock and
 /// notifications, hides the Dock and the menu bar while the app is frontmost, and keeps the display awake
-/// (macos/Runner/Kiosk.swift). On macOS kiosk is a regular app: an accessory app does not own the menu bar, so it
+/// (macos/Runner/Kiosk.swift); on Linux a session-bus idle inhibit keeps it awake (idle_inhibit.dart). On macOS kiosk is a regular app: an accessory app does not own the menu bar, so it
 /// cannot hide it. A call a platform lacks is reported once and the rest still run (plugin_calls.dart).
 Future<void> enterKiosk({required WindowMode from}) async {
   if (from == WindowMode.window) _windowBounds = await _attempt('getBounds', windowManager.getBounds);
@@ -30,7 +32,7 @@ Future<void> enterKiosk({required WindowMode from}) async {
   await _fillScreen();
   await _native('setWindowLevel', 'kiosk');
   await _native('setKiosk', true);
-  await _native('setKeepAwake', true);
+  await _keepAwake(true);
 }
 
 /// An ordinary window's frame before kiosk, so leaving puts it back where it was.
@@ -39,7 +41,7 @@ Rect? _windowBounds;
 /// Back to a corner widget at [bounds], or to an ordinary window with its title bar when [bounds] is null. [bounds]
 /// is read after the Dock and the menu bar come back, so the work area is the one the widget will sit in.
 Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) async {
-  await _native('setKeepAwake', false);
+  await _keepAwake(false);
   await _native('setKiosk', false);
   if (!Platform.isMacOS) {
     await _attempt('setFullScreen', () => windowManager.setFullScreen(false));
@@ -86,6 +88,18 @@ Future<Rect?> _screen() async {
   final display = await _attempt('getPrimaryDisplay', screenRetriever.getPrimaryDisplay);
   return display == null ? null : Offset.zero & display.size;
 }
+
+/// The Linux idle inhibit kiosk mode holds; a test swaps in a fake bus.
+@visibleForTesting
+IdleInhibitor kioskIdleInhibitor = IdleInhibitor(DBusInhibitBus());
+
+Future<void> _keepAwake(bool on) async {
+  if (Platform.isMacOS) return _native('setKeepAwake', on);
+  await (on ? kioskIdleInhibitor.hold() : kioskIdleInhibitor.release());
+}
+
+/// Lets go of the idle inhibit before the app quits; the session bus would drop it with the connection anyway.
+Future<void> releaseKioskIdleInhibit() => kioskIdleInhibitor.release();
 
 Future<T?> _attempt<T>(String what, Future<T> Function() call) => attemptPluginCall('$what in kiosk mode', call);
 
