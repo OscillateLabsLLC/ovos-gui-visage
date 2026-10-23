@@ -49,7 +49,7 @@ void main() {
     expect(busMessageFor(guiEvent(skill, 'input.box.close')), {'type': '$skill.input.box.close', 'data': <String, dynamic>{}});
   });
 
-  for (final name in ['input_box_round_trip', 'page_focus_round_trip']) {
+  for (final name in ['input_box_round_trip', 'page_focus_round_trip', 'ocp_controls_round_trip']) {
     test('the recorded round trip $name matches what the app builds and what ovos-gui emitted', () {
       for (final trip in roundTrips(name)) {
         final sent = trip['sent'] as Json;

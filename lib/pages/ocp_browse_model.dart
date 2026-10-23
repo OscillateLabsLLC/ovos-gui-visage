@@ -41,6 +41,13 @@ final _skillAffixes = [
   RegExp(r'^skill-'),
 ];
 const maxRows = 7;
+
+/// What a tap on an entry sends in OCP's namespace, as Playlist.qml and Disambiguation.qml do: the event, with the
+/// whole entry as `playlistData`. ovos-common-play (ocp/gui.py) plays it from the playlist or the search results.
+const playlistPlay = 'playlist.play';
+const searchPlay = 'search.play';
+
+typedef RowPlay = ({String event, Json parameters});
 // Home's skill chips: two columns of three fit above the attention strip.
 const maxChips = 6;
 const _hues = 360;
@@ -67,6 +74,7 @@ class BrowseRow {
     required this.current,
     this.section,
     this.hue,
+    this.play,
   });
 
   final String title;
@@ -76,8 +84,11 @@ class BrowseRow {
   final String? section;
   final int? hue;
 
+  /// Null for a row a tap cannot play (a skill chip). Not part of equality, which compares what the row shows.
+  final RowPlay? play;
+
   BrowseRow withSection(String section) =>
-      BrowseRow(title: title, subtitle: subtitle, cover: cover, current: current, section: section, hue: hue);
+      BrowseRow(title: title, subtitle: subtitle, cover: cover, current: current, section: section, hue: hue, play: play);
 
   @override
   bool operator ==(Object other) =>
@@ -93,7 +104,7 @@ class BrowseRow {
   int get hashCode => Object.hash(title, subtitle, cover, current, section, hue);
 }
 
-BrowseRow _entryRow(Map entry, String currentUri) {
+BrowseRow _entryRow(Map entry, String currentUri, String playEvent) {
   final duration = number(entry['duration']);
   final length = duration > 0 ? formatTime(duration) : '';
   final title = text(entry['track']);
@@ -102,6 +113,7 @@ BrowseRow _entryRow(Map entry, String currentUri) {
     subtitle: [skillName(entry['album']), length].where((s) => s.isNotEmpty).join(' · '),
     cover: coverUrl(entry['image']) ?? coverUrl(entry['source']),
     current: currentUri.isNotEmpty && entry['uri'] == currentUri,
+    play: (event: playEvent, parameters: {'playlistData': entry}),
   );
 }
 
@@ -129,7 +141,8 @@ BrowseModel suggestionsModel(Json data) {
   final results = _entries(data['searchModel']).where((entry) => !inPlaylist.contains(entry['uri'])).toList();
   final uri = text(data['uri']);
   final rows = [
-    for (final entry in [...playlist, ...results]) _entryRow(entry, uri),
+    for (final entry in playlist) _entryRow(entry, uri, playlistPlay),
+    for (final entry in results) _entryRow(entry, uri, searchPlay),
   ];
   if (playlist.isNotEmpty && results.isNotEmpty) rows[playlist.length] = rows[playlist.length].withSection('Search results');
   final window = windowRows(rows);
@@ -180,6 +193,6 @@ BrowseModel homeModel(Json data) {
     return (heading: 'Media', layout: BrowseLayout.chips, rows: window.rows, hidden: window.hidden);
   }
   final uri = text(data['uri']);
-  final window = windowRows([for (final entry in _entries(data['playlistModel'])) _entryRow(entry, uri)]);
+  final window = windowRows([for (final entry in _entries(data['playlistModel'])) _entryRow(entry, uri, playlistPlay)]);
   return (heading: 'Recent', layout: BrowseLayout.rows, rows: window.rows, hidden: window.hidden);
 }
