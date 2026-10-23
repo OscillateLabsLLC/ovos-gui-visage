@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=OVOS Visage (kiosk)
+Comment=Start OVOS Visage full screen when you log in
+Exec=env VISAGE_MODE=kiosk ovos_gui_visage
+Icon=net.oscillatelabs.ovos_gui_visage
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
