@@ -4,7 +4,7 @@
 # install and autostart-on point the entries at a release bundle built by `flutter build linux --release`.
 set -euo pipefail
 
-app_id=net.oscillatelabs.ovos_gui_visage
+app_id=net.oscillatelabs.ovosGuiVisage
 repo=$(cd "$(dirname "$0")/.." && pwd)
 data=${XDG_DATA_HOME:-$HOME/.local/share}
 config=${XDG_CONFIG_HOME:-$HOME/.config}

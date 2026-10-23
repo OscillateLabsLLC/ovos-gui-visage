@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/face.dart';
 import 'package:ovos_gui_visage/face/face_badge.dart';
 
-const linuxAppId = 'net.oscillatelabs.ovos_gui_visage';
+const linuxAppId = 'net.oscillatelabs.ovosGuiVisage';
 const linuxIconSizes = [48, 64, 128, 256, 512];
 
 // Freedesktop app icons fill most of the canvas; a thin margin keeps the disc off the edge of a panel button.

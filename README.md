@@ -210,12 +210,12 @@ flutter build linux --release
 just linux-install      # or: tool/linux_desktop.sh install
 ```
 
-This writes `~/.local/share/applications/net.oscillatelabs.ovos_gui_visage.desktop`, with `Exec`
+This writes `~/.local/share/applications/net.oscillatelabs.ovosGuiVisage.desktop`, with `Exec`
 set to the bundle under `build/linux/<arch>/release/bundle`, and copies the icons from
 `linux/icons/hicolor` to `~/.local/share/icons/hicolor`. Then it runs `update-desktop-database`
 and `gtk-update-icon-cache`. **OVOS Visage** then shows in the application menu, and the panel
 shows the face icon for its window. The file name, the icon name and the GTK application id are
-all `net.oscillatelabs.ovos_gui_visage`, which is how the desktop matches the window to the
+all `net.oscillatelabs.ovosGuiVisage`, which is how the desktop matches the window to the
 launcher. `just linux-uninstall` removes the launcher and the icons. If you move the checkout,
 run `just linux-install` again.
 
@@ -227,7 +227,7 @@ This is off by default. To turn it on:
 just linux-autostart on     # or: tool/linux_desktop.sh autostart-on
 ```
 
-This writes `~/.config/autostart/net.oscillatelabs.ovos_gui_visage-kiosk.desktop`, which starts
+This writes `~/.config/autostart/net.oscillatelabs.ovosGuiVisage-kiosk.desktop`, which starts
 the app with `VISAGE_MODE=kiosk`. To turn it off, run `just linux-autostart off`, or delete that
 file. Plasma also lists the entry in System Settings, Autostart, where you can turn it off.
 
