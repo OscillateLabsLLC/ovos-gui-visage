@@ -69,15 +69,23 @@ PageBuilder resolve(Target? target) {
 /// Hosts the current page. A new (namespace, page, index) replaces the subtree, so page state resets; the same
 /// target with new data rebuilds the same widget, so a page keeps its tickers and animations across updates.
 class PageHost extends StatelessWidget {
-  const PageHost({super.key, required this.state});
+  const PageHost({super.key, required this.state, required this.send});
 
   final GuiState state;
+
+  /// The GUI socket, handed to every page through its context.
+  final GuiSend send;
 
   @override
   Widget build(BuildContext context) {
     final target = state.current();
     final ns = target == null ? null : state.namespace(target.namespace);
-    final ctx = PageContext(namespace: target?.namespace ?? '', page: target?.page ?? '', events: ns?.events ?? const {});
+    final ctx = PageContext(
+      namespace: target?.namespace ?? '',
+      page: target?.page ?? '',
+      events: ns?.events ?? const {},
+      send: send,
+    );
     final data = Json.of(ns?.data ?? const {});
     return KeyedSubtree(key: ValueKey(target?.toString() ?? ''), child: resolve(target)(data, ctx));
   }

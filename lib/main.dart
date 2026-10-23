@@ -263,7 +263,7 @@ class _ScreenState extends State<Screen> {
               Positioned.fill(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? attentionStrip : 32),
-                  child: PageHost(state: state),
+                  child: PageHost(state: state, send: gui.send),
                 ),
               ),
               AttentionOverlay(attention: attention, face: face),
