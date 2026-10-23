@@ -1,7 +1,7 @@
 name: ovos_gui_visage
 description: "Flutter GUI client for OpenVoiceOS in the style of the 2018 Mycroft Mark II Kickstarter concept"
 publish_to: 'none'
-version: 2.0.0+5
+version: 2.1.0+6
 
 environment:
   sdk: ^3.13.3
