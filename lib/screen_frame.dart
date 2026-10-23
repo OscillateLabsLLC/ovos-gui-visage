@@ -1,0 +1,122 @@
+/// The 480 x 800 frame the screen scales into the window: the page with its pager, the attention face, captions, the
+/// status row (offline, outcome, notifications), and try-on mode on top (it owns the gestures while active).
+library;
+
+import 'package:flutter/material.dart';
+
+import 'attention.dart';
+import 'captions.dart';
+import 'face/face.dart';
+import 'face/face_remote.dart';
+import 'face/face_scope.dart';
+import 'face/face_theme.dart';
+import 'face/try_on.dart';
+import 'outcome.dart';
+import 'pages/page.dart';
+import 'pages/page_pager.dart';
+import 'pages/router.dart';
+import 'shell_overlays.dart';
+import 'state/gui_state.dart';
+import 'theme.dart';
+import 'widgets/caption_strip.dart';
+import 'widgets/notification_popups.dart';
+import 'widgets/notification_stack.dart';
+import 'widgets/offline_pill.dart';
+import 'widgets/outcome_pill.dart';
+
+const _pagePadding = 32.0;
+const _sidePadding = 24.0;
+
+/// What the frame needs from the screen; one object so the screen's build stays a line.
+class FrameParts {
+  const FrameParts({
+    required this.state,
+    required this.attention,
+    required this.face,
+    required this.remote,
+    required this.send,
+    required this.connected,
+    required this.captions,
+    required this.outcome,
+    required this.popups,
+    required this.expanded,
+    required this.kiosk,
+    required this.onStep,
+    required this.onInteract,
+    required this.onTryOn,
+  });
+
+  final GuiState state;
+  final Attention attention;
+  final FaceController face;
+  final FaceRemote remote;
+  final GuiSend send;
+  final bool connected;
+
+  /// Null when captions are turned off.
+  final Captions? captions;
+  final OutcomeModel outcome;
+  final NotificationPopups popups;
+  final bool expanded;
+  final bool kiosk;
+
+  final void Function(int delta) onStep;
+  final VoidCallback onInteract;
+  final void Function(bool active) onTryOn;
+}
+
+class ScreenFrame extends StatelessWidget {
+  const ScreenFrame({super.key, required this.parts});
+
+  final FrameParts parts;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = parts;
+    return SizedBox(
+      width: frameWidth,
+      height: frameHeight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: FaceScope(
+          controller: p.face,
+          child: Stack(
+            children: [
+              const Positioned.fill(child: ColoredBox(color: VisageColors.pageBg)),
+              Positioned.fill(child: _page()),
+              AttentionOverlay(attention: p.attention, face: p.face),
+              if (p.captions case final captions?) CaptionStrip(captions: captions, compact: p.attention.compact),
+              _topStatus(),
+              FaceTryOn(controller: p.face, remote: p.remote, enabled: p.expanded, onActive: p.onTryOn),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _page() {
+    final target = parts.state.current();
+    final count = target == null ? 0 : parts.state.namespace(target.namespace).pages.length;
+    final bottom = parts.attention.compact ? attentionStrip : _pagePadding;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(_sidePadding, _pagePadding, _sidePadding, bottom),
+      child: PagePager(
+        index: target?.index ?? 0,
+        count: count,
+        onStep: parts.onStep,
+        onInteract: parts.onInteract,
+        chevrons: parts.kiosk,
+        child: PageHost(state: parts.state, send: parts.send),
+      ),
+    );
+  }
+
+  Widget _topStatus() => TopStatus(
+    children: [
+      if (!parts.connected) const OfflinePill(),
+      OutcomePill(outcome: parts.outcome.showing),
+      if (parts.popups.all.isNotEmpty) NotificationStack(popups: parts.popups.all),
+    ],
+  );
+}

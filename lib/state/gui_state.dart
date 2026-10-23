@@ -89,6 +89,15 @@ class GuiState {
     return null;
   }
 
+  /// The user moved to page [index] of [skillId] (a swipe, an arrow key, a chevron); the shell then tells ovos-gui
+  /// with `page_gained_focus`, as the Qt GUI did. False when the namespace has no such page.
+  bool focusPage(String skillId, int index) {
+    final ns = namespaces[skillId];
+    if (ns == null || index < 0 || index >= ns.pages.length || index == ns.focusedIndex) return false;
+    ns.focusedIndex = index;
+    return true;
+  }
+
   Json snapshot() => {
     'active': List.of(active),
     'idle_namespace': idleNamespace,

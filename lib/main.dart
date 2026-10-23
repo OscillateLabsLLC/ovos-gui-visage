@@ -11,23 +11,16 @@ import 'attention.dart';
 import 'captions.dart';
 import 'face/face.dart';
 import 'face/face_remote.dart';
-import 'face/face_scope.dart';
-import 'face/face_theme.dart';
-import 'face/try_on.dart';
 import 'faults.dart';
 import 'outcome.dart';
-import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
 import 'protocol/gui_client.dart';
+import 'screen_frame.dart';
+import 'screen_input.dart';
 import 'state/gui_state.dart';
-import 'theme.dart';
 import 'turn_feed.dart';
-import 'widgets/caption_strip.dart';
 import 'widgets/notification_popups.dart';
-import 'widgets/notification_stack.dart';
-import 'widgets/offline_pill.dart';
-import 'widgets/outcome_pill.dart';
 import 'widgets/widget_manager.dart';
 import 'shell_overlays.dart';
 import 'window/desktop_extras.dart';
@@ -41,7 +34,6 @@ import 'window/window_remote.dart';
 import 'window/window_shell.dart';
 import 'window/window_surface.dart';
 
-const _pageBg = VisageColors.pageBg;
 const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible, place: setWidgetExpanded);
 
 Future<void> main() async {
@@ -130,6 +122,7 @@ class _ScreenState extends State<Screen> {
     onStatus: _onGuiStatus,
     log: _log,
   );
+  late final ScreenInput input = ScreenInput(state: state, sendGui: (message) => gui.send(message), onChanged: _refresh);
   bool guiConnected = false;
   Target? lastFocus;
 
@@ -229,10 +222,12 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     final collapsed = !peek.expanded;
+    final mode = window.config.mode;
     return WindowSurface(
-      mode: window.config.mode,
+      mode: mode,
       onLeaveKiosk: window.leaveKiosk,
       onDragStart: tryOnActive ? null : drag.start,
+      onStep: input.step,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -240,7 +235,7 @@ class _ScreenState extends State<Screen> {
             offstage: collapsed,
             child: TickerMode(
               enabled: !collapsed,
-              child: FittedBox(child: _frame()),
+              child: FittedBox(child: ScreenFrame(parts: _parts(mode))),
             ),
           ),
           if (collapsed) PeekBadge(face: face, onTap: peek.tap),
@@ -249,39 +244,20 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget _frame() {
-    return SizedBox(
-      width: frameWidth,
-      height: frameHeight,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: FaceScope(
-          controller: face,
-          child: Stack(
-            children: [
-              const Positioned.fill(child: ColoredBox(color: _pageBg)),
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? attentionStrip : 32),
-                  child: PageHost(state: state, send: gui.send),
-                ),
-              ),
-              AttentionOverlay(attention: attention, face: face),
-              if (widget.config.captions) CaptionStrip(captions: captions, compact: attention.compact),
-              _topStatus(),
-              FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: _onTryOn),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _topStatus() => TopStatus(
-    children: [
-      if (!guiConnected) const OfflinePill(),
-      OutcomePill(outcome: outcome.showing),
-      if (popups.all.isNotEmpty) NotificationStack(popups: popups.all),
-    ],
+  FrameParts _parts(WindowMode mode) => FrameParts(
+    state: state,
+    attention: attention,
+    face: face,
+    remote: remote,
+    send: gui.send,
+    connected: guiConnected,
+    captions: widget.config.captions ? captions : null,
+    outcome: outcome,
+    popups: popups,
+    expanded: peek.expanded,
+    kiosk: mode == WindowMode.kiosk,
+    onStep: input.step,
+    onInteract: input.interact,
+    onTryOn: _onTryOn,
   );
 }

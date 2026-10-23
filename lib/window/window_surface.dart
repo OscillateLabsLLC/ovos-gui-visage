@@ -16,7 +16,8 @@ Color windowBackground(WindowMode mode) => switch (mode) {
 
 /// The whole window around the frame. In kiosk mode Escape calls [onLeaveKiosk] and the pointer hides after
 /// [cursorHideAfter] without movement. A drag on a widget calls [onDragStart], which hands the window to the window
-/// manager to move. The tree is the same in every mode, so switching keeps the page's state.
+/// manager to move. The left and right arrow keys call [onStep]. The tree is the same in every mode, so switching
+/// keeps the page's state.
 class WindowSurface extends StatefulWidget {
   const WindowSurface({
     super.key,
@@ -24,6 +25,7 @@ class WindowSurface extends StatefulWidget {
     required this.onLeaveKiosk,
     required this.child,
     this.onDragStart,
+    this.onStep,
     this.timer,
   });
 
@@ -33,6 +35,9 @@ class WindowSurface extends StatefulWidget {
   /// Null where the window cannot be dragged: an ordinary window, kiosk, or while try-on mode owns the gestures.
   final VoidCallback? onDragStart;
   final Widget child;
+
+  /// Moves between the active skill's pages: -1 back, 1 forward.
+  final void Function(int delta)? onStep;
 
   /// Tests pass manual timers; the app uses real ones.
   final TimerFactory? timer;
@@ -73,7 +78,13 @@ class _WindowSurfaceState extends State<WindowSurface> {
   @override
   Widget build(BuildContext context) {
     return CallbackShortcuts(
-      bindings: {if (_kiosk) const SingleActivator(LogicalKeyboardKey.escape): widget.onLeaveKiosk},
+      bindings: {
+        if (_kiosk) const SingleActivator(LogicalKeyboardKey.escape): widget.onLeaveKiosk,
+        if (widget.onStep case final step?) ...{
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () => step(-1),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () => step(1),
+        },
+      },
       child: Focus(
         autofocus: true,
         child: MouseRegion(
