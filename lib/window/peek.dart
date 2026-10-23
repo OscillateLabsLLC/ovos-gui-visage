@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 const peekHold = Duration(seconds: 3);
 const tapHold = Duration(seconds: 10);
+const tryOnHold = 'try-on';
 
 typedef TimerFactory = Timer Function(Duration after, void Function() callback);
 
@@ -20,7 +21,7 @@ class PeekController extends ChangeNotifier {
   bool _enabled;
   bool _collapsed = true;
   bool _attending = false;
-  bool _held = false;
+  final Set<Object> _holders = {};
   Timer? _collapseTimer;
 
   bool get enabled => _enabled;
@@ -48,12 +49,15 @@ class PeekController extends ChangeNotifier {
     if (!_attending && !_held) _collapseAfter(tapHold);
   }
 
-  /// Keeps the window open while something on screen needs it (try-on mode); releasing collapses after the hold
-  /// unless the face is shown.
-  void hold(bool on) {
-    if (_held == on) return;
-    _held = on;
-    on ? _expand() : _collapseAfter(peekHold);
+  bool get _held => _holders.isNotEmpty;
+
+  /// Keeps the window open while something on screen needs it (try-on mode, the menu, the command box), each under
+  /// its own [by]; releasing the last holder collapses after the hold unless the face is shown.
+  void hold(bool on, {Object by = tryOnHold}) {
+    final changed = on ? _holders.add(by) : _holders.remove(by);
+    if (!changed) return;
+    if (on) return _expand();
+    if (!_held) _collapseAfter(peekHold);
   }
 
   /// A one-off from the bus: expanded stays until it is collapsed or the next attention cycle ends; collapsed stays

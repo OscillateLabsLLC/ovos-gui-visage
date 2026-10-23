@@ -31,6 +31,7 @@ import 'window/status_menu_binding.dart';
 import 'window/status_menu_host.dart';
 import 'window/window_config.dart';
 import 'window/window_remote.dart';
+import 'window/window_menu.dart';
 import 'window/window_shell.dart';
 import 'window/window_surface.dart';
 
@@ -122,16 +123,24 @@ class _ScreenState extends State<Screen> {
     onStatus: _onGuiStatus,
     log: _log,
   );
-  late final ScreenInput input = ScreenInput(state: state, sendGui: (message) => gui.send(message), onChanged: _refresh);
+  late final ScreenInput input = ScreenInput(
+    state: state,
+    sendGui: (message) => gui.send(message),
+    peek: peek,
+    dispatchMenu: (id) => menu.dispatch(id),
+    onChanged: _refresh,
+  );
   bool guiConnected = false;
   Target? lastFocus;
 
   void _log(String line) => debugPrint(line);
 
-  /// The macOS menu bar item and the Linux tray item show the same list; each ignores the other platform.
+  /// The macOS menu bar item and the Linux tray item show the same list; each ignores the other platform. The window's
+  /// own menu shows it everywhere.
   void _showMenu(List<MenuEntry> items) {
     menuHost.show(items);
     unawaited(tray.show(items));
+    input.menu.show(items);
   }
 
   /// Try-on mode owns the gestures while it is active, so the widget cannot be dragged then.
@@ -164,6 +173,7 @@ class _ScreenState extends State<Screen> {
   @override
   void dispose() {
     menu.dispose();
+    input.dispose();
     drag.dispose();
     tray.dispose();
     face.removeListener(_refresh);
@@ -227,19 +237,24 @@ class _ScreenState extends State<Screen> {
       mode: mode,
       onLeaveKiosk: window.leaveKiosk,
       onDragStart: tryOnActive ? null : drag.start,
+      onMenu: tryOnActive ? null : input.menu.open,
+      onDismiss: input.menu.dismiss,
       onStep: input.step,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Offstage(
-            offstage: collapsed,
-            child: TickerMode(
-              enabled: !collapsed,
-              child: FittedBox(child: ScreenFrame(parts: _parts(mode))),
+      child: WindowMenu(
+        host: input.menu,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Offstage(
+              offstage: collapsed,
+              child: TickerMode(
+                enabled: !collapsed,
+                child: FittedBox(child: ScreenFrame(parts: _parts(mode))),
+              ),
             ),
-          ),
-          if (collapsed) PeekBadge(face: face, onTap: peek.tap),
-        ],
+            if (collapsed) PeekBadge(face: face, onTap: peek.tap),
+          ],
+        ),
       ),
     );
   }

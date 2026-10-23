@@ -102,6 +102,17 @@ void main() {
     expect(peek.expanded, isFalse);
   });
 
+  test('holders are separate: the window stays open until the last one lets go', () {
+    peek.hold(true);
+    peek.hold(true, by: 'menu');
+    peek.hold(false);
+    expect(timers.pending, isEmpty, reason: 'the menu still holds it');
+    peek.hold(false, by: 'menu');
+    expect(timers.pending.single.after, peekHold);
+    timers.fireAll();
+    expect(peek.expanded, isFalse);
+  });
+
   test('a one-off expand holds until collapsed; a one-off collapse holds until the face is shown', () {
     peek.setExpanded(true);
     expect(peek.expanded, isTrue);

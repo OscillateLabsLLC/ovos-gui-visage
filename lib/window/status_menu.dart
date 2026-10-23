@@ -1,6 +1,7 @@
-/// The macOS menu bar item's menu, so the widget can be driven without the bus. Pure: [buildStatusMenu] turns the
-/// current state into items, [StatusMenuController] rebuilds them on every change and dispatches a selected id. The
-/// native half (status_menu_host.dart, macos/Runner/StatusMenu.swift) draws the items and sends ids back.
+/// The app's menu, so the widget can be driven without the bus. Pure: [buildStatusMenu] turns the current state into
+/// items, [StatusMenuController] rebuilds them on every change and dispatches a selected id. Three hosts draw the same
+/// items and send ids back: the macOS menu bar item (status_menu_host.dart, macos/Runner/StatusMenu.swift), the Linux
+/// tray (tray_host_io.dart) and the in-window menu (window_menu.dart) on every platform.
 library;
 
 import 'dart:convert';
@@ -99,6 +100,23 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
 List<MenuEntry> _choices(Iterable<String> names, String prefix, String? current) => [
   for (final name in names) MenuEntry('$prefix$name', menuTitle(name), checked: name == current),
 ];
+
+/// Entries that show a check mark: peek, the modes, and the face and colour choices.
+bool isCheckable(MenuEntry entry) =>
+    entry.id == peekItem || entry.id.startsWith('mode.') || entry.id.startsWith(facePrefix) || entry.id.startsWith(coloursPrefix);
+
+/// The menu as the window itself shows it: hiding the window from inside it would strand a desktop with no menu bar
+/// item or tray, and a browser tab cannot quit, so those entries (and a separator they leave dangling) go.
+List<MenuEntry> windowMenuEntries(List<MenuEntry> items, {required bool canQuit}) {
+  final kept = [
+    for (final item in items)
+      if (item.id != visibleItem && (canQuit || item.id != quitItem)) item,
+  ];
+  return [
+    for (final (index, item) in kept.indexed)
+      if (!item.separator || (index > 0 && index < kept.length - 1 && !kept[index + 1].separator)) item,
+  ];
+}
 
 /// "mark1" reads "Mark 1": the first letter upper-cased, a space before trailing digits.
 String menuTitle(String name) => name

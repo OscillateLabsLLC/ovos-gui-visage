@@ -65,7 +65,7 @@ void main() {
 
   test('a hidden face, peek off, on the desktop', () {
     final items = buildStatusMenu(_with(visible: false, peek: false, mode: WindowMode.desktop));
-    expect(items.first.title, 'Show face');
+    expect(_item(items, visibleItem).title, 'Show face');
     expect(
       [
         for (final i in items)
