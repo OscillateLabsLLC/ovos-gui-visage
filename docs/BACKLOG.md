@@ -63,8 +63,12 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   the middle when the app started in kiosk; the widget is now hidden across the switch, placed, shown,
   and placed again (KWin maps a re-shown window at 0,0 when it last sat in that corner). Measured at
   30 fps on a headless KWin: 27 frames in the wrong place before, none after.
-- **Wayland.** Untested. Apps cannot place their own windows there, so the corner modes need a
-  layer-shell or compositor rule instead.
+- **Wayland.** The runner prefers X11 (`gdk_set_allowed_backends("x11,wayland")`), so a Wayland session with
+  Xwayland gets the X11 behaviour (measured on nested KWin 5.27, issue #13). Native Wayland is the fallback: `window`
+  and `kiosk` work, the corner widgets are reported once as unplaceable, drag-to-corner does not snap or save, and the
+  widget size is corrected after the map. Still open: labwc under Xwayland places but does not keep above or below
+  (spike, 0.7.1); GNOME and Plasma 6 are unmeasured; gtk-layer-shell would give native Wayland corners and stacking
+  on KWin and labwc (3–5 days, spike in #13).
 - Not a bug: under a headless KWin with no desktop shell the widget surround renders opaque; on the
   real Plasma session it is transparent.
 

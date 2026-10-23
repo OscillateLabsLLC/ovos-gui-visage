@@ -197,7 +197,22 @@ system tray item (an app indicator, which needs `libayatana-appindicator3-1` ins
 GNOME needs the AppIndicator extension), and a widget can be dragged to another corner, where it snaps and
 the corner is saved; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
 the log reports it once); kiosk covers the panel through the window manager's fullscreen state and keeps
-the display awake with an idle inhibit on the session bus; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
+the display awake with an idle inhibit on the session bus.
+
+The app asks GTK for X11 first and native Wayland second, so in a Wayland session it runs through
+Xwayland when Xwayland is installed. `GDK_BACKEND=wayland` still forces native Wayland.
+
+| Session | What you get |
+|---|---|
+| X11 (checked on Plasma 5.27) | Every mode as described above. |
+| Wayland with Xwayland (checked on nested KWin 5.27) | The same as X11: the app is an X11 client, so corners, keep-above, keep-below, peek, drag-to-corner and kiosk all work. |
+| Wayland without Xwayland, or `GDK_BACKEND=wayland` | `window` and `kiosk` work. A `float` or `desktop` widget opens at its correct size but where the compositor puts it, and not above or below other windows; drag moves it but does not snap or save a corner. The log says this once at start. Install Xwayland to get the widget modes. |
+| GNOME (Wayland or X11) | Not tested. Under Xwayland it should behave as X11. The tray needs the AppIndicator extension; without it the log says so once. |
+
+If no panel on the session bus can show a tray item (no `org.kde.StatusNotifierWatcher`, as on stock
+GNOME), the log names the GNOME **AppIndicator and KStatusNotifierItem Support** extension once. The
+item appears without a restart when a tray starts later. Until then, use the bus messages
+(`visage.window.*`, `visage.face.*`) to change the mode or the face.
 
 #### Launcher and icon
 
