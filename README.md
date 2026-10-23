@@ -196,8 +196,8 @@ beneath other windows through the window manager's keep-below flag. Differences 
 system tray item (an app indicator, which needs `libayatana-appindicator3-1` installed; Plasma shows it,
 GNOME needs the AppIndicator extension), and a widget can be dragged to another corner, where it snaps and
 the corner is saved; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
-the log reports it once); kiosk covers the panel through the window manager's fullscreen state but does
-not keep the display awake, and leaving it shows the window at its ordinary size for a moment before the
+the log reports it once); kiosk covers the panel through the window manager's fullscreen state and keeps
+the display awake with an idle inhibit on the session bus, and leaving it shows the window at its ordinary size for a moment before the
 widget settles in its corner; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
 
 #### Launcher and icon
@@ -284,7 +284,10 @@ pointer hides after 5 seconds without movement.
 
 The display does not go to sleep while kiosk mode is on. The app holds a macOS power assertion,
 "ovos-gui-visage kiosk keeps the display awake" (`pmset -g assertions` shows it), and releases it
-when kiosk mode ends or the app quits.
+when kiosk mode ends or the app quits. On Linux it asks the desktop's screen saver service
+(`org.freedesktop.ScreenSaver`, or the desktop portal when that is missing) not to blank the display;
+on Plasma it shows, after five seconds, in
+`qdbus --literal org.kde.Solid.PowerManagement.PolicyAgent /org/kde/Solid/PowerManagement/PolicyAgent ListInhibitions`.
 
 To leave, press Escape, click **Full screen** again, or send `visage.window.set {"mode": "float"}`.
 Escape and **Full screen** go back to the mode you were in before kiosk. If the app started in
