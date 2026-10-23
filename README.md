@@ -197,8 +197,7 @@ system tray item (an app indicator, which needs `libayatana-appindicator3-1` ins
 GNOME needs the AppIndicator extension), and a widget can be dragged to another corner, where it snaps and
 the corner is saved; the widget sits on one virtual desktop (window_manager has no all-workspaces call on Linux, and
 the log reports it once); kiosk covers the panel through the window manager's fullscreen state and keeps
-the display awake with an idle inhibit on the session bus, and leaving it shows the window at its ordinary size for a moment before the
-widget settles in its corner; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
+the display awake with an idle inhibit on the session bus; and the widget cannot be dragged. Wayland is untested, and it does not let an app place its own window.
 
 #### Launcher and icon
 

@@ -21,7 +21,9 @@ import 'window_config.dart';
 /// is a regular app: an accessory app does not own the menu bar, so it cannot hide it. A call a platform lacks is
 /// reported once and the rest still run (plugin_calls.dart).
 Future<void> enterKiosk({required WindowMode from}) async {
-  if (from == WindowMode.window) _windowBounds = await _attempt('getBounds', windowManager.getBounds);
+  final before = from == WindowMode.window || !Platform.isMacOS ? await _attempt('getBounds', windowManager.getBounds) : null;
+  if (from == WindowMode.window) _windowBounds = before;
+  _beforeFullScreen = before;
   if (Platform.isMacOS) await _native('setActivationPolicy', 'regular');
   await _attempt('setAsFrameless', windowManager.setAsFrameless);
   await _attempt('setBackgroundColor', () => windowManager.setBackgroundColor(Colors.transparent));
@@ -39,22 +41,22 @@ Future<void> enterKiosk({required WindowMode from}) async {
 /// An ordinary window's frame before kiosk, so leaving puts it back where it was.
 Rect? _windowBounds;
 
+/// Off macOS, the frame the window manager gives back when fullscreen ends.
+Rect? _beforeFullScreen;
+
 /// Back to a corner widget at [bounds], or to an ordinary window with its title bar when [bounds] is null. [bounds]
 /// is read after the Dock and the menu bar come back, so the work area is the one the widget will sit in.
 Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) async {
   await _keepAwake(false);
   await _native('setKiosk', false);
-  if (!Platform.isMacOS) {
-    await _attempt('setFullScreen', () => windowManager.setFullScreen(false));
-    await _attempt('unmaximize', windowManager.unmaximize);
-  }
+  if (!Platform.isMacOS) await _leaveFullScreen(bounds);
   if (Platform.isMacOS) await _native('setActivationPolicy', config.isWidget ? 'accessory' : 'regular');
   await _attempt('setAlwaysOnTop', () => windowManager.setAlwaysOnTop(config.mode == WindowMode.float));
   await _native('setWindowLevel', config.isWidget ? config.mode.name : 'normal');
   if (!Platform.isMacOS) {
     await _attempt('setAlwaysOnBottom', () => windowManager.setAlwaysOnBottom(config.mode == WindowMode.desktop));
   }
-  if (bounds != null) return _placeWidget(bounds);
+  if (bounds != null) return Platform.isMacOS ? _placeWidget(bounds) : null;
   await _attempt('setTitleBarStyle', () => windowManager.setTitleBarStyle(TitleBarStyle.normal));
   await _attempt('setResizable', () => windowManager.setResizable(true));
   await _attempt('setVisibleOnAllWorkspaces', () => windowManager.setVisibleOnAllWorkspaces(false));
@@ -62,6 +64,43 @@ Future<void> leaveKiosk(WindowConfig config, {Future<Rect> Function()? bounds}) 
   final centred = screen == null ? null : Rect.fromCenter(center: screen.center, width: frameWidth, height: frameHeight);
   final restore = _windowBounds ?? centred;
   if (restore != null) await _attempt('setBounds', () => windowManager.setBounds(restore));
+}
+
+/// Off macOS the window manager gives the window back at the size it had before fullscreen: GTK's 1280 x 720 default
+/// in the middle of the screen when the app started in kiosk, shown for most of a second before the widget moved
+/// (issue #16). Unless that frame is already the widget's, the widget is hidden across the switch, sized and moved
+/// while hidden, and shown in its corner. KWin places a re-shown window itself when it was last seen in that corner
+/// (measured on Kubuntu 24.04: at 0,0), so the corner is set again once it shows. No wait for the Dock: the work area
+/// does not change here.
+Future<void> _leaveFullScreen(Future<Rect> Function()? bounds) async {
+  final target = bounds == null ? null : await _attempt('work area', bounds);
+  if (target == null || _sameFrame(target, _beforeFullScreen)) {
+    await _attempt('setFullScreen', () => windowManager.setFullScreen(false));
+    await _attempt('unmaximize', windowManager.unmaximize);
+    if (target != null) await _attempt('setBounds', () => setWindowBounds(target, growing: false));
+    return;
+  }
+  await _attempt('hide', windowManager.hide);
+  await _attempt('setFullScreen', _unfullscreenHidden);
+  await _attempt('unmaximize', windowManager.unmaximize);
+  await _attempt('setBounds', () => setWindowBounds(target, growing: false));
+  await _attempt('show', windowManager.show);
+  await _attempt('setPosition', () => windowManager.setPosition(target.topLeft));
+}
+
+bool _sameFrame(Rect a, Rect? b) =>
+    b != null && (a.topLeft - b.topLeft).distance < 1 && (a.bottomRight - b.bottomRight).distance < 1;
+
+/// A single unfullscreen on the hidden window let it come back fullscreen in one switch of three (Kubuntu 24.04):
+/// until GDK has seen the unmap it seems to send the request to KWin, which drops it for a window it is unmapping.
+/// Asking again until GDK reports the state gone took that to none in fifteen.
+Future<void> _unfullscreenHidden() async {
+  for (var i = 0; i < 25; i++) {
+    await windowManager.setFullScreen(false);
+    if (!await windowManager.isFullScreen()) return;
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
+  throw StateError('the hidden window is still fullscreen after half a second');
 }
 
 /// Waits for the work area to grow back from the hidden Dock (at most half a second), then places the widget.
