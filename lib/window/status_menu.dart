@@ -14,6 +14,7 @@ import '../face/styles.dart';
 import '../faults.dart';
 import 'window_config.dart';
 
+const typeItem = 'type';
 const visibleItem = 'visible';
 const peekItem = 'peek';
 const floatItem = 'mode.float';
@@ -58,6 +59,7 @@ class StatusMenuState {
 
 class StatusMenuActions {
   const StatusMenuActions({
+    required this.typeCommand,
     required this.toggleVisible,
     required this.togglePeek,
     required this.setMode,
@@ -68,6 +70,7 @@ class StatusMenuActions {
     required this.quit,
   });
 
+  final VoidCallback typeCommand;
   final VoidCallback toggleVisible;
   final VoidCallback togglePeek;
   final void Function(WindowMode mode) setMode;
@@ -82,6 +85,7 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
   final widget = state.mode == WindowMode.float || state.mode == WindowMode.desktop;
   final levels = state.mode != WindowMode.window;
   return [
+    const MenuEntry(typeItem, 'Type a command…'),
     MenuEntry(visibleItem, state.visible ? 'Hide face' : 'Show face'),
     const MenuEntry.separator(),
     MenuEntry(peekItem, 'Peek mode', checked: state.peek, enabled: widget),
@@ -151,6 +155,8 @@ class StatusMenuController {
     if (preset != null) return actions.applyPreset(preset);
     if (colours != null) return actions.applyColours(colours);
     switch (id) {
+      case typeItem:
+        actions.typeCommand();
       case visibleItem:
         actions.toggleVisible();
       case peekItem:

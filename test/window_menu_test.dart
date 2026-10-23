@@ -34,7 +34,7 @@ Widget _app(WindowMenuHost host, {double size = 600, void Function(int)? onStep,
 void main() {
   test('inside the window, the menu has no hide, and no quit in a browser', () {
     final desktop = windowMenuEntries(_items, canQuit: true);
-    expect(_titles(desktop).first, 'Peek mode');
+    expect(_titles(desktop).take(2), ['Type a command…', '-']);
     expect(_titles(desktop).last, 'Quit OVOS Visage');
     final web = windowMenuEntries(_items, canQuit: false);
     expect(_titles(web).last, 'Face picker…');

@@ -12,12 +12,14 @@ StatusMenuController bindStatusMenu({
   required FaceController faceController,
   required WindowRemote window,
   required void Function(List<MenuEntry> items) show,
+  required VoidCallback typeCommand,
   required VoidCallback quit,
 }) => StatusMenuController(
   changes: Listenable.merge([faceController, window]),
   read: () => StatusMenuState(mode: window.config.mode, peek: window.config.peek, visible: window.visible, face: face.spec),
   show: show,
   actions: StatusMenuActions(
+    typeCommand: typeCommand,
     toggleVisible: () => window.setVisible(!window.visible),
     togglePeek: () => window.setPeek(!window.config.peek),
     setMode: window.setMode,

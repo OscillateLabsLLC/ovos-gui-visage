@@ -2,6 +2,7 @@
 // face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
 // while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart). A peeking widget shows only
 // the badge until the face is shown (window/peek.dart), and the window follows over the bus (window_remote.dart).
+// Pages answer back through the GUI socket; the menu opens inside the window too, and a command can be typed.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -31,8 +32,8 @@ import 'window/status_menu_binding.dart';
 import 'window/status_menu_host.dart';
 import 'window/window_config.dart';
 import 'window/window_remote.dart';
-import 'window/window_menu.dart';
 import 'window/window_shell.dart';
+import 'window/window_menu.dart';
 import 'window/window_surface.dart';
 
 const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible, place: setWidgetExpanded);
@@ -106,11 +107,22 @@ class _ScreenState extends State<Screen> {
   late final TrayHost tray = TrayHost(onSelected: (id) => menu.dispatch(id));
   late final WindowDrag drag = WindowDrag(config: () => window.config, onCorner: window.setCorner);
   bool tryOnActive = false;
+  late final ScreenInput input = ScreenInput(
+    state: state,
+    bus: bus,
+    sendGui: (message) => gui.send(message),
+    peek: peek,
+    window: window,
+    dispatchMenu: (id) => menu.dispatch(id),
+    onChanged: _refresh,
+    lang: widget.config.lang,
+  );
   late final StatusMenuController menu = bindStatusMenu(
     face: remote,
     faceController: face,
     window: window,
     show: _showMenu,
+    typeCommand: () => input.typeCommand(),
     quit: quitApp,
   );
   late bool windowExpanded;
@@ -122,13 +134,6 @@ class _ScreenState extends State<Screen> {
     onMessage: _onGuiMessage,
     onStatus: _onGuiStatus,
     log: _log,
-  );
-  late final ScreenInput input = ScreenInput(
-    state: state,
-    sendGui: (message) => gui.send(message),
-    peek: peek,
-    dispatchMenu: (id) => menu.dispatch(id),
-    onChanged: _refresh,
   );
   bool guiConnected = false;
   Target? lastFocus;
@@ -264,6 +269,7 @@ class _ScreenState extends State<Screen> {
     attention: attention,
     face: face,
     remote: remote,
+    commands: input.commands,
     send: gui.send,
     connected: guiConnected,
     captions: widget.config.captions ? captions : null,
@@ -271,6 +277,7 @@ class _ScreenState extends State<Screen> {
     popups: popups,
     expanded: peek.expanded,
     kiosk: mode == WindowMode.kiosk,
+    typeOnHome: mode == WindowMode.window || mode == WindowMode.kiosk,
     onStep: input.step,
     onInteract: input.interact,
     onTryOn: _onTryOn,

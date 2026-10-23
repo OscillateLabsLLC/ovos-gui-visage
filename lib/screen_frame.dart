@@ -1,5 +1,6 @@
 /// The 480 x 800 frame the screen scales into the window: the page with its pager, the attention face, captions, the
-/// status row (offline, outcome, notifications), and try-on mode on top (it owns the gestures while active).
+/// status row (offline, outcome, notifications), the command box and its homescreen button, and try-on mode on top
+/// (it owns the gestures while active).
 library;
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'shell_overlays.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
 import 'widgets/caption_strip.dart';
+import 'widgets/command_box.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/notification_stack.dart';
 import 'widgets/offline_pill.dart';
@@ -34,6 +36,7 @@ class FrameParts {
     required this.attention,
     required this.face,
     required this.remote,
+    required this.commands,
     required this.send,
     required this.connected,
     required this.captions,
@@ -41,6 +44,7 @@ class FrameParts {
     required this.popups,
     required this.expanded,
     required this.kiosk,
+    required this.typeOnHome,
     required this.onStep,
     required this.onInteract,
     required this.onTryOn,
@@ -50,6 +54,7 @@ class FrameParts {
   final Attention attention;
   final FaceController face;
   final FaceRemote remote;
+  final CommandBoxController commands;
   final GuiSend send;
   final bool connected;
 
@@ -60,6 +65,8 @@ class FrameParts {
   final bool expanded;
   final bool kiosk;
 
+  /// Window and kiosk mode put a keyboard button on the homescreen.
+  final bool typeOnHome;
   final void Function(int delta) onStep;
   final VoidCallback onInteract;
   final void Function(bool active) onTryOn;
@@ -87,6 +94,7 @@ class ScreenFrame extends StatelessWidget {
               AttentionOverlay(attention: p.attention, face: p.face),
               if (p.captions case final captions?) CaptionStrip(captions: captions, compact: p.attention.compact),
               _topStatus(),
+              ..._commandParts(),
               FaceTryOn(controller: p.face, remote: p.remote, enabled: p.expanded, onActive: p.onTryOn),
             ],
           ),
@@ -119,4 +127,15 @@ class ScreenFrame extends StatelessWidget {
       if (parts.popups.all.isNotEmpty) NotificationStack(popups: parts.popups.all),
     ],
   );
+
+  List<Widget> _commandParts() {
+    final commands = parts.commands;
+    if (commands.isOpen) {
+      return [Positioned(left: 16, right: 16, bottom: 20, child: CommandBox(controller: commands))];
+    }
+    final target = parts.state.current();
+    final home = target != null && !isContentPage(target, parts.state.idleNamespace);
+    if (!parts.typeOnHome || !home) return const [];
+    return [Positioned(right: 20, bottom: 20, child: CommandButton(onPressed: commands.open))];
+  }
 }

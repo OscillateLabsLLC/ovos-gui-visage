@@ -30,6 +30,7 @@ void main() {
     expect(
       [for (final i in items) i.separator ? '-' : i.title],
       [
+        'Type a command…',
         'Hide face',
         '-',
         'Peek mode',
@@ -125,9 +126,10 @@ void main() {
 
   test('the JSON the runner reads', () {
     final json = [for (final i in buildStatusMenu(_state)) i.toJson()];
-    expect(json[0], {'id': 'visible', 'title': 'Hide face', 'checked': false, 'enabled': true});
-    expect(json[1], {'separator': true});
-    expect((json[7]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
+    expect(json[0], {'id': 'type', 'title': 'Type a command…', 'checked': false, 'enabled': true});
+    expect(json[1], {'id': 'visible', 'title': 'Hide face', 'checked': false, 'enabled': true});
+    expect(json[2], {'separator': true});
+    expect((json[8]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
   });
 
   group('controller', () {
@@ -147,6 +149,7 @@ void main() {
         read: () => state,
         show: shown.add,
         actions: StatusMenuActions(
+          typeCommand: () => calls.add('type'),
           toggleVisible: () => calls.add('visible'),
           togglePeek: () => calls.add('peek'),
           setMode: (m) => calls.add('mode ${m.name}'),
@@ -175,6 +178,7 @@ void main() {
 
     test('dispatches every id', () {
       for (final id in [
+        typeItem,
         visibleItem,
         peekItem,
         floatItem,
@@ -187,7 +191,18 @@ void main() {
       ]) {
         menu.dispatch(id);
       }
-      expect(calls, ['visible', 'peek', 'mode float', 'mode desktop', 'kiosk', 'preset mark1', 'colours mint', 'picker', 'quit']);
+      expect(calls, [
+        'type',
+        'visible',
+        'peek',
+        'mode float',
+        'mode desktop',
+        'kiosk',
+        'preset mark1',
+        'colours mint',
+        'picker',
+        'quit',
+      ]);
     });
 
     test('an unknown id, preset or colourway is reported and does nothing', () async {
