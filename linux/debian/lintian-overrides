@@ -1,0 +1,10 @@
+# The Flutter bundle finds its data and libraries next to the binary, so it stays whole under /opt (issue #17).
+ovos-gui-visage: dir-or-file-in-opt *
+# The prebuilt Flutter engine links its own freetype and libjpeg; it is not built here.
+ovos-gui-visage: embedded-library * [opt/ovos-gui-visage/lib/libflutter_linux_gtk.so]
+# The Dart AOT snapshot, which the engine loads; it links nothing.
+ovos-gui-visage: shared-library-lacks-prerequisites [opt/ovos-gui-visage/lib/libapp.so]
+# The face picker opens in the user's browser on request and uses its web fonts there, with system fonts as fallback.
+ovos-gui-visage: privacy-breach-generic * [opt/ovos-gui-visage/data/flutter_assets/docs/face-palettes.html]
+# The app takes no command-line options; its environment variables are in the README.
+ovos-gui-visage: no-manual-page [usr/bin/ovos-gui-visage]

@@ -39,3 +39,7 @@ linux-uninstall:
 # Start the Linux app in kiosk mode when this user logs in: `just linux-autostart on` or `just linux-autostart off`
 linux-autostart STATE:
     tool/linux_desktop.sh autostart-{{STATE}}
+
+# Package the Linux release bundle as a .deb in build/release (on Debian or Ubuntu with dpkg-dev and chrpath)
+linux-deb:
+    tool/package_deb.sh
