@@ -41,6 +41,17 @@ void main() {
     }
   });
 
+  test('status accepts the GUI-1 success flag, which wins over the legacy key', () {
+    expect(statusModel({'success': true, 'label': 'Saved'}), (ok: true, label: 'Saved'));
+    expect(statusModel({'success': false}).ok, isFalse);
+    expect(statusModel({'success': false, 'status': 'Enabled'}).ok, isFalse);
+    expect(statusModel({'success': true, 'status': 'Disabled'}).ok, isTrue);
+    for (final notBool in ['true', 1, null]) {
+      expect(statusModel({'success': notBool, 'status': 'Enabled'}).ok, isTrue, reason: '$notBool');
+      expect(statusModel({'success': notBool}).ok, isFalse, reason: '$notBool');
+    }
+  });
+
   test('image sources: data:image, http(s), /res/ and absolute paths are candidates; other schemes are not', () {
     expect(imageSource('data:image/png;base64,AAAA'), 'data:image/png;base64,AAAA');
     expect(imageSource('https://x.org/a.png'), 'https://x.org/a.png');

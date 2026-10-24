@@ -83,8 +83,12 @@ List<String>? splitShort(String value) {
 
 String loadingLabel(Json? data) => text(data?['label']);
 
-/// GUIInterface.show_status_animation sends "Enabled" / "Disabled"; the QML does a string compare.
-({bool ok, String label}) statusModel(Json? data) => (ok: data?['status'] == 'Enabled', label: text(data?['label']));
+/// GUI-1 sends `success: bool` (gui-1.md §3); GUIInterface.show_status_animation sends `status: "Enabled" | "Disabled"`,
+/// and the QML does a string compare. A boolean `success` wins over the legacy key.
+({bool ok, String label}) statusModel(Json? data) {
+  final success = data?['success'];
+  return (ok: success is bool ? success : data?['status'] == 'Enabled', label: text(data?['label']));
+}
 
 /// data:, http(s) and cache paths rewritten to /res/ are loadable; anything else (a bare producer path) is not.
 String? imageSource(Object? value) {
