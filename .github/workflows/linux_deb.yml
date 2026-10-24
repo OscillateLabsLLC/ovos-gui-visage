@@ -1,0 +1,105 @@
+name: Linux packages
+
+# Builds the Linux bundle in a debian:bookworm container, so it needs no glibc newer than 2.36 and runs on Debian and
+# Raspberry Pi OS Bookworm as well as Ubuntu 24.04, then packages it with tool/package_deb.sh, runs lintian, and installs
+# each package in clean Debian and Ubuntu containers with tool/smoke_deb.sh. release.yml calls it and attaches the
+# packages to the release. On a pull request that touches the packaging, or run by hand, it is a dry run: the packages
+# stay as workflow artifacts. docs/PACKAGING.md has the flow.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Tag or commit to package"
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag or commit to package; empty for the branch the run starts from"
+        type: string
+        required: false
+        default: ""
+  pull_request:
+    paths:
+      - ".github/workflows/linux_deb.yml"
+      - "linux/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "tool/package_deb.sh"
+      - "tool/smoke_deb.sh"
+
+env:
+  FLUTTER_VERSION: "3.47.4"
+  # Debian and Raspberry Pi OS Bookworm.
+  GLIBC_BASELINE: "2.36"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    container: debian:bookworm
+    steps:
+      - name: Install the build tools
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends git curl unzip xz-utils zip ca-certificates clang cmake \
+            ninja-build pkg-config libstdc++-12-dev libgtk-3-dev libayatana-appindicator3-dev dpkg-dev chrpath file lintian
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.ref }}
+      # The release archives are x64 only; a clone of the tag fetches the Dart SDK for the runner's architecture.
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git /opt/flutter
+          echo /opt/flutter/bin >> "$GITHUB_PATH"
+      - run: flutter config --no-analytics --enable-linux-desktop
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - run: tool/package_deb.sh
+      - name: Lint the package
+        run: lintian --fail-on error,warning build/release/*.deb
+      - name: Check the glibc baseline
+        run: |
+          mkdir -p "$RUNNER_TEMP/deb"
+          dpkg-deb -x build/release/*.deb "$RUNNER_TEMP/deb"
+          newest="$(find "$RUNNER_TEMP/deb/opt" -type f \( -name '*.so' -o -name ovos_gui_visage \) -exec objdump -T {} + |
+            grep -o 'GLIBC_[0-9.]*' | sed 's/GLIBC_//' | sort -u -V | tail -n 1)"
+          echo "newest glibc symbol version: $newest (baseline $GLIBC_BASELINE)"
+          if [ "$(printf '%s\n' "$newest" "$GLIBC_BASELINE" | sort -V | tail -n 1)" != "$GLIBC_BASELINE" ]; then
+            echo "::error::the package needs glibc $newest, newer than $GLIBC_BASELINE"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ovos-gui-visage-deb-${{ matrix.arch }}
+          path: |
+            build/release/*.deb
+            build/release/*.deb.sha256
+          if-no-files-found: error
+          retention-days: 3
+
+  install:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+        image: ["debian:bookworm", "ubuntu:24.04"]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ovos-gui-visage-deb-${{ matrix.arch }}
+          path: build/release
+      - run: tool/smoke_deb.sh build/release/ovos-gui-visage_*_${{ matrix.arch }}.deb

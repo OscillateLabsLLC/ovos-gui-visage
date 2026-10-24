@@ -2,7 +2,7 @@ name: Release
 
 # Builds the macOS app signed with the Developer ID certificate, notarises and staples it, attaches the zip and
 # its sha256 to the GitHub release, then points the Homebrew cask at it. Alongside, it pushes the sidecar image to
-# ghcr.io for amd64 and arm64. docs/PACKAGING.md has the flow and the one-time setup. release-please publishes the
+# ghcr.io for amd64 and arm64 and attaches the Linux .deb packages for both (linux_deb.yml). docs/PACKAGING.md has the flow and the one-time setup. release-please publishes the
 # release with RELEASE_PLEASE_TOKEN (a PAT); a release made with GITHUB_TOKEN would not trigger this workflow.
 
 on:
@@ -164,3 +164,41 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: FLUTTER_VERSION=${{ env.FLUTTER_VERSION }}
+
+  # The .deb packages for amd64 and arm64, built, linted and install-tested by linux_deb.yml. Like the container job,
+  # they do not wait for the macOS job.
+  linux:
+    uses: ./.github/workflows/linux_deb.yml
+    permissions:
+      contents: read
+    with:
+      ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+  linux-release:
+    needs: linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: ovos-gui-visage-deb-*
+          merge-multiple: true
+          path: build/release
+      - name: Check the packages have the tag's version and their checksums
+        working-directory: build/release
+        run: |
+          for arch in amd64 arm64; do
+            deb="ovos-gui-visage_${TAG#v}_${arch}.deb"
+            if [ ! -f "$deb" ]; then
+              echo "::error::no $deb; pubspec.yaml does not have the version of $TAG"
+              exit 1
+            fi
+            sha256sum -c "$deb.sha256"
+          done
+      - name: Upload the packages and checksums to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: build/release
+        run: |
+          gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY" \
+            "ovos-gui-visage_${TAG#v}_amd64.deb" "ovos-gui-visage_${TAG#v}_amd64.deb.sha256" \
+            "ovos-gui-visage_${TAG#v}_arm64.deb" "ovos-gui-visage_${TAG#v}_arm64.deb.sha256"
