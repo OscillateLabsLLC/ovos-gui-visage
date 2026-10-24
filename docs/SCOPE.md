@@ -79,11 +79,13 @@ does not switch while a connection holds; a reconnect probes again. With `gui1`,
 | — | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port (desktop) | `127.0.0.1`, `8181` |
 
 Under GUI-1 a namespace holds exactly one page, named with its spec template (`SYSTEM_text`), and its data is the full
-map of the last frame; Visage never merges. `deactivated` drops the namespace, `idle` empties the stack, a `snapshot`
-replaces it, and `status` frames drive the face. An unknown `SYSTEM_` name is reported once and shows the fallback.
+map of the last frame; Visage never merges. `deactivated` drops the namespace, a `snapshot` replaces the stack, and `status` frames drive the face. `idle` is
+device-wide, so it empties the screen only when this session's stack is already empty; otherwise it is ignored and logged
+once (finding F16). Status topics are keyed by their §5.3 `ovos.*` names, with the legacy bus names as aliases
+(`lib/status_topics.dart`); a topic Visage does not follow is reported once. An unknown `SYSTEM_` name is reported once and shows the fallback.
 GUI-1 has no reply leg, so page controls and page focus are logged and not sent on it (finding F14); typed commands,
 volume and notification actions use the core bus and work on both protocols. Fixtures: `test/fixtures/gui1/`, written
-from WIRE.md.
+from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 
 ## What ports how
 
