@@ -28,7 +28,7 @@ const _thinkEnd = ['mycroft.skill.handler.complete', 'ovos.utterance.handled', '
 /// the full face.
 bool isContentPage(Target? target, String idleNamespace) {
   if (target == null || target.page.isEmpty) return false;
-  if (canonicalTemplate(target.page) == faceTemplate) return false;
+  if (canonicalTemplate(target.page, url: target.url) == faceTemplate) return false;
   return !(target.namespace == idleNamespace && target.page == idlePage);
 }
 

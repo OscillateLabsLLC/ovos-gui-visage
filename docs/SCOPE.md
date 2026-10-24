@@ -76,7 +76,9 @@ test/
 
 Template pages are keyed by their OVOS-GUI-1 name (gui-1.md §3); `lib/pages/template_names.dart` holds the
 vocabulary and the aliases, and nothing else names an alias. ovos-bus-client's frame names and the QML files that
-ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name:
+ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name. A QML file name is a template only when
+its page url starts with `SYSTEM:`, as the legacy plugin sends it; without that mark, `Text.qml` is the skill's own file
+and takes the skill route or the fallback:
 
 | Spec name | Aliases | Page |
 |---|---|---|

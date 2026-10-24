@@ -18,12 +18,16 @@ class Namespace {
 
   final String skillId;
   List<String> pages = [];
+
+  /// The url sent beside each page, index for index; kept out of [toJson] so the reference snapshots are unchanged.
+  List<String?> urls = [];
   Json data = {};
   int focusedIndex = 0;
   Json events = {};
 
   void clearPages() {
     pages = [];
+    urls = [];
     focusedIndex = 0;
   }
 
@@ -32,11 +36,15 @@ class Namespace {
 
 /// The (namespace, page, index) the screen shows.
 class Target {
-  const Target(this.namespace, this.page, this.index);
+  const Target(this.namespace, this.page, this.index, {this.url});
 
   final String namespace;
   final String page;
   final int index;
+
+  /// The url ovos-gui sent beside [page]: a skill file, `SYSTEM:<file>.qml` for a legacy-plugin template, or null.
+  /// Routing reads it; it is not part of the target's identity.
+  final String? url;
 
   @override
   bool operator ==(Object other) => other is Target && other.namespace == namespace && other.page == page && other.index == index;
@@ -84,7 +92,7 @@ class GuiState {
       final ns = namespaces[skillId];
       if (ns == null || ns.pages.isEmpty) continue;
       final index = ns.focusedIndex.clamp(0, ns.pages.length - 1);
-      return Target(skillId, ns.pages[index], index);
+      return Target(skillId, ns.pages[index], index, url: ns.urls[index]);
     }
     return null;
   }
@@ -166,15 +174,23 @@ class GuiState {
     // ovos-gui moves an active namespace to the front before loading its pages, but only tells clients when it
     // already had pages, so later positional ops would miss.
     if (ns.pages.isEmpty && index > 0 && skillId != _lastActiveInsert) _move(active, index, 0, 1);
-    ns.pages.insertAll(m['position'] as int, [for (final item in m['data'] as List) item['page'] as String]);
+    final items = m['data'] as List;
+    ns.pages.insertAll(m['position'] as int, [for (final item in items) item['page'] as String]);
+    ns.urls.insertAll(m['position'] as int, [for (final item in items) item['url'] as String?]);
   }
 
-  void _pagesMove(Json m) =>
-      _move(namespace(m['namespace']).pages, m['from'] as int, m['to'] as int, (m['items_number'] ?? 1) as int);
+  void _pagesMove(Json m) {
+    final ns = namespace(m['namespace']);
+    final count = (m['items_number'] ?? 1) as int;
+    _move(ns.pages, m['from'] as int, m['to'] as int, count);
+    _move(ns.urls, m['from'] as int, m['to'] as int, count);
+  }
 
   void _pagesRemove(Json m) {
     final ns = namespace(m['namespace']);
-    _remove(ns.pages, m['position'] as int, (m['items_number'] ?? 1) as int);
+    final count = (m['items_number'] ?? 1) as int;
+    _remove(ns.pages, m['position'] as int, count);
+    _remove(ns.urls, m['position'] as int, count);
     ns.focusedIndex = ns.focusedIndex.clamp(0, ns.pages.isEmpty ? 0 : ns.pages.length - 1);
   }
 

@@ -84,7 +84,7 @@ PageBuilder resolve(Target? target, {TemplateGaps? gaps}) {
   if (target == null) return (_, _) => const BlankPage();
   final route = routes['${target.namespace}/${target.page}'];
   if (route != null) return route;
-  final template = canonicalTemplate(target.page);
+  final template = canonicalTemplate(target.page, url: target.url);
   if (template == null) return FallbackPage.page;
   return templates[template] ?? (gaps ?? templateGaps).fallbackFor(template);
 }

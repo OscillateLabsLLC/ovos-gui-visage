@@ -71,8 +71,18 @@ const _legacyPluginQml = {
 /// Every legacy name, mapped to the spec template it shows.
 const templateAliases = {..._busClientNames, ..._legacyPluginQml};
 
+/// The legacy plugin's url for a template page (`SYSTEM:Text.qml`), the Qt client's mark for a system file.
+const systemUrlPrefix = 'SYSTEM:';
+
 /// The canonical name of a template page, or null when [page] names no template.
-String? canonicalTemplate(String page) {
+///
+/// A bare QML name is a template only when its [url] carries [systemUrlPrefix]; without it, `Text.qml` is a skill's
+/// own file.
+String? canonicalTemplate(String page, {String? url}) {
   if (specTemplates.contains(page) || legacyOnlyTemplates.contains(page)) return page;
+  if (_legacyPluginQml.containsKey(page) && !isSystemFileUrl(url)) return null;
   return templateAliases[page];
 }
+
+/// Whether ovos-gui sent [url] as a system file rather than one of the skill's own.
+bool isSystemFileUrl(String? url) => url?.startsWith(systemUrlPrefix) ?? false;
