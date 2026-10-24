@@ -72,6 +72,29 @@ test/
 | CSS polish vocabulary | shared widgets | glow, gradient fill, stagger enter, bloom as reusable widgets; a theme file holds the colour tokens. |
 | `tests/test_style_rules.py` | golden tests plus a token check | No cards, no accent borders: enforced by review of goldens and by keeping fills to circles in the shared widgets. |
 
+## Template names
+
+Template pages are keyed by their OVOS-GUI-1 name (gui-1.md §3); `lib/pages/template_names.dart` holds the
+vocabulary and the aliases, and nothing else names an alias. ovos-bus-client's frame names and the QML files that
+ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name:
+
+| Spec name | Aliases | Page |
+|---|---|---|
+| `SYSTEM_text` | `SYSTEM_TextFrame`, `Text.qml` | text frame |
+| `SYSTEM_image` | `SYSTEM_ImageFrame`, `Image.qml` | image frame |
+| `SYSTEM_animated_image` | `SYSTEM_AnimatedImageFrame`, `AnimatedImage.qml` | image frame |
+| `SYSTEM_status` | `SYSTEM_Status`, `Status.qml` | status (`success: bool`, or legacy `status: "Enabled"`) |
+| `SYSTEM_loading` | `SYSTEM_Loading`, `Loading.qml` | loading |
+| `SYSTEM_face` | `SYSTEM_Face`, `Face.qml` | face |
+| `SYSTEM_html` | `SYSTEM_HtmlFrame`, `Html.qml` | html frame |
+| `SYSTEM_url` | `SYSTEM_UrlFrame`, `Url.qml` | url frame |
+
+`SYSTEM_idle`, `SYSTEM_error`, `SYSTEM_list`, `SYSTEM_grid`, `SYSTEM_table`, `SYSTEM_audio_player`,
+`SYSTEM_video_player`, `SYSTEM_media_player`, `SYSTEM_clock`, `SYSTEM_timer`, `SYSTEM_weather` and `SYSTEM_map` (and
+their `.qml` names) have no page yet: they show the fallback and report a fault once per template. `SYSTEM_confirm`
+and `SYSTEM_select` are reserved by the spec and route as unknown pages. `SYSTEM_InputBox` is not in GUI-1 and keeps
+its legacy name only. An exact skill route still wins over a template name.
+
 ## Platform gating
 
 | Capability | macOS | Linux | web |
