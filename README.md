@@ -125,7 +125,8 @@ falls back to `ovos-gui`. Each new connection tries again. The menu shows which 
 | | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
 
 The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
-GUI-1 path is a prototype: pages show and the face follows, but buttons inside pages do nothing on it yet.
+GUI-1 path is a prototype. On it, buttons inside pages send their events on the core bus, so Visage needs the core bus
+(`OVOS_HOST`, `OVOS_PORT`) for them to work.
 
 ## How it works
 

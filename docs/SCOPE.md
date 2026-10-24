@@ -83,8 +83,9 @@ map of the last frame; Visage never merges. `deactivated` drops the namespace, a
 device-wide, so it empties the screen only when this session's stack is already empty; otherwise it is ignored and logged
 once (finding F16). Status topics are keyed by their §5.3 `ovos.*` names, with the legacy bus names as aliases
 (`lib/status_topics.dart`); a topic Visage does not follow is reported once. An unknown `SYSTEM_` name is reported once and shows the fallback.
-GUI-1 has no reply leg, so page controls and page focus are logged and not sent on it (finding F14); typed commands,
-volume and notification actions use the core bus and work on both protocols. Fixtures: `test/fixtures/gui1/`, written
+GUI-1 has no reply leg, so on GUI-1 Visage puts each page event (controls, focus, interaction) on the core bus itself,
+as the message legacy ovos-gui forwarded (finding F14, `test/fixtures/outgoing/gui1_page_events.jsonl`); typed
+commands, volume and notification actions use the core bus on both protocols. Fixtures: `test/fixtures/gui1/`, written
 from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 
 ## What ports how
