@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/face.dart';
@@ -84,6 +85,24 @@ void main() {
       volume.handle(volumeReportEvent, {'percent': 0.38, 'muted': true});
       final submenu = shown.last.firstWhere((i) => i.id == volumeItem);
       expect([submenu.title, submenu.children.last.checked], ['Volume (muted)', true]);
+    });
+
+    test('the protocol line follows the connection', () {
+      final protocol = ValueNotifier('Protocol: detecting…');
+      final lines = <String>[];
+      bindStatusMenu(
+        face: face,
+        faceController: face.controller,
+        window: window,
+        volume: volume,
+        volumeControls: VolumeControls(bus),
+        show: (items) => lines.add(items.firstWhere((i) => i.id == protocolItem).title),
+        typeCommand: () {},
+        quit: () {},
+        protocol: protocol,
+      );
+      protocol.value = 'Protocol: GUI-1';
+      expect(lines, ['Protocol: detecting…', 'Protocol: GUI-1']);
     });
 
     test('a change over the bus rebuilds the menu', () {

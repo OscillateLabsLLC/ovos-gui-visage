@@ -8,7 +8,8 @@ import 'status_menu.dart';
 import 'window_remote.dart';
 
 /// The status menu over the app's state: it reads the window, the face and the volume, rebuilds whenever one changes,
-/// and acts through the same remotes the bus uses, so the menu and `visage.*` messages always agree.
+/// and acts through the same remotes the bus uses, so the menu and `visage.*` messages always agree. [protocol] is the
+/// GUI protocol line (protocol/gui_link.dart).
 StatusMenuController bindStatusMenu({
   required FaceRemote face,
   required FaceController faceController,
@@ -18,8 +19,9 @@ StatusMenuController bindStatusMenu({
   required void Function(List<MenuEntry> items) show,
   required VoidCallback typeCommand,
   required VoidCallback quit,
+  ValueListenable<String>? protocol,
 }) => StatusMenuController(
-  changes: Listenable.merge([faceController, window, volume]),
+  changes: Listenable.merge([faceController, window, volume, protocol]),
   read: () => StatusMenuState(
     mode: window.config.mode,
     peek: window.config.peek,
@@ -27,6 +29,7 @@ StatusMenuController bindStatusMenu({
     face: face.spec,
     volume: volume.level,
     muted: volume.muted,
+    protocol: protocol?.value,
   ),
   show: show,
   actions: StatusMenuActions(
