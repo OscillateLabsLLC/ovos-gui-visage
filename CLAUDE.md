@@ -72,3 +72,6 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   `PagePager` (a clearly horizontal swipe on a multi-page skill, kiosk chevrons, `system.gui.user.interaction`),
   try-on's long-press and the peek badge's tap. A new gesture gets a row in SCOPE's table first. Every outgoing
   message has a fixture in `test/fixtures/outgoing/`, recorded from the live bus or labelled as written from source.
+- Volume: `lib/volume.dart` (pure model: level, mute, show and fade) and `lib/volume_controls.dart` speak only the generic
+  `mycroft.volume.*` messages the PHAL volume plugins handle; Visage never touches an audio device. Do not send
+  `mycroft.volume.set`: its `percent` is a fraction for the ALSA plugin and a whole percent for the Mac plugin.

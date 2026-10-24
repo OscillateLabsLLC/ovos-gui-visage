@@ -116,6 +116,18 @@ The popups follow ovos-shell's NotificationPop*.qml.
 - **The two-finger tap** is tested with synthetic touches only; no touch screen was available on the development
   Mac. Check it on a Pi touch display and a touch laptop.
 
+## Volume (2026-10-23)
+
+- **Volume display and controls.** Done (2026-10-23): a brief row of dots in the status row for every change, and
+  Volume up, Volume down and Mute in the menu and on the media keys, all over the generic `mycroft.volume.*` bus
+  messages (SCOPE, Input). Verified live on macOS with ovos-phal-plugin-mac 0.2.4; the ALSA path is from source only.
+- **No slider, no exact level.** A touch slider needs `mycroft.volume.set`, and its `percent` is a fraction for
+  ovos-PHAL-plugin-alsa, ovos-skill-volume and ovos-shell but a whole percent for ovos-phal-plugin-mac (measured: a
+  voice "set volume to 50 percent" set the Mac to 0). Revisit when the plugins agree.
+- **ovos-phal-plugin-mac, upstream.** It reads `percent` as 0–100, and answers `mycroft.volume.get` with nothing at
+  level 0, so the display cannot show a Mac at 0 (reported in the log). Both are plugin fixes, not client ones.
+- **Media keys** are tested with synthetic key events only; check which desktops pass them to the app.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar

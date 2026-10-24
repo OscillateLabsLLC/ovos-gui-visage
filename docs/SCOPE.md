@@ -181,6 +181,7 @@ apply:
 | Drag on empty surface | nothing | moves the widget; it snaps to the nearest corner | moves the widget | nothing |
 | Clearly horizontal drag (2:1) on a skill with 2+ pages | next or previous page | next or previous page | | next or previous page |
 | Left and right arrow keys | next or previous page | next or previous page | | next or previous page |
+| Volume up, down and mute keys, where the desktop passes them on | volume up, down, mute toggle | the same | the same | the same |
 | Chevrons in the bottom corners | | | | next or previous page |
 | Long press | try-on mode | try-on mode | | try-on mode |
 | Right-click, two-finger tap, Menu key | opens the menu | opens the menu | expands, then opens the menu | opens the menu |
@@ -194,6 +195,15 @@ A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt d
 Flutter's MenuAnchor (`lib/window/window_menu.dart`), without "Hide face" (hiding the window from inside it would
 strand a desktop with no menu bar item or tray) and, in a browser, without "Quit". A peeking widget stays
 expanded while the menu or the command box is up.
+
+Volume (2026-10-23, `lib/volume.dart`, `lib/volume_controls.dart`): Visage never touches an audio device. The menu's
+Volume submenu and the volume keys send `mycroft.volume.increase`, `.decrease` and `.mute.toggle` with no data, which
+both PHAL volume plugins handle with their own step; `mycroft.volume.set` is never sent, since ovos-PHAL-plugin-alsa,
+ovos-skill-volume and ovos-shell send `percent` as a fraction and ovos-phal-plugin-mac reads it as a whole percent
+(a voice "set volume to 50 percent" set the Mac to 0, measured). That is also why the display has no slider. The
+level comes from `mycroft.volume.get.response`: ALSA broadcasts one after every change, the Mac plugin only answers,
+so a Mac `set.confirm` or `mute.confirm` makes Visage ask. A brief row of dots in the status row shows each change
+(`lib/widgets/volume_indicator.dart`) and holds a peeking widget open while it shows.
 
 ## Verifying a change
 

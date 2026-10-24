@@ -270,6 +270,33 @@ You can use the screen with a mouse or a touch screen, as you could with the Qt 
   entry to play it.
 - **Timers and alarms**: the ✕ on a timer cancels it. Each alarm has **Cancel**; while it rings, **Snooze**
   and **Dismiss**.
+- **Volume**: use **Volume** in the menu, or the volume keys where the system gives them to the app (see
+  [Volume](#volume)).
+
+## Volume
+
+When the volume changes, a small row of ten dots with the level shows at the top of the screen for two
+seconds. It shows for every change: by voice, by a hardware button, from another screen or from this
+app. While muted, the dots are grey and the row says **Muted**. On a peek widget, the window opens while the
+row shows.
+
+<p align="center">
+  <img src="docs/screenshots/volume/voice-up-with-outcome.png" alt="The volume row at 30% under the Done pill after a voice command" width="240">
+  &nbsp;
+  <img src="docs/screenshots/volume/muted.png" alt="The volume row while muted" width="240">
+  &nbsp;
+  <img src="docs/screenshots/volume/window-menu-volume-submenu.png" alt="Volume up, Volume down and Mute in the menu" width="240">
+</p>
+
+The app does not touch the audio device. It sends the standard OVOS volume messages
+(`mycroft.volume.increase`, `.decrease` and `.mute.toggle`), and a PHAL volume plugin changes the level:
+`ovos-PHAL-plugin-alsa` on Linux, `ovos-phal-plugin-mac` on macOS. Without a volume plugin, nothing changes
+and the app writes the fault to its log. Each plugin uses its own step, 10% by default. The app never
+sets an exact level, because the two plugins read that message on different scales, so there is no slider.
+
+The media keys (volume up, volume down, mute) send the same messages, but only when the app gets them.
+Desktops usually keep these keys for their own volume control, so expect them to work in a bare kiosk
+rather than on a full desktop. This is not checked on a real keyboard yet.
 
 <p align="center">
   <img src="docs/screenshots/input/window-menu-right-click-macos.png" alt="The menu inside the window after a right-click" width="300">
@@ -442,6 +469,8 @@ inside the window too (see [Touch and pointer](#touch-and-pointer)).
 - **Type a command…**: opens the command box, and shows the window first if it is hidden.
 - **Show face** / **Hide face**: removes the window from the screen and puts it back. A hidden widget
   stays running in the menu bar.
+- **Volume**: **Volume up**, **Volume down** and **Mute** (checked while muted). The title shows the level,
+  for example **Volume (38%)**. See [Volume](#volume).
 - **Peek mode**: turns peek on or off and writes it to the config file.
 - **Float above windows** / **Sit on the desktop**: changes the mode at once and writes it to the
   config file.
