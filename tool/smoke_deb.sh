@@ -31,7 +31,7 @@ check_files() {
     echo "error: $binary has unresolved libraries" >&2
     exit 1
   fi
-  ldd --version | head -n 1
+  ldd --version | sed -n '1p'
   desktop-file-validate /usr/share/applications/*.desktop "/usr/share/$PACKAGE"/*.desktop
 }
 
