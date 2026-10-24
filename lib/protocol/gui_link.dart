@@ -63,7 +63,10 @@ class GuiLink {
       return false;
     }
     final forwarded = busMessageFor(message);
-    return bus.emitWithContext(forwarded['type'] as String, forwarded['data'] as Json, forwardedContext);
+    final type = forwarded['type'] as String;
+    final sent = bus.emitWithContext(type, forwarded['data'] as Json, forwardedContext);
+    log?.call('GUI-1: ${sent ? 'forwarded' : 'could not forward'} $type on the core bus');
+    return sent;
   }
 
   Future<void> _keepConnected() async {

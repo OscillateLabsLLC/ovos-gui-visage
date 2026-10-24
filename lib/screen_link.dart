@@ -58,3 +58,25 @@ void applyGui1(GuiState state, Attention attention, Gui1Frame frame, {Gui1Gaps? 
   if (frame case Gui1Status(:final eventName, :final data)) attention.handle(eventName, data);
   applyGui1Frame(state, frame, gaps: gaps);
 }
+
+/// Tells the GUI service which page the screen shows, once per change (`page_gained_focus`, as the Qt GUI did). On
+/// legacy the memory survives an empty screen, as it always has, since ovos-gui announces a page it shows again itself.
+/// On GUI-1 nothing else announces it, so an empty screen clears the memory and a page shown again is announced again.
+class FocusAnnouncer {
+  FocusAnnouncer(this.link);
+
+  final GuiLink link;
+  Target? _last;
+
+  void update(Target? target) {
+    if (target == null) {
+      if (link.chosen == ChosenProtocol.gui1) _last = null;
+      return;
+    }
+    if (target == _last) return;
+    _last = target;
+    link.send(focusMessage(target.namespace, target.index));
+  }
+
+  void reset() => _last = null;
+}

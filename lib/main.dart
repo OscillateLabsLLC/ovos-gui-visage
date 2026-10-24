@@ -16,7 +16,6 @@ import 'faults.dart';
 import 'outcome.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
-import 'protocol/gui_client.dart';
 import 'protocol/gui_link.dart';
 import 'screen_frame.dart';
 import 'screen_input.dart';
@@ -149,7 +148,7 @@ class _ScreenState extends State<Screen> {
     log: _log,
   );
   bool guiConnected = false;
-  Target? lastFocus;
+  late final FocusAnnouncer focus = FocusAnnouncer(gui);
 
   void _log(String line) => debugPrint(line);
 
@@ -210,7 +209,7 @@ class _ScreenState extends State<Screen> {
 
   void _onGuiStatus(bool connected) {
     state.reset();
-    lastFocus = null;
+    focus.reset();
     guiConnected = connected;
     if (connected) volume.model.requestLevel();
     _refresh();
@@ -237,10 +236,7 @@ class _ScreenState extends State<Screen> {
     final target = state.current();
     attention.setCompact(isContentPage(target, state.idleNamespace));
     input.syncNotificationList();
-    if (target != null && target != lastFocus) {
-      lastFocus = target;
-      gui.send(focusMessage(target.namespace, target.index));
-    }
+    focus.update(target);
     setState(() {});
   }
 
