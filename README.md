@@ -208,8 +208,10 @@ dot shows the style: blue for `info`, amber for `warning`, green for `success`, 
 - A **controlled** notification (`ovos.notification.api.set.controlled`) changes in place each time
   the skill sends it again, and goes when the skill sends `ovos.notification.api.remove.controlled`.
 
-At most three show at a time; a "+2 more" line counts the rest. Notifications are display-only: you
-cannot tap one to close it or to run its action yet.
+At most three show at a time; a "+2 more" line counts the rest. The ✕ on a popup closes it and
+deletes it (`ovos.notification.api.pop.clear.delete`). A tap on the text runs the notification's
+action, if it has one, and closes it, as in ovos-shell. The ✕ on a controlled notification only hides
+it here.
 
 ## Touch and pointer
 
@@ -230,6 +232,11 @@ You can use the screen with a mouse or a touch screen, as you could with the Qt 
   on a widget, any other drag still moves the window.
 - **Input box**: when a skill asks for text (`show_input_box`), type the answer and press Enter or the confirm
   button; the exit button closes it. The skill receives the answer as `<skill_id>.input.box.response`.
+- **Media**: on the now-playing page, the buttons skip back, pause or play, stop and skip forward. Drag the
+  bar under the cover to seek; live streams have no bar. On the playlist and search results page, tap an
+  entry to play it.
+- **Timers and alarms**: the ✕ on a timer cancels it. Each alarm has **Cancel**; while it rings, **Snooze**
+  and **Dismiss**.
 
 <p align="center">
   <img src="docs/screenshots/input/window-menu-right-click-macos.png" alt="The menu inside the window after a right-click" width="300">
@@ -237,6 +244,14 @@ You can use the screen with a mouse or a touch screen, as you could with the Qt 
   <img src="docs/screenshots/input/command-box-homescreen-macos.png" alt="The command box on the homescreen with a typed command" width="300">
   &nbsp;
   <img src="docs/screenshots/input/peek-badge-menu-macos.png" alt="The menu on a peek widget opened from its collapsed badge" width="160">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/input/ocp-transport-macos.png" alt="The now-playing page with a seek bar and the transport buttons" width="200">
+  &nbsp;
+  <img src="docs/screenshots/input/alarm-ringing-snooze-macos.png" alt="A ringing alarm with Snooze and Dismiss buttons" width="200">
+  &nbsp;
+  <img src="docs/screenshots/input/notifications-close-and-tap-macos.png" alt="Two notification popups, each with a close button" width="200">
 </p>
 
 ## As a desktop widget

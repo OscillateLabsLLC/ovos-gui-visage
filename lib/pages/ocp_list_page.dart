@@ -22,16 +22,16 @@ const _thumbFill = RadialGradient(
 );
 
 class OcpListPage extends StatelessWidget {
-  const OcpListPage({super.key, required this.data, required this.page});
+  const OcpListPage({super.key, required this.data, required this.ctx});
 
-  static Widget build_(Json data, PageContext ctx) => OcpListPage(data: data, page: ctx.page);
+  static Widget build_(Json data, PageContext ctx) => OcpListPage(data: data, ctx: ctx);
 
   final Json data;
-  final String page;
+  final PageContext ctx;
 
   @override
   Widget build(BuildContext context) {
-    final model = page == 'Home' ? homeModel(data) : suggestionsModel(data);
+    final model = ctx.page == 'Home' ? homeModel(data) : suggestionsModel(data);
     final chips = model.layout == BrowseLayout.chips;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +49,10 @@ class OcpListPage extends StatelessWidget {
         else
           for (final (i, row) in model.rows.indexed) ...[
             if (i > 0) const SizedBox(height: 12),
-            RiseIn(index: i, child: _Row(row)),
+            RiseIn(
+              index: i,
+              child: _Row(row, onTap: _player(row.play)),
+            ),
           ],
         if (model.hidden > 0) ...[
           const SizedBox(height: 12),
@@ -59,6 +62,8 @@ class OcpListPage extends StatelessWidget {
       ],
     );
   }
+
+  VoidCallback? _player(RowPlay? play) => play == null ? null : () => ctx.trigger(play.event, play.parameters);
 }
 
 /// A round thumbnail: the cover when it loads, else the vinyl glyph on a dark gradient.
@@ -95,9 +100,12 @@ class _Thumb extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
-  const _Row(this.row);
+  const _Row(this.row, {this.onTap});
 
   final BrowseRow row;
+
+  /// Plays the entry, as a tap on a Qt row did.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -125,8 +133,9 @@ class _Row extends StatelessWidget {
         ),
       ],
     );
+    final tappable = InkWell(onTap: onTap, borderRadius: BorderRadius.circular(_thumbPx / 2), child: line);
     final section = row.section;
-    if (section == null) return line;
+    if (section == null) return tappable;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -134,7 +143,7 @@ class _Row extends StatelessWidget {
           padding: const EdgeInsets.only(top: 14, bottom: 10),
           child: Text(section.toUpperCase(), style: VisageText.muted(13).copyWith(letterSpacing: 1)),
         ),
-        line,
+        tappable,
       ],
     );
   }

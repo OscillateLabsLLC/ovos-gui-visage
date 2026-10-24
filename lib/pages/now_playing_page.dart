@@ -1,6 +1,7 @@
 /// ovos.common_play now-playing (SPEC 8.6): the cover turns like a record inside the progress ring, over a blurred
-/// wash of itself; title, artist, and a status line with equaliser bars, time and a live dot. OCP shows PlayerLoader
-/// with playerBackend OVOSSyncPlayer; video and web backends get the fallback.
+/// wash of itself; title, artist, a status line with equaliser bars, time and a live dot, a seek bar and the transport
+/// (ocp_transport.dart). OCP shows PlayerLoader with playerBackend OVOSSyncPlayer; video and web backends get the
+/// fallback.
 library;
 
 import 'dart:async';
@@ -15,7 +16,9 @@ import '../theme.dart';
 import '../widgets/static_icon.dart';
 import '../widgets/circle.dart';
 import 'fallback_page.dart';
+import 'now_playing_status.dart';
 import 'ocp_model.dart';
+import 'ocp_transport.dart';
 import 'page.dart';
 
 const _stagePx = 320.0;
@@ -23,7 +26,6 @@ const _coverInset = 24.0;
 const _washInset = 56.0;
 const _turnPeriod = Duration(seconds: 20);
 const _settle = Duration(milliseconds: 600);
-const _liveRed = Color(0xFFFF4D4D);
 
 class NowPlayingPage extends StatelessWidget {
   const NowPlayingPage({super.key, required this.data, required this.ctx});
@@ -36,14 +38,15 @@ class NowPlayingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isSyncPlayer(data)) return FallbackPage(data: data, ctx: ctx);
-    return _Player(data: data);
+    return _Player(data: data, send: ctx.trigger);
   }
 }
 
 class _Player extends StatefulWidget {
-  const _Player({required this.data});
+  const _Player({required this.data, required this.send});
 
   final Json data;
+  final OcpSend send;
 
   @override
   State<_Player> createState() => _PlayerState();
@@ -102,7 +105,7 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _Stage(track: _track, progress: progress, turn: _turn),
-        const SizedBox(height: 28),
+        const SizedBox(height: 20),
         Text(_track.title, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: VisageText.fg(30)),
         if (_track.artist.isNotEmpty) ...[
           const SizedBox(height: 6),
@@ -119,9 +122,9 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           spacing: 8,
           children: [
-            if (state != PlaybackState.stopped) _Equaliser(running: state == PlaybackState.playing),
+            if (state != PlaybackState.stopped) Equaliser(running: state == PlaybackState.playing),
             Text(parts.state.name, style: VisageText.muted(15).copyWith(letterSpacing: 0.5)),
-            if (parts.live) _LiveDot(running: state == PlaybackState.playing),
+            if (parts.live) LiveDot(running: state == PlaybackState.playing),
             Text(
               parts.live ? '${parts.time} · live' : parts.time,
               style: VisageText.muted(15).copyWith(fontFeatures: VisageText.tabular),
@@ -129,6 +132,9 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
             if (parts.flags.isNotEmpty) Text(parts.flags.join('  '), style: VisageText.muted(15)),
           ],
         ),
+        if (canSeek(_track)) SeekBar(fraction: progress.fraction, durationMs: _track.durationMs, send: widget.send),
+        const SizedBox(height: 4),
+        OcpTransport(track: _track, send: widget.send),
       ],
     );
   }
@@ -207,98 +213,6 @@ class _Stage extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Four bars breathing between a quarter and full height on a 0.9 s cycle; frozen and muted on pause.
-class _Equaliser extends StatefulWidget {
-  const _Equaliser({required this.running});
-
-  final bool running;
-
-  @override
-  State<_Equaliser> createState() => _EqualiserState();
-}
-
-class _EqualiserState extends State<_Equaliser> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.running) _controller.repeat();
-  }
-
-  @override
-  void didUpdateWidget(_Equaliser old) {
-    super.didUpdateWidget(old);
-    widget.running ? _controller.repeat() : _controller.stop();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const delays = [0.0, 0.3, 0.6, 0.45];
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) => Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        spacing: 2,
-        children: [
-          for (final delay in delays)
-            Container(
-              width: 3,
-              height: 14 * (0.25 + 0.75 * (0.5 - 0.5 * math.cos(2 * math.pi * ((_controller.value + delay) % 1)))),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(2),
-                color: widget.running ? VisageColors.accent : VisageColors.muted,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The pulsing red dot of a live stream, half-dimmed and still on pause.
-class _LiveDot extends StatefulWidget {
-  const _LiveDot({required this.running});
-
-  final bool running;
-
-  @override
-  State<_LiveDot> createState() => _LiveDotState();
-}
-
-class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-    ..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: widget.running ? Tween(begin: 1.0, end: 0.3).animate(_controller) : const AlwaysStoppedAnimation(0.5),
-      child: Container(
-        width: 8,
-        height: 8,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: _liveRed,
-          boxShadow: [BoxShadow(color: Color(0xB3FF4D4D), blurRadius: 8, spreadRadius: 1)],
-        ),
       ),
     );
   }

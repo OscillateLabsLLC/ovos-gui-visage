@@ -38,11 +38,13 @@ class OfflinePill extends StatelessWidget {
       const StatusPill(label: 'GUI offline', colour: Color(0xFFFFB4B4), background: Color(0xFF3A1D1D));
 }
 
-/// The pills at the top centre of the frame, one under the other.
+/// The pills at the top centre of the frame, one under the other, and under them [interactive] (the notification
+/// popups), which takes taps; the pills let them through to the page.
 class TopStatus extends StatelessWidget {
-  const TopStatus({super.key, required this.children});
+  const TopStatus({super.key, required this.children, this.interactive});
 
   final List<Widget> children;
+  final Widget? interactive;
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +52,15 @@ class TopStatus extends StatelessWidget {
       top: 12,
       left: 0,
       right: 0,
-      child: IgnorePointer(
-        child: Column(mainAxisSize: MainAxisSize.min, spacing: 6, children: children),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          IgnorePointer(
+            child: Column(mainAxisSize: MainAxisSize.min, spacing: 6, children: children),
+          ),
+          ?interactive,
+        ],
       ),
     );
   }

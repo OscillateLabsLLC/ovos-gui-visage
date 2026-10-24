@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import 'alert_controls.dart';
 import 'alerts_model.dart';
 import 'page.dart';
 
@@ -27,11 +28,14 @@ Color toneGlow(TimerTone tone) => switch (tone) {
 };
 
 class TimerPage extends StatefulWidget {
-  const TimerPage({super.key, required this.data});
+  const TimerPage({super.key, required this.data, this.ctx});
 
-  static Widget page(Json data, PageContext ctx) => TimerPage(data: data);
+  static Widget page(Json data, PageContext ctx) => TimerPage(data: data, ctx: ctx);
 
   final Json data;
+
+  /// Where the cancel buttons send; none without one (a preview).
+  final PageContext? ctx;
 
   @override
   State<TimerPage> createState() => _TimerPageState();
@@ -43,9 +47,24 @@ class _TimerPageState extends State<TimerPage> {
   @override
   Widget build(BuildContext context) {
     final model = timerModel(widget.data, longest);
-    return StaggerEnter(
-      gap: 22,
-      children: [for (final timer in model.timers) TimerRing(key: ValueKey(timer.id), timer: timer, size: model.size)],
+    return StaggerEnter(gap: 22, children: [for (final timer in model.timers) _withCancel(timer, model.size)]);
+  }
+
+  Widget _withCancel(TimerView timer, double size) {
+    final ring = TimerRing(key: ValueKey(timer.id), timer: timer, size: size);
+    final ctx = widget.ctx;
+    if (ctx == null) return ring;
+    void cancel() => sendAlertEvent(ctx, cancelTimer, cancelTimerParameters(widget.data, timer.id));
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ring,
+        Positioned(
+          right: 0,
+          top: 0,
+          child: TimerCancelButton(expired: timer.expired, onPressed: cancel, size: size < 200 ? 36 : 44),
+        ),
+      ],
     );
   }
 }

@@ -25,9 +25,13 @@ const popupStyleColours = {
 Color popupColour(String style) => popupStyleColours[style] ?? popupStyleColours['info']!;
 
 class NotificationStack extends StatelessWidget {
-  const NotificationStack({super.key, required this.popups});
+  const NotificationStack({super.key, required this.popups, this.onTap, this.onClose});
 
   final List<Popup> popups;
+
+  /// A tap on a popup's text and its close button; none in a preview.
+  final void Function(Popup popup)? onTap;
+  final void Function(Popup popup)? onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,11 @@ class NotificationStack extends StatelessWidget {
           for (final popup in shown)
             _SlideIn(
               key: ValueKey(popup.id),
-              child: PopupCard(popup: popup),
+              child: PopupCard(
+                popup: popup,
+                onTap: onTap == null ? null : () => onTap!(popup),
+                onClose: onClose == null ? null : () => onClose!(popup),
+              ),
             ),
           if (hidden > 0) Text('+$hidden more', style: VisageText.muted(13)),
         ],
@@ -52,9 +60,11 @@ class NotificationStack extends StatelessWidget {
 }
 
 class PopupCard extends StatelessWidget {
-  const PopupCard({super.key, required this.popup});
+  const PopupCard({super.key, required this.popup, this.onTap, this.onClose});
 
   final Popup popup;
+  final VoidCallback? onTap;
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +80,22 @@ class PopupCard extends StatelessWidget {
             height: 12,
             decoration: BoxDecoration(color: popupColour(popup.style), shape: BoxShape.circle),
           ),
-          Expanded(child: Text(popup.text, style: VisageText.fg(17, height: 1.25))),
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              child: Text(popup.text, style: VisageText.fg(17, height: 1.25)),
+            ),
+          ),
+          if (onClose != null)
+            IconButton(
+              tooltip: 'Close notification',
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
+              color: VisageColors.muted,
+              onPressed: onClose,
+              icon: const Icon(Icons.close_rounded),
+            ),
         ],
       ),
     );

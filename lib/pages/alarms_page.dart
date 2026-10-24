@@ -1,6 +1,7 @@
 /// ovos-skill-alerts.openvoiceos / AlarmsOverviewCard (SPEC 8.5): gradient ring chips with a bell for one or two
 /// alarms; beyond that a two-by-two grid of gradient circles, "+n more" past four. A ringing (expired) alarm is the
-/// loudest thing on screen: shaking bell, red bloom on a loop. Otherwise only the next to fire glows.
+/// loudest thing on screen: shaking bell, red bloom on a loop. Otherwise only the next to fire glows. Each alarm has
+/// Cancel under it, and Snooze while it rings (alert_controls.dart).
 library;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../json.dart';
 import '../widgets/motion_icon.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import 'alert_controls.dart';
 import 'alerts_model.dart';
 import 'page.dart';
 
@@ -17,11 +19,14 @@ const _ringingGlow = Color(0x61FF5C5C);
 const _maxChips = 2;
 
 class AlarmsPage extends StatelessWidget {
-  const AlarmsPage({super.key, required this.data});
+  const AlarmsPage({super.key, required this.data, this.ctx});
 
-  static Widget page(Json data, PageContext ctx) => AlarmsPage(data: data);
+  static Widget page(Json data, PageContext ctx) => AlarmsPage(data: data, ctx: ctx);
 
   final Json data;
+
+  /// Where the snooze and cancel buttons send; none without one (a preview).
+  final PageContext? ctx;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,21 @@ class AlarmsPage extends StatelessWidget {
         if (alarms.length > _maxChips)
           _grid(alarms)
         else
-          for (final alarm in alarms) _AlarmChip(alarm: alarm, isNext: alarm.id == next, small: two),
+          for (final alarm in alarms) _withActions(alarm, _AlarmChip(alarm: alarm, isNext: alarm.id == next, small: two)),
+      ],
+    );
+  }
+
+  Widget _withActions(AlarmView alarm, Widget circle) {
+    final ctx = this.ctx;
+    if (ctx == null) return circle;
+    void send(String event) => sendAlertEvent(ctx, event, alarmParameters(data, alarm.id));
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 10,
+      children: [
+        circle,
+        AlarmActions(ringing: alarm.expired, onSnooze: () => send(snoozeAlarm), onCancel: () => send(cancelAlarm)),
       ],
     );
   }
@@ -44,7 +63,7 @@ class AlarmsPage extends StatelessWidget {
   Widget _grid(List<AlarmView> alarms) {
     final (:shown, :more, :next) = alarmGrid(alarms);
     final cells = [
-      for (final alarm in shown) _AlarmCell(alarm: alarm, isNext: alarm.id == next),
+      for (final alarm in shown) _withActions(alarm, _AlarmCell(alarm: alarm, isNext: alarm.id == next)),
       if (more > 0)
         Circle(
           size: 170,

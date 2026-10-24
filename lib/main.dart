@@ -21,6 +21,7 @@ import 'screen_frame.dart';
 import 'screen_input.dart';
 import 'state/gui_state.dart';
 import 'turn_feed.dart';
+import 'widgets/notification_actions.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/widget_manager.dart';
 import 'shell_overlays.dart';
@@ -84,6 +85,7 @@ class _ScreenState extends State<Screen> {
   late final CoreBus bus = CoreBus(url: sockets.core.toString(), log: _log);
   late final NotificationPopups popups = NotificationPopups(onExpired: (record) => widgets.popClear(record));
   late final WidgetManager widgets = WidgetManager(bus, log: _log, popups: popups);
+  late final NotificationActions notifications = NotificationActions(bus: bus, popups: popups);
   final captions = Captions();
   final outcome = OutcomeModel();
   late final FaceRemote remote = FaceRemote(
@@ -276,6 +278,7 @@ class _ScreenState extends State<Screen> {
     captions: widget.config.captions ? captions : null,
     outcome: outcome,
     popups: popups,
+    notifications: notifications,
     expanded: peek.expanded,
     kiosk: mode == WindowMode.kiosk,
     typeOnHome: mode == WindowMode.window || mode == WindowMode.kiosk,
