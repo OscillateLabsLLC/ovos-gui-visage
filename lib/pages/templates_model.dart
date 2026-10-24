@@ -1,11 +1,12 @@
 /// View models for the SYSTEM_* templates (SPEC 8.2), port of templates_model.js. Keys are those
-/// GUIInterface.show_* sets in ovos_bus_client/apis/gui.py. Every model tolerates null or missing keys. Pure.
+/// GUIInterface.show_* sets in ovos_bus_client/apis/gui.py. Every model tolerates null or missing keys. Pure, except that malformed data is reported.
 library;
 
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart' show BoxFit;
 
+import '../faults.dart';
 import '../json.dart';
 import 'page.dart';
 
@@ -84,10 +85,20 @@ List<String>? splitShort(String value) {
 String loadingLabel(Json? data) => text(data?['label']);
 
 /// GUI-1 sends `success: bool` (gui-1.md §3); GUIInterface.show_status_animation sends `status: "Enabled" | "Disabled"`,
-/// and the QML does a string compare. A boolean `success` wins over the legacy key.
+/// and the QML does a string compare. A boolean `success` wins over the legacy key; any other non-null `success` is a
+/// protocol fault, reported once per value, and the legacy key decides.
 ({bool ok, String label}) statusModel(Json? data) {
   final success = data?['success'];
+  if (success != null && success is! bool) _reportBadSuccess(success);
   return (ok: success is bool ? success : data?['status'] == 'Enabled', label: text(data?['label']));
+}
+
+final _reportedBadSuccess = <String>{};
+
+void _reportBadSuccess(Object value) {
+  final key = '${value.runtimeType}:$value';
+  if (!_reportedBadSuccess.add(key)) return;
+  reportFault('SYSTEM_status data', FormatException('success must be a bool, got ${value.runtimeType} $value'));
 }
 
 /// data:, http(s) and cache paths rewritten to /res/ are loadable; anything else (a bare producer path) is not.

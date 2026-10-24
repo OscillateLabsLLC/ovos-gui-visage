@@ -3,6 +3,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/templates_model.dart';
 
+import 'faults.dart';
+
 void main() {
   test('every model tolerates null and missing keys', () {
     for (final data in [
@@ -46,10 +48,21 @@ void main() {
     expect(statusModel({'success': false}).ok, isFalse);
     expect(statusModel({'success': false, 'status': 'Enabled'}).ok, isFalse);
     expect(statusModel({'success': true, 'status': 'Disabled'}).ok, isTrue);
-    for (final notBool in ['true', 1, null]) {
-      expect(statusModel({'success': notBool, 'status': 'Enabled'}).ok, isTrue, reason: '$notBool');
-      expect(statusModel({'success': notBool}).ok, isFalse, reason: '$notBool');
-    }
+    expect(statusModel({'success': null, 'status': 'Enabled'}).ok, isTrue);
+    expect(statusModel({'success': null}).ok, isFalse);
+  });
+
+  test('a non-bool success is reported once per value and the legacy key decides', () async {
+    final faults = await collectFaults(() async {
+      for (final notBool in ['true', 1, 'true', 1]) {
+        expect(statusModel({'success': notBool, 'status': 'Enabled'}).ok, isTrue, reason: '$notBool');
+        expect(statusModel({'success': notBool}).ok, isFalse, reason: '$notBool');
+      }
+    });
+    expect(faults.map((f) => '${f.exception}'), [
+      'FormatException: success must be a bool, got String true',
+      'FormatException: success must be a bool, got int 1',
+    ]);
   });
 
   test('image sources: data:image, http(s), /res/ and absolute paths are candidates; other schemes are not', () {
