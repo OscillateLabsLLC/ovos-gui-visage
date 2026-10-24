@@ -39,7 +39,29 @@ The cask installs `OVOS Visage.app` in `/Applications`. Without Homebrew, downlo
 app to `/Applications`. The app is signed with a Developer ID and notarised, so it opens without
 any security prompt. `docs/PACKAGING.md` describes how a release is built.
 
-**Linux, including a Raspberry Pi** (amd64 or arm64): Visage runs in a browser, served by a small
+**Debian 12, Raspberry Pi OS Bookworm or Ubuntu 24.04** (amd64 or arm64): download
+`ovos-gui-visage_<version>_<arch>.deb` for your machine from the
+[releases](https://github.com/OscillateLabsLLC/ovos-gui-visage/releases), then install it with apt:
+
+```bash
+sha256sum -c ovos-gui-visage_<version>_arm64.deb.sha256    # optional: check the download
+sudo apt install ./ovos-gui-visage_<version>_arm64.deb     # amd64 on a PC
+```
+
+The package puts the app in `/opt/ovos-gui-visage`, the `ovos-gui-visage` command in `/usr/bin` and
+**OVOS Visage** in the application menu. To start it full screen when you log in, for example on a Pi
+with a touchscreen:
+
+```bash
+mkdir -p ~/.config/autostart
+cp /usr/share/ovos-gui-visage/net.oscillatelabs.ovosGuiVisage-kiosk.desktop ~/.config/autostart/
+```
+
+Delete that file to turn it off. `sudo apt remove ovos-gui-visage` removes the app.
+[On Linux](#on-linux) has what works on which desktop, and the tray needs a panel that shows app
+indicators (GNOME needs an extension).
+
+**Any Linux machine, in a browser** (amd64 or arm64): Visage can also run in a browser, served by a small
 container on the OVOS machine:
 
 ```bash
@@ -53,9 +75,8 @@ Then open `http://<ovos-machine>:8080/` in any browser on your network. For a fu
 display attached to the machine, use `chromium --kiosk http://127.0.0.1:8080/`. If port 8080 is taken,
 add `-e VISAGE_PORT=8090`. OVOS listens only on `127.0.0.1` by default, which is why the container
 shares the host's network. `sidecar/compose.yaml` does the same with `docker compose`, and
-[Web build and sidecar](#web-build-and-sidecar) has the details. A native Linux app (the corner widget,
-the tray) builds from source today (see [On Linux](#on-linux)); packages are tracked under the
-[`linux` label](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues?q=label%3Alinux).
+[Web build and sidecar](#web-build-and-sidecar) has the details. The browser page has no corner widget
+and no tray; for those, use the package above.
 
 ## Set up the OVOS side (once)
 
@@ -83,9 +104,9 @@ With OVOS running, start the GUI service and the homescreen (two terminals, or a
 ~/.venvs/ovos-gui/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
 ```
 
-Then open **OVOS Visage** from Applications on macOS, or the browser page on Linux. On macOS it
-starts as a small face in a corner of the desktop, with a face icon in the menu bar for everything else
-([As a desktop widget](#as-a-desktop-widget)).
+Then open **OVOS Visage** from Applications on macOS, from the application menu on Linux, or the
+browser page. On macOS it starts as a small face in a corner of the desktop, with a face icon in the
+menu bar for everything else ([As a desktop widget](#as-a-desktop-widget)); on Linux the menu is in the tray.
 
 **Is it working?** Say "what time is it" (or ask anything). The face listens, thinks and answers,
 and the clock shows. If the face never reacts, check that the GUI service is listening on port
@@ -300,8 +321,8 @@ item appears without a restart when a tray starts later. Until then, use the bus
 
 #### Launcher and icon
 
-Until there is a package, add the launcher by hand after a release build. The launcher and the
-icons go in your home folder only:
+The `.deb` package ([Install](#install)) installs the launcher and the icons for every user. When you
+build from source instead, add them by hand after a release build. They go in your home folder only:
 
 ```bash
 flutter build linux --release
@@ -315,18 +336,20 @@ and `gtk-update-icon-cache`. **OVOS Visage** then shows in the application menu,
 shows the face icon for its window. The file name, the icon name and the GTK application id are
 all `net.oscillatelabs.ovosGuiVisage`, which is how the desktop matches the window to the
 launcher. `just linux-uninstall` removes the launcher and the icons. If you move the checkout,
-run `just linux-install` again.
+run `just linux-install` again. With the package installed, `just linux-install` refuses: a copy
+in your home folder would hide the package's launcher.
 
 #### Start in kiosk mode when you log in
 
-This is off by default. To turn it on:
+This is off by default. With the package, copy its entry as [Install](#install) shows. In a checkout:
 
 ```bash
 just linux-autostart on     # or: tool/linux_desktop.sh autostart-on
 ```
 
 This writes `~/.config/autostart/net.oscillatelabs.ovosGuiVisage-kiosk.desktop`, which starts
-the app with `VISAGE_MODE=kiosk`. To turn it off, run `just linux-autostart off`, or delete that
+the app with `VISAGE_MODE=kiosk`: the packaged `/usr/bin/ovos-gui-visage` when the package is
+installed, otherwise the release bundle. To turn it off, run `just linux-autostart off`, or delete that
 file. Plasma also lists the entry in System Settings, Autostart, where you can turn it off.
 
 If the app starts before OVOS is ready, it shows the clock with a **GUI offline** label. It tries

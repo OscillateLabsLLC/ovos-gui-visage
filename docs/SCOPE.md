@@ -18,7 +18,7 @@ visual reference; this file records what changes in the port and why.
 | Face | Composed from an eye style, a mouth style and a backdrop that places them; nine eye styles, eight mouth styles, a regular or large mouth (`docs/FACE_PALETTES.md`). `visage` and `mark1` are presets. Chosen by `face` in config or `VISAGE_FACE`, and changed while running from the picker page over the bus (`visage.face.*`) or by hand in try-on mode. |
 | Input | Touch and pointer, decided 2026-10-23: Visage lets a user do what the Qt GUI (mycroft-gui-qt5, ovos-shell and the stock skills' QML) let them do by touch or mouse. Pages hold plain controls that answer through the GUI socket; the shell owns every gesture (see Input below). Until then it was display-only, so that the port could reach parity with ovos-visage without a gesture layer in every page; try-on mode and the peek badge's tap were the only input. |
 | macOS sandbox | Off. The app opens local sockets and reads the GUI cache; it is a kiosk display, not an App Store app. Signed with the Oscillate Labs LLC team. |
-| Linux | Built and tested in CI only until a desktop is available; the workflow pattern comes from neon-node-flutter-app. |
+| Linux | Built in CI; each release attaches `.deb` packages for amd64 and arm64, built on Debian Bookworm for glibc 2.36 and install-tested on Debian 12 and Ubuntu 24.04 (`docs/PACKAGING.md`). Checked by hand on Kubuntu 24.04; the workflow pattern comes from neon-node-flutter-app. |
 
 ## Architecture
 
@@ -113,8 +113,9 @@ test/
    notarises and zips, and `.github/workflows/release.yml` runs it on each release, uploads the zip
    and checksum and bumps the cask. Verified locally with an ad hoc signature only. The first
    signed release waits on the Developer ID certificate, the App Store Connect API key, the two
-   GitHub repositories and their secrets. Not packaged yet: Linux, and publishing the
-   sidecar image.
+   GitHub repositories and their secrets. Linux ships as `.deb` packages for amd64 and arm64 on
+   each release (`tool/package_deb.sh`, `.github/workflows/linux_deb.yml`, issue #17). Not
+   published yet: the sidecar image.
 6. **Widget modes** (done on macOS; `desktop` is the default): `lib/window/` reads `~/.config/ovos-gui-visage/config.json`
    (environment on top) and places a frameless window in a corner of the primary display's
    work area, beneath everything (`desktop`) or above (`float`), on every Space, through
