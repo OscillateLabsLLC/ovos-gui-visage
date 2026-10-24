@@ -189,6 +189,16 @@ void main() {
       attention.dispose();
     });
 
+    test('a status event Visage does not know changes nothing and reports nothing', () async {
+      final face = FaceController();
+      final attention = Attention(face);
+      final faults = await collectFaults(() async {
+        applyGui1(GuiState(), attention, const Gui1Status(eventName: 'ovos.hologram.started', data: {'x': 1}));
+      });
+      expect([faults, attention.shown, face.mode], [isEmpty, false, FaceMode.rest]);
+      attention.dispose();
+    });
+
     testWidgets('status_events: SYSTEM_status with success true renders the success state', (tester) async {
       final state = replayGui1(loadGui1Fixture('status_events'));
       await tester.pumpWidget(host(pageOf(state)));
