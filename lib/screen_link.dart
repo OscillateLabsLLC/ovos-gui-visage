@@ -43,6 +43,7 @@ GuiLink screenLink({
     onStatus: onStatus,
     log: log,
   ),
+  bus: bus,
   log: log,
 );
 

@@ -14,14 +14,20 @@ import 'wire_protocol.dart';
 
 export 'wire_protocol.dart';
 
+/// The context legacy ovos-gui added to every message it forwarded from this app's GUI socket.
+const forwardedContext = {'gui_framework': framework};
+
 class GuiLink {
-  GuiLink({required this.mode, required this.legacy, required this.gui1, this.log}) {
+  GuiLink({required this.mode, required this.legacy, required this.gui1, required this.bus, this.log}) {
     title.value = protocolTitle(mode, null);
   }
 
   final WireProtocol mode;
   final GuiClient legacy;
   final Gui1Client gui1;
+
+  /// Where page events go on GUI-1, which has no reply leg of its own.
+  final CoreBus bus;
   final void Function(String)? log;
 
   /// What the current connection speaks; null until the first one is chosen.
@@ -47,12 +53,17 @@ class GuiLink {
     await legacy.stop();
   }
 
-  /// GUI-1 has no reply leg (spec §7.2), so a page's events and focus changes have nowhere to go on it: logged, not
-  /// sent.
+  /// Legacy: the GUI socket, unchanged. GUI-1 has no reply leg (spec §7.2), so Visage puts a page event on the core
+  /// bus itself, as the message legacy ovos-gui would have forwarded (bus.py `on_message`, `busMessageFor`), with its
+  /// `gui_framework` context. Anything but a page event is logged, not sent (finding F14).
   bool send(Json message) {
     if (_chosen != ChosenProtocol.gui1) return legacy.send(message);
-    log?.call('GUI-1 has no reply leg; not sent: $message');
-    return false;
+    if (message['type'] != eventsTriggered) {
+      log?.call('GUI-1 has no reply leg; not sent: $message');
+      return false;
+    }
+    final forwarded = busMessageFor(message);
+    return bus.emitWithContext(forwarded['type'] as String, forwarded['data'] as Json, forwardedContext);
   }
 
   Future<void> _keepConnected() async {

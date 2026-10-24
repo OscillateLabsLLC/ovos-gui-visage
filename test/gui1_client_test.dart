@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/protocol/gui1_client.dart';
 import 'package:ovos_gui_visage/protocol/gui_client.dart';
 import 'package:ovos_gui_visage/protocol/gui_link.dart';
@@ -177,12 +178,21 @@ void main() {
   });
 
   group('protocol selection', () {
-    GuiLink link(WireProtocol mode, FakeSocket socket, FakeLegacy legacy, List<String> logs) => GuiLink(
+    GuiLink link(WireProtocol mode, FakeSocket socket, FakeLegacy legacy, List<String> logs, [RecordingBus? bus]) => GuiLink(
       mode: mode,
       legacy: legacy,
       gui1: Gui1Client(url: _url, connector: (_) => socket, onFrame: (_) {}, onStatus: (_) {}, log: logs.add),
+      bus: bus ?? RecordingBus(),
       log: logs.add,
     );
+
+    Future<GuiLink> welcomed(FakeSocket socket, FakeLegacy legacy, List<String> logs, [RecordingBus? bus]) async {
+      final l = link(WireProtocol.auto, socket, legacy, logs, bus)..start();
+      await pumpEventQueue();
+      socket.serve(_welcome);
+      await pumpEventQueue();
+      return l;
+    }
 
     test('legacy starts the legacy client as before and never probes', () {
       final legacy = FakeLegacy();
@@ -210,20 +220,54 @@ void main() {
       await l.stop();
     });
 
-    test('auto takes GUI-1 when welcomed, and sends nothing back over it', () async {
+    test('auto takes GUI-1 when welcomed, and sends nothing over the GUI-1 socket', () async {
       final legacy = FakeLegacy();
       final socket = FakeSocket();
       final logs = <String>[];
-      final l = link(WireProtocol.auto, socket, legacy, logs)..start();
-      await pumpEventQueue();
-      socket.serve(_welcome);
-      await pumpEventQueue();
+      final l = await welcomed(socket, legacy, logs);
       expect([l.chosen, l.title.value], [ChosenProtocol.gui1, 'Protocol: GUI-1']);
       expect(logs.last, 'GUI protocol (WireProtocol.auto): GUI-1 at $_url');
-      expect(l.send({'type': 'mycroft.events.triggered'}), isFalse);
+      expect(l.send({'type': 'mycroft.session.set', 'namespace': 'x', 'data': <String, dynamic>{}}), isFalse);
       expect(logs.last, contains('no reply leg'));
-      expect([legacy.attempts, legacy.sends], [0, isEmpty]);
+      expect([legacy.attempts, legacy.sends, socket.sent], [0, isEmpty, hasLength(1)]);
       await l.stop();
+    });
+
+    test('on GUI-1 a page event goes on the core bus as legacy ovos-gui forwarded it', () async {
+      final bus = RecordingBus();
+      final legacy = FakeLegacy();
+      final socket = FakeSocket();
+      final l = await welcomed(socket, legacy, [], bus);
+      final rows = [
+        for (final line in File('test/fixtures/outgoing/gui1_page_events.jsonl').readAsLinesSync()) jsonDecode(line) as Json,
+      ];
+      expect(rows.first['note'], startsWith('written from ovos-gui source'));
+      final ctx = PageContext(namespace: 'ovos.common_play', page: 'p', events: const {}, send: l.send);
+      ctx.trigger('resume');
+      for (final row in rows.skip(1)) {
+        expect(l.send(row['sent'] as Json), isTrue);
+      }
+      final emitted = [
+        for (final (i, e) in bus.emitted.indexed) {'type': e[0], 'data': e[1], 'context': bus.contexts[i]},
+      ];
+      expect(emitted, [for (final row in rows) row['bus']]);
+      expect([legacy.sends, socket.sent], [isEmpty, hasLength(1)], reason: 'only the hello went to the adapter');
+      await l.stop();
+    });
+
+    test('on legacy a page event still goes on the GUI socket, untouched', () {
+      final bus = RecordingBus();
+      final legacy = FakeLegacy();
+      final l = link(WireProtocol.legacy, FakeSocket(), legacy, [], bus)..start();
+      final event = guiEvent('ovos.common_play', 'resume');
+      expect(l.send(event), isTrue);
+      expect(
+        [legacy.sends, bus.emitted],
+        [
+          [event],
+          isEmpty,
+        ],
+      );
     });
 
     test('gui1 never falls back', () async {
