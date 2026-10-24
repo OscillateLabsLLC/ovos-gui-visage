@@ -117,6 +117,7 @@ class _ScreenState extends State<Screen> {
     window: window,
     dispatchMenu: (id) => menu.dispatch(id),
     onChanged: _refresh,
+    storage: widgets.stored,
     lang: widget.config.lang,
   );
   late final StatusMenuController menu = bindStatusMenu(
@@ -165,6 +166,7 @@ class _ScreenState extends State<Screen> {
     captions.addListener(_refresh);
     outcome.addListener(_refresh);
     popups.addListener(_refresh);
+    input.notificationList.addListener(_refresh);
     bindTurnFeed(bus, {captions.handle: captionEvents, outcome.handle: outcomeEvents});
     windowExpanded = peek.expanded;
     peek.addListener(_onPeek);
@@ -229,6 +231,7 @@ class _ScreenState extends State<Screen> {
     peek.attention(attention.shown);
     final target = state.current();
     attention.setCompact(isContentPage(target, state.idleNamespace));
+    input.syncNotificationList();
     if (target != null && target != lastFocus) {
       lastFocus = target;
       gui.send(focusMessage(target.namespace, target.index));
@@ -245,7 +248,7 @@ class _ScreenState extends State<Screen> {
       onLeaveKiosk: window.leaveKiosk,
       onDragStart: tryOnActive ? null : drag.start,
       onMenu: tryOnActive ? null : input.menu.open,
-      onDismiss: input.menu.dismiss,
+      onDismiss: input.dismiss,
       onStep: input.step,
       child: WindowMenu(
         host: input.menu,
@@ -279,6 +282,8 @@ class _ScreenState extends State<Screen> {
     outcome: outcome,
     popups: popups,
     notifications: notifications,
+    notificationList: input.notificationList,
+    listShown: input.notificationList.isOpen,
     expanded: peek.expanded,
     kiosk: mode == WindowMode.kiosk,
     typeOnHome: mode == WindowMode.window || mode == WindowMode.kiosk,

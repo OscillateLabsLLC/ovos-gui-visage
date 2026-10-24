@@ -13,8 +13,17 @@ typedef GuiSend = bool Function(Json message);
 
 bool _notConnected(Json message) => false;
 
+void _noNotificationList() => reportFault('showing the stored notifications', StateError('no shell list is wired'));
+
 class PageContext {
-  const PageContext({required this.namespace, required this.page, required this.events, this.send = _notConnected});
+  const PageContext({
+    required this.namespace,
+    required this.page,
+    required this.events,
+    this.send = _notConnected,
+    this.showNotifications = _noNotificationList,
+    this.storedNotifications = 0,
+  });
 
   final String namespace;
   final String page;
@@ -24,6 +33,13 @@ class PageContext {
 
   /// The GUI socket; without one (a test that does not wire it) every trigger is reported.
   final GuiSend send;
+
+  /// Opens the shell's stored notification list, as the homescreen's notification button opened its popup; that
+  /// sends nothing, so it is not a [trigger].
+  final VoidCallback showNotifications;
+
+  /// How many notifications the shell's list holds; the homescreen badge shows it.
+  final int storedNotifications;
 
   /// Sends [eventName] with [parameters] in this page's namespace; ovos-gui emits `<namespace>.<eventName>` on the
   /// core bus. A message that cannot leave is reported, so a button that does nothing is never silent.
