@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.2.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.1.0...v2.2.0) (2026-10-24)
+
+
+### Features
+
+* **alerts:** cancel timers, snooze and cancel alarms ([55e5848](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/55e5848528c44e100cd660c5995d8c7abad183ee))
+* **notifications:** close popups and run their actions ([04ba45d](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/04ba45d062f91a278321728c029791a826b6d26f))
+* **ocp:** transport, seek and tap-to-play on the OCP pages ([817332b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/817332b4e72d9836cc309e130ad34caa8c1d7a80))
+* **pages:** answer SYSTEM_InputBox ([ff24dbd](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ff24dbd604343a6f3765528efc06ffcade9dfa72))
+* **protocol:** let pages send events back to OVOS ([9269b2c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9269b2c3420e61547a87a52d8860de4de466b6b9))
+* swipe between a skill's pages and report page use ([4a20f1c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/4a20f1c547271b9e16d0ec1678fa278c5bf15725))
+* touch and pointer input, part A (foundation) ([3a94ea9](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/3a94ea93ccd13b7531310cff99450a4970e7e9f7))
+* touch and pointer input, part B (skill controls), stacks on [#36](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/36) ([9eaae03](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9eaae03b898e09ab007b18925c1e4c5c3370bd29))
+* type a command ([bec29e1](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/bec29e1dbae445dcf1705ebc0840d4e2795fe07d))
+* **window:** open the menu inside the window ([9f37a27](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9f37a27be3b2559409bd17591261bc010f5241a6)), closes [#14](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/14)
+
+
+### Bug Fixes
+
+* **window:** close the in-window menu on a click outside it ([794f3af](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/794f3af498bce5e9786b6baf95d96d53f5075f09))
+* **window:** open the in-window menu once the peek badge has expanded ([1477e32](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/1477e32bc84fe94098d907eb27ff2a6c0156c7f5))
+
 ## [2.1.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.0.0...v2.1.0) (2026-10-23)
 
 
