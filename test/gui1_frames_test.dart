@@ -81,6 +81,7 @@ void main() {
       {'type': 'template', 'skill_id': _skill, 'data': <String, dynamic>{}, 'session_id': _s},
       {'type': 'activated', 'skill_id': 3, 'session_id': _s},
       {'type': 'snapshot', 'session_id': _s, 'stack': 'nope'},
+      {'type': 'status', 'event_name': 'speak', 'data': <String, dynamic>{}},
     ]) {
       expect(
         () => parseGui1Frame(bad),

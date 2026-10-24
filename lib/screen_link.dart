@@ -53,7 +53,7 @@ void applyLegacyMessage(GuiState state, Attention attention, Json message, void 
   }
 }
 
-void applyGui1(GuiState state, Attention attention, Gui1Frame frame) {
+void applyGui1(GuiState state, Attention attention, Gui1Frame frame, {Gui1Gaps? gaps}) {
   if (frame case Gui1Status(:final eventName, :final data)) attention.handle(eventName, data);
-  applyGui1Frame(state, frame);
+  applyGui1Frame(state, frame, gaps: gaps);
 }

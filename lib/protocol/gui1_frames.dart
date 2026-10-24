@@ -81,13 +81,13 @@ class Gui1Idle extends Gui1Frame {
   const Gui1Idle();
 }
 
-/// A bus topic forwarded as is; sent to every client, with the session it came from when there is one.
+/// A bus topic forwarded as is, to every client, with the session it came from.
 class Gui1Status extends Gui1Frame {
-  const Gui1Status({required this.eventName, required this.data, this.sessionId});
+  const Gui1Status({required this.eventName, required this.data, required this.sessionId});
 
   final String eventName;
   final Json data;
-  final String? sessionId;
+  final String sessionId;
 }
 
 class Gui1StackEntry {
@@ -139,7 +139,7 @@ final Map<String, Gui1Frame Function(Json)> _parsers = {
   'activated': (f) => Gui1Activated(skillId: f['skill_id'] as String, sessionId: f['session_id'] as String),
   'deactivated': (f) => Gui1Deactivated(skillId: f['skill_id'] as String, sessionId: f['session_id'] as String),
   'idle': (_) => const Gui1Idle(),
-  'status': (f) => Gui1Status(eventName: f['event_name'] as String, data: _data(f), sessionId: f['session_id'] as String?),
+  'status': (f) => Gui1Status(eventName: f['event_name'] as String, data: _data(f), sessionId: f['session_id'] as String),
   'snapshot': (f) =>
       Gui1Snapshot(sessionId: f['session_id'] as String, stack: [for (final entry in f['stack'] as List) _entry(entry as Json)]),
 };
