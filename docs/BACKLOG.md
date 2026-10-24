@@ -55,7 +55,8 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   StatusNotifierItem published no menu on Plasma.
 - **Launcher, icon and start on login.** Done (2026-10-23): hicolor icons from the badge golden
   (`test/linux_icon_test.dart`), `linux/net.oscillatelabs.ovosGuiVisage.desktop`, and an optional XDG
-  autostart entry for kiosk, installed per user by `tool/linux_desktop.sh` until a package installs them (#17).
+  autostart entry for kiosk. The `.deb` installs the launcher and icons (#17); `tool/linux_desktop.sh` installs them
+  per user for a source build, and its kiosk autostart points at `/usr/bin/ovos-gui-visage` when the package is there.
   Checked on Plasma 5.27 only; GNOME and Raspberry Pi OS are untested.
 - **Kiosk extras.** Keeping the display awake: done (2026-10-23, issue #15). Kiosk takes an
   `org.freedesktop.ScreenSaver` idle inhibit over the session bus (package:dbus), falls back to
@@ -81,8 +82,10 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
   real Developer ID certificate; `spctl` reports "accepted, source=Notarized Developer ID", `stapler validate`
   passes, and the tap job updated the cask. Still true: pull the local tap clone before
   `brew audit --cask --online`, or it compares a stale version.
-- Linux has a CI build but no release artifact; the sidecar image is built but not published to a
-  registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
+- Linux packages: done (issue #17). Each release attaches `.deb` packages for amd64 and arm64, built in a
+  `debian:bookworm` container (no glibc symbol newer than 2.34), lintian-clean, and installed with plain apt and
+  started under Xvfb in clean Debian 12 and Ubuntu 24.04 containers by `.github/workflows/linux_deb.yml`. Not yet
+  run on a real Raspberry Pi. The sidecar image is built but not published to a registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
 
 ## Interactive notifications (2026-10-23, left out of the display-only popups)
 

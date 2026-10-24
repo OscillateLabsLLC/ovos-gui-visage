@@ -6,8 +6,10 @@ notarised by Apple, and installs through the Homebrew cask in
 Mac App Store app: the sandbox is off, because the app opens local sockets and reads
 `~/.cache/ovos_gui`.
 
-The web build ships as a container image on ghcr.io with each release, for amd64 and arm64; it is the
-way onto Linux until native packages exist.
+Linux ships as `.deb` packages for amd64 and arm64 on each GitHub release, installed with plain apt on
+Debian 12, Raspberry Pi OS Bookworm and Ubuntu 24.04 ([Linux packages](#linux-packages)). The web
+build ships as a container image on ghcr.io with each release, for amd64 and arm64, for a browser on
+any machine.
 
 ## The flow
 
@@ -36,6 +38,11 @@ way onto Linux until native packages exist.
    `<version>`, `<major>.<minor>`, `<major>` and `latest`, with `GITHUB_TOKEN`. The Flutter stage runs
    once on the runner's own platform, since the web build is the same for both; only the nginx stage
    is per platform, so nothing runs under emulation.
+6. Also alongside, the `linux` job runs `.github/workflows/linux_deb.yml` on the tag: it builds and
+   tests the packages ([Linux packages](#linux-packages)). Then `linux-release` checks that both
+   file names carry the tag's version, checks their checksums, and uploads
+   `ovos-gui-visage_<version>_amd64.deb`, `ovos-gui-visage_<version>_arm64.deb` and their `.sha256`
+   files to the release.
 
 To build a tag again, run the Release workflow by hand (`workflow_dispatch`) with the tag. The
 upload replaces the assets and the tap job does nothing when the checksum did not change.
@@ -83,6 +90,58 @@ The zip and `<zip>.sha256` go to `build/release/`. An ad hoc build has the harde
 A real identity with no notary credentials gives a signed app that is not notarised, and the
 script says so.
 
+## Linux packages
+
+`.github/workflows/linux_deb.yml` has two jobs:
+
+1. `package`, once per architecture on a native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm`
+   for arm64), inside a `debian:bookworm` container. A build on Ubuntu 24.04 needs glibc 2.39 and does
+   not start on Bookworm (glibc 2.36); a Bookworm build runs on both. The job clones Flutter at the tag
+   in `FLUTTER_VERSION` (the release archives are x64 only), runs `flutter build linux --release` and
+   `tool/package_deb.sh`, runs `lintian --fail-on error,warning`, and stops if any binary needs a glibc
+   symbol newer than 2.36. It keeps the `.deb` and its `.sha256` as the artifact
+   `ovos-gui-visage-deb-<arch>`.
+2. `install`, for each architecture in clean `debian:bookworm` and `ubuntu:24.04` containers. It runs
+   `tool/smoke_deb.sh`: `apt-get install ./<deb>`, a check that `/usr/bin/ovos-gui-visage` resolves and
+   has no missing libraries, `desktop-file-validate`, 20 seconds of the app under Xvfb with
+   `dbus-run-session` (any earlier exit fails), then `apt-get remove` and a check that nothing is left.
+
+`tool/package_deb.sh [bundle]` takes a built bundle and makes the package with `dpkg-deb`, with the
+version from `pubspec.yaml`:
+
+| Path | What |
+|---|---|
+| `/opt/ovos-gui-visage/` | The Flutter bundle as built. The runner and the plugins are stripped, and the plugins lose the build machine's RUNPATH. |
+| `/usr/bin/ovos-gui-visage` | A symlink to the binary. The engine finds its data through `/proc/self/exe`, so the symlink works. |
+| `/usr/share/applications/net.oscillatelabs.ovosGuiVisage.desktop` | The launcher, `Exec=ovos-gui-visage`. |
+| `/usr/share/icons/hicolor/<size>/apps/net.oscillatelabs.ovosGuiVisage.png` | The icons from `linux/icons/hicolor`. |
+| `/usr/share/ovos-gui-visage/net.oscillatelabs.ovosGuiVisage-kiosk.desktop` | The kiosk autostart entry, for the user to copy to `~/.config/autostart`. The package does not turn it on. |
+| `/usr/share/doc/ovos-gui-visage/`, `/usr/share/lintian/overrides/` | `copyright`, `changelog.gz` and `linux/debian/lintian-overrides`. |
+
+`Depends` comes from `dpkg-shlibdeps` over every ELF file in the bundle. It includes GTK 3,
+`libayatana-appindicator3-1` and glibc 2.34 or newer. `libegl1` and `libgles2` are added by hand,
+because libepoxy loads them with `dlopen` and shlibdeps cannot see them. Without them the app aborts
+at start. On Ubuntu 24.04, the time_t packages (`libgtk-3-0t64` and others) provide the Bookworm
+names, so one package fits both. There are no maintainer scripts: the file triggers of
+`hicolor-icon-theme` and `desktop-file-utils` refresh the icon cache and the desktop database.
+
+Every lintian override in `linux/debian/lintian-overrides` has its reason beside it: the bundle in
+`/opt`, the engine's own freetype and libjpeg, the AOT snapshot `libapp.so` with no `NEEDED`
+entries, the web fonts of the face picker page, and no man page.
+
+A dry run on any branch: a pull request that touches `linux/`, `pubspec.*`, the two scripts or the
+workflow runs `Linux packages` by itself. On `main`, run it by hand (`workflow_dispatch`, with an
+optional `ref`). GitHub dispatches only workflows that are on the default branch, so before this
+workflow is merged, the pull request run is the dry run. The packages are artifacts of the run. To
+make one locally, in a `debian:bookworm` container with the build tools of the `package` job:
+
+```bash
+flutter build linux --release
+just linux-deb            # or: tool/package_deb.sh
+lintian --fail-on error,warning build/release/*.deb
+tool/smoke_deb.sh build/release/ovos-gui-visage_<version>_<arch>.deb   # root, in a throwaway container
+```
+
 ## Release checklist
 
 1. Merge the release-please PR on `main`.
@@ -116,3 +175,12 @@ script says so.
 
    The first push creates the package as private. Once, under the organisation's Packages, open
    `ovos-gui-visage`, set its visibility to public, and check that it is linked to this repository.
+
+6. Check the Linux packages on the release page, then on a Debian or Ubuntu machine:
+
+   ```bash
+   curl -LO https://github.com/OscillateLabsLLC/ovos-gui-visage/releases/download/v<version>/ovos-gui-visage_<version>_arm64.deb
+   curl -LO https://github.com/OscillateLabsLLC/ovos-gui-visage/releases/download/v<version>/ovos-gui-visage_<version>_arm64.deb.sha256
+   sha256sum -c ovos-gui-visage_<version>_arm64.deb.sha256
+   sudo apt install ./ovos-gui-visage_<version>_arm64.deb
+   ```
