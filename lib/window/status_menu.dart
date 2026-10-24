@@ -12,6 +12,7 @@ import '../face/face_palette.dart';
 import '../face/face_spec.dart';
 import '../face/styles.dart';
 import '../faults.dart';
+import '../volume_controls.dart';
 import 'window_config.dart';
 
 const typeItem = 'type';
@@ -21,6 +22,10 @@ const floatItem = 'mode.float';
 const desktopItem = 'mode.desktop';
 const kioskItem = 'mode.kiosk';
 const pickerItem = 'picker';
+const volumeItem = 'volume';
+const volumeUpItem = 'volume.up';
+const volumeDownItem = 'volume.down';
+const muteItem = 'volume.mute';
 const quitItem = 'quit';
 const facePrefix = 'face.';
 const coloursPrefix = 'colours.';
@@ -49,12 +54,23 @@ class MenuEntry {
 }
 
 class StatusMenuState {
-  const StatusMenuState({required this.mode, required this.peek, required this.visible, required this.face});
+  const StatusMenuState({
+    required this.mode,
+    required this.peek,
+    required this.visible,
+    required this.face,
+    this.volume,
+    this.muted = false,
+  });
 
   final WindowMode mode;
   final bool peek;
   final bool visible;
   final FaceSpec face;
+
+  /// 0 to 1, null until a volume plugin has reported.
+  final double? volume;
+  final bool muted;
 }
 
 class StatusMenuActions {
@@ -67,6 +83,7 @@ class StatusMenuActions {
     required this.applyPreset,
     required this.applyColours,
     required this.openPicker,
+    required this.volume,
     required this.quit,
   });
 
@@ -78,6 +95,7 @@ class StatusMenuActions {
   final void Function(String preset) applyPreset;
   final void Function(String colours) applyColours;
   final VoidCallback openPicker;
+  final void Function(VolumeAction action) volume;
   final VoidCallback quit;
 }
 
@@ -87,6 +105,7 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
   return [
     const MenuEntry(typeItem, 'Type a command…'),
     MenuEntry(visibleItem, state.visible ? 'Hide face' : 'Show face'),
+    _volume(state),
     const MenuEntry.separator(),
     MenuEntry(peekItem, 'Peek mode', checked: state.peek, enabled: widget),
     MenuEntry(floatItem, 'Float above windows', checked: state.mode == WindowMode.float, enabled: levels),
@@ -101,13 +120,32 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
   ];
 }
 
+MenuEntry _volume(StatusMenuState state) => MenuEntry(
+  volumeItem,
+  volumeTitle(state.volume, muted: state.muted),
+  children: [
+    const MenuEntry(volumeUpItem, 'Volume up'),
+    const MenuEntry(volumeDownItem, 'Volume down'),
+    MenuEntry(muteItem, 'Mute', checked: state.muted),
+  ],
+);
+
+String volumeTitle(double? volume, {required bool muted}) {
+  if (muted) return 'Volume (muted)';
+  return volume == null ? 'Volume' : 'Volume (${(volume * 100).round()}%)';
+}
+
 List<MenuEntry> _choices(Iterable<String> names, String prefix, String? current) => [
   for (final name in names) MenuEntry('$prefix$name', menuTitle(name), checked: name == current),
 ];
 
-/// Entries that show a check mark: peek, the modes, and the face and colour choices.
+/// Entries that show a check mark: peek, mute, the modes, and the face and colour choices.
 bool isCheckable(MenuEntry entry) =>
-    entry.id == peekItem || entry.id.startsWith('mode.') || entry.id.startsWith(facePrefix) || entry.id.startsWith(coloursPrefix);
+    entry.id == peekItem ||
+    entry.id == muteItem ||
+    entry.id.startsWith('mode.') ||
+    entry.id.startsWith(facePrefix) ||
+    entry.id.startsWith(coloursPrefix);
 
 /// The menu as the window itself shows it: hiding the window from inside it would strand a desktop with no menu bar
 /// item or tray, and a browser tab cannot quit, so those entries (and a separator they leave dangling) go.
@@ -154,27 +192,26 @@ class StatusMenuController {
     final colours = _suffix(id, coloursPrefix, facePalettes.keys);
     if (preset != null) return actions.applyPreset(preset);
     if (colours != null) return actions.applyColours(colours);
-    switch (id) {
-      case typeItem:
-        actions.typeCommand();
-      case visibleItem:
-        actions.toggleVisible();
-      case peekItem:
-        actions.togglePeek();
-      case floatItem:
-        actions.setMode(WindowMode.float);
-      case desktopItem:
-        actions.setMode(WindowMode.desktop);
-      case kioskItem:
-        actions.toggleKiosk();
-      case pickerItem:
-        actions.openPicker();
-      case quitItem:
-        actions.quit();
-      default:
-        reportFault('menu item "$id"', ArgumentError.value(id, 'id', 'not an item of the status menu'));
+    final action = _plainActions[id];
+    if (action == null) {
+      return reportFault('menu item "$id"', ArgumentError.value(id, 'id', 'not an item of the status menu'));
     }
+    action();
   }
+
+  late final Map<String, VoidCallback> _plainActions = {
+    typeItem: actions.typeCommand,
+    visibleItem: actions.toggleVisible,
+    peekItem: actions.togglePeek,
+    floatItem: () => actions.setMode(WindowMode.float),
+    desktopItem: () => actions.setMode(WindowMode.desktop),
+    kioskItem: actions.toggleKiosk,
+    pickerItem: actions.openPicker,
+    volumeUpItem: () => actions.volume(VolumeAction.up),
+    volumeDownItem: () => actions.volume(VolumeAction.down),
+    muteItem: () => actions.volume(VolumeAction.toggleMute),
+    quitItem: actions.quit,
+  };
 
   void dispose() => changes.removeListener(refresh);
 }

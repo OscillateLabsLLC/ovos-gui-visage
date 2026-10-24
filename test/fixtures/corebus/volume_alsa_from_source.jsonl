@@ -1,0 +1,8 @@
+{"note": "written from source, not recorded (no ALSA on the development Mac): ovos-PHAL-plugin-alsa at 780f998, handle_volume_request answers mycroft.volume.get with percent as a fraction and muted", "type": "mycroft.volume.get", "data": {}, "context": {"source": "ovos-gui-visage"}}
+{"note": "written from source, not recorded: the answer to the get above", "type": "mycroft.volume.get.response", "data": {"percent": 0.38, "muted": false}, "context": {"source": "ovos-gui-visage"}}
+{"note": "written from source, not recorded: increase with no data steps by 0.10 * 100; increase_volume then broadcasts a fresh get.response", "type": "mycroft.volume.increase", "data": {}, "context": {"source": "ovos-gui-visage"}}
+{"note": "written from source, not recorded: the broadcast after the increase", "type": "mycroft.volume.get.response", "data": {"percent": 0.48, "muted": false}, "context": {}}
+{"note": "written from source, not recorded: mute.toggle, then handle_mute_toggle_request broadcasts a get.response", "type": "mycroft.volume.mute.toggle", "data": {}, "context": {"source": "ovos-gui-visage"}}
+{"note": "written from source, not recorded: the broadcast after the toggle", "type": "mycroft.volume.get.response", "data": {"percent": 0.48, "muted": true}, "context": {}}
+{"note": "written from source, not recorded: a voice set from ovos-skill-volume (percent as a fraction); set_volume unmutes and broadcasts", "type": "mycroft.volume.set", "data": {"percent": 0.5}, "context": {"source": "ovos-skill-volume.openvoiceos"}}
+{"note": "written from source, not recorded: the broadcast after the set", "type": "mycroft.volume.get.response", "data": {"percent": 0.5, "muted": false}, "context": {}}

@@ -21,6 +21,8 @@ import 'screen_frame.dart';
 import 'screen_input.dart';
 import 'state/gui_state.dart';
 import 'turn_feed.dart';
+import 'volume.dart';
+import 'volume_controls.dart';
 import 'widgets/notification_actions.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/widget_manager.dart';
@@ -97,6 +99,7 @@ class _ScreenState extends State<Screen> {
     log: _log,
   );
   late final PeekController peek = PeekController(enabled: widget.config.window.peeks);
+  late final ScreenVolume volume = ScreenVolume(bus: bus, peek: peek);
   late final WindowRemote window = WindowRemote(
     bus,
     peek,
@@ -124,6 +127,8 @@ class _ScreenState extends State<Screen> {
     face: remote,
     faceController: face,
     window: window,
+    volume: volume.model,
+    volumeControls: volume.controls,
     show: _showMenu,
     typeCommand: () => input.typeCommand(),
     quit: quitApp,
@@ -167,7 +172,8 @@ class _ScreenState extends State<Screen> {
     outcome.addListener(_refresh);
     popups.addListener(_refresh);
     input.notificationList.addListener(_refresh);
-    bindTurnFeed(bus, {captions.handle: captionEvents, outcome.handle: outcomeEvents});
+    volume.model.addListener(_refresh);
+    bindTurnFeed(bus, {captions.handle: captionEvents, outcome.handle: outcomeEvents, volume.model.handle: volumeEvents});
     windowExpanded = peek.expanded;
     peek.addListener(_onPeek);
     widgets;
@@ -190,6 +196,7 @@ class _ScreenState extends State<Screen> {
     captions.dispose();
     outcome.dispose();
     popups.dispose();
+    volume.dispose();
     peek.dispose();
     gui.stop();
     bus.stop();
@@ -208,6 +215,7 @@ class _ScreenState extends State<Screen> {
     state.reset();
     lastFocus = null;
     guiConnected = connected;
+    if (connected) volume.model.requestLevel();
     _refresh();
   }
 
@@ -250,6 +258,7 @@ class _ScreenState extends State<Screen> {
       onMenu: tryOnActive ? null : input.menu.open,
       onDismiss: input.dismiss,
       onStep: input.step,
+      onVolume: volume.controls.act,
       child: WindowMenu(
         host: input.menu,
         ready: !collapsed,
@@ -280,6 +289,7 @@ class _ScreenState extends State<Screen> {
     connected: guiConnected,
     captions: widget.config.captions ? captions : null,
     outcome: outcome,
+    volume: volume.model,
     popups: popups,
     notifications: notifications,
     notificationList: input.notificationList,

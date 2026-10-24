@@ -4,6 +4,8 @@ import 'package:ovos_gui_visage/face/face.dart';
 import 'package:ovos_gui_visage/face/face_palette.dart';
 import 'package:ovos_gui_visage/face/face_remote.dart';
 import 'package:ovos_gui_visage/face/face_spec.dart';
+import 'package:ovos_gui_visage/volume.dart';
+import 'package:ovos_gui_visage/volume_controls.dart';
 import 'package:ovos_gui_visage/window/peek.dart';
 import 'package:ovos_gui_visage/window/status_menu.dart';
 import 'package:ovos_gui_visage/window/status_menu_binding.dart';
@@ -25,6 +27,7 @@ void main() {
     late WindowRemote window;
     late List<List<MenuEntry>> shown;
     late StatusMenuController menu;
+    late VolumeModel volume;
     var quits = 0;
     var types = 0;
     var pickers = 0;
@@ -37,10 +40,14 @@ void main() {
       const effects = WindowEffects(mode: _noMode, visible: _noVisible);
       window = WindowRemote(bus, peek, initial: config, persist: (_) async {}, effects: effects);
       shown = [];
+      final controls = VolumeControls(bus);
+      volume = VolumeModel(ask: controls.askLevel, timer: ManualTimers().create);
       menu = bindStatusMenu(
         face: face,
         faceController: face.controller,
         window: window,
+        volume: volume,
+        volumeControls: controls,
         show: shown.add,
         typeCommand: () => types++,
         quit: () => quits++,
@@ -67,6 +74,16 @@ void main() {
       expect(bus.types.toSet(), {faceStateMessage, windowStateMessage});
       expect(shown, hasLength(6));
       expect(shown.last.firstWhere((i) => i.id == visibleItem).title, 'Show face');
+    });
+
+    test('the volume items send the bus requests, and a report retitles the submenu', () {
+      menu.dispatch(volumeUpItem);
+      menu.dispatch(volumeDownItem);
+      menu.dispatch(muteItem);
+      expect(bus.types, ['mycroft.volume.increase', 'mycroft.volume.decrease', 'mycroft.volume.mute.toggle']);
+      volume.handle(volumeReportEvent, {'percent': 0.38, 'muted': true});
+      final submenu = shown.last.firstWhere((i) => i.id == volumeItem);
+      expect([submenu.title, submenu.children.last.checked], ['Volume (muted)', true]);
     });
 
     test('a change over the bus rebuilds the menu', () {
