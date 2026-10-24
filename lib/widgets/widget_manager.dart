@@ -5,6 +5,8 @@ library;
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import '../protocol/core_bus.dart';
 import 'notification_popups.dart';
 
@@ -51,7 +53,11 @@ class WidgetManager {
   final NotificationPopups? popups;
   final double Function() _clock;
   final List<Json> notifications = [];
-  List<Json> storage = [];
+
+  /// The stored notifications, oldest first: what this display's popups expired into, less what any client cleared.
+  final ValueNotifier<List<Json>> stored = ValueNotifier(const []);
+
+  List<Json> get storage => stored.value;
 
   static double _epochSeconds() => DateTime.now().millisecondsSinceEpoch / 1000;
 
@@ -104,7 +110,7 @@ class WidgetManager {
   void popClear(Json notification) {
     popups?.cleared(notification);
     if (_contains(storage, notification)) return;
-    storage.add(notification);
+    stored.value = [...storage, notification];
     _dropPending(notification);
     emitStorageModel();
     bus.emit('ovos.notification.notification_data', {'notification': <String, dynamic>{}});
@@ -118,14 +124,14 @@ class WidgetManager {
   }
 
   void _onStorageClear() {
-    storage = [];
+    stored.value = const [];
     emitStorageModel();
   }
 
   void _onStorageClearItem(Json message) {
     final notification = _notificationOf(message);
     if (notification == null) return;
-    storage = [
+    stored.value = [
       for (final item in storage)
         if (!_sameNotification(item, notification)) item,
     ];

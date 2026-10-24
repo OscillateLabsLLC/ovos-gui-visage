@@ -22,10 +22,13 @@ BusMessage? closeMessage(Popup popup) =>
     popup.kind == PopupKind.controlled ? null : (type: popClearDelete, data: {'notification': popup.record});
 
 /// Null when the popup names no action (or is the controlled one, which never does).
-BusMessage? actionMessage(Popup popup) {
-  final action = '${popup.record['action'] ?? ''}';
-  if (popup.kind == PopupKind.controlled || action.isEmpty) return null;
-  final callback = popup.record['callback_data'];
+BusMessage? actionMessage(Popup popup) => popup.kind == PopupKind.controlled ? null : recordAction(popup.record);
+
+/// The record's `action` with its `callback_data`, as the shell's `sendRequest(action, callback_data)`; null without one.
+BusMessage? recordAction(Json record) {
+  final action = '${record['action'] ?? ''}';
+  if (action.isEmpty) return null;
+  final callback = record['callback_data'];
   return (type: action, data: callback is Json ? callback : <String, dynamic>{});
 }
 

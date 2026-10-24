@@ -1,5 +1,6 @@
 /// ovos-skill-homescreen.openvoiceos / idle (SPEC 8.1): weather circle, clock circle, widget chips and the
-/// notification badge, from the homescreen's session data and its widget-manager events.
+/// notification badge, from the homescreen's session data and its widget-manager events; the badge counts and opens
+/// the shell's stored notification list.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../theme.dart';
 import '../widgets/circle.dart';
 import 'page.dart';
 
+const showNotificationsLabel = 'Show notifications';
 const timerEvent = 'ovos.timer.widget.manager.update';
 const alarmEvent = 'ovos.alarm.widget.manager.update';
 const mediaEvent = 'ovos.media.widget.manager.update';
@@ -30,26 +32,34 @@ String dateLine(Json data) {
   return parts.isEmpty ? text(data['date_string']) : parts.join(', ');
 }
 
-int notificationCount(Json data) {
-  final model = data['notification_model'];
-  final stored = model is List ? model.length : number(model is Map ? model['count'] : 0).toInt();
-  final counter = number(data['notifcation_counter']).toInt();
-  return counter > stored ? counter : stored;
-}
-
 bool hasWeather(Json data) => truthy(data['weather_api_enabled']) && data['weather_temp'] != null;
 
+/// The badge counts the stored list it opens, as WidgetsArea.qml shows `notificationModel.count`; the session's
+/// `notifcation_counter` (sic) only ever grows, so it is not shown.
 class IdlePage extends StatelessWidget {
-  const IdlePage({super.key, required this.data, required this.events});
+  const IdlePage({
+    super.key,
+    required this.data,
+    required this.events,
+    required this.storedNotifications,
+    required this.onShowNotifications,
+  });
 
-  static Widget page(Json data, PageContext ctx) => IdlePage(data: data, events: ctx.events);
+  static Widget page(Json data, PageContext ctx) => IdlePage(
+    data: data,
+    events: ctx.events,
+    storedNotifications: ctx.storedNotifications,
+    onShowNotifications: ctx.showNotifications,
+  );
 
   final Json data;
   final Json events;
+  final int storedNotifications;
+  final VoidCallback onShowNotifications;
 
   @override
   Widget build(BuildContext context) {
-    final count = notificationCount(data);
+    final count = storedNotifications;
     final timer = events[timerEvent] as Map?;
     final alarm = events[alarmEvent] as Map?;
     final media = events[mediaEvent] as Map?;
@@ -163,13 +173,23 @@ class IdlePage extends StatelessWidget {
   }
 
   Widget _badge(int count) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 28),
-      height: 28,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: VisageColors.accent, borderRadius: BorderRadius.circular(14)),
-      child: Text('$count', style: VisageText.fg(15, weight: FontWeight.w600)),
+    return Tooltip(
+      message: showNotificationsLabel,
+      child: Material(
+        color: VisageColors.accent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onShowNotifications,
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 28),
+            height: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            alignment: Alignment.center,
+            child: Text('$count', style: VisageText.fg(15, weight: FontWeight.w600)),
+          ),
+        ),
+      ),
     );
   }
 }

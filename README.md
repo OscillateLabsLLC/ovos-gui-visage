@@ -234,6 +234,18 @@ deletes it (`ovos.notification.api.pop.clear.delete`). A tap on the text runs th
 action, if it has one, and closes it, as in ovos-shell. The ✕ on a controlled notification only hides
 it here.
 
+The number in the top-right corner of the homescreen counts the stored notifications. Click or tap
+it to open the list, oldest first, over the homescreen:
+
+- A tap on a notification's text runs its action (the row has a › when it has one), then clears it.
+- The ✕ on a row clears that notification (`ovos.notification.api.storage.clear.item`) without
+  running its action. **Clear all** clears the store (`ovos.notification.api.storage.clear`). The
+  homescreen's Qt list ran the actions on these too; Visage does not.
+- The ✕ at the top, or Escape, closes the list. The arrow keys move between its buttons, and Enter
+  or Space presses one. The list closes by itself when it is empty or another page comes up.
+
+Each display lists what its own popups put in the store, less what any client or skill clears.
+
 ## Touch and pointer
 
 You can use the screen with a mouse or a touch screen, as you could with the Qt GUI.

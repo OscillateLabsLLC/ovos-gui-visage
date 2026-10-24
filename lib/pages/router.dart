@@ -5,6 +5,7 @@ library;
 import 'package:flutter/widgets.dart';
 
 import '../state/gui_state.dart';
+import '../widgets/notification_list.dart';
 import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
@@ -69,12 +70,15 @@ PageBuilder resolve(Target? target) {
 /// Hosts the current page. A new (namespace, page, index) replaces the subtree, so page state resets; the same
 /// target with new data rebuilds the same widget, so a page keeps its tickers and animations across updates.
 class PageHost extends StatelessWidget {
-  const PageHost({super.key, required this.state, required this.send});
+  const PageHost({super.key, required this.state, required this.send, required this.notifications});
 
   final GuiState state;
 
   /// The GUI socket, handed to every page through its context.
   final GuiSend send;
+
+  /// The stored notification list: its count and the way to open it, for the homescreen's badge.
+  final NotificationListController notifications;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +89,8 @@ class PageHost extends StatelessWidget {
       page: target?.page ?? '',
       events: ns?.events ?? const {},
       send: send,
+      showNotifications: notifications.open,
+      storedNotifications: notifications.storage.value.length,
     );
     final data = Json.of(ns?.data ?? const {});
     return KeyedSubtree(key: ValueKey(target?.toString() ?? ''), child: resolve(target)(data, ctx));

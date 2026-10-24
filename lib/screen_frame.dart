@@ -22,6 +22,8 @@ import 'theme.dart';
 import 'widgets/caption_strip.dart';
 import 'widgets/command_box.dart';
 import 'widgets/notification_actions.dart';
+import 'widgets/notification_list.dart';
+import 'widgets/notification_list_panel.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/notification_stack.dart';
 import 'widgets/offline_pill.dart';
@@ -44,6 +46,8 @@ class FrameParts {
     required this.outcome,
     required this.popups,
     required this.notifications,
+    required this.notificationList,
+    required this.listShown,
     required this.expanded,
     required this.kiosk,
     required this.typeOnHome,
@@ -67,6 +71,10 @@ class FrameParts {
 
   /// What a tap on a popup or its close button sends.
   final NotificationActions notifications;
+
+  /// The stored notifications, which the homescreen's count badge opens over the page.
+  final NotificationListController notificationList;
+  final bool listShown;
   final bool expanded;
   final bool kiosk;
 
@@ -96,6 +104,7 @@ class ScreenFrame extends StatelessWidget {
             children: [
               const Positioned.fill(child: ColoredBox(color: VisageColors.pageBg)),
               Positioned.fill(child: _page()),
+              if (p.listShown) NotificationListPanel(items: p.notificationList.items, controller: p.notificationList),
               AttentionOverlay(attention: p.attention, face: p.face),
               if (p.captions case final captions?) CaptionStrip(captions: captions, compact: p.attention.compact),
               _topStatus(),
@@ -120,7 +129,7 @@ class ScreenFrame extends StatelessWidget {
         onStep: parts.onStep,
         onInteract: parts.onInteract,
         chevrons: parts.kiosk,
-        child: PageHost(state: parts.state, send: parts.send),
+        child: PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList),
       ),
     );
   }

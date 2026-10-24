@@ -5,6 +5,9 @@ import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
+import 'package:ovos_gui_visage/widgets/notification_list.dart';
+
+import 'recording_bus.dart';
 
 void main() {
   test('no target resolves to the blank page', () {
@@ -42,7 +45,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: PageHost(state: state, send: (_) => true),
+          child: PageHost(
+            state: state,
+            send: (_) => true,
+            notifications: NotificationListController(bus: RecordingBus(), storage: ValueNotifier(const [])),
+          ),
         ),
       ),
     );
