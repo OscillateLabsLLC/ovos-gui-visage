@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.2.0...v2.3.0) (2026-10-24)
+
+
+### Features
+
+* **linux:** .deb packages for amd64 and arm64 on each release ([7be0b35](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7be0b359c2f746b4dfa3abf34e54010021316dc0))
+* **linux:** package the release bundle as a .deb ([2e91611](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/2e91611750d18ecc0a49c5636ec55d868c018eb7)), closes [#17](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/17)
+* **linux:** point the kiosk autostart at the packaged app ([7a961a2](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7a961a28f036bb415a32629aa72886fca4a95179)), closes [#17](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/17)
+
+
+### Bug Fixes
+
+* **ci:** read the glibc version without breaking the pipe ([6316049](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/6316049019548779789ad5b89d7ebb52e3971816))
+
 ## [2.2.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.1.0...v2.2.0) (2026-10-24)
 
 
