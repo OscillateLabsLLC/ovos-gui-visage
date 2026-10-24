@@ -1,5 +1,5 @@
 # The web build behind nginx: serves the app, the face picker at /faces.html, the ovos-gui cache under /res/, host
-# files under /res-abs/, and proxies the two OVOS websockets so the sidecar's port is the only one a remote browser
+# files under /res-abs/, and proxies the OVOS websockets (core bus, legacy GUI, GUI-1 adapter) so the sidecar's port is the only one a remote browser
 # needs (docs/SCOPE.md).
 # Build from the repository root: docker build -f sidecar/Dockerfile .
 # The web build is the same on every architecture, so the Flutter stage runs on the build platform and only the nginx
@@ -22,6 +22,7 @@ ENV VISAGE_PORT=8080
 ENV OVOS_HOST=host.docker.internal
 ENV OVOS_BUS_PORT=8181
 ENV OVOS_GUI_PORT=18181
+ENV OVOS_GUI1_PORT=18182
 COPY sidecar/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /src/build/web /usr/share/nginx/html
 COPY docs/face-palettes.html /usr/share/nginx/html/faces.html
