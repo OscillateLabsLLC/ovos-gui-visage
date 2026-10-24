@@ -148,17 +148,28 @@ class _WindowMenuState extends State<WindowMenu> {
         if (constraints.biggest != _size) _resized(constraints.biggest);
         return Theme(
           data: Theme.of(context).copyWith(colorScheme: _menuColours),
-          child: MenuAnchor(
-            controller: controller,
-            onClose: widget.host.closed,
-            style: _menuStyle,
-            menuChildren: [for (final entry in widget.host.items) _entry(entry)],
-            child: SizedBox.expand(child: widget.child),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              widget.child,
+              Positioned(left: 0, top: 0, child: _anchor()),
+            ],
           ),
         );
       },
     );
   }
+
+  /// An empty anchor at the window's origin: MenuAnchor counts its child as inside the menu, so a window-sized child
+  /// would leave no outside to click.
+  Widget _anchor() => MenuAnchor(
+    controller: controller,
+    consumeOutsideTap: true,
+    onClose: widget.host.closed,
+    style: _menuStyle,
+    menuChildren: [for (final entry in widget.host.items) _entry(entry)],
+    child: const SizedBox.shrink(),
+  );
 
   Widget _entry(MenuEntry entry) {
     if (entry.separator) return const Divider(height: 9, thickness: 1, color: VisageColors.accentDim);

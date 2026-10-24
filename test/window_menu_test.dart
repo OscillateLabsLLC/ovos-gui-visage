@@ -12,26 +12,28 @@ final _items = buildStatusMenu(const StatusMenuState(mode: WindowMode.kiosk, pee
 
 List<String> _titles(List<MenuEntry> items) => [for (final i in items) i.separator ? '-' : i.title];
 
-Widget _app(WindowMenuHost host, {double size = 600, bool ready = true, void Function(int)? onStep, VoidCallback? onLeave}) =>
-    MaterialApp(
-      home: Center(
-        child: SizedBox.square(
-          dimension: size,
-          child: WindowSurface(
-            mode: WindowMode.kiosk,
-            onLeaveKiosk: onLeave ?? () {},
-            onMenu: host.open,
-            onDismiss: host.dismiss,
-            onStep: onStep,
-            child: WindowMenu(
-              host: host,
-              ready: ready,
-              child: const ColoredBox(color: Colors.black),
-            ),
-          ),
-        ),
+Widget _app(
+  WindowMenuHost host, {
+  double size = 600,
+  bool ready = true,
+  void Function(int)? onStep,
+  VoidCallback? onLeave,
+  Widget child = const ColoredBox(color: Colors.black),
+}) => MaterialApp(
+  home: Center(
+    child: SizedBox.square(
+      dimension: size,
+      child: WindowSurface(
+        mode: WindowMode.kiosk,
+        onLeaveKiosk: onLeave ?? () {},
+        onMenu: host.open,
+        onDismiss: host.dismiss,
+        onStep: onStep,
+        child: WindowMenu(host: host, ready: ready, child: child),
       ),
-    );
+    ),
+  ),
+);
 
 void main() {
   test('inside the window, the menu has no hide, and no quit in a browser', () {
@@ -55,6 +57,45 @@ void main() {
     await tester.tap(find.text('Full screen'));
     await tester.pumpAndSettle();
     expect(chosen, [kioskItem]);
+    expect(opens, [true, false]);
+  });
+
+  testWidgets('a click outside the menu closes it and does not reach what is under it', (tester) async {
+    final opens = <bool>[];
+    var pressed = 0;
+    final host = WindowMenuHost(onSelected: (_) {}, canQuit: true, onOpenChanged: opens.add)..show(_items);
+    final under = Align(
+      alignment: Alignment.bottomRight,
+      child: TextButton(onPressed: () => pressed++, child: const Text('under')),
+    );
+    await tester.pumpWidget(_app(host, child: under));
+    await tester.pump(menuSettle);
+    final click = tester.getTopLeft(find.byType(WindowMenu)) + const Offset(20, 20);
+    await tester.tapAt(click, buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect((tester.getTopLeft(find.text('Type a command…')) - click).distance, lessThan(60), reason: 'opens at the click');
+    await tester.tap(find.text('under'));
+    await tester.pumpAndSettle();
+    expect(find.text('Full screen'), findsNothing);
+    expect(opens, [true, false]);
+    expect(pressed, 0);
+    await tester.tap(find.text('under'));
+    expect(pressed, 1);
+  });
+
+  testWidgets('a menu opened on a collapsed badge closes on a click outside once the window has grown', (tester) async {
+    final opens = <bool>[];
+    final host = WindowMenuHost(onSelected: (_) {}, canQuit: true, onOpenChanged: opens.add)..show(_items);
+    await tester.pumpWidget(_app(host, size: 96, ready: false));
+    await tester.pump(menuSettle);
+    host.open(const Offset(40, 40));
+    await tester.pumpWidget(_app(host));
+    await tester.pump(menuSettle);
+    await tester.pumpAndSettle();
+    expect(find.text('Full screen'), findsOneWidget);
+    await tester.tapAt(tester.getBottomRight(find.byType(WindowMenu)) - const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('Full screen'), findsNothing);
     expect(opens, [true, false]);
   });
 
