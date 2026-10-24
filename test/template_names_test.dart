@@ -78,9 +78,23 @@ const unimplemented = {
   'SYSTEM_map',
 };
 
-const unknown = ['SYSTEM_confirm', 'SYSTEM_select', 'Confirm.qml', 'Select.qml', 'SYSTEM_ocp_now_playing', 'Mystery'];
+/// The legacy plugin's OCP pages, under both of its names; neither is a GUI-1 template.
+const legacyOcpPages = [
+  'SYSTEM_ocp_now_playing',
+  'SYSTEM_ocp_search',
+  'SYSTEM_ocp_playlist',
+  'OCPNowPlaying.qml',
+  'OCPSearch.qml',
+  'OCPPlaylist.qml',
+];
 
-PageBuilder route(String page, [TemplateGaps? gaps]) => resolve(Target('any.skill', page, 0), gaps: gaps ?? TemplateGaps());
+const unknown = ['SYSTEM_confirm', 'SYSTEM_select', 'Confirm.qml', 'Select.qml', ...legacyOcpPages, 'Mystery'];
+
+/// The url the legacy plugin sends beside [page]: `SYSTEM:<file>` for a QML file, none for a spec or bus-client name.
+String? systemUrl(String page) => page.endsWith('.qml') ? 'SYSTEM:$page' : null;
+
+PageBuilder route(String page, [TemplateGaps? gaps]) =>
+    resolve(Target('any.skill', page, 0, url: systemUrl(page)), gaps: gaps ?? TemplateGaps());
 
 void main() {
   test('the spec vocabulary is the 20 GUI-1 templates, split into implemented and not yet', () {
@@ -92,7 +106,7 @@ void main() {
   test('every alias maps to its spec template', () {
     expect(templateAliases, expectedAliases);
     for (final MapEntry(key: alias, value: spec) in expectedAliases.entries) {
-      expect(canonicalTemplate(alias), spec, reason: alias);
+      expect(canonicalTemplate(alias, url: systemUrl(alias)), spec, reason: alias);
     }
   });
 
@@ -120,6 +134,53 @@ void main() {
 
   test('SYSTEM_TextFrame, SYSTEM_text and Text.qml reach the same page', () {
     expect({route('SYSTEM_TextFrame'), route('SYSTEM_text'), route('Text.qml')}, {TextFramePage.page});
+  });
+
+  test('Text.qml reaches the text template only when its url marks it SYSTEM:', () async {
+    PageBuilder textQml(String? url) => resolve(Target('any.skill', 'Text.qml', 0, url: url), gaps: TemplateGaps());
+    final faults = await collectFaults(() async {
+      expect(textQml('SYSTEM:Text.qml'), same(TextFramePage.page));
+      expect(textQml(null), same(FallbackPage.page));
+      expect(textQml('file:///home/ovos/.cache/ovos_gui/any.skill/qt5/Text.qml'), same(FallbackPage.page));
+    });
+    expect(faults, isEmpty);
+  });
+
+  test('a QML name without the SYSTEM: mark is a skill file, not a template', () {
+    expect(canonicalTemplate('Timer.qml'), isNull);
+    expect(canonicalTemplate('Timer.qml', url: 'SYSTEM:Timer.qml'), 'SYSTEM_timer');
+  });
+
+  test('GuiState keeps each page url through insert, move and remove', () {
+    final state = GuiState()
+      ..apply({
+        'type': 'mycroft.session.list.insert',
+        'namespace': activeSkills,
+        'position': 0,
+        'data': [
+          {'skill_id': 'legacy.skill'},
+        ],
+      });
+    Json pages(List<Json> data) => {'type': 'mycroft.gui.list.insert', 'namespace': 'legacy.skill', 'position': 0, 'data': data};
+    state.apply(
+      pages([
+        {'page': 'Text.qml', 'url': 'SYSTEM:Text.qml'},
+        {'page': 'Text.qml', 'url': null},
+      ]),
+    );
+    expect(resolve(state.current(), gaps: TemplateGaps()), same(TextFramePage.page));
+    state.apply({'type': 'mycroft.gui.list.move', 'namespace': 'legacy.skill', 'from': 0, 'to': 1, 'items_number': 1});
+    expect(state.current()?.url, isNull);
+    state.apply({'type': 'mycroft.gui.list.remove', 'namespace': 'legacy.skill', 'position': 0, 'items_number': 1});
+    expect(state.current()?.url, 'SYSTEM:Text.qml');
+    expect(state.snapshot()['namespaces']['legacy.skill']['pages'], ['Text.qml']);
+  });
+
+  test('spec and bus-client names alias whatever url they carry', () {
+    for (final url in [null, 'SYSTEM:Text.qml', 'file:///skill/Text.qml']) {
+      expect(canonicalTemplate('SYSTEM_TextFrame', url: url), 'SYSTEM_text', reason: url);
+      expect(canonicalTemplate('SYSTEM_text', url: url), 'SYSTEM_text', reason: url);
+    }
   });
 
   test('reserved, non-spec and unknown names show the fallback without a fault', () async {
@@ -150,7 +211,8 @@ void main() {
 
   test('the face template by any name keeps the full face', () {
     for (final name in ['SYSTEM_face', 'SYSTEM_Face', 'Face.qml']) {
-      expect(isContentPage(Target('any.skill', name, 0), defaultIdleNamespace), isFalse, reason: name);
+      final target = Target('any.skill', name, 0, url: systemUrl(name));
+      expect(isContentPage(target, defaultIdleNamespace), isFalse, reason: name);
     }
     expect(isContentPage(const Target('any.skill', 'SYSTEM_text', 0), defaultIdleNamespace), isTrue);
   });
