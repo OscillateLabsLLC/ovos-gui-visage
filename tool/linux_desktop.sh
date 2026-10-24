@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Adds or removes the Linux launcher, its icons and the optional kiosk autostart entry for the current user.
 # Usage: tool/linux_desktop.sh install | uninstall | autostart-on | autostart-off
-# install and autostart-on point the entries at a release bundle built by `flutter build linux --release`.
+# install points the launcher at a release bundle built by `flutter build linux --release`. With the .deb installed the
+# package already provides the launcher and icons, so install refuses, and autostart-on points at the packaged app.
 set -euo pipefail
 
 app_id=net.oscillatelabs.ovosGuiVisage
+packaged_binary=/usr/bin/ovos-gui-visage
 repo=$(cd "$(dirname "$0")/.." && pwd)
 data=${XDG_DATA_HOME:-$HOME/.local/share}
 config=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -23,9 +25,23 @@ bundle_binary() {
   exit 1
 }
 
+app_binary() {
+  if [[ -x $packaged_binary ]]; then
+    echo "$packaged_binary"
+    return
+  fi
+  bundle_binary
+}
+
+refuse_if_packaged() {
+  if [[ -x $packaged_binary ]]; then
+    echo "The ovos-gui-visage package is installed and provides the launcher and icons; a copy here would hide it." >&2
+    exit 1
+  fi
+}
+
 write_entry() {
-  local source=$1 target=$2 binary
-  binary=$(bundle_binary)
+  local source=$1 target=$2 binary=$3
   mkdir -p "$(dirname "$target")"
   sed "/^Exec=/s| ovos_gui_visage\$| $binary|; s|^Exec=ovos_gui_visage\$|Exec=$binary|" "$source" >"$target"
   echo "Wrote $target (Exec: $binary)"
@@ -42,7 +58,9 @@ install_icons() {
 
 case ${1:-} in
   install)
-    write_entry "$repo/linux/$app_id.desktop" "$launcher"
+    refuse_if_packaged
+    binary=$(bundle_binary)
+    write_entry "$repo/linux/$app_id.desktop" "$launcher" "$binary"
     install_icons
     update-desktop-database "$data/applications"
     ;;
@@ -53,7 +71,8 @@ case ${1:-} in
     echo "Removed $launcher and its icons"
     ;;
   autostart-on)
-    write_entry "$repo/linux/$app_id-kiosk.desktop" "$autostart"
+    binary=$(app_binary)
+    write_entry "$repo/linux/$app_id-kiosk.desktop" "$autostart" "$binary"
     ;;
   autostart-off)
     rm -f "$autostart"
