@@ -65,13 +65,23 @@ const templates = <String, PageBuilder>{
   'SYSTEM_InputBox': InputBoxPage.page,
 };
 
-/// Known templates that have no page yet. Each one is reported the first time it is shown, then falls back quietly.
+/// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
+/// then falls back quietly.
 class TemplateGaps {
   final _reported = <String>{};
 
   PageBuilder fallbackFor(String template) {
     if (_reported.add(template)) {
       reportFault('routing $template', UnimplementedError('$template has no page yet'), StackTrace.current);
+    }
+    return FallbackPage.page;
+  }
+
+  /// A `SYSTEM_` name outside the GUI-1 vocabulary, which the GUI-1 adapter passes through (spec §6.5): reported the
+  /// first time, and it shows the fallback like any name without a page.
+  PageBuilder unknown(String template) {
+    if (_reported.add(template)) {
+      reportFault('routing $template', ArgumentError.value(template, 'template', 'not a GUI-1 template'), StackTrace.current);
     }
     return FallbackPage.page;
   }

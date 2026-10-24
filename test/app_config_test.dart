@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/app_config.dart';
 import 'package:ovos_gui_visage/face/face_spec.dart';
+import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/window/window_config.dart';
 
 import 'faults.dart';
@@ -44,5 +45,28 @@ void main() {
     final faults = await collectFaults(() async => config = AppConfig.from({'captions': 'loud'}, const {}));
     expect(config.captions, isTrue);
     expect(faults.single.context.toString(), contains('captions is not a flag'));
+  });
+
+  test('protocol is auto by default, from the file, and VISAGE_PROTOCOL wins', () {
+    expect(AppConfig.from(null, const {}).protocol, WireProtocol.auto);
+    expect(AppConfig.from({'protocol': 'legacy'}, const {}).protocol, WireProtocol.legacy);
+    expect(AppConfig.from({'protocol': 'legacy'}, const {'VISAGE_PROTOCOL': 'gui1'}).protocol, WireProtocol.gui1);
+  });
+
+  test('an unknown protocol is reported and treated as auto', () async {
+    late AppConfig config;
+    final faults = await collectFaults(() async => config = AppConfig.from({'protocol': 'qt5'}, const {}));
+    expect(config.protocol, WireProtocol.auto);
+    expect(faults.single.exceptionAsString(), contains('qt5'));
+  });
+
+  test('VISAGE_GUI1_URL moves the GUI-1 endpoint; anything but a ws URL is reported and ignored', () async {
+    expect(AppConfig.from(null, const {}).gui1Url, isNull);
+    final url = AppConfig.from({'gui1Url': 'ws://a:1/gui1'}, const {'VISAGE_GUI1_URL': 'ws://127.0.0.1:28182/gui1'}).gui1Url;
+    expect(url, Uri.parse('ws://127.0.0.1:28182/gui1'));
+    late AppConfig config;
+    final faults = await collectFaults(() async => config = AppConfig.from(null, const {'VISAGE_GUI1_URL': 'http://x/gui1'}));
+    expect(config.gui1Url, isNull);
+    expect(faults, hasLength(1));
   });
 }

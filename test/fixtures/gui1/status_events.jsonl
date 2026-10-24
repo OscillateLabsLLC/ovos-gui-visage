@@ -1,0 +1,8 @@
+{"_note": "written from WIRE.md, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "snapshot", "session_id": "default", "stack": []}
+{"type": "status", "event_name": "recognizer_loop:wakeword", "data": {"utterance": "hey mycroft"}, "session_id": "default"}
+{"type": "status", "event_name": "recognizer_loop:record_end", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "recognizer_loop:audio_output_start", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "recognizer_loop:audio_output_end", "data": {}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_status", "data": {"label": "Done", "success": true}, "session_id": "default"}
