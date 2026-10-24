@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme.dart';
+import '../volume_controls.dart';
 import 'kiosk_cursor.dart';
 import 'peek.dart';
 import 'two_finger_tap.dart';
@@ -17,10 +18,17 @@ Color windowBackground(WindowMode mode) => switch (mode) {
   WindowMode.float || WindowMode.desktop => Colors.transparent,
 };
 
+final volumeKeys = {
+  LogicalKeyboardKey.audioVolumeUp: VolumeAction.up,
+  LogicalKeyboardKey.audioVolumeDown: VolumeAction.down,
+  LogicalKeyboardKey.audioVolumeMute: VolumeAction.toggleMute,
+};
+
 /// The whole window around the frame. In kiosk mode Escape calls [onLeaveKiosk] and the pointer hides after
 /// [cursorHideAfter] without movement. A drag on a widget calls [onDragStart], which hands the window to the window
 /// manager to move. A right-click, a two-finger tap or the menu key calls [onMenu] with the window position; the left
-/// and right arrow keys call [onStep]. The tree is the same in every mode, so switching keeps the page's state.
+/// and right arrow keys call [onStep]; the volume keys call [onVolume], where the system passes them to the app. The
+/// tree is the same in every mode, so switching keeps the page's state.
 class WindowSurface extends StatefulWidget {
   const WindowSurface({
     super.key,
@@ -31,6 +39,7 @@ class WindowSurface extends StatefulWidget {
     this.onMenu,
     this.onDismiss,
     this.onStep,
+    this.onVolume,
     this.timer,
   });
 
@@ -49,6 +58,9 @@ class WindowSurface extends StatefulWidget {
 
   /// Moves between the active skill's pages: -1 back, 1 forward.
   final void Function(int delta)? onStep;
+
+  /// Volume up, down and mute: sent on the bus, so the PHAL volume plugin changes the level.
+  final void Function(VolumeAction action)? onVolume;
 
   /// Tests pass manual timers; the app uses real ones.
   final TimerFactory? timer;
@@ -94,6 +106,8 @@ class _WindowSurfaceState extends State<WindowSurface> {
       const SingleActivator(LogicalKeyboardKey.arrowRight): () => step(1),
     },
     if (widget.onMenu case final menu?) const SingleActivator(LogicalKeyboardKey.contextMenu): () => menu(_centre),
+    if (widget.onVolume case final volume?)
+      for (final MapEntry(key: key, value: action) in volumeKeys.entries) SingleActivator(key): () => volume(action),
   };
 
   void _escape() {

@@ -1,5 +1,5 @@
 /// The 480 x 800 frame the screen scales into the window: the page with its pager, the attention face, captions, the
-/// status row (offline, outcome, notifications), the command box and its homescreen button, and try-on mode on top
+/// status row (offline, outcome, volume, notifications), the command box and its homescreen button, and try-on mode on top
 /// (it owns the gestures while active).
 library;
 
@@ -19,6 +19,7 @@ import 'pages/router.dart';
 import 'shell_overlays.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
+import 'volume.dart';
 import 'widgets/caption_strip.dart';
 import 'widgets/command_box.dart';
 import 'widgets/notification_actions.dart';
@@ -28,6 +29,7 @@ import 'widgets/notification_popups.dart';
 import 'widgets/notification_stack.dart';
 import 'widgets/offline_pill.dart';
 import 'widgets/outcome_pill.dart';
+import 'widgets/volume_indicator.dart';
 
 const _pagePadding = 32.0;
 const _sidePadding = 24.0;
@@ -44,6 +46,7 @@ class FrameParts {
     required this.connected,
     required this.captions,
     required this.outcome,
+    required this.volume,
     required this.popups,
     required this.notifications,
     required this.notificationList,
@@ -67,6 +70,7 @@ class FrameParts {
   /// Null when captions are turned off.
   final Captions? captions;
   final OutcomeModel outcome;
+  final VolumeModel volume;
   final NotificationPopups popups;
 
   /// What a tap on a popup or its close button sends.
@@ -141,6 +145,7 @@ class ScreenFrame extends StatelessWidget {
     children: [
       if (!parts.connected) const OfflinePill(),
       OutcomePill(outcome: parts.outcome.showing),
+      VolumeIndicator(showing: parts.volume.showing, level: parts.volume.level, muted: parts.volume.muted),
     ],
   );
 

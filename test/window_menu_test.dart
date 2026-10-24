@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/face_spec.dart';
+import 'package:ovos_gui_visage/volume_controls.dart';
 import 'package:ovos_gui_visage/window/status_menu.dart';
 import 'package:ovos_gui_visage/window/window_config.dart';
 import 'package:ovos_gui_visage/window/window_menu.dart';
@@ -17,6 +18,7 @@ Widget _app(
   double size = 600,
   bool ready = true,
   void Function(int)? onStep,
+  void Function(VolumeAction)? onVolume,
   VoidCallback? onLeave,
   Widget child = const ColoredBox(color: Colors.black),
 }) => MaterialApp(
@@ -29,6 +31,7 @@ Widget _app(
         onMenu: host.open,
         onDismiss: host.dismiss,
         onStep: onStep,
+        onVolume: onVolume,
         child: WindowMenu(host: host, ready: ready, child: child),
       ),
     ),
@@ -38,7 +41,7 @@ Widget _app(
 void main() {
   test('inside the window, the menu has no hide, and no quit in a browser', () {
     final desktop = windowMenuEntries(_items, canQuit: true);
-    expect(_titles(desktop).take(2), ['Type a command…', '-']);
+    expect(_titles(desktop).take(3), ['Type a command…', 'Volume', '-']);
     expect(_titles(desktop).last, 'Quit OVOS Visage');
     final web = windowMenuEntries(_items, canQuit: false);
     expect(_titles(web).last, 'Face picker…');
@@ -138,6 +141,32 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
     await tester.pumpAndSettle();
     expect(find.text('Full screen'), findsOneWidget);
+  });
+
+  testWidgets('the volume keys act where the system passes them on; nothing else hears them', (tester) async {
+    final actions = <VolumeAction>[];
+    final steps = <int>[];
+    final host = WindowMenuHost(onSelected: (_) {}, canQuit: true)..show(_items);
+    await tester.pumpWidget(_app(host, onStep: steps.add, onVolume: actions.add));
+    await tester.sendKeyEvent(LogicalKeyboardKey.audioVolumeUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.audioVolumeDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.audioVolumeMute);
+    expect(actions, [VolumeAction.up, VolumeAction.down, VolumeAction.toggleMute]);
+    expect(steps, isEmpty);
+  });
+
+  testWidgets('the in-window menu opens the volume submenu and hands back Volume up', (tester) async {
+    final selected = <String>[];
+    final host = WindowMenuHost(onSelected: selected.add, canQuit: true)..show(_items);
+    await tester.pumpWidget(_app(host));
+    await tester.pump(menuSettle);
+    host.open(const Offset(50, 50));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Volume'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Volume up'));
+    await tester.pumpAndSettle();
+    expect(selected, [volumeUpItem]);
   });
 
   testWidgets('in kiosk, Escape closes an open menu first and leaves kiosk only when nothing is open', (tester) async {

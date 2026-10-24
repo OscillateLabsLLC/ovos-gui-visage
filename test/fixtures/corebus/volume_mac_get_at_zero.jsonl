@@ -1,0 +1,1 @@
+{"note": "recorded 2026-10-23 from the live core bus on macOS with the output volume at 0: ovos-phal-plugin-mac 0.2.4 sends no mycroft.volume.get.response (its handler skips a falsy volume); nothing followed within 3 s", "type": "mycroft.volume.get", "data": {}, "context": {"source": "volume-probe"}, "after_send_s": 0.001}

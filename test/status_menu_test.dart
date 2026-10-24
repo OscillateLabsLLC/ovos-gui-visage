@@ -10,12 +10,15 @@ import 'faults.dart';
 
 const _state = StatusMenuState(mode: WindowMode.float, peek: true, visible: true, face: FaceSpec.visage);
 
-StatusMenuState _with({WindowMode? mode, bool? peek, bool? visible, FaceSpec? face}) => StatusMenuState(
-  mode: mode ?? _state.mode,
-  peek: peek ?? _state.peek,
-  visible: visible ?? _state.visible,
-  face: face ?? _state.face,
-);
+StatusMenuState _with({WindowMode? mode, bool? peek, bool? visible, FaceSpec? face, double? volume, bool muted = false}) =>
+    StatusMenuState(
+      mode: mode ?? _state.mode,
+      peek: peek ?? _state.peek,
+      visible: visible ?? _state.visible,
+      face: face ?? _state.face,
+      volume: volume,
+      muted: muted,
+    );
 
 MenuEntry _item(List<MenuEntry> items, String id) => items.firstWhere((i) => i.id == id);
 
@@ -32,6 +35,7 @@ void main() {
       [
         'Type a command…',
         'Hide face',
+        'Volume',
         '-',
         'Peek mode',
         'Float above windows',
@@ -124,12 +128,35 @@ void main() {
     expect(_checked(_item(items, 'colours')), isEmpty);
   });
 
+  test('the volume submenu: up, down and a mute check; its title carries the level once a plugin has reported', () {
+    var volume = _item(buildStatusMenu(_state), volumeItem);
+    expect([for (final c in volume.children) c.title], ['Volume up', 'Volume down', 'Mute']);
+    expect([for (final c in volume.children) c.id], [volumeUpItem, volumeDownItem, muteItem]);
+    expect([volume.title, _checked(volume)], ['Volume', isEmpty]);
+    expect([for (final c in volume.children) isCheckable(c)], [false, false, true]);
+    volume = _item(buildStatusMenu(_with(volume: 0.38)), volumeItem);
+    expect(volume.title, 'Volume (38%)');
+    volume = _item(buildStatusMenu(_with(volume: 0.38, muted: true)), volumeItem);
+    expect(
+      [volume.title, _checked(volume)],
+      [
+        'Volume (muted)',
+        [muteItem],
+      ],
+    );
+  });
+
+  test('the in-window menu keeps the volume submenu', () {
+    final items = windowMenuEntries(buildStatusMenu(_state), canQuit: true);
+    expect(_item(items, volumeItem).children, hasLength(3));
+  });
+
   test('the JSON the runner reads', () {
     final json = [for (final i in buildStatusMenu(_state)) i.toJson()];
     expect(json[0], {'id': 'type', 'title': 'Type a command…', 'checked': false, 'enabled': true});
     expect(json[1], {'id': 'visible', 'title': 'Hide face', 'checked': false, 'enabled': true});
-    expect(json[2], {'separator': true});
-    expect((json[8]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
+    expect(json[3], {'separator': true});
+    expect((json[9]['children']! as List).first, {'id': 'face.visage', 'title': 'Visage', 'checked': true, 'enabled': true});
   });
 
   group('controller', () {
@@ -157,6 +184,7 @@ void main() {
           applyPreset: (n) => calls.add('preset $n'),
           applyColours: (n) => calls.add('colours $n'),
           openPicker: () => calls.add('picker'),
+          volume: (a) => calls.add('volume ${a.name}'),
           quit: () => calls.add('quit'),
         ),
       );
@@ -187,6 +215,9 @@ void main() {
         'face.mark1',
         'colours.mint',
         pickerItem,
+        volumeUpItem,
+        volumeDownItem,
+        muteItem,
         quitItem,
       ]) {
         menu.dispatch(id);
@@ -201,17 +232,20 @@ void main() {
         'preset mark1',
         'colours mint',
         'picker',
+        'volume up',
+        'volume down',
+        'volume toggleMute',
         'quit',
       ]);
     });
 
     test('an unknown id, preset or colourway is reported and does nothing', () async {
       final faults = await collectFaults(() async {
-        for (final id in ['nope', 'face.nope', 'colours.nope', 'face', '']) {
+        for (final id in ['nope', 'face.nope', 'colours.nope', 'face', '', volumeItem]) {
           menu.dispatch(id);
         }
       });
-      expect(faults, hasLength(5));
+      expect(faults, hasLength(6));
       expect(calls, isEmpty);
     });
   });
