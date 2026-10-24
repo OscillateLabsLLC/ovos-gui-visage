@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.4.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.3.0...v2.4.0) (2026-10-24)
+
+
+### Features
+
+* **notifications:** stored notification list ([dc6ba4d](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/dc6ba4dc71b0fad94b3ac7704f72fb2030df6561))
+* **notifications:** stored notification list ([7ba3cbf](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7ba3cbfeccde0471b937f137eb166111a67184ae))
+* **volume:** on-screen volume display and volume controls over the bus ([aab2923](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/aab2923bf70ee55981f982aaac7129ff6abbf033))
+* **volume:** on-screen volume display and volume controls over the bus ([97b9d3c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/97b9d3cb12cdad9c5d76b0be15b12b19d7c03607))
+
 ## [2.3.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.2.0...v2.3.0) (2026-10-24)
 
 
