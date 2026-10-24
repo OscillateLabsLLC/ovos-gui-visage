@@ -12,6 +12,7 @@ git clone https://github.com/OscillateLabsLLC/ovos-gui-visage
 cd ovos-gui-visage
 just sync          # flutter pub get
 just test          # flutter test
+just conformance   # docs/GUI1_CONFORMANCE.md matches the template names
 just lint          # dart format check + flutter analyze
 just run           # flutter run -d macos
 ```

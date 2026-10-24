@@ -11,6 +11,10 @@ sync:
 test:
     flutter test
 
+# Check docs/GUI1_CONFORMANCE.md against the template names
+conformance:
+    flutter test test/conformance_test.dart
+
 # Format check and static analysis
 lint:
     dart format --output=none --set-exit-if-changed --line-length 130 lib test tool

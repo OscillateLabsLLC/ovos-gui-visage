@@ -532,6 +532,7 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 
 ```bash
 just test      # flutter test
+just conformance  # docs/GUI1_CONFORMANCE.md matches the template names
 just lint      # dart format check + flutter analyze
 just run       # flutter run -d macos
 ```
