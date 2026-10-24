@@ -112,6 +112,21 @@ menu bar for everything else ([As a desktop widget](#as-a-desktop-widget)); on L
 and the clock shows. If the face never reacts, check that the GUI service is listening on port
 18181 (`lsof -iTCP:18181 -sTCP:LISTEN` on macOS, `ss -ltn | grep 18181` on Linux).
 
+## GUI protocol
+
+Visage talks to stock `ovos-gui` (the legacy protocol, port 18181) or to the OVOS-GUI-1 adapter
+`ovos-gui-plugin-visage` (port 18182, path `/gui1`). By default it tries the adapter first, for up to 3 seconds, and
+falls back to `ovos-gui`. Each new connection tries again. The menu shows which one is in use.
+
+| Config file key | Environment | Values | Default |
+|---|---|---|---|
+| `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
+| `gui1Url` | `VISAGE_GUI1_URL` | the adapter's `ws://` URL | `ws://<bus host>:18182/gui1` |
+| | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
+
+The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
+GUI-1 path is a prototype: pages show and the face follows, but buttons inside pages do nothing on it yet.
+
 ## How it works
 
 - **Seam.** `lib/protocol/` announces `framework: html` on the core bus, gets the port, opens

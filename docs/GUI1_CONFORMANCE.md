@@ -22,7 +22,7 @@ reads and the keys that no test drives.
 |---|---|---|---|---|---|
 | `SYSTEM_idle` | §3.4, line 217; §6.9, lines 718–740 | none | — | — | In the unimplemented set. Visage routes only the homescreen skill's `idle` page (`lib/pages/router.dart` line 36). Finding F4, F9. |
 | `SYSTEM_loading` | §3.4, line 218 | partial | `lib/pages/loading_page.dart`, `lib/pages/templates_model.dart` | `test/template_names_test.dart`, `test/templates_model_test.dart` | Reads `label`. Unchecked: no page test drives `label`. |
-| `SYSTEM_status` | §3.4, line 219 | partial | `lib/pages/status_page.dart`, `lib/pages/templates_model.dart` | `test/template_names_test.dart`, `test/templates_model_test.dart`, `test/template_pages_test.dart` | Reads `label`, `success` and the legacy `status`. `success` is tested in the model only; the page test uses legacy `status`. |
+| `SYSTEM_status` | §3.4, line 219 | partial | `lib/pages/status_page.dart`, `lib/pages/templates_model.dart` | `test/template_names_test.dart`, `test/templates_model_test.dart`, `test/template_pages_test.dart`, `test/gui1_apply_test.dart` | Reads `label`, `success` and the legacy `status`. `success: true` reaches the page from a GUI-1 fixture (`test/gui1_apply_test.dart`, `status_events`); `success: false` is tested in the model only. |
 | `SYSTEM_error` | §3.4, line 220 | none | — | — | In the unimplemented set. |
 | `SYSTEM_text` | §3.4, line 226 | partial | `lib/pages/text_frame_page.dart`, `lib/pages/templates_model.dart` | `test/template_names_test.dart`, `test/template_pages_test.dart` | Reads `text`, `title`, which is the full spec list. Unchecked: no test is written from the spec's key list. |
 | `SYSTEM_image` | §3.4, line 227; §3.5, lines 304–317 | partial | `lib/pages/image_frame_page.dart`, `lib/pages/templates_model.dart` | `test/template_names_test.dart`, `test/templates_model_test.dart`, `test/template_pages_test.dart` | Reads `image`, `caption`, `title`, `fill`, `background_color`. Unchecked: `background_color` (fixture only). Also accepts absolute paths (`templates_model.dart` line 25), which §3.5 does not require. |
@@ -37,7 +37,7 @@ reads and the keys that no test drives.
 | `SYSTEM_media_player` | §3.4, line 241 | none | — | — | In the unimplemented set. Finding F10. |
 | `SYSTEM_clock` | §3.4, line 259 | none | — | — | In the unimplemented set. |
 | `SYSTEM_timer` | §3.4, line 260 | none | — | — | In the unimplemented set. Finding F8. |
-| `SYSTEM_weather` | §3.4, line 261 | none | — | — | In the unimplemented set. |
+| `SYSTEM_weather` | §3.4, line 261 | none | — | — | In the unimplemented set. Over GUI-1 it shows the fallback with one report (`text_then_weather` fixture). |
 | `SYSTEM_map` | §3.4, line 262 | none | — | — | In the unimplemented set. |
 | `SYSTEM_face` | §3.4, line 263 | partial | `lib/pages/system_face_page.dart` | `test/template_names_test.dart` | Reads `sleeping` (any truthy value, not only a boolean). Unchecked: `sleeping`. |
 | `SYSTEM_confirm` | §3.4, lines 288–302 | done | `lib/pages/template_names.dart` | `test/template_names_test.dart` | Reserved. Routes as unknown with no fault, as does `Confirm.qml`. Finding F11. |
@@ -47,8 +47,8 @@ reads and the keys that no test drives.
 
 ## Adapter MUST (§8.4)
 
-Visage is the client. The adapter that carries these clauses is `ovos-gui-plugin-visage` (plan phase 2), which does
-not exist yet. A clause is `partial` only where Visage already does the client half.
+Visage is the client. The adapter that carries these clauses is `ovos-gui-plugin-visage` (plan phase 2), which is
+being written. A clause is `partial` only where Visage already does the client half.
 
 | Item | Spec reference | Status | Visage files | Test | Notes |
 |---|---|---|---|---|---|
@@ -56,10 +56,10 @@ not exist yet. A clause is `partial` only where Visage already does the client h
 | Construct quickly, non-blocking, server loop on a background thread | §8.4, lines 848–849; §6.2 | none | — | — | Adapter not written. |
 | No exception escapes a handler or hook | §8.4, line 850; §6.6 | none | — | — | Adapter not written. |
 | Never block the dispatch path; never mutate GUI-service state | §8.4, lines 851–852; §6.6 | none | — | — | Adapter not written. |
-| Per-session events go to clients on that `session_id`; `"default"` is not a wildcard | §8.4, lines 853–854; §5.1 | none | — | — | No `session_id` anywhere in `lib/`. |
-| Never fail on a template it cannot render: render, or decline as a no-op | §8.4, lines 855–856; §6.5 | partial | `lib/pages/router.dart`, `lib/pages/template_names.dart` | `test/template_names_test.dart`, `test/router_test.dart` | Client half: every known template without a page and every unknown name shows the fallback page and never throws. Adapter half not written. |
-| Never fail on a status event it does not recognise | §8.4, line 857; §5.3 | none | — | — | Adapter not written. Visage does not read the §5.3 `ovos.*` set yet. Cannot tell from code how an unknown core-bus topic is handled; no test covers it. |
-| Release per-namespace state on namespace-deactivated | §8.4, line 858; §6.6, lines 690–692 | partial | `lib/state/gui_state.dart` | `test/gui_state_test.dart` | Legacy path only: `mycroft.session.list.remove` clears the namespace's pages (lines 150–160) but keeps its data. No GUI-1 namespace-deactivated event yet. |
+| Per-session events go to clients on that `session_id`; `"default"` is not a wildcard | §8.4, lines 853–854; §5.1 | partial | `lib/protocol/gui1_frames.dart`, `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart`, `test/gui1_client_test.dart` | Client half: Visage declares `default` in `hello`, refuses a `welcome` for another session, and reports and ignores a frame for another session. The session is not configurable yet (plan P3.7). Adapter half in `ovos-gui-plugin-visage`. |
+| Never fail on a template it cannot render: render, or decline as a no-op | §8.4, lines 855–856; §6.5 | partial | `lib/pages/router.dart`, `lib/pages/template_names.dart`, `lib/state/gui1_apply.dart` | `test/template_names_test.dart`, `test/router_test.dart`, `test/gui1_apply_test.dart` | Client half: every known template without a page and every unknown name shows the fallback page and never throws. Over GUI-1 an unknown `SYSTEM_` name is also reported once (`TemplateGaps.unknown`, `unknown_template` fixture). Adapter half in `ovos-gui-plugin-visage`. |
+| Never fail on a status event it does not recognise | §8.4, line 857; §5.3 | partial | `lib/screen_link.dart`, `lib/attention.dart` | `test/gui1_apply_test.dart` | Client half: a GUI-1 `status` frame goes to `Attention`, which ignores a topic it does not know with no fault and no state change. Visage does not read most of the §5.3 `ovos.*` set yet (plan P3.6). Adapter half in `ovos-gui-plugin-visage`. |
+| Release per-namespace state on namespace-deactivated | §8.4, line 858; §6.6, lines 690–692 | partial | `lib/state/gui_state.dart`, `lib/state/gui1_apply.dart` | `test/gui_state_test.dart`, `test/gui1_apply_test.dart` | Client half: a GUI-1 `deactivated` frame drops the namespace, its page and its data (`two_namespaces_deactivate` fixture). The legacy path still keeps the data: `mycroft.session.list.remove` clears only the pages. Adapter half in `ovos-gui-plugin-visage`. |
 
 ## Adapter SHOULD (§8.5)
 
@@ -68,4 +68,19 @@ not exist yet. A clause is `partial` only where Visage already does the client h
 | Degrade an unrenderable template to the nearest renderable presentation | §8.5, lines 862–863; §6.5 | none | `lib/pages/fallback_page.dart` | — | The fallback page is a debug dump of the session data, not a degraded presentation. |
 | Broadcast status events and device-wide signals to all clients | §8.5, lines 864–865; §5.3 | none | — | — | Adapter not written; no sessions in Visage. |
 | Report connection status | §8.5, lines 866–867; §6.8 | none | — | — | Adapter not written. OPM's adapter base has no hook for it (plan section 1.4). |
-| Re-read state from the query surface, do not cache `data` | §8.5, lines 868–869; §6.6, §6.7 | none | — | — | Adapter not written. |
+| Re-read state from the query surface, do not cache `data` | §8.5, lines 868–869; §6.6, §6.7 | partial | `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart` | Client half: every `template`, `session_update` and `snapshot` replaces the namespace's data with the full map; Visage never merges. Adapter half in `ovos-gui-plugin-visage`. |
+
+## GUI-1 wire client (WIRE.md)
+
+Not spec clauses: the adapter ⇄ Visage protocol (`gui1-upstream/WIRE.md`, plan section 2.2), which the spec leaves to
+the backend (§1, §8.6).
+
+| Item | Spec reference | Status | Visage files | Test | Notes |
+|---|---|---|---|---|---|
+| `hello` first; `welcome` within 3 s; `error` or anything else ends the probe | WIRE.md, Handshake | done | `lib/protocol/gui1_client.dart`, `lib/protocol/gui1_frames.dart` | `test/gui1_client_test.dart`, `test/gui1_frames_test.dart` | A mismatched protocol, version or session in `welcome` is also a failed probe. Tested against a scripted socket and a real local websocket. |
+| Every server frame decoded into a typed event | WIRE.md, Server → client frames | done | `lib/protocol/gui1_frames.dart` | `test/gui1_frames_test.dart` | An unknown type or a bad field is reported with the payload; the socket stays. |
+| `template` before `activated` activates; `session_update` for an unseen namespace | WIRE.md, Server → client frames | done | `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart` | |
+| `snapshot` replaces the session's state, index 0 on top, `template: null` holds data only | WIRE.md, Server → client frames | done | `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart` | `snapshot_late_joiner` fixture. |
+| `idle` empties the stack | WIRE.md, Server → client frames | done | `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart` | The screen goes blank under the full face. The backend-owned resting display is plan P3.5. |
+| `protocol: auto, gui1, legacy`; `VISAGE_PROTOCOL`, `VISAGE_GUI1_URL` | WIRE.md, Client behaviour | done | `lib/app_config.dart`, `lib/protocol/wire_protocol.dart` | `test/app_config_test.dart`, `test/gui1_frames_test.dart` | |
+| `auto` falls back to legacy; no switch mid-run; a reconnect probes again; the choice is logged and in the menu | WIRE.md, Client behaviour | done | `lib/protocol/gui_link.dart`, `lib/window/status_menu.dart` | `test/gui1_client_test.dart`, `test/status_menu_test.dart` | Not verified live against legacy ovos-gui after this change (Visage was never pointed at Mike's OVOS). |

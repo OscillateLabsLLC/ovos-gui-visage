@@ -25,6 +25,7 @@ visual reference; this file records what changes in the port and why.
 ```
 ovos-core ──core bus 8181──▶ ovos-gui-service ──GUI ws 18181──▶ ovos-gui-visage (Dart)
 skills, homescreen                 ▲ ovos.widgets.* translation       GuiClient, GuiState, WidgetManager
+                                   └─ or GUI-1 adapter ──ws 18182/gui1──▶ Gui1Client (Protocols below)
                                                                       pages, face, attention
                                                                       ~/.cache/ovos_gui read directly
 ```
@@ -54,6 +55,35 @@ test/
   fixtures/*.jsonl     the recorded protocol traffic from ovos-visage, unchanged
   fixtures/expected/   the Python reference's state snapshot per fixture; gui_state_test requires a match
 ```
+
+## Protocols (2026-10-24)
+
+Visage speaks one of two GUI protocols per connection. Both fill the same `GuiState`, so the router, the pages and the
+face do not know which one is in use.
+
+| Protocol | Server | Socket | Client code |
+|---|---|---|---|
+| legacy | ovos-gui 1.x (`mycroft.gui.connected` on the core bus, then the port it names) | `ws://<host>:18181/gui` | `lib/protocol/gui_client.dart`, `GuiState.apply` |
+| GUI-1 | `ovos-gui-plugin-visage`, an OVOS-GUI-1 adapter (`gui1-upstream/WIRE.md`, plan section 2.2) | `ws://<host>:18182/gui1` | `lib/protocol/gui1_client.dart`, `lib/state/gui1_apply.dart` |
+
+`lib/protocol/gui_link.dart` chooses. With `auto`, the default, it opens the GUI-1 endpoint before every connection
+and sends `hello`. A `welcome` within 3 s selects GUI-1 for that connection. A refused connection, a timeout or an
+`error` selects legacy. The choice is logged and the menu shows it ("Protocol: GUI-1" or "Protocol: legacy"). Visage
+does not switch while a connection holds; a reconnect probes again. With `gui1`, Visage retries the adapter only. With
+`legacy`, `GuiClient` runs as before and nothing probes.
+
+| Config key | Environment | Values | Default |
+|---|---|---|---|
+| `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
+| `gui1Url` | `VISAGE_GUI1_URL` | a `ws://` or `wss://` URL | the bus host, port 18182, path `/gui1`; the sidecar's `/gui1` on the web |
+| — | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port (desktop) | `127.0.0.1`, `8181` |
+
+Under GUI-1 a namespace holds exactly one page, named with its spec template (`SYSTEM_text`), and its data is the full
+map of the last frame; Visage never merges. `deactivated` drops the namespace, `idle` empties the stack, a `snapshot`
+replaces it, and `status` frames drive the face. An unknown `SYSTEM_` name is reported once and shows the fallback.
+GUI-1 has no reply leg, so page controls and page focus are logged and not sent on it (finding F14); typed commands,
+volume and notification actions use the core bus and work on both protocols. Fixtures: `test/fixtures/gui1/`, written
+from WIRE.md.
 
 ## What ports how
 
