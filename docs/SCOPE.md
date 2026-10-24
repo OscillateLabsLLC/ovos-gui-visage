@@ -14,9 +14,9 @@ visual reference; this file records what changes in the port and why.
 | Deployment | Same-host display: the app runs on the machine that runs OVOS and reads `~/.cache/ovos_gui` directly. |
 | Remote use | The web build, served from a sidecar container on the OVOS host, instead of a phone app. The sidecar proxies the two websockets, so its port is the only one exposed and the place to put authentication and TLS; the bus itself stays off the LAN. |
 | Middle layer | None on desktop. The Dart app is the GUI client, the state mirror and the WidgetManager. The web build needs the sidecar (`sidecar/`) to serve the cache, since ovos-gui 1.5.3a1 has no file server. |
-| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required. |
+| Webviews | `SYSTEM_HtmlFrame` and `SYSTEM_UrlFrame` are gated per platform, best effort: webview_flutter on macOS, an iframe on the web, text fallbacks elsewhere. No Linux webview is required. Kept for legacy compatibility only: upstream (the GUI-1 spec work) recommends against `show_url` / `show_html`, nothing in the OpenVoiceOS org uses them, and they are being deprecated, so the current support stays and is not extended (issue #27). |
 | Face | Composed from an eye style, a mouth style and a backdrop that places them; nine eye styles, eight mouth styles, a regular or large mouth (`docs/FACE_PALETTES.md`). `visage` and `mark1` are presets. Chosen by `face` in config or `VISAGE_FACE`, and changed while running from the picker page over the bus (`visage.face.*`) or by hand in try-on mode. |
-| Input | Display-only, as before. Touch is additive later; pages are plain widgets with no gesture plumbing. |
+| Input | Touch and pointer, decided 2026-10-23: Visage lets a user do what the Qt GUI (mycroft-gui-qt5, ovos-shell and the stock skills' QML) let them do by touch or mouse. Pages hold plain controls that answer through the GUI socket; the shell owns every gesture (see Input below). Until then it was display-only, so that the port could reach parity with ovos-visage without a gesture layer in every page; try-on mode and the peek badge's tap were the only input. |
 | macOS sandbox | Off. The app opens local sockets and reads the GUI cache; it is a kiosk display, not an App Store app. Signed with the Oscillate Labs LLC team. |
 | Linux | Built and tested in CI only until a desktop is available; the workflow pattern comes from neon-node-flutter-app. |
 
@@ -156,6 +156,41 @@ test/
    is both the design preview and, served by the sidecar or opened with `?bus=`, the picker that
    drives the device. Try-on mode (`try_on.dart`) is the first gesture surface: long-press,
    swipe to cycle, swipe the mouth vertically for size, tap to keep.
+9. **Input** (2026-10-23): pages answer back (Input above). The in-window menu (#14), typed commands,
+   SYSTEM_InputBox answers and page swipes come first; skill controls (OCP transport, alerts, notifications)
+   follow on top.
+
+## Input (2026-10-23)
+
+Pages answer the way Qt pages did: a control calls `PageContext.trigger(event, parameters)`, which sends
+`mycroft.events.triggered` on the GUI socket in the page's namespace (`lib/protocol/gui_events.dart`), and
+ovos-gui (bus.py `on_message`) emits `<namespace>.<event>` on the core bus. Two event names are ovos-gui's own:
+`page_gained_focus` becomes `gui.page_gained_focus` (ovos-gui focuses the page and echoes the event to every
+client) and `system.gui.user.interaction`, sent in the `system` namespace, becomes `gui.page_interaction` (it
+restarts the namespace's removal timer). Typed commands go straight onto the core bus as `recognizer_loop:utterance`.
+Every outgoing shape has a recorded fixture in `test/fixtures/outgoing/`.
+
+Pages never read raw pointers or keys. The shell owns the gestures, and they mean the same in every mode where they
+apply:
+
+| Gesture | window | float / desktop, expanded | float / desktop, collapsed badge | kiosk |
+|---|---|---|---|---|
+| Click or tap a control in a page | activates it | activates it | (no page shows) | activates it |
+| Click or tap the badge | | | expands for 10 s | |
+| Drag on empty surface | nothing | moves the widget; it snaps to the nearest corner | moves the widget | nothing |
+| Clearly horizontal drag (2:1) on a skill with 2+ pages | next or previous page | next or previous page | | next or previous page |
+| Left and right arrow keys | next or previous page | next or previous page | | next or previous page |
+| Chevrons in the bottom corners | | | | next or previous page |
+| Long press | try-on mode | try-on mode | | try-on mode |
+| Right-click, two-finger tap, Menu key | opens the menu | opens the menu | expands, then opens the menu | opens the menu |
+| Keyboard button on the homescreen | opens the command box | | | opens the command box |
+| Escape | closes the menu or command box | the same | | the same, else leaves kiosk |
+
+A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt delegate did. The menu is the one
+`lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time with
+Flutter's MenuAnchor (`lib/window/window_menu.dart`), without "Hide face" (hiding the window from inside it would
+strand a desktop with no menu bar item or tray) and, in a browser, without "Quit". A peeking widget stays
+expanded while the menu or the command box is up.
 
 ## Verifying a change
 

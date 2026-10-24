@@ -2,6 +2,7 @@
 // face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
 // while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart). A peeking widget shows only
 // the badge until the face is shown (window/peek.dart), and the window follows over the bus (window_remote.dart).
+// Pages answer back through the GUI socket; the menu opens inside the window too, and a command can be typed.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -11,23 +12,16 @@ import 'attention.dart';
 import 'captions.dart';
 import 'face/face.dart';
 import 'face/face_remote.dart';
-import 'face/face_scope.dart';
-import 'face/face_theme.dart';
-import 'face/try_on.dart';
 import 'faults.dart';
 import 'outcome.dart';
-import 'pages/router.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
 import 'protocol/gui_client.dart';
+import 'screen_frame.dart';
+import 'screen_input.dart';
 import 'state/gui_state.dart';
-import 'theme.dart';
 import 'turn_feed.dart';
-import 'widgets/caption_strip.dart';
 import 'widgets/notification_popups.dart';
-import 'widgets/notification_stack.dart';
-import 'widgets/offline_pill.dart';
-import 'widgets/outcome_pill.dart';
 import 'widgets/widget_manager.dart';
 import 'shell_overlays.dart';
 import 'window/desktop_extras.dart';
@@ -39,9 +33,9 @@ import 'window/status_menu_host.dart';
 import 'window/window_config.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
+import 'window/window_menu.dart';
 import 'window/window_surface.dart';
 
-const _pageBg = VisageColors.pageBg;
 const _effects = WindowEffects(mode: setWindowMode, visible: setWindowVisible, place: setWidgetExpanded);
 
 Future<void> main() async {
@@ -113,11 +107,22 @@ class _ScreenState extends State<Screen> {
   late final TrayHost tray = TrayHost(onSelected: (id) => menu.dispatch(id));
   late final WindowDrag drag = WindowDrag(config: () => window.config, onCorner: window.setCorner);
   bool tryOnActive = false;
+  late final ScreenInput input = ScreenInput(
+    state: state,
+    bus: bus,
+    sendGui: (message) => gui.send(message),
+    peek: peek,
+    window: window,
+    dispatchMenu: (id) => menu.dispatch(id),
+    onChanged: _refresh,
+    lang: widget.config.lang,
+  );
   late final StatusMenuController menu = bindStatusMenu(
     face: remote,
     faceController: face,
     window: window,
     show: _showMenu,
+    typeCommand: () => input.typeCommand(),
     quit: quitApp,
   );
   late bool windowExpanded;
@@ -135,10 +140,12 @@ class _ScreenState extends State<Screen> {
 
   void _log(String line) => debugPrint(line);
 
-  /// The macOS menu bar item and the Linux tray item show the same list; each ignores the other platform.
+  /// The macOS menu bar item and the Linux tray item show the same list; each ignores the other platform. The window's
+  /// own menu shows it everywhere.
   void _showMenu(List<MenuEntry> items) {
     menuHost.show(items);
     unawaited(tray.show(items));
+    input.menu.show(items);
   }
 
   /// Try-on mode owns the gestures while it is active, so the widget cannot be dragged then.
@@ -171,6 +178,7 @@ class _ScreenState extends State<Screen> {
   @override
   void dispose() {
     menu.dispose();
+    input.dispose();
     drag.dispose();
     tray.dispose();
     face.removeListener(_refresh);
@@ -229,59 +237,50 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     final collapsed = !peek.expanded;
+    final mode = window.config.mode;
     return WindowSurface(
-      mode: window.config.mode,
+      mode: mode,
       onLeaveKiosk: window.leaveKiosk,
       onDragStart: tryOnActive ? null : drag.start,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Offstage(
-            offstage: collapsed,
-            child: TickerMode(
-              enabled: !collapsed,
-              child: FittedBox(child: _frame()),
-            ),
-          ),
-          if (collapsed) PeekBadge(face: face, onTap: peek.tap),
-        ],
-      ),
-    );
-  }
-
-  Widget _frame() {
-    return SizedBox(
-      width: frameWidth,
-      height: frameHeight,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: FaceScope(
-          controller: face,
-          child: Stack(
-            children: [
-              const Positioned.fill(child: ColoredBox(color: _pageBg)),
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 32, 24, attention.compact ? attentionStrip : 32),
-                  child: PageHost(state: state),
-                ),
+      onMenu: tryOnActive ? null : input.menu.open,
+      onDismiss: input.menu.dismiss,
+      onStep: input.step,
+      child: WindowMenu(
+        host: input.menu,
+        ready: !collapsed,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Offstage(
+              offstage: collapsed,
+              child: TickerMode(
+                enabled: !collapsed,
+                child: FittedBox(child: ScreenFrame(parts: _parts(mode))),
               ),
-              AttentionOverlay(attention: attention, face: face),
-              if (widget.config.captions) CaptionStrip(captions: captions, compact: attention.compact),
-              _topStatus(),
-              FaceTryOn(controller: face, remote: remote, enabled: peek.expanded, onActive: _onTryOn),
-            ],
-          ),
+            ),
+            if (collapsed) PeekBadge(face: face, onTap: peek.tap),
+          ],
         ),
       ),
     );
   }
 
-  Widget _topStatus() => TopStatus(
-    children: [
-      if (!guiConnected) const OfflinePill(),
-      OutcomePill(outcome: outcome.showing),
-      if (popups.all.isNotEmpty) NotificationStack(popups: popups.all),
-    ],
+  FrameParts _parts(WindowMode mode) => FrameParts(
+    state: state,
+    attention: attention,
+    face: face,
+    remote: remote,
+    commands: input.commands,
+    send: gui.send,
+    connected: guiConnected,
+    captions: widget.config.captions ? captions : null,
+    outcome: outcome,
+    popups: popups,
+    expanded: peek.expanded,
+    kiosk: mode == WindowMode.kiosk,
+    typeOnHome: mode == WindowMode.window || mode == WindowMode.kiosk,
+    onStep: input.step,
+    onInteract: input.interact,
+    onTryOn: _onTryOn,
   );
 }

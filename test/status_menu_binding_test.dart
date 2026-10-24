@@ -26,6 +26,7 @@ void main() {
     late List<List<MenuEntry>> shown;
     late StatusMenuController menu;
     var quits = 0;
+    var types = 0;
     var pickers = 0;
 
     setUp(() {
@@ -36,7 +37,14 @@ void main() {
       const effects = WindowEffects(mode: _noMode, visible: _noVisible);
       window = WindowRemote(bus, peek, initial: config, persist: (_) async {}, effects: effects);
       shown = [];
-      menu = bindStatusMenu(face: face, faceController: face.controller, window: window, show: shown.add, quit: () => quits++);
+      menu = bindStatusMenu(
+        face: face,
+        faceController: face.controller,
+        window: window,
+        show: shown.add,
+        typeCommand: () => types++,
+        quit: () => quits++,
+      );
     });
 
     test('menu choices act through the remotes, which announce them, and the menu follows', () {
@@ -47,16 +55,18 @@ void main() {
       menu.dispatch(peekItem);
       menu.dispatch(pickerItem);
       menu.dispatch(quitItem);
+      menu.dispatch(typeItem);
       expect(face.spec.presetName, 'mark1');
       expect(face.spec.colours, FacePalette.ice);
       expect(window.config.mode, WindowMode.desktop);
       expect(window.visible, isFalse);
       expect(window.config.peek, isFalse);
       expect(quits, 1);
+      expect(types, 1);
       expect(pickers, 1);
       expect(bus.types.toSet(), {faceStateMessage, windowStateMessage});
       expect(shown, hasLength(6));
-      expect(shown.last.first.title, 'Show face');
+      expect(shown.last.firstWhere((i) => i.id == visibleItem).title, 'Show face');
     });
 
     test('a change over the bus rebuilds the menu', () {

@@ -211,6 +211,34 @@ dot shows the style: blue for `info`, amber for `warning`, green for `success`, 
 At most three show at a time; a "+2 more" line counts the rest. Notifications are display-only: you
 cannot tap one to close it or to run its action yet.
 
+## Touch and pointer
+
+You can use the screen with a mouse or a touch screen, as you could with the Qt GUI.
+
+- **Menu**: right-click anywhere in the window, tap with two fingers, or press the Menu key. The same menu as
+  the menu bar item and the Linux tray opens inside the window, on every platform, the web build too. So a
+  desktop with no tray, such as stock GNOME or a Raspberry Pi, can still change the mode, leave kiosk and quit.
+  The menu inside the window has no **Hide face**, because you could not get the window back without a tray,
+  and in a browser it has no **Quit**. On a collapsed peek badge, the window opens first, then the menu.
+- **Type a command**: choose **Type a command…** in the menu, or, in `window` and `kiosk` mode, click the
+  keyboard button at the bottom right of the homescreen. Type and press Enter; Escape or ✕ closes the box. The
+  command goes to OVOS as if you had said it (`recognizer_loop:utterance`). It is sent in the language set by
+  `"lang"` in the config file or `VISAGE_LANG` (for example `en-US`). Without one, OVOS uses its own default
+  language.
+- **Pages**: when a skill shows more than one page, swipe left or right across the page, or press the left and
+  right arrow keys. In kiosk mode, arrows in the bottom corners do the same. The swipe must be clearly sideways:
+  on a widget, any other drag still moves the window.
+- **Input box**: when a skill asks for text (`show_input_box`), type the answer and press Enter or the confirm
+  button; the exit button closes it. The skill receives the answer as `<skill_id>.input.box.response`.
+
+<p align="center">
+  <img src="docs/screenshots/input/window-menu-right-click-macos.png" alt="The menu inside the window after a right-click" width="300">
+  &nbsp;
+  <img src="docs/screenshots/input/command-box-homescreen-macos.png" alt="The command box on the homescreen with a typed command" width="300">
+  &nbsp;
+  <img src="docs/screenshots/input/peek-badge-menu-macos.png" alt="The menu on a peek widget opened from its collapsed badge" width="160">
+</p>
+
 ## As a desktop widget
 
 By default the app is a desktop widget: a frameless window in the top-right corner, 400 px
@@ -296,8 +324,8 @@ With `"peek": true` (or `VISAGE_PEEK=1`), the widget stays out of the way. At re
 badge, `peekSize` pixels across, in its corner: the resting face, still blinking. When OVOS
 listens, thinks or speaks, the window grows to its full size in the same corner and shows the
 page and the face. Three seconds after the face hides, it shrinks back to the badge. In `float`
-mode, a click or tap on the badge opens the window for ten seconds, and try-on mode keeps it open
-until you tap out. Peek mode applies to `float`
+mode, a click or tap on the badge opens the window for ten seconds, and try-on mode, the menu and the
+command box keep it open until you close them. Peek mode applies to `float`
 and `desktop` only; an ordinary `window` ignores it.
 
 <p align="center">
@@ -344,7 +372,8 @@ when kiosk mode ends or the app quits. On Linux it asks the desktop's screen sav
 on Plasma it shows, after five seconds, in
 `qdbus --literal org.kde.Solid.PowerManagement.PolicyAgent /org/kde/Solid/PowerManagement/PolicyAgent ListInhibitions`.
 
-To leave, press Escape, click **Full screen** again, or send `visage.window.set {"mode": "float"}`.
+To leave, press Escape, click **Full screen** again (in the menu bar or in the menu inside the window), or
+send `visage.window.set {"mode": "float"}`.
 Escape and **Full screen** go back to the mode you were in before kiosk. If the app started in
 kiosk, they go to the mode the config file names, or to `float` if the file says `kiosk`. Kiosk
 is saved like the other modes, so a kiosk screen is still a kiosk after a restart. Peek mode does
@@ -357,8 +386,10 @@ not apply in kiosk.
 ### Menu bar
 
 On macOS, a widget is a menu bar app with no Dock icon. A face icon in the menu bar opens a menu
-that does what the bus does, so the face stays under control without a bus client:
+that does what the bus does, so the face stays under control without a bus client. The same menu opens
+inside the window too (see [Touch and pointer](#touch-and-pointer)).
 
+- **Type a command…**: opens the command box, and shows the window first if it is hidden.
 - **Show face** / **Hide face**: removes the window from the screen and puts it back. A hidden widget
   stays running in the menu bar.
 - **Peek mode**: turns peek on or off and writes it to the config file.

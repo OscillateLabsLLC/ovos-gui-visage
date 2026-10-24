@@ -66,5 +66,9 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   both call `FaceRemote.openPicker`; `lib/window/face_picker*.dart` writes the bundled
   `docs/face-palettes.html` to `faces.html` beside the config plus `open-faces.html`, which redirects to
   `faces.html#bus=…` (macOS drops a file URL's fragment), and the runner's `openUrl` opens the launcher.
-- Pages are display-only. Try-on mode and the collapsed peek badge (a tap) are the only gesture
-  surfaces; no gesture plumbing in pages.
+- Input (`docs/SCOPE.md`, Input): pages hold plain controls (buttons, text fields, sliders) that answer through
+  `PageContext.trigger` (`lib/protocol/gui_events.dart`) and never read raw pointers or keys. The shell owns the
+  gestures: `WindowSurface` (drag-to-move, right-click / two-finger tap / Menu key for the in-window menu, arrow keys),
+  `PagePager` (a clearly horizontal swipe on a multi-page skill, kiosk chevrons, `system.gui.user.interaction`),
+  try-on's long-press and the peek badge's tap. A new gesture gets a row in SCOPE's table first. Every outgoing
+  message has a fixture in `test/fixtures/outgoing/`, recorded from the live bus or labelled as written from source.

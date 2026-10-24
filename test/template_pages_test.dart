@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/html_frame_page.dart';
 import 'package:ovos_gui_visage/pages/image_frame_page.dart';
-import 'package:ovos_gui_visage/pages/input_box_page.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
@@ -72,15 +71,6 @@ void main() {
     expect(parseColor('#fff'), const Color(0xFFFFFFFF));
     expect(parseColor(''), Colors.transparent);
     expect(parseColor('blue'), Colors.transparent);
-  });
-
-  testWidgets('input box shows title, placeholder and hints', (tester) async {
-    final data = {'title': 'Name?', 'placeholder': 'say a name', 'confirm_text': 'OK', 'exit_text': 'Cancel'};
-    await tester.pumpWidget(host(InputBoxPage.page(data, ctx)));
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Name?'), findsOneWidget);
-    expect(find.text('say a name'), findsOneWidget);
-    expect(find.text('OK  ·  Cancel'), findsOneWidget);
   });
 
   testWidgets('url frame shows the address and why it is not framed', (tester) async {

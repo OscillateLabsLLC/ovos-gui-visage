@@ -9,6 +9,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'core_bus.dart';
 
+export 'gui_events.dart';
+
 const framework = 'html';
 const guiRoute = '/gui';
 const portTimeout = Duration(seconds: 10);
@@ -17,14 +19,6 @@ typedef GuiMessageHandler = void Function(Json message);
 typedef GuiStatusHandler = void Function(bool connected);
 
 Json announcement(String guiId) => {'gui_id': guiId, 'framework': framework};
-
-/// ovos-gui reads `parameters` (not `data`) from client events and takes the namespace from `skillId`.
-Json focusMessage(String namespace, int number) => {
-  'type': 'mycroft.events.triggered',
-  'namespace': namespace,
-  'event_name': 'page_gained_focus',
-  'parameters': {'number': number, 'skillId': namespace},
-};
 
 class GuiClient {
   GuiClient({

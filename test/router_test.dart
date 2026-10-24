@@ -41,7 +41,9 @@ void main() {
     });
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: PageHost(state: state)),
+        home: Material(
+          child: PageHost(state: state, send: (_) => true),
+        ),
       ),
     );
     expect(find.text('Odd'), findsOneWidget);

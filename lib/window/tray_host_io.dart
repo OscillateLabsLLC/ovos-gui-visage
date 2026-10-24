@@ -64,12 +64,8 @@ MenuItem _item(MenuEntry entry) {
     final submenu = Menu(items: [for (final child in entry.children) _item(child)]);
     return MenuItem.submenu(key: entry.id, label: entry.title, disabled: !entry.enabled, submenu: submenu);
   }
-  if (_checkable(entry.id)) {
+  if (isCheckable(entry)) {
     return MenuItem.checkbox(key: entry.id, label: entry.title, checked: entry.checked, disabled: !entry.enabled);
   }
   return MenuItem(key: entry.id, label: entry.title, disabled: !entry.enabled);
 }
-
-/// Entries that show a check mark: peek, the modes, and the face and colour choices.
-bool _checkable(String id) =>
-    id == peekItem || id.startsWith('mode.') || id.startsWith(facePrefix) || id.startsWith(coloursPrefix);

@@ -47,6 +47,9 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 - **Drag to move the widget.** Done: a drag hands the window to the window manager, and when it stops the
   widget snaps to the nearest corner, which is saved. No drag starts while try-on mode is active.
+- **Menu without a tray.** Done (2026-10-23, issue #14): a right-click, a two-finger tap or the Menu key opens the
+  same menu inside the window on every platform, the web build too, so stock GNOME and a Pi can change mode, leave
+  kiosk and quit without the bus.
 - **A tray item.** Done: an app indicator (tray_manager 0.5.3, libayatana-appindicator) with the same menu
   as the macOS item and the resting badge as its icon. tray_manager 0.8 was tried first; its
   StatusNotifierItem published no menu on Plasma.
@@ -74,22 +77,33 @@ evidence is needed before it is built. Scope phases 5 and 6 (`SCOPE.md`) stay ah
 
 ## Packaging (2026-10-18)
 
-- The first signed, notarised release needs the owner's one-time setup (`PACKAGING.md`). The
-  Release workflow and the Gatekeeper check have never run with a real certificate; check the first
-  run end to end, then run `brew audit --cask --online` when the release URL exists.
+- The first signed, notarised release: done. v2.0.0 and v2.1.0 ran the Release workflow on 2026-10-23 with the
+  real Developer ID certificate; `spctl` reports "accepted, source=Notarized Developer ID", `stapler validate`
+  passes, and the tap job updated the cask. Still true: pull the local tap clone before
+  `brew audit --cask --online`, or it compares a stale version.
 - Linux has a CI build but no release artifact; the sidecar image is built but not published to a
   registry. Windows is dropped for now (2026-10-18): nobody in the user base runs OVOS on it.
 
 ## Interactive notifications (2026-10-23, left out of the display-only popups)
 
-The popups follow ovos-shell's NotificationPop*.qml except for their input, which SCOPE.md keeps out for now:
+The popups follow ovos-shell's NotificationPop*.qml except for their input. Input is decided now (SCOPE.md, Input,
+2026-10-23); tap to dismiss and actions follow the input foundation in the skill-controls work:
 
 - **Tap to dismiss.** The shell's close button sends `ovos.notification.api.pop.clear.delete` with the popup's
   record. Without it, a sticky popup stays until a skill clears it or the app restarts; no stock skill API clears
   one, so this matters most for stickies.
 - **Notification actions.** A tap on a transient popup in the shell emits the record's `action` with its
-  `callback_data` as a bus message, then closes the popup. Needs an input decision (touch and pointer) first.
+  `callback_data` as a bus message, then closes the popup.
 - **The stored list.** The idle page's count badge opens the shell's notification list; here it is only a count.
+
+## Input (2026-10-23)
+
+- **On-screen keyboard.** The command box and SYSTEM_InputBox take a hardware keyboard, or the system's own
+  on-screen keyboard where the desktop shows one for a focused text field (GNOME can; a bare Pi kiosk or labwc
+  does not). A touch-only kiosk needs either a desktop that offers one or a keyboard drawn in the app.
+- **Pinch to size the mouth in try-on mode** stays open (entry 5); the gesture table in SCOPE.md has room for it.
+- **The two-finger tap** is tested with synthetic touches only; no touch screen was available on the development
+  Mac. Check it on a Pi touch display and a touch laptop.
 
 ## Carried over
 
