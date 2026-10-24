@@ -186,6 +186,8 @@ apply:
 | Right-click, two-finger tap, Menu key | opens the menu | opens the menu | expands, then opens the menu | opens the menu |
 | Keyboard button on the homescreen | opens the command box | | | opens the command box |
 | Escape | closes the menu or command box | the same | | the same, else leaves kiosk |
+| Click or tap the notification count on the homescreen | opens the stored notification list | the same | | the same |
+| In the notification list: arrow keys, Enter or Space, Escape | move between its buttons, press one, close the list (before Escape does anything else) | the same | | the same |
 
 A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt delegate did. The menu is the one
 `lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time with

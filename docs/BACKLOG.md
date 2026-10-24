@@ -95,7 +95,11 @@ The popups follow ovos-shell's NotificationPop*.qml.
   the popup's record.
 - **Notification actions.** Done (2026-10-23): a tap on the text sends the record's `action` with its
   `callback_data`, then closes the popup.
-- **The stored list.** The idle page's count badge opens the shell's notification list; here it is only a count.
+- **The stored list.** Done (2026-10-23): the idle page's count badge opens the stored list, after the homescreen's
+  idle.qml; an item's text runs its action and clears it (`storage.clear.item`), its ✕ and Clear all clear without
+  running actions (`storage.clear.item`, `storage.clear`), unlike the Qt trash and Clear buttons. Each display lists
+  its own WidgetManager's store: with several clients on one OVOS, the homescreen's `notification_model` is whichever
+  client answered `request.storage.model` last (measured 2026-10-23: ovos-visage answers with an empty store).
 
 ## Input (2026-10-23)
 
