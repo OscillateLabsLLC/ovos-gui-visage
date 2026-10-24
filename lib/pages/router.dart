@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 
+import '../faults.dart';
 import '../state/gui_state.dart';
 import '../widgets/notification_list.dart';
 import 'alarms_page.dart';
@@ -24,6 +25,7 @@ import 'page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
 import 'system_face_page.dart';
+import 'template_names.dart';
 import 'text_frame_page.dart';
 import 'time_page.dart';
 import 'timer_page.dart';
@@ -50,21 +52,41 @@ const routes = <String, PageBuilder>{
   'ovos.common_play/Home': OcpListPage.build_,
 };
 
+/// Keyed by canonical name (template_names.dart); a known template missing here shows the fallback, reported.
 const templates = <String, PageBuilder>{
-  'SYSTEM_Face': SystemFacePage.page,
-  'SYSTEM_TextFrame': TextFramePage.page,
-  'SYSTEM_Loading': LoadingPage.page,
-  'SYSTEM_Status': StatusPage.page,
-  'SYSTEM_ImageFrame': ImageFramePage.page,
-  'SYSTEM_AnimatedImageFrame': ImageFramePage.page,
-  'SYSTEM_HtmlFrame': HtmlFramePage.page,
-  'SYSTEM_UrlFrame': UrlFramePage.page,
+  'SYSTEM_face': SystemFacePage.page,
+  'SYSTEM_text': TextFramePage.page,
+  'SYSTEM_loading': LoadingPage.page,
+  'SYSTEM_status': StatusPage.page,
+  'SYSTEM_image': ImageFramePage.page,
+  'SYSTEM_animated_image': ImageFramePage.page,
+  'SYSTEM_html': HtmlFramePage.page,
+  'SYSTEM_url': UrlFramePage.page,
   'SYSTEM_InputBox': InputBoxPage.page,
 };
 
-PageBuilder resolve(Target? target) {
+/// Known templates that have no page yet. Each one is reported the first time it is shown, then falls back quietly.
+class TemplateGaps {
+  final _reported = <String>{};
+
+  PageBuilder fallbackFor(String template) {
+    if (_reported.add(template)) {
+      reportFault('routing $template', UnimplementedError('$template has no page yet'), StackTrace.current);
+    }
+    return FallbackPage.page;
+  }
+}
+
+final templateGaps = TemplateGaps();
+
+/// Exact skill route first, then the template the page name stands for (by any alias), then the fallback.
+PageBuilder resolve(Target? target, {TemplateGaps? gaps}) {
   if (target == null) return (_, _) => const BlankPage();
-  return routes['${target.namespace}/${target.page}'] ?? templates[target.page] ?? FallbackPage.page;
+  final route = routes['${target.namespace}/${target.page}'];
+  if (route != null) return route;
+  final template = canonicalTemplate(target.page);
+  if (template == null) return FallbackPage.page;
+  return templates[template] ?? (gaps ?? templateGaps).fallbackFor(template);
 }
 
 /// Hosts the current page. A new (namespace, page, index) replaces the subtree, so page state resets; the same
