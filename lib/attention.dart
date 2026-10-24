@@ -11,6 +11,7 @@ import 'face/face.dart';
 import 'face/face_theme.dart';
 import 'pages/template_names.dart';
 import 'state/gui_state.dart';
+import 'status_topics.dart';
 
 const fadeAfterAudio = Duration(seconds: 1);
 const quietAfterHandled = Duration(seconds: 4);
@@ -18,11 +19,6 @@ const stuckAfter = Duration(seconds: 20);
 const visemeEvent = 'enclosure.mouth.viseme_list';
 const faceTemplate = 'SYSTEM_face';
 const idlePage = 'idle';
-
-const _listenStart = ['recognizer_loop:wakeword', 'recognizer_loop:record_begin', 'ovos.listener.record.started'];
-const _listenEnd = ['recognizer_loop:record_end', 'ovos.listener.record.ended'];
-const _thinkStart = ['recognizer_loop:utterance', 'mycroft.skill.handler.start'];
-const _thinkEnd = ['mycroft.skill.handler.complete', 'ovos.utterance.handled', 'complete_intent_failure', 'speak'];
 
 /// A page with content gets the compact badge face; idle, the face template (by any name) and the blank screen get
 /// the full face.
@@ -48,22 +44,26 @@ class Attention extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// [event] by its §5.3 name or a legacy alias (status_topics.dart); a topic with no role changes nothing.
   void handle(String event, Map<String, dynamic> data) {
-    if (_listenStart.contains(event)) {
-      _show(FaceMode.listening);
-      face.widen();
-    } else if (_listenEnd.contains(event) && mode == FaceMode.listening) {
-      _show(FaceMode.thinking);
-    } else if (_thinkStart.contains(event) && mode != FaceMode.speaking) {
-      _show(FaceMode.thinking);
-    } else if (_thinkEnd.contains(event) && mode == FaceMode.thinking) {
-      _settle(quietAfterHandled);
-    } else if (event == 'recognizer_loop:audio_output_start') {
-      _show(FaceMode.speaking);
-    } else if (event == 'recognizer_loop:audio_output_end') {
-      _settle(fadeAfterAudio);
-    } else if (event == visemeEvent && shown) {
-      face.playVisemes(data['visemes'] as List?);
+    switch (statusRole(event)) {
+      case StatusRole.listenStart:
+        _show(FaceMode.listening);
+        face.widen();
+      case StatusRole.listenEnd when mode == FaceMode.listening:
+        _show(FaceMode.thinking);
+      case StatusRole.thinkStart when mode != FaceMode.speaking:
+        _show(FaceMode.thinking);
+      case StatusRole.thinkEnd when mode == FaceMode.thinking:
+        _settle(quietAfterHandled);
+      case StatusRole.speakStart:
+        _show(FaceMode.speaking);
+      case StatusRole.speakEnd:
+        _settle(fadeAfterAudio);
+      case StatusRole.visemes when shown:
+        face.playVisemes(data['visemes'] as List?);
+      case _:
+        break;
     }
   }
 
