@@ -65,6 +65,13 @@ Future<List<String>> pumpReported(WidgetTester tester, PageBuilder page, Json da
 void main() {
   setUp(forgetReportedKeys);
 
+  test('a hand-written note names WIRE.md or a spec section, with or without the section sign', () {
+    for (final source in ['WIRE.md', 'gui-1.md 3.4 at b6c1583', 'gui-1.md §3.4 at b6c1583']) {
+      expect({'_note': 'written from $source, not recorded'}, handWritten, reason: source);
+    }
+    expect({'_note': 'written from memory, not recorded'}, isNot(handWritten));
+  });
+
   group('from GUI-1 fixtures', () {
     testWidgets('SYSTEM_error shows the mark, the label and the detail', (tester) async {
       await pumpFixture(tester, errorTemplate);

@@ -13,8 +13,9 @@ const hello = 'ovos-skill-hello.openvoiceos';
 const alerts = 'ovos-skill-alerts.openvoiceos';
 const weather = 'ovos-skill-weather.openvoiceos';
 
-/// The `_note` of a hand-written fixture names its source: WIRE.md, or the spec section and commit it was written from.
-final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §[\d.]+ at [0-9a-f]{7}), not recorded$'))};
+/// The `_note` of a hand-written fixture names its source: WIRE.md, or the spec section (with or without a section
+/// sign) and commit it was written from.
+final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+ at [0-9a-f]{7}), not recorded$'))};
 
 List<Gui1Frame> _parse(Iterable<String> lines) => [for (final line in lines) parseGui1Frame(jsonDecode(line) as Json)];
 

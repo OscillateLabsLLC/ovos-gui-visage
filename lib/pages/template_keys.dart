@@ -1,6 +1,6 @@
-/// Typed reads of GUI-1 session-data keys (gui-1.md §3.3) for the template view models. A missing required key or a
-/// value of the wrong type is a protocol fault: reported once per template, key and value, and then read as the
-/// nearest usable value so the page still renders (§6.5).
+/// Typed reads of GUI-1 session-data keys (gui-1.md 3.3 Session-data typing rules) for the template view models. A
+/// missing required key or a value of the wrong type is a protocol fault: reported once per template, key and value,
+/// and then read as the nearest usable value so the page still renders (gui-1.md 6.5).
 library;
 
 import 'package:flutter/foundation.dart';
@@ -46,13 +46,13 @@ List<Object?>? readList(String template, Json data, String key, {bool required =
   return null;
 }
 
-/// An image key per §3.5: an `http(s)` URL or a `data:image/` URI, else null. A bare filesystem path or anything else
-/// is reported, and the caller renders without the image.
+/// An image key per gui-1.md 3.5 Image delivery: an `http(s)` URL or a `data:image/` URI, else null. A bare
+/// filesystem path or anything else is reported, and the caller renders without the image.
 String? readImage(String template, Json data, String key, {bool required = false}) {
   final value = readText(template, data, key, required: required).trim();
   if (value.isEmpty) return null;
   if (_imageUrl.hasMatch(value)) return value;
-  reportKey(template, key, 'must be an http(s) URL or a data:image URI (§3.5), got $value');
+  reportKey(template, key, 'must be an http(s) URL or a data:image URI (gui-1.md 3.5 Image delivery), got $value');
   return null;
 }
 

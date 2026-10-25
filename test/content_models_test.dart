@@ -18,7 +18,7 @@ void main() {
   setUp(forgetReportedKeys);
 
   group('template keys', () {
-    test('an http(s) URL and a data:image URI are images; a bare path is reported (§3.5)', () async {
+    test('an http(s) URL and a data:image URI are images; a bare path is reported (gui-1.md 3.5)', () async {
       final (images, faults) = await reported(
         () => [
           for (final v in ['https://x/a.png', 'HTTP://x/a.png', png, '/home/me/a.png', 'data:text/plain,hi', null])
@@ -27,7 +27,10 @@ void main() {
       );
       expect(images, ['https://x/a.png', 'HTTP://x/a.png', png, null, null, null]);
       expect(faults, hasLength(2));
-      expect(faults.first, allOf(contains('SYSTEM_list data'), contains('/home/me/a.png'), contains('§3.5')));
+      expect(
+        faults.first,
+        allOf(contains('SYSTEM_list data'), contains('/home/me/a.png'), contains('gui-1.md 3.5 Image delivery')),
+      );
     });
 
     test('the same fault is reported once', () async {

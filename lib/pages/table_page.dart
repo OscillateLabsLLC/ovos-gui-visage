@@ -1,4 +1,4 @@
-/// SYSTEM_table (gui-1.md §3.4, line 231): the skill header, a header row in the muted uppercase of template titles,
+/// SYSTEM_table (gui-1.md 3.4 Catalogue): the skill header, a header row in the muted uppercase of template titles,
 /// then the rows as plain stacked text with a thin divider between them. Columns share the width equally; cells wrap
 /// rather than shrink, and the rows scroll. Nothing moves.
 library;

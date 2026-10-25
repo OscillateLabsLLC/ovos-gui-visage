@@ -1,6 +1,6 @@
-/// View models for SYSTEM_error, SYSTEM_list, SYSTEM_grid and SYSTEM_table (gui-1.md §3.4, lines 220 and 229–231).
+/// View models for SYSTEM_error, SYSTEM_list, SYSTEM_grid and SYSTEM_table (gui-1.md 3.4 Catalogue).
 /// Pure, except that malformed data is reported through template_keys.dart; every model still returns something the
-/// page can render (§6.5).
+/// page can render (gui-1.md 6.5 Capability and graceful degradation).
 library;
 
 import 'dart:math' as math;
@@ -28,7 +28,7 @@ const maxGridColumns = 6;
 
 typedef ListItem = ({String title, String subtitle, String? image});
 
-/// `items` is optional (§3.4 marks only the item's `title`); absent or not an array gives an empty list. An item
+/// `items` is optional (the catalogue marks only the item's `title`); absent or not an array gives an empty list. An item
 /// without `title` is reported and shows its subtitle in its place; one with neither is dropped.
 ({String title, List<ListItem> items}) systemListModel(Json data) {
   final items = readList(listTemplate, data, 'items') ?? const [];

@@ -1,4 +1,4 @@
-/// SYSTEM_list (gui-1.md §3.4, line 229): the skill header, then plain stacked rows that scroll, each a round
+/// SYSTEM_list (gui-1.md 3.4 Catalogue): the skill header, then plain stacked rows that scroll, each a round
 /// thumbnail (when the item has a usable image) with the title and the muted subtitle beside it, rising in one after
 /// another, as the alerts and OCP lists do. Long text ends in an ellipsis; it never shrinks.
 library;

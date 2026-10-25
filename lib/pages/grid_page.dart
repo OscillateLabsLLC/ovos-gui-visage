@@ -1,4 +1,4 @@
-/// SYSTEM_grid (gui-1.md §3.4, line 230): the skill header, then equal round tiles that scroll, the image filling each
+/// SYSTEM_grid (gui-1.md 3.4 Catalogue): the skill header, then equal round tiles that scroll, the image filling each
 /// circle and the title beneath, rising in one after another. The column count follows the width (`gridColumns`). A
 /// tile without a usable image is a gradient circle with its title inside instead.
 library;

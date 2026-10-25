@@ -12,7 +12,7 @@ const png =
 const ctx = PageContext(namespace: hello, page: 'SYSTEM_x', events: {});
 
 void main() {
-  group('the fallback degrades (§6.5, §8.5)', () {
+  group('the fallback degrades (gui-1.md 6.5 and 8.5)', () {
     testWidgets('title and text show as the text page', (tester) async {
       await tester.pumpWidget(host(FallbackPage.page({'title': 'Hi', 'text': 'Hello', 'other': 1}, ctx)));
       await tester.pump(const Duration(seconds: 1));

@@ -1,4 +1,4 @@
-/// Any (namespace, page) without a widget degrades to the nearest page that can show its data (gui-1.md §6.5, §8.5):
+/// Any (namespace, page) without a widget degrades to the nearest page that can show its data (gui-1.md 6.5 and 8.5):
 /// an `image` shows as the image page would (with `title` and `caption`), else `title` and `text` show as the text
 /// page would. Data with none of these keys is dumped with the namespace and page name (SPEC 8.7): the main debugging
 /// tool and the one place a card is allowed (SPEC 9).

@@ -1,4 +1,4 @@
-/// SYSTEM_error (gui-1.md §3.4, line 220): a chip-sized gradient circle with an exclamation mark in the failure red,
+/// SYSTEM_error (gui-1.md 3.4 Catalogue): a chip-sized gradient circle with an exclamation mark in the failure red,
 /// a red-tinted glow that blooms once as the error arrives and then breathes, the label beneath and the detail muted
 /// under it. With reduced motion the halo stands still.
 library;
