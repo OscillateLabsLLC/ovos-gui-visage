@@ -19,6 +19,7 @@ import 'idle_page.dart';
 import 'image_frame_page.dart';
 import 'input_box_page.dart';
 import 'loading_page.dart';
+import 'map_page.dart';
 import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
 import 'ocp_list_page.dart';
@@ -69,6 +70,7 @@ const templates = <String, PageBuilder>{
   'SYSTEM_clock': ClockPage.page,
   'SYSTEM_timer': SystemTimerPage.page,
   'SYSTEM_weather': SystemWeatherPage.page,
+  'SYSTEM_map': MapPage.page,
 };
 
 /// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
