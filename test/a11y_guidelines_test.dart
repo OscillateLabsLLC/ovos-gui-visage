@@ -70,9 +70,13 @@ void collectShownPages() {
       _remember(state);
     }
   }
-  for (final file in [..._jsonl('test/fixtures/gui1'), ..._jsonl('test/fixtures/gui1/recorded')]) {
+  for (final file in [
+    ..._jsonl('test/fixtures/gui1'),
+    ..._jsonl('test/fixtures/gui1/recorded'),
+    ..._jsonl('test/fixtures/gui1/recorded/demo'),
+  ]) {
     final state = GuiState();
-    final gaps = Gui1Gaps(templates: TemplateGaps(), log: (_) {});
+    final gaps = Gui1Gaps(templates: TemplateGaps());
     for (final frame in _lines(file).where((line) => !line.containsKey('_note')).map(parseGui1Frame)) {
       applyGui1Frame(state, frame, gaps: gaps);
       _remember(state);

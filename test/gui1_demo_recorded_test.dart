@@ -142,7 +142,7 @@ void main() {
           if (frame is Gui1Template) frame.template,
       ];
       expect(shown, [for (final (template, _) in catalogue.values) template]);
-      expect(frames.whereType<Gui1Idle>(), hasLength(19), reason: 'a device-wide idle between templates');
+      expect(frames.whereType<Gui1Idle>(), hasLength(19), reason: 'an idle for the session between templates');
       final state = replayGui1(frames);
       expect([state.active, state.namespaces], [isEmpty, isEmpty]);
     });

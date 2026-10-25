@@ -25,6 +25,7 @@ class ScreenInput {
     required this.state,
     required this.bus,
     required this.sendGui,
+    required this.requestFocus,
     required this.peek,
     required this.window,
     required this.dispatchMenu,
@@ -36,6 +37,9 @@ class ScreenInput {
   final GuiState state;
   final CoreBus bus;
   final bool Function(Json message) sendGui;
+
+  /// Asks the GUI service for another entry of a namespace (`GuiLink.requestFocus`).
+  final bool Function(String namespace, int page) requestFocus;
   final PeekController peek;
   final WindowRemote window;
   final void Function(String id) dispatchMenu;
@@ -84,12 +88,15 @@ class ScreenInput {
     commands.open();
   }
 
-  /// A swipe, an arrow key or a chevron; the screen tells ovos-gui about the new focus as it does for any change.
+  /// A swipe, an arrow key or a chevron. On legacy the screen then reports the new focus as it does for any change; on
+  /// GUI-1 the step is a `focus` request, and the service's next `template` frame shows the entry.
   void step(int delta) {
     final target = state.current();
     if (target == null) return;
     final next = pageStep(target.index, state.namespace(target.namespace).pages.length, delta);
-    if (next != null && state.focusPage(target.namespace, next)) onChanged();
+    if (next == null) return;
+    requestFocus(target.namespace, next);
+    if (state.focusPage(target.namespace, next)) onChanged();
   }
 
   void interact() {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
 import 'package:ovos_gui_visage/pages/clock_page.dart';
+import 'package:ovos_gui_visage/pages/confirm_page.dart';
 import 'package:ovos_gui_visage/pages/error_page.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/grid_page.dart';
@@ -15,6 +16,7 @@ import 'package:ovos_gui_visage/pages/map_page.dart';
 import 'package:ovos_gui_visage/pages/media_pages.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
+import 'package:ovos_gui_visage/pages/select_page.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
 import 'package:ovos_gui_visage/pages/system_face_page.dart';
 import 'package:ovos_gui_visage/pages/system_timer_page.dart';
@@ -85,7 +87,14 @@ const implemented = <String, PageBuilder>{
 
 const unimplemented = {'SYSTEM_idle'};
 
-const unknown = ['SYSTEM_confirm', 'SYSTEM_select', 'Confirm.qml', 'Select.qml', 'SYSTEM_ocp_now_playing', 'Mystery'];
+const unknown = ['Confirm.qml', 'Select.qml', 'SYSTEM_ocp_now_playing', 'Mystery'];
+
+/// The drafted amendment A companions, real templates since then.
+const companions = <String, PageBuilder>{
+  'SYSTEM_confirm': ConfirmPage.page,
+  'SYSTEM_select': SelectPage.page,
+  'SYSTEM_input': InputBoxPage.companion,
+};
 
 PageBuilder route(String page, [TemplateGaps? gaps]) => resolve(Target('any.skill', page, 0), gaps: gaps ?? TemplateGaps());
 
@@ -93,7 +102,15 @@ void main() {
   test('the spec vocabulary is the 20 GUI-1 templates, split into implemented and not yet', () {
     expect(specTemplates, {...implemented.keys, ...unimplemented});
     expect(specTemplates, hasLength(20));
-    expect(specTemplates.intersection(reservedTemplates), isEmpty);
+    expect(specTemplates.intersection(companionTemplates), isEmpty);
+  });
+
+  test('the three companions of amendment A are their own canonical names and reach their pages', () {
+    expect(companionTemplates, companions.keys.toSet());
+    for (final MapEntry(key: name, value: page) in companions.entries) {
+      expect(canonicalTemplate(name), name);
+      expect(route(name), same(page), reason: name);
+    }
   });
 
   test('every alias maps to its spec template', () {

@@ -6,4 +6,4 @@
 {"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_text", "data": {"title": "Hi", "text": "Hello"}, "session_id": "default"}
 {"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
 {"type": "deactivated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
-{"type": "idle"}
+{"type": "idle", "session_id": "default"}

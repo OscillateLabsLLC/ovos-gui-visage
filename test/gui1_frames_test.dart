@@ -45,7 +45,7 @@ void main() {
     expect(u, isA<Gui1SessionUpdate>().having((f) => f.data, 'data', data));
     expect(parseGui1Frame({'type': 'activated', 'skill_id': _skill, 'session_id': _s}), isA<Gui1Activated>());
     expect(parseGui1Frame({'type': 'deactivated', 'skill_id': _skill, 'session_id': _s}), isA<Gui1Deactivated>());
-    expect(parseGui1Frame({'type': 'idle'}), isA<Gui1Idle>());
+    expect(parseGui1Frame({'type': 'idle', 'session_id': _s}), isA<Gui1Idle>().having((f) => f.sessionId, 'session', _s));
     final st = parseGui1Frame({'type': 'status', 'event_name': 'speak', 'data': data, 'session_id': _s});
     expect(st, isA<Gui1Status>().having((f) => (f.eventName, f.sessionId), 'fields', ('speak', _s)));
   });
@@ -68,6 +68,19 @@ void main() {
     expect(stack[1].data, {'k': 1});
   });
 
+  test('a snapshot carries the adapter\'s ambient map (finding F34); one without it keeps none', () {
+    final weather = {'current_temp': 21, 'condition': 'Cloudy'};
+    final frame = parseGui1Frame({
+      'type': 'snapshot',
+      'session_id': _s,
+      'stack': <Object>[],
+      'ambient': {'gui.ambient.weather': weather},
+    });
+    expect((frame as Gui1Snapshot).ambient, {'gui.ambient.weather': weather});
+    final bare = parseGui1Frame({'type': 'snapshot', 'session_id': _s, 'stack': <Object>[]});
+    expect((bare as Gui1Snapshot).ambient, isEmpty);
+  });
+
   test('a frame data map is a copy, so a later frame never aliases it', () {
     final data = <String, dynamic>{'a': 1};
     final frame = parseGui1Frame({'type': 'session_update', 'skill_id': _skill, 'data': data, 'session_id': _s});
@@ -82,6 +95,8 @@ void main() {
       {'type': 'activated', 'skill_id': 3, 'session_id': _s},
       {'type': 'snapshot', 'session_id': _s, 'stack': 'nope'},
       {'type': 'status', 'event_name': 'speak', 'data': <String, dynamic>{}},
+      {'type': 'idle'},
+      {'type': 'snapshot', 'session_id': _s, 'stack': <Object>[], 'ambient': 'nope'},
     ]) {
       expect(
         () => parseGui1Frame(bad),

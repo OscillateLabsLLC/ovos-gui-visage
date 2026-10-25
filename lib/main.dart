@@ -117,6 +117,7 @@ class _ScreenState extends State<Screen> {
     state: state,
     bus: bus,
     sendGui: (message) => gui.send(message),
+    requestFocus: (namespace, page) => gui.requestFocus(namespace, page),
     peek: peek,
     window: window,
     dispatchMenu: (id) => menu.dispatch(id),

@@ -9,4 +9,4 @@
 {"type": "deactivated", "skill_id": "ovos-skill-weather.openvoiceos", "session_id": "default"}
 {"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
 {"type": "deactivated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
-{"type": "idle"}
+{"type": "idle", "session_id": "default"}

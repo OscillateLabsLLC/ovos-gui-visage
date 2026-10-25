@@ -89,22 +89,6 @@ void main() {
       expect([state.active, state.namespaces, state.current()], [isEmpty, isEmpty, isNull]);
     });
 
-    test('idle while this session still shows a page is ignored and logged once, not reported', () async {
-      final logs = <String>[];
-      final gaps = freshGaps(logs);
-      late GuiState state;
-      final faults = await collectFaults(() async {
-        state = replayGui1([
-          template(hello, 'SYSTEM_text', {'text': 'x'}),
-          const Gui1Idle(),
-          const Gui1Idle(),
-        ], gaps: gaps);
-      });
-      expect(state.current(), const Target(hello, 'SYSTEM_text', 0));
-      expect(faults, isEmpty);
-      expect(logs.single, contains('F16'));
-    });
-
     test('a frame for another session is reported and changes nothing', () async {
       final state = GuiState();
       final faults = await collectFaults(() async {
@@ -153,9 +137,8 @@ void main() {
     });
 
     testWidgets('idle: once the stack is empty, idle leaves the full face over the resting page', (tester) async {
-      final logs = <String>[];
-      final state = replayGui1(loadGui1Fixture('idle'), gaps: freshGaps(logs));
-      expect([state.active, state.namespaces, state.current(), logs], [isEmpty, isEmpty, isNull, isEmpty]);
+      final state = replayGui1(loadGui1Fixture('idle'));
+      expect([state.active, state.namespaces, state.current()], [isEmpty, isEmpty, isNull]);
       expect(isContentPage(state.current(), state.idleNamespace), isFalse);
       await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
       expect(find.byType(RestingPage), findsOneWidget);
@@ -227,7 +210,7 @@ void main() {
 
     test('every hand-written GUI-1 fixture says so and parses', () {
       final files = Directory('test/fixtures/gui1').listSync().whereType<File>().where((f) => f.path.endsWith('.jsonl'));
-      expect(files.length, 18);
+      expect(files.length, 21);
       for (final file in files) {
         final name = file.uri.pathSegments.last.replaceAll('.jsonl', '');
         expect(loadGui1Fixture(name).first, isA<Gui1Welcome>(), reason: name);

@@ -1,0 +1,5 @@
+{"_note": "written from SPEC_PROPOSALS.md amendment A, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"question": "Turn off the kitchen lights?", "yes_label": "Turn off", "no_label": "Leave on"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_confirm", "data": {"question": "Turn off the kitchen lights?", "yes_label": "Turn off", "no_label": "Leave on"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}

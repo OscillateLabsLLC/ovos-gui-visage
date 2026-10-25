@@ -76,9 +76,11 @@ class Gui1Deactivated extends Gui1Frame {
   final String sessionId;
 }
 
-/// The device's stack is empty; device-wide, so it carries no session.
+/// [sessionId]'s stack is empty (amendment D, idle per session): the client empties its state and rests.
 class Gui1Idle extends Gui1Frame {
-  const Gui1Idle();
+  const Gui1Idle({required this.sessionId});
+
+  final String sessionId;
 }
 
 /// A bus topic forwarded as is, to every client, with the session it came from.
@@ -100,12 +102,14 @@ class Gui1StackEntry {
   final Json data;
 }
 
-/// The session's whole stack, index 0 the active namespace; empty means idle.
+/// The session's whole stack, index 0 the active namespace; empty means idle. [ambient] is the adapter's last payload
+/// per `gui.ambient.*` topic (finding F34); an adapter that keeps none sends none.
 class Gui1Snapshot extends Gui1Frame {
-  const Gui1Snapshot({required this.sessionId, required this.stack});
+  const Gui1Snapshot({required this.sessionId, required this.stack, this.ambient = const {}});
 
   final String sessionId;
   final List<Gui1StackEntry> stack;
+  final Map<String, Json> ambient;
 }
 
 /// One server frame; a frame of an unknown type or with a missing or mistyped field throws [Gui1FrameException].
@@ -138,10 +142,16 @@ final Map<String, Gui1Frame Function(Json)> _parsers = {
       Gui1SessionUpdate(skillId: f['skill_id'] as String, data: _data(f), sessionId: f['session_id'] as String),
   'activated': (f) => Gui1Activated(skillId: f['skill_id'] as String, sessionId: f['session_id'] as String),
   'deactivated': (f) => Gui1Deactivated(skillId: f['skill_id'] as String, sessionId: f['session_id'] as String),
-  'idle': (_) => const Gui1Idle(),
+  'idle': (f) => Gui1Idle(sessionId: f['session_id'] as String),
   'status': (f) => Gui1Status(eventName: f['event_name'] as String, data: _data(f), sessionId: f['session_id'] as String),
-  'snapshot': (f) =>
-      Gui1Snapshot(sessionId: f['session_id'] as String, stack: [for (final entry in f['stack'] as List) _entry(entry as Json)]),
+  'snapshot': (f) => Gui1Snapshot(
+    sessionId: f['session_id'] as String,
+    stack: [for (final entry in f['stack'] as List) _entry(entry as Json)],
+    ambient: {
+      for (final MapEntry(:key, :value) in ((f['ambient'] ?? const <String, dynamic>{}) as Json).entries)
+        key: Json.of(value as Json),
+    },
+  ),
 };
 
 Gui1StackEntry _entry(Json e) =>

@@ -9,6 +9,7 @@ import 'package:flutter/painting.dart' show BoxFit;
 import '../faults.dart';
 import '../json.dart';
 import 'page.dart';
+import 'template_keys.dart';
 
 const readingWpm = 180;
 const minPageMs = 4000;
@@ -107,8 +108,10 @@ String? imageSource(Object? value) {
   return _safeImage.hasMatch(src) ? src : null;
 }
 
-({String? src, BoxFit fit, String background, String title, String caption}) imageModel(Json? data) => (
-  src: imageSource(data?['image']),
+/// [gui1Template] names the template when the page came over GUI-1: its `image` must then be an http(s) URL or a
+/// `data:image/` URI, and a path is reported and dropped (`readImage`, finding F39).
+({String? src, BoxFit fit, String background, String title, String caption}) imageModel(Json? data, {String? gui1Template}) => (
+  src: gui1Template == null ? imageSource(data?['image']) : readImage(gui1Template, data ?? const {}, 'image', required: true),
   fit: _fillToFit[text(data?['fill']).toLowerCase()] ?? BoxFit.contain,
   background: text(data?['background_color']),
   title: text(data?['title']),

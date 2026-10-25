@@ -8,25 +8,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../faults.dart';
-import 'core_bus.dart';
+import 'core_bus.dart' show reconnectDelay;
 import 'gui1_client.dart';
+import 'gui1_outgoing.dart';
 import 'gui_client.dart';
 import 'wire_protocol.dart';
 
 export 'wire_protocol.dart';
 
-/// The context legacy ovos-gui added to every message it forwarded from this app's GUI socket.
-const forwardedContext = {'gui_framework': framework};
-
 class GuiLink {
-  GuiLink({
-    required this.mode,
-    required this.legacy,
-    required this.gui1,
-    required this.bus,
-    this.log,
-    this.retryDelay = reconnectDelay,
-  }) {
+  GuiLink({required this.mode, required this.legacy, required this.gui1, this.log, this.retryDelay = reconnectDelay}) {
     title.value = protocolTitle(mode, null);
   }
 
@@ -34,8 +25,6 @@ class GuiLink {
   final GuiClient legacy;
   final Gui1Client gui1;
 
-  /// Where page events go on GUI-1, which has no reply leg of its own.
-  final CoreBus bus;
   final void Function(String)? log;
 
   /// The pause between one connection ending and the next attempt.
@@ -49,6 +38,7 @@ class GuiLink {
   ChosenProtocol? _chosen;
   bool _running = false;
   bool _lossReported = false;
+  bool _touchReported = false;
 
   void start() {
     if (mode == WireProtocol.legacy) {
@@ -65,20 +55,42 @@ class GuiLink {
     await legacy.stop();
   }
 
-  /// Legacy: the GUI socket, unchanged. GUI-1 has no reply leg (gui-1.md 7.2), so Visage puts a page event on the core
-  /// bus itself, as the message legacy ovos-gui would have forwarded (bus.py `on_message`, `busMessageFor`), with its
-  /// `gui_framework` context. Anything but a page event is logged, not sent (finding F14).
+  /// Legacy: the GUI socket, unchanged. GUI-1: a page event goes to the adapter as an `interaction` or `focus` frame
+  /// (gui1_outgoing.dart), never on the core bus. Anything but a page event has no GUI-1 frame and is logged, not sent.
   bool send(Json message) {
     if (_chosen != ChosenProtocol.gui1) return legacy.send(message);
     if (message['type'] != eventsTriggered) {
-      log?.call('GUI-1 has no reply leg; not sent: $message');
+      log?.call('GUI-1 has no frame for $message; not sent');
       return false;
     }
-    final forwarded = busMessageFor(message);
-    final type = forwarded['type'] as String;
-    final sent = bus.emitWithContext(type, forwarded['data'] as Json, forwardedContext);
-    log?.call('GUI-1: ${sent ? 'forwarded' : 'could not forward'} $type on the core bus');
+    final frame = gui1FrameFor(message);
+    if (frame == null) return _touchWithoutEntry(message);
+    final sent = gui1.send(frame);
+    log?.call('GUI-1: ${sent ? 'sent' : 'could not send'} $frame');
     return sent;
+  }
+
+  /// A user's request for entry [page] of [namespace]: a swipe, an arrow key or a chevron. GUI-1 sends it as `focus`.
+  /// Legacy sends nothing here, since FocusAnnouncer reports the change once the page shows; false then.
+  bool requestFocus(String namespace, int page) {
+    if (_chosen != ChosenProtocol.gui1) return false;
+    final frame = focusFrame(namespace, page);
+    final sent = gui1.send(frame);
+    log?.call('GUI-1: ${sent ? 'sent' : 'could not send'} $frame');
+    return sent;
+  }
+
+  /// A touch on GUI-1 is a focus on the active entry, which the `template` frame does not name (finding F45): reported
+  /// once per run, then logged.
+  bool _touchWithoutEntry(Json message) {
+    final unknown = StateError('a touch on GUI-1 needs the active entry, which no frame names; not sent: $message');
+    if (_touchReported) {
+      log?.call('$unknown');
+      return false;
+    }
+    _touchReported = true;
+    reportFault('GUI-1 touch', unknown);
+    return false;
   }
 
   Future<void> _keepConnected() async {

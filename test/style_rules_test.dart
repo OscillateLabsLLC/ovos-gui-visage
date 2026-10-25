@@ -18,7 +18,7 @@ const _hairlines = {'_hairline', 'Color(0x24FFFFFF)'};
 /// Exceptions: file -> rule -> why it is allowed. Every entry must still match something. A reason that starts with
 /// `audit:` is not known to be sanctioned; docs/BACKLOG.md, Pre-announcement polish audit, lists it for a decision.
 const allowed = <String, Map<String, String>>{
-  'lib/pages/fallback_page.dart': {roundedFill: 'the debug card for unrouted pages, the one card CONTRIBUTING allows'},
+  'lib/pages/fallback_page.dart': {roundedFill: 'the debug card for unrouted pages (CONTRIBUTING, Visual rule)'},
   'lib/widgets/offline_pill.dart': {roundedFill: 'StatusPill: the GUI-offline pill and the outcome pill (v2.1.0)'},
   'lib/widgets/home_chips.dart': {roundedFill: 'the notification-count badge (ovos-visage .badge)'},
   'lib/pages/now_playing_status.dart': {roundedFill: 'the listening bars: 3 px wide with 2 px corners, fully rounded'},

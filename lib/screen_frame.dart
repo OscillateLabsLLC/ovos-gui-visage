@@ -142,7 +142,7 @@ class ScreenFrame extends StatelessWidget {
         chevrons: parts.kiosk,
         child:
             restingPage(parts.state, parts.protocol, onShowNotifications: parts.notificationList.open) ??
-            PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList),
+            PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
       ),
     );
   }

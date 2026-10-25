@@ -175,8 +175,12 @@ Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both p
 - `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
 - `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1. The fallback page shows
   an unknown template's `text` the same way (`SYSTEM_hologram` fixture), so it fails for the same reason.
-- `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size (informative only).
-- No fixture reaches three routes, so they are not checked: alerts `ListView`, OCP `OVOSSyncPlayer`, `SYSTEM_face`.
+- `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size. Informative, no
+  audit entry: the Android tap-target check only prints. The re-run of 2026-10-25 printed "passes" for both resting
+  screens, so the claim needs a check on a device before anyone acts on it.
+- The guard now also replays the demo skill's recordings (`test/fixtures/gui1/recorded/demo`) and the three companion
+  fixtures. `SYSTEM_face`, `SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input` are checked and pass both guidelines at
+  both sizes. No fixture reaches two routes, so they are not checked: alerts `ListView` and OCP `OVOSSyncPlayer`.
 
 Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
 

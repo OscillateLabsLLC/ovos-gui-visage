@@ -79,13 +79,17 @@ does not switch while a connection holds; a reconnect probes again. With `gui1`,
 | — | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port (desktop) | `127.0.0.1`, `8181` |
 
 Under GUI-1 a namespace holds exactly one page, named with its spec template (`SYSTEM_text`), and its data is the full
-map of the last frame; Visage never merges. `deactivated` drops the namespace, a `snapshot` replaces the stack, and `status` frames drive the face. `idle` is
-device-wide, so it empties the screen only when this session's stack is already empty; otherwise it is ignored and logged
-once (finding F16). Status topics are keyed by their [gui-1.md 5.3 System-wide signals](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#53-system-wide-signals) `ovos.*` names, with the legacy bus names as aliases
+map of the last frame; Visage never merges. `deactivated` drops the namespace, a `snapshot` replaces the stack and
+keeps its `ambient` map, and `status` frames drive the face. `idle` names its session: Visage's own session's `idle`
+empties the screen to the resting page, and another session's is reported once (drafted amendment D; it supersedes
+finding F16). Status topics are keyed by their [gui-1.md 5.3 System-wide signals](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#53-system-wide-signals) `ovos.*` names, with the legacy bus names as aliases
 (`lib/status_topics.dart`); a topic Visage does not follow is reported once. An unknown `SYSTEM_` name is reported once and shows the fallback.
-GUI-1 has no reply leg, so on GUI-1 Visage puts each page event (controls, focus, interaction) on the core bus itself,
-as the message legacy ovos-gui forwarded (finding F14, `test/fixtures/outgoing/gui1_page_events.jsonl`); typed
-commands, volume and notification actions use the core bus on both protocols. Fixtures: `test/fixtures/gui1/`, written
+On GUI-1 a page's control answers as an `interaction` frame on the GUI-1 socket, and a swipe or arrow key asks for
+another entry with a `focus` frame (WIRE.md, Client → server frames; drafted amendments A and B;
+`lib/protocol/gui1_outgoing.dart`, `test/fixtures/outgoing/gui1_interaction.jsonl` and `gui1_focus.jsonl`). Nothing
+goes on the core bus for a page. A touch and the focus announcement send nothing on GUI-1, since no frame names the
+active entry (finding F45). Typed commands, volume and notification actions use the core bus on both protocols. Pages
+learn the protocol from `PageContext.protocol`; over GUI-1 the image page refuses a filesystem path (finding F39). Fixtures: `test/fixtures/gui1/`, written
 from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 
 ## What ports how
@@ -122,11 +126,11 @@ ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name:
 | `SYSTEM_html` | `SYSTEM_HtmlFrame`, `Html.qml` | html frame |
 | `SYSTEM_url` | `SYSTEM_UrlFrame`, `Url.qml` | url frame |
 
-`SYSTEM_idle`, `SYSTEM_error`, `SYSTEM_list`, `SYSTEM_grid`, `SYSTEM_table`, `SYSTEM_audio_player`,
-`SYSTEM_video_player`, `SYSTEM_media_player`, `SYSTEM_clock`, `SYSTEM_timer`, `SYSTEM_weather` and `SYSTEM_map` (and
-their `.qml` names) have no page yet: they show the fallback and report a fault once per template. `SYSTEM_confirm`
-and `SYSTEM_select` are reserved by the spec and route as unknown pages. `SYSTEM_InputBox` is not in GUI-1 and keeps
-its legacy name only. An exact skill route still wins over a template name.
+Every other catalogue template has its own page under its spec name and its `.qml` name, except `SYSTEM_idle`, which
+names no page (`docs/GUI1_CONFORMANCE.md`). The three interactive companions of the drafted amendment A,
+`SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input`, have pages too and answer with `confirm`, `select` and `input`
+(`lib/pages/companions_model.dart`); their `.qml` names have no alias. `SYSTEM_InputBox` is not in GUI-1 and keeps its
+legacy name only; `SYSTEM_input` reuses its page. An exact skill route still wins over a template name.
 
 ## Platform gating
 

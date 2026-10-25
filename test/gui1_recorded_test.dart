@@ -62,15 +62,14 @@ void main() {
   });
 
   testWidgets('weather_then_clear: hello shows again, then the session empties and the resting page shows', (tester) async {
-    final logs = <String>[];
     final frames = loadRecorded('weather_then_clear');
     expect(frames, hasLength(12));
-    final gaps = freshGaps(logs);
+    final gaps = freshGaps();
     final state = replayGui1(frames.take(10).toList(), gaps: gaps);
     expect(state.current(), const Target(hello, 'SYSTEM_text', 0));
     expect(restingPage(state, ChosenProtocol.gui1), isNull);
     replayGui1(frames.skip(10).toList(), state: state, gaps: gaps);
-    expect([state.active, state.namespaces, logs], [isEmpty, isEmpty, isEmpty]);
+    expect([state.active, state.namespaces], [isEmpty, isEmpty]);
     expect(frames.last, isA<Gui1Idle>());
     await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
     expect([find.byType(RestingPage), find.text('09:05')], everyElement(findsOneWidget));

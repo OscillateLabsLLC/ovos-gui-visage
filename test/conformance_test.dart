@@ -8,7 +8,11 @@ const statuses = {'none', 'partial', 'done'};
 const _columns = ['Item', 'Spec reference', 'Status', 'Visage files', 'Test', 'Notes'];
 final _testPath = RegExp(r'`(test/[^`]+)`');
 
-typedef Row = ({String item, String status, List<String> tests});
+/// The adapter half of a clause cites the adapter's own tests (`ovos-gui-plugin-visage/test/...`); they name a test but
+/// live in another repository, so their files are not checked here.
+final _adapterTest = RegExp(r'`ovos-gui-plugin-visage/test/[^`]+`');
+
+typedef Row = ({String item, String status, List<String> tests, int adapterTests});
 
 List<String> cells(String line) => line.trim().split('|').skip(1).toList()..removeLast();
 
@@ -19,6 +23,7 @@ Row parseRow(List<String> row) => (
   item: row[0].trim().replaceAll('`', ''),
   status: row[2].trim(),
   tests: [for (final m in _testPath.allMatches(row[4])) m.group(1)!],
+  adapterTests: _adapterTest.allMatches(row[4]).length,
 );
 
 List<Row> parseMatrix(String markdown) => [
@@ -33,9 +38,9 @@ void main() {
     expect(rows.length, greaterThan(specTemplates.length));
   });
 
-  test('every spec and reserved template has exactly one row', () {
+  test('every spec and companion template has exactly one row', () {
     final items = rows.map((r) => r.item).toList();
-    for (final template in {...specTemplates, ...reservedTemplates}) {
+    for (final template in {...specTemplates, ...companionTemplates}) {
       expect(items.where((i) => i == template), hasLength(1), reason: '$template in $matrixPath');
     }
   });
@@ -46,9 +51,9 @@ void main() {
     }
   });
 
-  test('a done row names a test', () {
+  test('a done row names a test, of Visage or of the adapter', () {
     for (final row in rows.where((r) => r.status == 'done')) {
-      expect(row.tests, isNotEmpty, reason: row.item);
+      expect(row.tests.length + row.adapterTests, isPositive, reason: row.item);
     }
   });
 
@@ -64,10 +69,11 @@ void main() {
     const sample = '''
 | Item | Spec reference | Status | Visage files | Test | Notes |
 |---|---|---|---|---|---|
-| `SYSTEM_x` | gui-1.md 1 | done | `lib/a.dart` | `test/a_test.dart`, `test/b_test.dart` | n |
+| `SYSTEM_x` | gui-1.md 1 | done | `lib/a.dart` | `test/a_test.dart`, `ovos-gui-plugin-visage/test/test_a.py::test_b` | n |
 | short | row |''';
     final parsed = parseMatrix(sample);
     expect(parsed.map((r) => (r.item, r.status)), [('SYSTEM_x', 'done')]);
-    expect(parsed.single.tests, ['test/a_test.dart', 'test/b_test.dart']);
+    expect(parsed.single.tests, ['test/a_test.dart']);
+    expect(parsed.single.adapterTests, 1);
   });
 }

@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import '../faults.dart';
 import '../json.dart';
 import '../protocol/gui_events.dart';
+import '../protocol/wire_protocol.dart';
 
 /// Sends one GUI protocol message; false when it could not leave (the socket is closed).
 typedef GuiSend = bool Function(Json message);
@@ -23,6 +24,7 @@ class PageContext {
     this.send = _notConnected,
     this.showNotifications = _noNotificationList,
     this.storedNotifications = 0,
+    this.protocol,
   });
 
   final String namespace;
@@ -40,6 +42,12 @@ class PageContext {
 
   /// How many notifications the shell's list holds; the homescreen badge shows it.
   final int storedNotifications;
+
+  /// What the connection speaks, null before one is chosen. GUI-1 holds a page's data to the spec's wire rules, such as
+  /// no filesystem path in an image key (finding F39), where legacy keeps what the Qt pages accepted.
+  final ChosenProtocol? protocol;
+
+  bool get gui1 => protocol == ChosenProtocol.gui1;
 
   /// Sends [eventName] with [parameters] in this page's namespace; ovos-gui emits `<namespace>.<eventName>` on the
   /// core bus. A message that cannot leave is reported, so a button that does nothing is never silent.

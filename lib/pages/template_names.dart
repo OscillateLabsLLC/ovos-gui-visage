@@ -29,8 +29,10 @@ const specTemplates = {
   'SYSTEM_face',
 };
 
-/// Reserved by GUI-1 and never emitted by a producer, so they route as unknown pages, as do their QML files.
-const reservedTemplates = {'SYSTEM_confirm', 'SYSTEM_select'};
+/// The interactive companions of the drafted amendment A (gui1-upstream SPEC_PROPOSALS.md, part A): reserved at
+/// gui-1.md 3.4 as pinned, real templates with their reply events in the draft (companions_model.dart). Their QML
+/// files have no alias.
+const companionTemplates = {'SYSTEM_confirm', 'SYSTEM_select', 'SYSTEM_input'};
 
 /// Not part of GUI-1: reachable under its legacy name only.
 const legacyOnlyTemplates = {'SYSTEM_InputBox'};
@@ -76,6 +78,6 @@ const templateAliases = {..._busClientNames, ..._legacyPluginQml};
 
 /// The canonical name of a template page, or null when [page] names no template.
 String? canonicalTemplate(String page) {
-  if (specTemplates.contains(page) || legacyOnlyTemplates.contains(page)) return page;
+  if (specTemplates.contains(page) || companionTemplates.contains(page) || legacyOnlyTemplates.contains(page)) return page;
   return templateAliases[page];
 }

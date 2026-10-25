@@ -7,17 +7,14 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 
 import 'gui1_client_test.dart' show FakeLegacy, FakeSocket;
 import 'gui1_fixture.dart';
-import 'recording_bus.dart';
 
 const _welcome = {'type': 'welcome', 'protocol': 'ovos-gui-1', 'version': 1, 'session_id': 'default', 'server': 'fake/1'};
 
-Future<GuiLink> _link(WireProtocol mode, RecordingBus bus, FakeLegacy legacy) async {
-  final socket = FakeSocket();
+Future<GuiLink> _link(WireProtocol mode, FakeSocket socket, FakeLegacy legacy) async {
   final link = GuiLink(
     mode: mode,
     legacy: legacy,
     gui1: Gui1Client(url: Uri.parse('ws://127.0.0.1:1/gui1'), connector: (_) => socket, onFrame: (_) {}, onStatus: (_) {}),
-    bus: bus,
   )..start();
   await pumpEventQueue();
   socket.serve(_welcome);
@@ -43,33 +40,31 @@ final _clearThenShow = <Gui1Frame>[
 ];
 
 void main() {
-  test('on GUI-1 a page shown again after the screen emptied is announced again on the core bus', () async {
-    final bus = RecordingBus();
-    final link = await _link(WireProtocol.gui1, bus, FakeLegacy());
+  test('on GUI-1 the announcer sends nothing: focus there is a request, and the service knows what it dispatched', () async {
+    final socket = FakeSocket();
+    final legacy = FakeLegacy();
+    final link = await _link(WireProtocol.gui1, socket, legacy);
     _drive(FocusAnnouncer(link), _clearThenShow);
-    expect(bus.types, ['gui.page_gained_focus', 'gui.page_gained_focus']);
-    expect(bus.data(1), {'namespace': hello, 'page_number': 0, 'skill_id': hello});
-    expect(bus.contexts, everyElement({'gui_framework': 'html'}));
+    expect([socket.sent, legacy.sends], [hasLength(1), isEmpty], reason: 'only the hello');
     await link.stop();
   });
 
-  test('a target that does not change is announced once', () async {
-    final bus = RecordingBus();
-    final link = await _link(WireProtocol.gui1, bus, FakeLegacy());
+  test('on legacy a target that does not change is announced once', () async {
+    final legacy = FakeLegacy();
+    final link = await _link(WireProtocol.legacy, FakeSocket(), legacy);
     final focus = FocusAnnouncer(link)
       ..update(const Target(hello, 'SYSTEM_text', 0))
       ..update(const Target(hello, 'SYSTEM_text', 0));
     focus.update(const Target(alerts, 'SYSTEM_text', 0));
-    expect(bus.types, ['gui.page_gained_focus', 'gui.page_gained_focus']);
-    await link.stop();
+    expect(legacy.sends, [focusMessage(hello, 0), focusMessage(alerts, 0)]);
   });
 
   test('legacy keeps announcing a page once, even across an empty screen, and only on the GUI socket', () async {
-    final bus = RecordingBus();
+    final socket = FakeSocket();
     final legacy = FakeLegacy();
-    final link = await _link(WireProtocol.legacy, bus, legacy);
+    final link = await _link(WireProtocol.legacy, socket, legacy);
     _drive(FocusAnnouncer(link), _clearThenShow);
     expect(legacy.sends, [focusMessage(hello, 0)]);
-    expect(bus.emitted, isEmpty);
+    expect(socket.sent, isEmpty);
   });
 }

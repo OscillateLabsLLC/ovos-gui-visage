@@ -5,12 +5,14 @@ library;
 import 'package:flutter/widgets.dart';
 
 import '../faults.dart';
+import '../protocol/wire_protocol.dart';
 import '../state/gui_state.dart';
 import '../widgets/notification_list.dart';
 import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
 import 'clock_page.dart';
+import 'confirm_page.dart';
 import 'date_page.dart';
 import 'error_page.dart';
 import 'fallback_page.dart';
@@ -28,6 +30,7 @@ import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
 import 'ocp_list_page.dart';
 import 'page.dart';
+import 'select_page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
 import 'system_face_page.dart';
@@ -83,6 +86,9 @@ const templates = <String, PageBuilder>{
   'SYSTEM_timer': SystemTimerPage.page,
   'SYSTEM_weather': SystemWeatherPage.page,
   'SYSTEM_map': MapPage.page,
+  'SYSTEM_confirm': ConfirmPage.page,
+  'SYSTEM_select': SelectPage.page,
+  'SYSTEM_input': InputBoxPage.companion,
 };
 
 /// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
@@ -122,7 +128,7 @@ PageBuilder resolve(Target? target, {TemplateGaps? gaps}) {
 /// Hosts the current page. A new (namespace, page, index) replaces the subtree, so page state resets; the same
 /// target with new data rebuilds the same widget, so a page keeps its tickers and animations across updates.
 class PageHost extends StatelessWidget {
-  const PageHost({super.key, required this.state, required this.send, required this.notifications});
+  const PageHost({super.key, required this.state, required this.send, required this.notifications, this.protocol});
 
   final GuiState state;
 
@@ -131,6 +137,9 @@ class PageHost extends StatelessWidget {
 
   /// The stored notification list: its count and the way to open it, for the homescreen's badge.
   final NotificationListController notifications;
+
+  /// Handed to every page (PageContext.protocol).
+  final ChosenProtocol? protocol;
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +152,7 @@ class PageHost extends StatelessWidget {
       send: send,
       showNotifications: notifications.open,
       storedNotifications: notifications.storage.value.length,
+      protocol: protocol,
     );
     final data = Json.of(ns?.data ?? const {});
     return KeyedSubtree(key: ValueKey(target?.toString() ?? ''), child: resolve(target)(data, ctx));

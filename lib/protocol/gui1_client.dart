@@ -106,6 +106,14 @@ class Gui1Client {
     onStatus(false);
   }
 
+  /// Writes one client frame (gui1_outgoing.dart) on the welcomed socket; false when no connection holds.
+  bool send(Json frame) {
+    final socket = _socket;
+    if (socket == null) return false;
+    socket.add(jsonEncode(frame));
+    return true;
+  }
+
   Future<void> stop() async {
     final socket = _socket;
     _socket = null;
