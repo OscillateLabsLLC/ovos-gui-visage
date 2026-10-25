@@ -1,4 +1,4 @@
-/// SYSTEM_list (gui-1.md 3.4 Catalogue): the skill header, then plain stacked rows that scroll, each a round
+/// SYSTEM_list (gui-1.md 3.4 Catalogue): the template title, then plain stacked rows that scroll, each a round
 /// thumbnail (when the item has a usable image) with the title and the muted subtitle beside it, rising in one after
 /// another, as the alerts and OCP lists do. Long text ends in an ellipsis; it never shrinks.
 library;
@@ -12,13 +12,12 @@ import '../theme.dart';
 import 'content_models.dart';
 import 'page.dart';
 import 'reduced_motion.dart';
-import 'skill_header.dart';
 import 'template_text.dart';
 
 const emptyList = 'Nothing to show';
 const listThumbPx = 64.0;
 const _rowGapPx = 18.0;
-const _headerGapPx = 18.0;
+const _titleGapPx = 14.0;
 
 class ListPage extends StatelessWidget {
   const ListPage({super.key, required this.data});
@@ -33,7 +32,7 @@ class ListPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[SkillHeader(heading: title, location: ''), const SizedBox(height: _headerGapPx)],
+        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: _titleGapPx)],
         Expanded(
           child: items.isEmpty
               ? const Center(child: TemplateHint(emptyList))

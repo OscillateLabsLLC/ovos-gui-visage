@@ -8,6 +8,9 @@ import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/shell_overlays.dart' show attentionStrip;
 import 'package:ovos_gui_visage/pages/table_page.dart';
 import 'package:ovos_gui_visage/pages/template_keys.dart';
+import 'package:ovos_gui_visage/pages/template_text.dart';
+import 'package:ovos_gui_visage/pages/text_frame_page.dart';
+import 'package:ovos_gui_visage/pages/image_frame_page.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 import 'package:ovos_gui_visage/widgets/circle.dart';
 
@@ -84,7 +87,7 @@ void main() {
     testWidgets('SYSTEM_list shows the title and every item, a thumbnail only where the item has one', (tester) async {
       await pumpFixture(tester, listTemplate);
       expect(find.byType(ListView), findsOneWidget);
-      for (final text in ['Shopping list', 'Eggs', 'A dozen', 'Flour', 'Plain, 1 kg', 'Milk']) {
+      for (final text in ['SHOPPING LIST', 'Eggs', 'A dozen', 'Flour', 'Plain, 1 kg', 'Milk']) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
       expect(find.byType(ListRow), findsNWidgets(3));
@@ -93,7 +96,7 @@ void main() {
 
     testWidgets('SYSTEM_grid shows every tile with its image in two columns at 432 px', (tester) async {
       await pumpFixture(tester, gridTemplate);
-      for (final text in ['Albums', 'Kind of Blue', 'Blue Train', 'Mingus Ah Um']) {
+      for (final text in ['ALBUMS', 'Kind of Blue', 'Blue Train', 'Mingus Ah Um']) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
       expect([find.byType(GridItemView), find.byType(Image)], everyElement(findsNWidgets(4)));
@@ -103,10 +106,28 @@ void main() {
 
     testWidgets('SYSTEM_table shows the header and the rows, a number cell as text', (tester) async {
       await pumpFixture(tester, tableTemplate);
-      for (final text in ['Departures', 'TRAIN', 'PLATFORM', 'TIME', 'Express', '08:15', 'Local', '4', 'Night', '23:50']) {
+      for (final text in ['DEPARTURES', 'TRAIN', 'PLATFORM', 'TIME', 'Express', '08:15', 'Local', '4', 'Night', '23:50']) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
     });
+  });
+
+  testWidgets('every SYSTEM_* page with a title uses the one template title', (tester) async {
+    const titled = {
+      'title': 'Same',
+      'text': 'Hello',
+      'items': [
+        {'title': 'a', 'image': png},
+      ],
+      'columns': ['A'],
+      'rows': [
+        ['x'],
+      ],
+    };
+    for (final page in [TextFramePage.page, ImageFramePage.page, ListPage.page, GridPage.page, TablePage.page]) {
+      await tester.pumpWidget(host(page(titled, ctx)));
+      expect(find.widgetWithText(TemplateTitle, 'SAME'), findsOneWidget, reason: '$page');
+    }
   });
 
   group('degraded data still renders, reported', () {
@@ -129,7 +150,7 @@ void main() {
 
     testWidgets('SYSTEM_list without items shows the empty hint, no fault', (tester) async {
       expect(await pumpReported(tester, ListPage.page, {'title': 'Groceries'}), isEmpty);
-      expect([find.text('Groceries'), find.text(emptyList)], everyElement(findsOneWidget));
+      expect([find.text('GROCERIES'), find.text(emptyList)], everyElement(findsOneWidget));
     });
 
     testWidgets('SYSTEM_grid: a tile without an image shows its title on the tile', (tester) async {

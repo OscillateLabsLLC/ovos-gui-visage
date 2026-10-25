@@ -1,4 +1,4 @@
-/// SYSTEM_table (gui-1.md 3.4 Catalogue): the skill header, a header row in the muted uppercase of template titles,
+/// SYSTEM_table (gui-1.md 3.4 Catalogue): the template title, a header row in the muted uppercase of template titles,
 /// then the rows as plain stacked text with a thin divider between them. Columns share the width equally; cells wrap
 /// rather than shrink, and the rows scroll. Nothing moves.
 library;
@@ -9,13 +9,12 @@ import '../json.dart';
 import '../theme.dart';
 import 'content_models.dart';
 import 'page.dart';
-import 'skill_header.dart';
 import 'template_text.dart';
 
 const emptyTable = 'No rows';
 const _cellPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 10);
 const _divider = BorderSide(color: VisageColors.card);
-const _headerGapPx = 18.0;
+const _titleGapPx = 14.0;
 
 class TablePage extends StatelessWidget {
   const TablePage({super.key, required this.data});
@@ -30,7 +29,7 @@ class TablePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[SkillHeader(heading: title, location: ''), const SizedBox(height: _headerGapPx)],
+        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: _titleGapPx)],
         if (columns.isNotEmpty) _line(columns, header: true),
         Expanded(
           child: rows.isEmpty
