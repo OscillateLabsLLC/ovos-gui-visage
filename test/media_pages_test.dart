@@ -146,7 +146,7 @@ void main() {
           expect(find.text('0:30 / 5:37'), findsOneWidget);
           expect(
             [
-              for (final l in ['NOW PLAYING', 'RESULTS', 'QUEUE']) find.text(l).evaluate().length,
+              for (final l in ['PLAYING', 'RESULTS', 'QUEUE']) find.text(l).evaluate().length,
             ],
             [1, 1, 1],
           );

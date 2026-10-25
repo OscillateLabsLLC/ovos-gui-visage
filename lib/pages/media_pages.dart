@@ -23,6 +23,10 @@ import 'status_page.dart';
 
 const _stillPx = 260.0;
 
+/// A finger-sized target for each view button in the 480 x 800 frame.
+const _choiceTarget = Size(96, 48);
+const _choicePadding = EdgeInsets.symmetric(horizontal: 12);
+
 /// [ctx] re-addressed to OCP, so `pause` arrives as `ovos.common_play.pause` and not as `<the app>.pause`.
 PageContext ocpContext(PageContext ctx) =>
     PageContext(namespace: ocpNamespace, page: ctx.page, events: ctx.events, send: ctx.send);
@@ -64,7 +68,7 @@ class VideoPlayerPage extends StatelessWidget {
         const SizedBox(height: 10),
         Text(state.name, style: VisageText.muted(15).copyWith(letterSpacing: 0.5)),
         const SizedBox(height: 6),
-        Text('The video itself is not shown on this display', textAlign: TextAlign.center, style: VisageText.muted(13)),
+        Text('Video not shown on this display', textAlign: TextAlign.center, style: VisageText.muted(15)),
       ],
     );
   }
@@ -119,14 +123,15 @@ class _ViewChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.center,
-    spacing: 8,
+    spacing: 4,
     children: [
       for (final choice in choices)
         TextButton(
+          style: TextButton.styleFrom(minimumSize: _choiceTarget, padding: _choicePadding),
           onPressed: choice == view ? null : () => choose(choice),
           child: Text(
             viewLabels[choice]!.toUpperCase(),
-            style: VisageText.muted(13).copyWith(letterSpacing: 1, color: choice == view ? VisageColors.accent : null),
+            style: VisageText.muted(15).copyWith(letterSpacing: 0.5, color: choice == view ? VisageColors.accent : null),
           ),
         ),
     ],

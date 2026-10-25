@@ -122,6 +122,39 @@ void main() {
     expect(faults.map((f) => '${f.context}'), everyElement(contains('installing.json')));
   });
 
+  testWidgets('under reduced motion the progress ring still follows the position while the cover holds', (tester) async {
+    final data = fixtureData('system_audio_player');
+    await tester.pumpWidget(framed(pageFor(hello, 'SYSTEM_audio_player', data), still: true));
+    expect(tester.widget<Ring>(find.byType(Ring)).fraction, closeTo(0.3, 0.01));
+    await tester.pumpWidget(framed(pageFor(hello, 'SYSTEM_audio_player', {...data, 'position': 150000}), still: true));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<Ring>(find.byType(Ring)).fraction, closeTo(0.5, 0.01));
+    expect(anythingRotated(tester), isFalse);
+  });
+
+  testWidgets('media player error: the failure view holds a still frame under reduced motion', (tester) async {
+    final faults = await collectFaults(() async {
+      await tester.pumpWidget(framed(media({'media_playback_state': 'error'}), still: true));
+      await untilBusyArrives(tester);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Could not play Blue in Green'), findsOneWidget);
+      expect(busyMoving(tester), isFalse);
+    });
+    expect(faults.map((f) => '${f.context}'), everyElement(contains('status-fail.json')));
+  });
+
+  testWidgets('every control is at least 48 x 48 in the 480 x 800 frame', (tester) async {
+    for (final page in [audio(), media()]) {
+      await tester.pumpWidget(framed(page));
+      final controls = [...find.byType(IconButton).evaluate(), ...find.byType(TextButton).evaluate()];
+      expect(controls, isNotEmpty);
+      for (final control in controls) {
+        expect(control.size!.width, greaterThanOrEqualTo(48), reason: '${control.widget}');
+        expect(control.size!.height, greaterThanOrEqualTo(48), reason: '${control.widget}');
+      }
+    }
+  });
+
   testWidgets('video still: a defined frame under reduced motion', (tester) async {
     await tester.pumpWidget(framed(video(), still: true));
     await tester.pump(const Duration(seconds: 1));

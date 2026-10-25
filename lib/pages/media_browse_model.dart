@@ -15,9 +15,9 @@ enum MediaView { loading, error, nowPlaying, results, queue, empty }
 
 /// The chips that switch views. At most one of loading, error and now-playing is present, so they share a label.
 const viewLabels = {
-  MediaView.loading: 'Now playing',
-  MediaView.error: 'Now playing',
-  MediaView.nowPlaying: 'Now playing',
+  MediaView.loading: 'Playing',
+  MediaView.error: 'Playing',
+  MediaView.nowPlaying: 'Playing',
   MediaView.results: 'Results',
   MediaView.queue: 'Queue',
 };
