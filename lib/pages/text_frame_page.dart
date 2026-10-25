@@ -9,9 +9,14 @@ import 'package:flutter/material.dart';
 import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import 'data_faults.dart';
 import 'page.dart';
 import 'templates_model.dart';
 import 'template_text.dart';
+
+/// The `SYSTEM_text` key list ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// `text` required, `title` optional.
+List<String> textProblems(Json data) => [?requiredString(data['text'], 'text'), ?optionalString(data['title'], 'title')];
 
 const _chipPx = 300.0;
 const _chipInnerPx = 252.0;
@@ -22,7 +27,12 @@ final _longStyle = VisageText.fg(32, height: 1.32);
 class TextFramePage extends StatefulWidget {
   const TextFramePage({super.key, required this.data});
 
-  static Widget page(Json data, PageContext ctx) => TextFramePage(data: data);
+  /// A missing `text`, or a key of the wrong type, is reported and the page shows what it has (gui-1.md 3.4, 6.5).
+  static Widget page(Json data, PageContext ctx) => ReportsDataFaults(
+    template: 'SYSTEM_text',
+    problems: textProblems(data),
+    child: TextFramePage(data: data),
+  );
 
   final Json data;
 
