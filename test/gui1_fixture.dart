@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
+import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/state/gui1_apply.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
@@ -51,8 +52,8 @@ final recordedDemo = RegExp(
 );
 
 /// A fixture `ovos-skill-gui1-demo` recorded through the adapter (`fixtures/gui1` there): the frames after its `_note`,
-/// without the welcome or the first snapshot. Each `idle` was given `"session_id": "default"` by a script for
-/// amendment D, and the `_note` ends by saying so.
+/// without the welcome or the first snapshot. Recorded at the skill's 816e8fa from adapter 67fbaca, copied unchanged:
+/// each `idle` carries the adapter's own `session_id` (amendment D), each `template` its `index` and `page_count`.
 List<Gui1Frame> loadDemo(String name) {
   final lines = _lines('test/fixtures/gui1/recorded/demo/$name.jsonl');
   final note = jsonDecode(lines.first) as Json;
@@ -87,8 +88,10 @@ Widget host(Widget page) => MaterialApp(
   ),
 );
 
-Widget pageOf(GuiState state, {TemplateGaps? gaps}) {
+/// [state]'s current page through the router. Pass [protocol] to render it as a GUI-1 window does: some pages differ by
+/// protocol (the image page refuses a filesystem path over GUI-1, finding F39).
+Widget pageOf(GuiState state, {TemplateGaps? gaps, ChosenProtocol? protocol}) {
   final target = state.current()!;
-  final ctx = PageContext(namespace: target.namespace, page: target.page, events: const {});
+  final ctx = PageContext(namespace: target.namespace, page: target.page, events: const {}, protocol: protocol);
   return resolve(target, gaps: gaps ?? TemplateGaps())(state.namespace(target.namespace).data, ctx);
 }

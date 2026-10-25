@@ -23,6 +23,7 @@ import 'package:ovos_gui_visage/pages/template_keys.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/pages/url_frame_page.dart';
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
+import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/state/ambient.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
@@ -68,8 +69,8 @@ void frameSized(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// Pumps [state]'s page through the router, expects a [shows] page, and returns what it reported; then unmounts it so
-/// no ticker or timer outlives the test.
+/// Pumps [state]'s page through the router as the GUI-1 window renders it, expects a [shows] page, and returns what it
+/// reported; then unmounts it so no ticker or timer outlives the test.
 Future<List<FlutterErrorDetails>> pumpRouted(
   WidgetTester tester,
   GuiState state,
@@ -78,7 +79,7 @@ Future<List<FlutterErrorDetails>> pumpRouted(
 }) async {
   frameSized(tester);
   final faults = await collectFaults(() async {
-    await tester.pumpWidget(host(pageOf(state, gaps: gaps)));
+    await tester.pumpWidget(host(pageOf(state, gaps: gaps, protocol: ChosenProtocol.gui1)));
     await tester.pump(const Duration(milliseconds: 100));
   });
   expect(find.byType(shows), findsOneWidget);
@@ -183,14 +184,16 @@ void main() {
   degradation();
 }
 
-/// Each degraded template, by the `title` the demo skill gave it, and the exact reports Visage makes for it.
+/// Each degraded template, by the `title` the demo skill gave it, and the exact reports Visage makes for it over GUI-1.
+/// The live window (d7b332b) printed these six as its fault lines during "show the broken gui demo", one each.
 const planted = <String, List<String>>{
   'Fault: missing required key text': ['SYSTEM_text data: FormatException: text is required'],
   'Fault: current_temp is a string': [
     'SYSTEM_weather data: FormatException: current_temp must be a finite number, got String seventy two',
   ],
   'Fault: bare file path as image': [
-    'image /usr/share/pixmaps/gui1-demo.png: Bad state: no such file /usr/share/pixmaps/gui1-demo.png',
+    'SYSTEM_image data: FormatException: image must be an http(s) URL or a data:image URI (gui-1.md 3.5 Image delivery), '
+        'got /usr/share/pixmaps/gui1-demo.png',
   ],
   'Fault: table row of the wrong length': ['SYSTEM_table data: FormatException: rows[1] has 2 cells for 3 columns'],
   'Fault: unlisted condition_code': [
@@ -211,7 +214,7 @@ void degradation() {
       final faults = await collectFaults(() async {
         replayGui1([frame], gaps: gaps, state: state);
         if (frame is! Gui1Template) return;
-        await tester.pumpWidget(host(pageOf(state, gaps: gaps.templates)));
+        await tester.pumpWidget(host(pageOf(state, gaps: gaps.templates, protocol: ChosenProtocol.gui1)));
         await tester.pump(const Duration(milliseconds: 100));
       });
       if (frame is Gui1Template) reported[frame.data['title'] as String] = faults.map(described).toList();
