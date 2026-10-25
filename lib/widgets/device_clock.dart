@@ -1,13 +1,12 @@
-/// The device's own clock in the concept's blue circle, ticking each second: the built-in blank page and the GUI-1
-/// resting display both show it, since neither has a producer for the time (gui-1.md §6.9.1).
+/// The device's own clock in the hero clock chip, ticking each second: the built-in blank page and the GUI-1
+/// resting display both show it, since neither has a producer for the time (gui-1.md 6.9.1).
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
-import 'circle.dart';
+import 'home_chips.dart';
 
 const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const _months = [
@@ -57,27 +56,6 @@ class _DeviceClockState extends State<DeviceClock> {
   @override
   Widget build(BuildContext context) {
     final now = widget.now();
-    return Circle(
-      size: 300,
-      gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
-      ring: const Ring(),
-      children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              clockLine(now),
-              style: VisageText.fg(
-                92,
-                weight: FontWeight.w300,
-                height: 1,
-              ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
-            ),
-            const SizedBox(height: 10),
-            Text(dateLine(now), style: VisageText.muted(20)),
-          ],
-        ),
-      ],
-    );
+    return ClockChip(time: clockLine(now), date: dateLine(now));
   }
 }

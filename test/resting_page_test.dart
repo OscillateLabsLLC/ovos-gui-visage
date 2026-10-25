@@ -6,6 +6,7 @@ import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/state/ambient.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 import 'package:ovos_gui_visage/widgets/device_clock.dart';
+import 'package:ovos_gui_visage/widgets/home_chips.dart';
 import 'package:ovos_gui_visage/widgets/weather_icon.dart';
 
 import 'faults.dart';
@@ -17,13 +18,40 @@ void main() {
   ) async {
     late GuiState state;
     final faults = await collectFaults(() async => state = replayGui1(loadGui1Fixture('resting_ambient')));
-    expect(faults, isEmpty, reason: 'gui.ambient.notifications is kept and shows nothing, without a fault');
+    expect(faults, isEmpty);
     expect([state.active, state.current()], [isEmpty, isNull]);
     expect(state.ambient.keys, [ambientWeather, ambientNotifications]);
     expect(restingPage(state, ChosenProtocol.legacy), isNull, reason: 'legacy rests on the homescreen skill');
     await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
-    expect([find.text('09:05'), find.text('21°'), find.text('Cloudy')], everyElement(findsOneWidget));
+    expect([find.text('09:05'), find.text('21°'), find.byType(CountBadge)], everyElement(findsOneWidget));
     expect(tester.widget<WeatherIcon>(find.byType(WeatherIcon)).name, 'clouds');
+    expect(tester.widget<CountBadge>(find.byType(CountBadge)).count, 2);
+    expect(find.text('Cloudy'), findsNothing, reason: 'the icon is the one hero of the weather chip');
+  });
+
+  testWidgets('without condition_code the weather chip shows the condition text; a zero count shows no badge', (tester) async {
+    var opened = 0;
+    final ambient = {
+      ambientWeather: {'current_temp': 18, 'condition': 'Light rain'},
+      ambientNotifications: {'count': 0},
+    };
+    await tester.pumpWidget(host(RestingPage(ambient: ambient, onShowNotifications: () => opened++, now: () => restingNow)));
+    expect([find.text('Light rain'), find.text('18°')], everyElement(findsOneWidget));
+    expect([find.byType(WeatherIcon), find.byType(CountBadge)], everyElement(findsNothing));
+    await tester.pumpWidget(
+      host(
+        RestingPage(
+          ambient: {
+            ...ambient,
+            ambientNotifications: {'count': 3},
+          },
+          onShowNotifications: () => opened++,
+          now: () => restingNow,
+        ),
+      ),
+    );
+    await tester.tap(find.byType(CountBadge));
+    expect([find.text('3'), opened], [findsOneWidget, 1]);
   });
 
   test('resting_ambient: the ambient data outlives the template, the snapshot and a reconnect', () {
