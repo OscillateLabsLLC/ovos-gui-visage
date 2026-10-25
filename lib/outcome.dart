@@ -24,7 +24,7 @@ const turnEndEvent = 'ovos.utterance.handled';
 
 /// `complete_intent_failure` and its spec name `ovos.intent.unmatched` (both reach the bus through ovos-bus-client's
 /// compatibility twin), and the handler error signal by its skill-framework name, which carries `exception`, and its
-/// orchestrator name (gui-1.md §5.3).
+/// orchestrator name (gui-1.md 5.3).
 const failureEvents = [
   'complete_intent_failure',
   'ovos.intent.unmatched',
@@ -32,7 +32,7 @@ const failureEvents = [
   'ovos.intent.handler.error',
 ];
 
-/// Speech to text heard nothing usable, by its §5.3 name and the listener's. No turn starts, so no end marker follows,
+/// Speech to text heard nothing usable, by its gui-1.md 5.3 name and the listener's. No turn starts, so no end marker follows,
 /// and the failure shows at once.
 const sttFailedEvents = ['ovos.stt.failed', 'recognizer_loop:speech.recognition.unknown'];
 const outcomeEvents = [turnStartEvent, handlerCompleteEvent, cancelledEvent, turnEndEvent, ...failureEvents, ...sttFailedEvents];

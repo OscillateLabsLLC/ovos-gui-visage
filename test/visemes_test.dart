@@ -30,7 +30,7 @@ void main() {
     expect(visemeAt([], 0), isNull);
   });
 
-  test('the audio-out.md §5.4 example plays as written; a code outside the set is the rest shape', () {
+  test('the audio-out.md 5.4 example plays as written; a code outside the set is the rest shape', () {
     final spoken = jsonDecode('{"visemes": [["4", 0.35], ["0", 0.52], ["3", 0.71]], "start": 1791688142.76}')['visemes'] as List;
     expect(
       [

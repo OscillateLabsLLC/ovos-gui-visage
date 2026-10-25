@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/status_topics.dart';
 
-/// ovos-gui's `STATUS_TOPICS` (gui-1.md §5.3), copied from ovos_gui/gui1.py, not from lib/.
+/// ovos-gui's `STATUS_TOPICS` (gui-1.md 5.3), copied from ovos_gui/gui1.py, not from lib/.
 const specTopics = {
   'ovos.listener.wakeword',
   'ovos.listener.record.started',
@@ -22,7 +22,7 @@ const specTopics = {
 };
 
 void main() {
-  test('every followed topic is a §5.3 topic, and every legacy alias names one with the same role', () {
+  test('every followed topic is a gui-1.md 5.3 topic, and every legacy alias names one with the same role', () {
     expect(specTopics, containsAll(specStatusRoles.keys));
     for (final MapEntry(key: legacy, value: spec) in legacyStatusAliases.entries) {
       expect(specStatusRoles, contains(spec), reason: legacy);
@@ -37,7 +37,7 @@ void main() {
     expect(statusRole('enclosure.mouth.viseme_list'), StatusRole.visemes);
   });
 
-  test('every §5.3 topic has a role', () {
+  test('every gui-1.md 5.3 topic has a role', () {
     expect(specStatusRoles.keys.toSet(), specTopics);
   });
 
@@ -54,7 +54,7 @@ void main() {
     }
   });
 
-  test('topics outside §5.3 have no role', () {
+  test('topics outside gui-1.md 5.3 have no role', () {
     for (final topic in ['gui.ambient.weather', 'ovos.utterance.cancelled', 'recognizer_loop:wake_up']) {
       expect(statusRole(topic), isNull, reason: topic);
     }

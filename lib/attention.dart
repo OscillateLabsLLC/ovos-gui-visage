@@ -44,7 +44,7 @@ class Attention extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// [event] by its §5.3 name or a legacy alias (status_topics.dart); a topic with no role changes nothing. A failure
+  /// [event] by its gui-1.md 5.3 name or a legacy alias (status_topics.dart); a topic with no role changes nothing. A failure
   /// settles a listening or thinking face as a finished turn does; the outcome pill shows the failure itself
   /// (outcome.dart). Sleep closes the eyes until awoken, whatever the face is doing.
   void handle(String event, Map<String, dynamic> data) {

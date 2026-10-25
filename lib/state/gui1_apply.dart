@@ -14,7 +14,7 @@ import 'ambient.dart';
 import 'gui_state.dart';
 
 /// What GUI-1 frames ask for that Visage cannot do, each told once so a stream never spams the log. A template or a
-/// status topic without a page or a role, and an ambient payload without the keys §6.9.1 requires, is a fault
+/// status topic without a page or a role, and an ambient payload without the keys gui-1.md 6.9.1 requires, is a fault
 /// ([TemplateGaps], [reportFault]); an `idle` while this session still holds a stack is the spec's device-wide idle
 /// (finding F16), logged.
 class Gui1Gaps {
@@ -97,7 +97,7 @@ void _keepAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps) {
 
 const idleTemplate = 'SYSTEM_idle';
 
-/// `SYSTEM_idle` asks for the resting state and names no page (§3.4, §6.9; finding F17): its namespace keeps its place
+/// `SYSTEM_idle` asks for the resting state and names no page (gui-1.md 3.4 and 6.9; finding F32): its namespace keeps its place
 /// on the stack without one, so the page beneath it, or the resting display, shows.
 void _show(GuiState state, String skillId, String? template, Json data) {
   final ns = state.namespace(skillId)

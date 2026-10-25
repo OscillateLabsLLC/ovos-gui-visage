@@ -1,5 +1,5 @@
-/// The status topics the face follows, keyed by their OVOS-GUI-1 names (gui-1.md §5.3, ovos-gui `STATUS_TOPICS`). The
-/// legacy bus names are aliases of them, so both protocols drive [Attention] the same way. Every §5.3 topic has a role.
+/// The status topics the face follows, keyed by their OVOS-GUI-1 names (gui-1.md 5.3, ovos-gui `STATUS_TOPICS`). The
+/// legacy bus names are aliases of them, so both protocols drive [Attention] the same way. Every gui-1.md 5.3 topic has a role.
 library;
 
 enum StatusRole { listenStart, listenEnd, thinkStart, thinkEnd, failed, speakStart, speakEnd, visemes, sleep, awoken }
@@ -23,7 +23,7 @@ const specStatusRoles = {
   'ovos.listener.awoken': StatusRole.awoken,
 };
 
-/// The bus names ovos-core, the listener and the audio service sent before the §5.3 names, each to the spec topic it
+/// The bus names ovos-core, the listener and the audio service sent before the gui-1.md 5.3 names, each to the spec topic it
 /// became. Sleep and awoken follow ovos-spec-tools' `MIGRATION_MAP`; the listener sends
 /// `recognizer_loop:speech.recognition.unknown` when speech to text returns nothing (ovos-dinkum-listener `service.py`).
 const legacyStatusAliases = {
