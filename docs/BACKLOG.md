@@ -141,7 +141,7 @@ Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
 - `lib/window/window_menu.dart`: the in-window menu has an accent outline.
 - `lib/window/window_menu.dart`: the in-window menu separators are accent, not the faint hairline.
 
-Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at 480 × 800 and 240 × 400):
+Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
 
 - `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
 - `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.

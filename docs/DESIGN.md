@@ -10,6 +10,10 @@ Read it before you add a page, a widget or an animation.
 - Use circles, rings and plain stacked text. Do not use cards, nested panels, accent borders or edge stripes.
 - Use gradients, glows and motion as polish.
 - On the resting screen, stack the weather above the clock. Show a small logo badge only when nothing else is available.
+  On GUI-1 the display owns the resting screen, not a skill
+  ([gui-1.md 6.9 Idle / resting display ownership](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#69-idle--resting-display-ownership)),
+  and fills it from the kept ambient data
+  ([gui-1.md 6.9.1 Ambient data](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#691-ambient-data)).
 - Use white text, one blue accent, and yellow for the sun. Use the system font. Do not use web fonts.
 - The colours are tokens in `lib/theme.dart`. Its page background is `#05070A`; SPEC 9 says `#0b0f14`
   (docs/BACKLOG.md, Pre-announcement polish audit).
@@ -49,8 +53,11 @@ A user reads the screen from across the room, often in one look.
 
 - Give each chip one hero element: the time, the temperature, an icon.
 - Use big numerals. Do not shrink text to make it fit; show less instead.
-- Check every page in the 480 × 800 frame and in the 240 × 400 widget. The frame scales into the widget
-  (`lib/screen_frame.dart`), so small text gets smaller still.
+- Know the space a page gets. The frame is 480 × 800, and the shell pads it, so a page gets 432 × 736. While the face
+  is the strip at the bottom, the page gets 432 × 650 (`lib/screen_frame.dart`).
+- The 240 × 400 corner widget is the same frame scaled by half (a fitted box in `lib/main.dart`), not a layout of its
+  own. Text there is half size, so check that the smallest text still reads.
+- Check every page at 432 × 736 and at 432 × 650.
 - Keep text contrast at the guideline: 4.5:1 for normal text, 3:1 for large text.
 - A page holds plain controls (buttons, text fields, sliders). It never reads raw touches or keys. The shell owns the
   gestures (`docs/SCOPE.md`, Input). Give every control a label.
@@ -75,7 +82,7 @@ Never show an empty screen without a report. Never hide a failure in an empty `c
 | Test | It fails when |
 |---|---|
 | `test/style_rules_test.dart` | a card, a filled box with rounded corners, a border with a width, or a divider other than the hairline is outside its allowlist |
-| `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 480 × 800 or 240 × 400, and is not on the audit list |
+| `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 432 × 736 or 432 × 650, and is not on the audit list |
 | `test/reduced_motion_test.dart` | a file that animates does not read the reduced-motion setting and is not on the audit list |
 | `test/circle_motion_test.dart` | the shared widgets move under reduced motion |
 | `test/styles_test.dart` | a face pairing does not paint every frame without a fault |

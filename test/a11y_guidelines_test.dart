@@ -24,8 +24,8 @@ import 'faults.dart';
 const contrast = 'text contrast';
 const labels = 'labelled tap targets';
 
-/// Pages that fail a guideline today, at both sizes: page -> guideline -> the failure, as the first run (2026-10-25)
-/// measured it. testWidgets takes no skip message, so the reason goes in the skipped test's name.
+/// Pages that fail a guideline today, at both page sizes: page -> guideline -> the failure, as measured 2026-10-25.
+/// testWidgets takes no skip message, so the reason goes in the skipped test's name.
 const audit = <String, Map<String, String>>{
   'ovos-skill-weather.openvoiceos/SunriseSunset': {contrast: 'SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1'},
   'resting (GUI-1)': {contrast: 'count badge, white on the accent, 2.92:1 at 15 px; the homescreen idle page shares it'},
@@ -93,19 +93,14 @@ Widget _routed(Shown page) {
   return resolve(page.target, gaps: TemplateGaps())(page.data, ctx);
 }
 
-/// The page as the frame shows it: padded on the black page background, the 480 x 800 frame scaled into [view].
+/// The box the shell gives a page (lib/screen_frame.dart): the 480 x 800 frame less its padding, 432 x 736, or
+/// 432 x 650 while the face is the bottom strip. The 240 x 400 corner widget is that frame scaled by half, not a
+/// layout of its own, so these two sizes are every layout a page gets.
+const pageSizes = [Size(432, 736), Size(432, 650)];
+
 Widget framed(Widget page) => MaterialApp(
   debugShowCheckedModeBanner: false,
-  home: Material(
-    color: VisageColors.pageBg,
-    child: FittedBox(
-      child: SizedBox(
-        width: 480,
-        height: 800,
-        child: Padding(padding: const EdgeInsets.fromLTRB(24, 32, 24, 32), child: page),
-      ),
-    ),
-  ),
+  home: Material(color: VisageColors.pageBg, child: page),
 );
 
 Future<Evaluation> evaluate(WidgetTester tester, String key, Size view, AccessibilityGuideline guideline) async {
@@ -136,20 +131,18 @@ void main() {
   });
 
   for (final key in keys) {
-    for (final (name, view, guideline) in [
-      (contrast, const Size(480, 800), textContrastGuideline),
-      (labels, const Size(480, 800), labeledTapTargetGuideline),
-      (contrast, const Size(240, 400), textContrastGuideline),
-    ]) {
-      final skip = audit[key]?[name];
-      final title = '$key: $name at ${view.width.round()} x ${view.height.round()}${skip == null ? '' : ' [audit: $skip]'}';
-      testWidgets(title, skip: skip != null, (tester) async {
-        final result = await evaluate(tester, key, view, guideline);
-        expect(result.passed, isTrue, reason: result.reason);
-      });
+    for (final (name, guideline) in [(contrast, textContrastGuideline), (labels, labeledTapTargetGuideline)]) {
+      for (final view in pageSizes) {
+        final skip = audit[key]?[name];
+        final title = '$key: $name at ${view.width.round()} x ${view.height.round()}${skip == null ? '' : ' [audit: $skip]'}';
+        testWidgets(title, skip: skip != null, (tester) async {
+          final result = await evaluate(tester, key, view, guideline);
+          expect(result.passed, isTrue, reason: result.reason);
+        });
+      }
     }
     testWidgets('$key: Android tap-target size (informative on the desktop)', (tester) async {
-      final result = await evaluate(tester, key, const Size(480, 800), androidTapTargetGuideline);
+      final result = await evaluate(tester, key, pageSizes.first, androidTapTargetGuideline);
       debugPrint('a11y informative: $key tap-target size ${result.passed ? 'passes' : 'fails: ${result.reason}'}');
     });
   }
