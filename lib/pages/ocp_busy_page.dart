@@ -54,8 +54,18 @@ class _TurningArc extends StatefulWidget {
 }
 
 class _TurningArcState extends State<_TurningArc> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
-    ..repeat();
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+
+  /// Turns unless reduced motion is on; then the arc and dots hold the cycle's first frame.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _controller.value = 0;
+    } else {
+      _controller.repeat();
+    }
+  }
 
   @override
   void dispose() {

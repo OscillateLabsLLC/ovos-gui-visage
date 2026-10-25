@@ -26,6 +26,7 @@ const _coverInset = 24.0;
 const _washInset = 56.0;
 const _turnPeriod = Duration(seconds: 20);
 const _settle = Duration(milliseconds: 600);
+const _dim = Duration(milliseconds: 300);
 
 class NowPlayingPage extends StatelessWidget {
   const NowPlayingPage({super.key, required this.data, required this.ctx});
@@ -63,6 +64,7 @@ class _NowPlayingViewState extends State<NowPlayingView> with SingleTickerProvid
   late Anchor _anchor = anchorFor(null, _track, _nowMs);
   late final AnimationController _turn = AnimationController(vsync: this, lowerBound: 0, upperBound: 360);
   Timer? _ticker;
+  bool? _still;
 
   double get _nowMs => _clock.elapsedMicroseconds / 1000;
 
@@ -70,6 +72,15 @@ class _NowPlayingViewState extends State<NowPlayingView> with SingleTickerProvid
   void initState() {
     super.initState();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+  }
+
+  /// Reduced motion (the platform setting) is read here, before the first paint and whenever it changes.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still == _still) return;
+    _still = still;
     _paint(previousId: null, wasPlaying: false);
   }
 
@@ -83,8 +94,12 @@ class _NowPlayingViewState extends State<NowPlayingView> with SingleTickerProvid
   }
 
   /// Playing (or a new track while playing) starts the record turn from upright; leaving playing eases it back
-  /// upright from wherever it stopped, so a paused logo never sits upside down.
+  /// upright from wherever it stopped, so a paused logo never sits upside down. Under reduced motion it holds upright.
   void _paint({required String? previousId, required bool wasPlaying}) {
+    if (_still ?? false) {
+      _turn.value = 0;
+      return;
+    }
     final playing = _track.state == PlaybackState.playing;
     if (playing && (!wasPlaying || previousId != _track.id)) {
       _turn.repeat(min: 0, max: 360, period: _turnPeriod);
@@ -157,6 +172,7 @@ class _Stage extends StatelessWidget {
   Widget build(BuildContext context) {
     final playing = track.state == PlaybackState.playing;
     final paused = track.state == PlaybackState.paused;
+    final fade = (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ? 0.0 : 1.0;
     final cover = imageFor(
       track.cover,
       fit: BoxFit.cover,
@@ -190,7 +206,7 @@ class _Stage extends StatelessWidget {
                 child: ImageFiltered(
                   imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
                   child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 600),
+                    duration: _settle * fade,
                     opacity: playing ? 0.42 : (paused ? 0.2 : 0),
                     child: SizedBox.expand(child: imageFor(track.cover, fit: BoxFit.cover)),
                   ),
@@ -203,7 +219,7 @@ class _Stage extends StatelessWidget {
             ring: Ring(fraction: progress.fraction, value: ringColour),
             children: [
               AnimatedOpacity(
-                duration: const Duration(milliseconds: 300),
+                duration: _dim * fade,
                 opacity: paused ? 0.45 : 1,
                 child: AnimatedBuilder(
                   animation: turn,
