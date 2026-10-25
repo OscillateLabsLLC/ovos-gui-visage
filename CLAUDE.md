@@ -6,9 +6,10 @@ protocol and visual reference (`../ovos-visage/docs/SPEC.md` in Mike's checkout)
 
 ## Hard rules
 
-- **Never modify OVOS code** (`ovos-gui`, skills, workshop). If the protocol does not do what
-  you need, change the client, or stop and report.
-- **Never install into or upgrade the virtualenv OVOS runs from.** `ovos-gui-service` and the
+- **Never modify the live install.** The OVOS on this Mac (`~/.venvs/ovos`, `~/.venvs/ovos-gui`, bus 8181,
+  GUI 18181) is read-only and never a test target. Upstream OVOS work is in scope, in separate clones and virtualenvs
+  (today `~/coding/OscillateLabs/gui1-upstream/`, `~/.venvs/ovos-gui1*`), as PRs from OscillateLabsLLC forks.
+- **Never install into or upgrade the live install's virtualenvs.** `ovos-gui-service` and the
   homescreen live in `~/.venvs/ovos-gui`; this app has no Python of its own.
 - **Branch + PR, never push `main`.** A maintainer merges. Conventional commit titles.
 - **Deterministic evidence.** Run the change against the live stack and look. ovos-visage's
