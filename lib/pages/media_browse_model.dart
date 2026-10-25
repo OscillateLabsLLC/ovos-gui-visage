@@ -1,7 +1,7 @@
 /// SYSTEM_media_player's views ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
 /// which ones its data can fill, and the queue and search results as the OCP list page's [BrowseModel]. Rows cannot
 /// be tapped: OCP's `playlist.play` takes its own entry shape, and GUI-1 leaves the media-control surface out of scope
-/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F21).
+/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F30).
 library;
 
 import '../json.dart';
@@ -27,7 +27,7 @@ MediaKeys mediaKeys(Json data) => MediaKeys(mediaPlayer, data, prefix: 'media_')
 bool _hasTrack(MediaKeys keys) => (keys.string('title') ?? '').isNotEmpty || (keys.string('uri') ?? '').isNotEmpty;
 
 /// The views the data can fill, the one to show first leading: loading or error while the state says so, then the
-/// current track, the search results, the queue; [MediaView.empty] when there is nothing (finding F20).
+/// current track, the search results, the queue; [MediaView.empty] when there is nothing (finding F29).
 List<MediaView> mediaViews(Json data) {
   final keys = mediaKeys(data);
   final state = mediaState(keys);
@@ -51,7 +51,7 @@ String mediaStateLabel(Json data, MediaView view) {
   };
 }
 
-/// Entries carry `duration` in ms like the player's own (finding F19); it shows only when positive.
+/// Entries carry `duration` in ms like the player's own (finding F28); it shows only when positive.
 BrowseRow _itemRow(MediaKeys keys, String list, Map item, {required bool current, Object? skillId}) {
   final duration = number(item['duration']);
   final title = text(item['title']);
@@ -91,7 +91,7 @@ BrowseModel queueModel(Json data) {
   return (heading: 'Queue', layout: BrowseLayout.rows, rows: window.rows, hidden: window.hidden);
 }
 
-/// Search results with the skill that found each; `match_confidence` is not shown (its range is unspecified, F19).
+/// Search results with the skill that found each; `match_confidence` is not shown (its range is unspecified, F28).
 BrowseModel resultsModel(Json data) {
   final keys = mediaKeys(data);
   final uri = keys.string('uri') ?? '';

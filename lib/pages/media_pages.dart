@@ -4,7 +4,7 @@
 /// title and play state
 /// ([6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation)),
 /// since Visage decodes no video yet. The transport answers in OCP's namespace whichever namespace showed the page
-/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F21).
+/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F30).
 library;
 
 import 'package:flutter/material.dart';

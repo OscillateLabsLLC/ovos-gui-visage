@@ -14,12 +14,12 @@ const videoPlayer = 'SYSTEM_video_player';
 const mediaPlayer = 'SYSTEM_media_player';
 
 /// Where the transport goes whichever namespace showed the template: 7.1 points controls at the media subsystem, and
-/// OCP's `ovos.common_play.*` messages are the only media-control surface OVOS has (finding F21).
+/// OCP's `ovos.common_play.*` messages are the only media-control surface OVOS has (finding F30).
 const ocpNamespace = 'ovos.common_play';
 
 const unknownOrLive = -1.0;
 
-/// `-1` and an omitted duration are both unknown or live (finding F18); any other value that is not positive is
+/// `-1` and an omitted duration are both unknown or live (finding F27); any other value that is not positive is
 /// reported (0 is legacy OCP's live marker) and read the same way.
 double? _durationMs(MediaKeys keys) {
   final value = keys.number('duration');
@@ -29,7 +29,7 @@ double? _durationMs(MediaKeys keys) {
   return null;
 }
 
-/// `-1` is unknown here too: the convention covers the pair (finding F18). Any other negative value is reported.
+/// `-1` is unknown here too: the convention covers the pair (finding F27). Any other negative value is reported.
 double _positionMs(MediaKeys keys) {
   final value = keys.number('position') ?? 0;
   if (value >= 0) return value;
@@ -102,7 +102,7 @@ PlaybackState _playback(MediaState state) => switch (state) {
   _ => PlaybackState.paused,
 };
 
-/// `media_playlist_position`, read as a 0-based index into `media_playlist` (finding F19); out of range is reported.
+/// `media_playlist_position`, read as a 0-based index into `media_playlist` (finding F28); out of range is reported.
 int? playlistIndex(MediaKeys keys, int length) {
   final value = keys.number('playlist_position');
   if (value == null) return null;

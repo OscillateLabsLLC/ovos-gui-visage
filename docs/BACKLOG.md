@@ -133,11 +133,11 @@ The popups follow ovos-shell's NotificationPop*.qml.
 - **SYSTEM_video_player shows no video.** Version 1 shows a play glyph, the title and the play state ([gui-1.md 6.5](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation)). Real
   playback needs a video dependency that builds on macOS, Linux and web, and a decision about who owns the stream
   ([7.1](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport) gives it to the media subsystem, not the display). Evidence first: which producer sends the template, and what
-  `uri` it carries. A poster image waits on finding F17.
+  `uri` it carries. A poster image waits on finding F26.
 - **Queue and search-result rows cannot be tapped** in SYSTEM_media_player. OCP's `playlist.play` and `search.play`
-  take OCP's own entry shape, and GUI-1 names no "play this entry" control (F21). Wire them when the media subsystem's
+  take OCP's own entry shape, and GUI-1 names no "play this entry" control (F30). Wire them when the media subsystem's
   control surface is specified, or record what OCP accepts for a `media_*` entry from the live bus first.
-- **Repeat and shuffle** have no `media_*` key (F22), so the media player cannot show them.
+- **Repeat and shuffle** have no `media_*` key (F31), so the media player cannot show them.
 
 ## Carried over
 
