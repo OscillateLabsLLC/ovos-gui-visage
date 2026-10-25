@@ -13,6 +13,7 @@ const hello = 'ovos-skill-hello.openvoiceos';
 const alerts = 'ovos-skill-alerts.openvoiceos';
 const weather = 'ovos-skill-weather.openvoiceos';
 const handWritten = {'_note': 'written from WIRE.md, not recorded'};
+const fromSpec = {'_note': 'written from gui-1.md §3.4 at b6c1583, not recorded'};
 
 List<Gui1Frame> _parse(Iterable<String> lines) => [for (final line in lines) parseGui1Frame(jsonDecode(line) as Json)];
 
@@ -21,7 +22,7 @@ List<String> _lines(String path) => File(path).readAsLinesSync().where((l) => l.
 /// A hand-written fixture's frames after its `_note` line, the handshake's `welcome` included.
 List<Gui1Frame> loadGui1Fixture(String scenario) {
   final lines = _lines('test/fixtures/gui1/$scenario.jsonl');
-  expect(jsonDecode(lines.first), handWritten, reason: '$scenario says it is hand-written');
+  expect(jsonDecode(lines.first), anyOf(handWritten, fromSpec), reason: '$scenario says it is hand-written');
   return _parse(lines.skip(1));
 }
 

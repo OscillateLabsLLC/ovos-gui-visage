@@ -7,6 +7,7 @@ import 'package:ovos_gui_visage/pages/html_frame_page.dart';
 import 'package:ovos_gui_visage/pages/image_frame_page.dart';
 import 'package:ovos_gui_visage/pages/input_box_page.dart';
 import 'package:ovos_gui_visage/pages/loading_page.dart';
+import 'package:ovos_gui_visage/pages/media_pages.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
@@ -61,6 +62,9 @@ const implemented = <String, PageBuilder>{
   'SYSTEM_status': StatusPage.page,
   'SYSTEM_loading': LoadingPage.page,
   'SYSTEM_face': SystemFacePage.page,
+  'SYSTEM_audio_player': AudioPlayerPage.page,
+  'SYSTEM_video_player': VideoPlayerPage.page,
+  'SYSTEM_media_player': MediaPlayerPage.page,
 };
 
 const unimplemented = {
@@ -69,9 +73,6 @@ const unimplemented = {
   'SYSTEM_list',
   'SYSTEM_grid',
   'SYSTEM_table',
-  'SYSTEM_audio_player',
-  'SYSTEM_video_player',
-  'SYSTEM_media_player',
   'SYSTEM_clock',
   'SYSTEM_timer',
   'SYSTEM_weather',
