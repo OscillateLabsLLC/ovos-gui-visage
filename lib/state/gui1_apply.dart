@@ -97,7 +97,7 @@ void _keepAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps) {
 
 const idleTemplate = 'SYSTEM_idle';
 
-/// `SYSTEM_idle` asks for the resting state and names no page (gui-1.md 3.4 and 6.9; finding F32): its namespace keeps its place
+/// `SYSTEM_idle` asks for the resting state and names no page (gui-1.md 3.4 and 6.9; finding F33): its namespace keeps its place
 /// on the stack without one, so the page beneath it, or the resting display, shows.
 void _show(GuiState state, String skillId, String? template, Json data) {
   final ns = state.namespace(skillId)
