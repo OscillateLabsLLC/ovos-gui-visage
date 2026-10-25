@@ -38,23 +38,28 @@ class NowPlayingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isSyncPlayer(data)) return FallbackPage(data: data, ctx: ctx);
-    return _Player(data: data, send: ctx.trigger);
+    return NowPlayingView(data: data, send: ctx.trigger);
   }
 }
 
-class _Player extends StatefulWidget {
-  const _Player({required this.data, required this.send});
+/// Reads a page's data into the [Track] the view shows; [previous] is the last one, for models that compare.
+typedef TrackModel = Track Function(Json data, [Track? previous]);
+
+/// The player itself, for any data a [model] can read: OCP's session keys by default, or a GUI-1 template's.
+class NowPlayingView extends StatefulWidget {
+  const NowPlayingView({super.key, required this.data, required this.send, this.model = trackModel});
 
   final Json data;
   final OcpSend send;
+  final TrackModel model;
 
   @override
-  State<_Player> createState() => _PlayerState();
+  State<NowPlayingView> createState() => _NowPlayingViewState();
 }
 
-class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
+class _NowPlayingViewState extends State<NowPlayingView> with SingleTickerProviderStateMixin {
   final _clock = Stopwatch()..start();
-  late Track _track = trackModel(widget.data);
+  late Track _track = widget.model(widget.data);
   late Anchor _anchor = anchorFor(null, _track, _nowMs);
   late final AnimationController _turn = AnimationController(vsync: this, lowerBound: 0, upperBound: 360);
   Timer? _ticker;
@@ -69,10 +74,10 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(_Player old) {
+  void didUpdateWidget(NowPlayingView old) {
     super.didUpdateWidget(old);
     final previous = _track;
-    _track = trackModel(widget.data, previous);
+    _track = widget.model(widget.data, previous);
     _anchor = anchorFor(_anchor, _track, _nowMs);
     _paint(previousId: previous.id, wasPlaying: previous.state == PlaybackState.playing);
   }
