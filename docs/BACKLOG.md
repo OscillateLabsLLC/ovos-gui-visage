@@ -130,9 +130,9 @@ The popups follow ovos-shell's NotificationPop*.qml.
 
 ## GUI-1 media templates (2026-10-25)
 
-- **SYSTEM_video_player shows no video.** Version 1 shows a film glyph, the title and the play state (§6.5). Real
+- **SYSTEM_video_player shows no video.** Version 1 shows a play glyph, the title and the play state ([gui-1.md 6.5](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation)). Real
   playback needs a video dependency that builds on macOS, Linux and web, and a decision about who owns the stream
-  (§7.1 gives it to the media subsystem, not the display). Evidence first: which producer sends the template, and what
+  ([7.1](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport) gives it to the media subsystem, not the display). Evidence first: which producer sends the template, and what
   `uri` it carries. A poster image waits on finding F17.
 - **Queue and search-result rows cannot be tapped** in SYSTEM_media_player. OCP's `playlist.play` and `search.play`
   take OCP's own entry shape, and GUI-1 names no "play this entry" control (F21). Wire them when the media subsystem's
