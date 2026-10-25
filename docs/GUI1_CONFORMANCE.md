@@ -67,7 +67,7 @@ being written. A clause is `partial` only where Visage already does the client h
 |---|---|---|---|---|---|
 | Degrade an unrenderable template to the nearest renderable presentation | §8.5, lines 862–863; §6.5 | none | `lib/pages/fallback_page.dart` | — | The fallback page is a debug dump of the session data, not a degraded presentation. |
 | Broadcast status events and device-wide signals to all clients | §8.5, lines 864–865; §5.3 | none | — | — | Adapter not written; no sessions in Visage. |
-| Report connection status | §8.5, lines 866–867; §6.8 | none | — | — | Adapter not written. OPM's adapter base has no hook for it (plan section 1.4). |
+| Report connection status | §8.5, lines 866–867; §6.8 | none | `lib/protocol/gui_link.dart`, `lib/protocol/wire_protocol.dart` | `test/gui1_client_test.dart` | Adapter half: not written; OPM's adapter base has no hook for it (plan section 1.4). Client half: the menu's protocol line reads `Protocol: GUI-1 (reconnecting)` from the moment a welcomed GUI-1 connection closes until the next probe chooses again, and the offline pill shows as on legacy. The first loss in a run is reported through `reportFault`; later losses are logged. |
 | Re-read state from the query surface, do not cache `data` | §8.5, lines 868–869; §6.6, §6.7 | partial | `lib/state/gui1_apply.dart` | `test/gui1_apply_test.dart` | Client half: every `template`, `session_update` and `snapshot` replaces the namespace's data with the full map; Visage never merges. Adapter half in `ovos-gui-plugin-visage`. |
 
 ## GUI-1 wire client (WIRE.md)
