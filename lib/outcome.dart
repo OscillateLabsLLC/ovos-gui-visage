@@ -23,9 +23,19 @@ const cancelledEvent = 'ovos.utterance.cancelled';
 const turnEndEvent = 'ovos.utterance.handled';
 
 /// `complete_intent_failure` and its spec name `ovos.intent.unmatched` (both reach the bus through ovos-bus-client's
-/// compatibility twin), and the skill framework's handler error signal, which carries `exception`.
-const failureEvents = ['complete_intent_failure', 'ovos.intent.unmatched', 'mycroft.skill.handler.error'];
-const outcomeEvents = [turnStartEvent, handlerCompleteEvent, cancelledEvent, turnEndEvent, ...failureEvents];
+/// compatibility twin), and the handler error signal by its skill-framework name, which carries `exception`, and its
+/// orchestrator name (gui-1.md §5.3).
+const failureEvents = [
+  'complete_intent_failure',
+  'ovos.intent.unmatched',
+  'mycroft.skill.handler.error',
+  'ovos.intent.handler.error',
+];
+
+/// Speech to text heard nothing usable, by its §5.3 name and the listener's. No turn starts, so no end marker follows,
+/// and the failure shows at once.
+const sttFailedEvents = ['ovos.stt.failed', 'recognizer_loop:speech.recognition.unknown'];
+const outcomeEvents = [turnStartEvent, handlerCompleteEvent, cancelledEvent, turnEndEvent, ...failureEvents, ...sttFailedEvents];
 
 class OutcomeModel extends ChangeNotifier {
   OutcomeModel({OneShot? timer}) : _timer = timer ?? Timer.new;
@@ -44,6 +54,8 @@ class OutcomeModel extends ChangeNotifier {
       _note(data['exception'] == null ? Outcome.success : Outcome.failure);
     } else if (failureEvents.contains(event)) {
       _note(Outcome.failure);
+    } else if (sttFailedEvents.contains(event)) {
+      _show(Outcome.failure);
     } else if (event == cancelledEvent) {
       _note(Outcome.cancelled);
     } else if (event == turnEndEvent) {

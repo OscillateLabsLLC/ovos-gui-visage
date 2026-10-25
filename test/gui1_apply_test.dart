@@ -176,20 +176,24 @@ void main() {
       expect(find.text('Timer set'), findsOneWidget);
     });
 
-    test('status_events: spec topics drive the face; an unfollowed topic is reported once', () async {
+    test('status_events: spec topics drive the face: failures settle it, sleep and awoken close and open the eyes', () async {
       final face = FaceController();
       final attention = Attention(face);
       final state = GuiState();
       final gaps = freshGaps();
       final modes = <FaceMode>[];
+      final asleep = <bool>[];
       final faults = await collectFaults(() async {
         for (final frame in loadGui1Fixture('status_events')) {
           applyGui1(state, attention, frame, gaps: gaps);
-          if (frame is Gui1Status) modes.add(face.mode);
+          if (frame is! Gui1Status) continue;
+          modes.add(face.mode);
+          asleep.add(face.sleeping);
         }
       });
-      const listening = FaceMode.listening, thinking = FaceMode.thinking, speaking = FaceMode.speaking;
-      expect(modes, [listening, thinking, speaking, speaking, FaceMode.rest, FaceMode.rest]);
+      const listening = FaceMode.listening, thinking = FaceMode.thinking, speaking = FaceMode.speaking, rest = FaceMode.rest;
+      expect(modes, [listening, thinking, speaking, speaking, rest, rest, listening, rest, thinking, rest, rest, rest]);
+      expect(asleep, [...List.filled(10, false), true, false], reason: 'sleep closes the eyes, awoken opens them');
       expect(faults, isEmpty, reason: 'gui.ambient.weather is kept, not an unknown topic');
       expect(state.ambient[ambientWeather], {'current_temp': 22, 'condition': 'Clear', 'condition_code': 'clear'});
       expect(state.current(), const Target(hello, 'SYSTEM_status', 0));

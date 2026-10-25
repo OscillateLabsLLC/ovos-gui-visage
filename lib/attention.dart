@@ -44,7 +44,9 @@ class Attention extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// [event] by its §5.3 name or a legacy alias (status_topics.dart); a topic with no role changes nothing.
+  /// [event] by its §5.3 name or a legacy alias (status_topics.dart); a topic with no role changes nothing. A failure
+  /// settles a listening or thinking face as a finished turn does; the outcome pill shows the failure itself
+  /// (outcome.dart). Sleep closes the eyes until awoken, whatever the face is doing.
   void handle(String event, Map<String, dynamic> data) {
     switch (statusRole(event)) {
       case StatusRole.listenStart:
@@ -56,12 +58,16 @@ class Attention extends ChangeNotifier {
         _show(FaceMode.thinking);
       case StatusRole.thinkEnd when mode == FaceMode.thinking:
         _settle(quietAfterHandled);
+      case StatusRole.failed when mode == FaceMode.listening || mode == FaceMode.thinking:
+        _settle(quietAfterHandled);
       case StatusRole.speakStart:
         _show(FaceMode.speaking);
       case StatusRole.speakEnd:
         _settle(fadeAfterAudio);
       case StatusRole.visemes when shown:
         face.playVisemes(data['visemes'] as List?);
+      case StatusRole.sleep || StatusRole.awoken:
+        face.setSleeping(statusRole(event) == StatusRole.sleep);
       case _:
         break;
     }

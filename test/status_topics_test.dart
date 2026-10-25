@@ -37,8 +37,25 @@ void main() {
     expect(statusRole('enclosure.mouth.viseme_list'), StatusRole.visemes);
   });
 
-  test('topics Visage does not follow yet have no role', () {
-    for (final topic in ['ovos.stt.failed', 'ovos.listener.sleep', 'gui.ambient.weather', 'mycroft.skill.handler.error']) {
+  test('every §5.3 topic has a role', () {
+    expect(specStatusRoles.keys.toSet(), specTopics);
+  });
+
+  test('the four topics added in P3.6, by spec name and legacy alias', () {
+    for (final (topics, role) in const [
+      (['ovos.stt.failed', 'recognizer_loop:speech.recognition.unknown'], StatusRole.failed),
+      (['ovos.intent.handler.error', 'mycroft.skill.handler.error'], StatusRole.failed),
+      (['ovos.listener.sleep', 'recognizer_loop:sleep'], StatusRole.sleep),
+      (['ovos.listener.awoken', 'mycroft.awoken'], StatusRole.awoken),
+    ]) {
+      for (final topic in topics) {
+        expect(statusRole(topic), role, reason: topic);
+      }
+    }
+  });
+
+  test('topics outside §5.3 have no role', () {
+    for (final topic in ['gui.ambient.weather', 'ovos.utterance.cancelled', 'recognizer_loop:wake_up']) {
       expect(statusRole(topic), isNull, reason: topic);
     }
   });
