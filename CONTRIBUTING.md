@@ -31,7 +31,8 @@ reference. Never change OVOS code to make the client work.
 Circles, rings and plain stacked text on black. No cards, nested panels, accent borders or
 edge stripes; gradients, glows and motion are welcome. Reuse `lib/widgets/circle.dart`
 (`Circle`, `Ring`, `Glow`, `StaggerEnter`, `RiseIn`) rather than inventing per-page effects.
-The fallback debug card is the one exception.
+The fallback debug card is the one exception. The full guide, with motion and glanceability rules, is
+`docs/DESIGN.md`.
 
 ## Icons
 

@@ -38,6 +38,8 @@ VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget
   Oscillate Labs LLC team.
 - `flutter analyze --fatal-infos` and `dart format --line-length 130` are clean; `flutter test`
   is green. Functions under 30 lines, files under 300, no narrating comments.
+- Design rules (vocabulary, shared widgets, motion, glanceability, goldens) are in `docs/DESIGN.md`; read it before
+  adding a page, widget or animation.
 - Pages are `StatelessWidget`s or small `StatefulWidget`s with a static `page(Json, PageContext)`
   builder registered in `lib/pages/router.dart`. Pure view models live beside them and are
   unit tested; widget tests pump the pages from the recorded fixtures.
