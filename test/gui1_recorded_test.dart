@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
 import 'package:ovos_gui_visage/face/face.dart';
-import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
+import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
+import 'package:ovos_gui_visage/pages/weather_model.dart' show missing;
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
 import 'package:ovos_gui_visage/screen_link.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
@@ -13,7 +14,7 @@ import 'gui1_fixture.dart';
 
 /// The adapter's own recordings, in the order ovos-gui really calls it: session_update, template, then activated.
 void main() {
-  test('text_then_weather: weather ends on top with its last data, hello beneath; nothing but the weather gap', () async {
+  test('text_then_weather: weather ends on top with its last data, hello beneath; it routes to the weather page', () async {
     final gaps = freshGaps();
     late GuiState state;
     final faults = await collectFaults(() async {
@@ -24,11 +25,22 @@ void main() {
         applyGui1(state, attention, frame, gaps: gaps);
       }
       attention.dispose();
-      expect(resolve(state.current(), gaps: gaps.templates), same(FallbackPage.page));
+      expect(resolve(state.current(), gaps: gaps.templates), same(SystemWeatherPage.page));
     });
     expect(state.active, [weather, hello]);
     expect(state.namespace(weather).data['current'], 22);
-    expect(faults.map((f) => '${f.exception}'), ['UnimplementedError: SYSTEM_weather has no page yet']);
+    expect(faults, isEmpty);
+  });
+
+  testWidgets('text_then_weather: the weather page renders; the recording lacks current_temp, which is reported', (tester) async {
+    final state = replayGui1(loadRecorded('text_then_weather'));
+    final faults = await collectFaults(() async {
+      await tester.pumpWidget(host(pageOf(state)));
+      await tester.pump(const Duration(milliseconds: 100));
+    });
+    expect(find.byType(SystemWeatherPage), findsOneWidget);
+    expect([find.text('Clear'), find.text('San Antonio'), find.text(missing)], everyElement(findsOneWidget));
+    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F19');
   });
 
   test('text_then_weather: its snapshot alone gives the same state as the stream', () {
@@ -56,6 +68,15 @@ void main() {
     replayGui1(frames.skip(10).toList(), state: state, gaps: gaps);
     expect([state.active, state.namespaces, logs], [isEmpty, isEmpty, isEmpty]);
     expect(frames.last, isA<Gui1Idle>());
+  });
+
+  testWidgets('weather_then_clear: while weather is on top the weather page renders, not the fallback', (tester) async {
+    final state = replayGui1(loadRecorded('weather_then_clear').take(8).toList());
+    expect(state.current(), const Target(weather, 'SYSTEM_weather', 0));
+    final faults = await collectFaults(() async => tester.pumpWidget(host(pageOf(state))));
+    expect(find.byType(SystemWeatherPage), findsOneWidget);
+    expect(find.text('Clear'), findsOneWidget);
+    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F19');
   });
 
   test('weather_then_clear: its snapshot is the empty stack it ends with', () {

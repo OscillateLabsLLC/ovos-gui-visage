@@ -20,8 +20,20 @@ class WeatherNowPage extends StatelessWidget {
   final String page;
 
   @override
+  Widget build(BuildContext context) => WeatherNowCard(model: nowModel(page, data));
+}
+
+/// The big weather circle with its chips; SYSTEM_weather draws the same card, with the producer's image as [icon].
+class WeatherNowCard extends StatelessWidget {
+  const WeatherNowCard({super.key, required this.model, this.icon});
+
+  final NowModel model;
+
+  /// Shown in place of the bundled icon that [NowModel.icon] names.
+  final Widget? icon;
+
+  @override
   Widget build(BuildContext context) {
-    final model = nowModel(page, data);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 28,
@@ -34,7 +46,7 @@ class WeatherNowPage extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                WeatherIcon(model.icon, size: 120),
+                SizedBox.square(dimension: 120, child: icon ?? WeatherIcon(model.icon, size: 120)),
                 const SizedBox(height: 2),
                 Text(
                   model.big,
