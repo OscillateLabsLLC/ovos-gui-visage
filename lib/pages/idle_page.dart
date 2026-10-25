@@ -6,12 +6,13 @@ library;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../widgets/weather_icon.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import '../widgets/home_chips.dart';
 import 'page.dart';
 
-const showNotificationsLabel = 'Show notifications';
+export '../widgets/home_chips.dart' show showNotificationsLabel;
+
 const timerEvent = 'ovos.timer.widget.manager.update';
 const alarmEvent = 'ovos.alarm.widget.manager.update';
 const mediaEvent = 'ovos.media.widget.manager.update';
@@ -59,77 +60,32 @@ class IdlePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = storedNotifications;
     final timer = events[timerEvent] as Map?;
     final alarm = events[alarmEvent] as Map?;
     final media = events[mediaEvent] as Map?;
-    return Stack(
-      // The badge sits in the shell's padding, above the page box; Stack would clip it by default.
-      clipBehavior: Clip.none,
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (hasWeather(data)) ...[_weather(), const SizedBox(height: 28)],
-            _clock(),
+    return WithCountBadge(
+      count: storedNotifications,
+      onTap: onShowNotifications,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (hasWeather(data)) ...[
+            WeatherChip(icon: weatherIconName(data['weather_code']), temperature: '${number(data['weather_temp']).round()}°'),
             const SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 18,
-              children: [
-                if (number(timer?['count']) > 0) _countChip(number(timer?['count']).toInt(), 'timer'),
-                if (number(alarm?['count']) > 0) _countChip(number(alarm?['count']).toInt(), 'alarm'),
-                if (media?['state'] == 'playing') _mediaChip(media?['widget'] as Map? ?? const {}),
-              ],
-            ),
           ],
-        ),
-        if (count > 0) Positioned(top: -10, right: -2, child: _badge(count)),
-      ],
-    );
-  }
-
-  Widget _weather() {
-    return Circle(
-      size: 170,
-      fill: VisageColors.card,
-      children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            WeatherIcon(weatherIconName(data['weather_code']), size: 72),
-            const SizedBox(height: 4),
-            Text('${number(data['weather_temp']).round()}°', style: VisageText.fg(34)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _clock() {
-    final time = text(data['time_string']);
-    return Circle(
-      size: 300,
-      gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
-      glow: const Glow(),
-      ring: const Ring(),
-      children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              time.isEmpty ? '--:--' : time,
-              style: VisageText.fg(
-                92,
-                weight: FontWeight.w300,
-                height: 1,
-              ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
-            ),
-            const SizedBox(height: 10),
-            Text(dateLine(data), style: VisageText.muted(20)),
-          ],
-        ),
-      ],
+          ClockChip(time: text(data['time_string']), date: dateLine(data)),
+          const SizedBox(height: 28),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 18,
+            children: [
+              if (number(timer?['count']) > 0) _countChip(number(timer?['count']).toInt(), 'timer'),
+              if (number(alarm?['count']) > 0) _countChip(number(alarm?['count']).toInt(), 'alarm'),
+              if (media?['state'] == 'playing') _mediaChip(media?['widget'] as Map? ?? const {}),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -169,27 +125,6 @@ class IdlePage extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _badge(int count) {
-    return Tooltip(
-      message: showNotificationsLabel,
-      child: Material(
-        color: VisageColors.accent,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onShowNotifications,
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 28),
-            height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            alignment: Alignment.center,
-            child: Text('$count', style: VisageText.fg(15, weight: FontWeight.w600)),
-          ),
-        ),
-      ),
     );
   }
 }

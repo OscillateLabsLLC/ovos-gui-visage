@@ -155,6 +155,50 @@ The popups follow ovos-shell's NotificationPop*.qml.
   the system setting; on a Linux kiosk without a desktop session the engine's source for it is unchecked. Check on a
   Pi before adding any config key.
 
+## Pre-announcement polish audit (2026-10-25)
+
+Before the finished product is announced, every v2 feature is checked against `docs/DESIGN.md`. This list is the first
+run of the guards in that guide's "Enforced by" table. Decide each item: fix it, or record why it is allowed.
+
+Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
+
+- `lib/widgets/command_box.dart`: the typed-command box has an accent outline.
+- `lib/widgets/volume_indicator.dart`: the volume pill is a filled rounded box; allow it as a status pill or redraw it.
+- `lib/widgets/notification_stack.dart`: notification popups are filled rounded boxes, close to cards.
+- `lib/window/window_menu.dart`: the in-window menu has an accent outline.
+- `lib/window/window_menu.dart`: the in-window menu separators are accent, not the faint hairline.
+
+Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
+
+- `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
+- `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.
+- `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
+- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1.
+- `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size (informative only).
+- No fixture reaches three routes, so they are not checked: alerts `ListView`, OCP `OVOSSyncPlayer`, `SYSTEM_face`.
+
+Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
+
+- `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
+- `lib/lottie/cache_lottie.dart`: OVOS Lottie files play.
+- `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
+- `lib/pages/now_playing_page.dart`: the cover turns like a record.
+- `lib/pages/now_playing_status.dart`: the equaliser bars and the live dot pulse.
+- `lib/pages/ocp_busy_page.dart`: the fallback dashed arc turns.
+- `lib/pages/sun_times_page.dart`: the sun rises and settles over 8 s.
+- `lib/pages/timer_page.dart`: an expired timer's ring pulses.
+
+Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
+
+- `lib/pages/now_playing_page.dart`: the blurred cover wash fades an image inside its blur.
+- `lib/pages/status_page.dart`: the failure state fades the whole chip, its glow included.
+
+Other:
+
+- `lib/pages/status_page.dart`: the comment says the glyph "blooms as it arrives", but no code blooms; add the bloom or
+  correct the comment. No shared widget makes a one-time bloom (`docs/DESIGN.md`, Shared widgets).
+- `lib/theme.dart`: the page background is `#05070A`; ovos-visage SPEC 9 gives `#0b0f14`.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar

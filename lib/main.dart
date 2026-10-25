@@ -1,8 +1,7 @@
-// App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the
-// face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
-// while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart). A peeking widget shows only
-// the badge until the face is shown (window/peek.dart), and the window follows over the bus (window_remote.dart).
-// Pages answer back through the GUI socket; the menu opens inside the window too, and a command can be typed.
+// App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the face
+// for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable over the
+// bus (face_remote.dart) and on the screen (try_on.dart). A peeking widget shows only the badge until the face is shown
+// (window/peek.dart); the window follows the bus (window_remote.dart). Pages answer back; a command can be typed.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -37,6 +36,7 @@ import 'window/status_menu_host.dart';
 import 'window/window_config.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
+import 'window/window_title.dart';
 import 'window/window_menu.dart';
 import 'window/window_surface.dart';
 
@@ -185,6 +185,7 @@ class _ScreenState extends State<Screen> {
     window.addListener(_onWindow);
     menu;
     drag.attach();
+    bindWindowTitle(gui, window, setWindowTitle);
     bus.start();
     gui.start();
   }
@@ -280,6 +281,7 @@ class _ScreenState extends State<Screen> {
     commands: input.commands,
     send: gui.send,
     connected: guiConnected,
+    protocol: gui.chosen,
     captions: widget.config.captions ? captions : null,
     outcome: outcome,
     volume: volume.model,

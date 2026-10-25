@@ -270,6 +270,37 @@ void main() {
       );
     });
 
+    test('a dropped GUI-1 connection shows in the menu line until it is back, and is reported once per run', () async {
+      FakeSocket welcoming({bool stays = false}) {
+        final socket = FakeSocket()..serve(_welcome);
+        if (!stays) socket.hangUp();
+        return socket;
+      }
+
+      final sockets = [welcoming(), FakeSocket(refuse: true), welcoming(), welcoming(stays: true)];
+      final logs = <String>[];
+      final l = GuiLink(
+        mode: WireProtocol.gui1,
+        legacy: FakeLegacy(),
+        gui1: Gui1Client(url: _url, connector: (_) => sockets.removeAt(0), onFrame: (_) {}, onStatus: (_) {}),
+        bus: RecordingBus(),
+        log: logs.add,
+        retryDelay: Duration.zero,
+      );
+      final lines = <String>[];
+      l.title.addListener(() => lines.add(l.title.value));
+      final faults = await collectFaults(() async {
+        l.start();
+        await pumpEventQueue();
+      });
+      const up = 'Protocol: GUI-1', down = 'Protocol: GUI-1 (reconnecting)';
+      expect(lines, [up, down, up, down, up]);
+      expect([sockets, l.chosen], [isEmpty, ChosenProtocol.gui1]);
+      expect(faults.single.exceptionAsString(), contains('GUI-1 connection to $_url closed'));
+      expect(logs.where((line) => line.contains('closed; reconnecting')), hasLength(1), reason: 'the second loss is logged');
+      await l.stop();
+    });
+
     test('gui1 never falls back', () async {
       final legacy = FakeLegacy();
       final l = link(WireProtocol.gui1, FakeSocket(refuse: true), legacy, []);

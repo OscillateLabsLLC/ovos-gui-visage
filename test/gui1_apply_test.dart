@@ -6,12 +6,15 @@ import 'package:ovos_gui_visage/attention.dart';
 import 'package:ovos_gui_visage/face/face.dart';
 import 'package:ovos_gui_visage/face/face_theme.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
+import 'package:ovos_gui_visage/pages/resting_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
 import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
+import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/screen_link.dart';
+import 'package:ovos_gui_visage/state/ambient.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
 import 'faults.dart';
@@ -149,11 +152,14 @@ void main() {
       expect(state.current(), const Target(hello, 'SYSTEM_text', 0));
     });
 
-    test('idle: once the stack is empty, idle leaves the face over a blank screen', () {
+    testWidgets('idle: once the stack is empty, idle leaves the full face over the resting page', (tester) async {
       final logs = <String>[];
       final state = replayGui1(loadGui1Fixture('idle'), gaps: freshGaps(logs));
       expect([state.active, state.namespaces, state.current(), logs], [isEmpty, isEmpty, isNull, isEmpty]);
       expect(isContentPage(state.current(), state.idleNamespace), isFalse);
+      await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
+      expect(find.byType(RestingPage), findsOneWidget);
+      expect([find.text('09:05'), find.text('Saturday, 17 October')], everyElement(findsOneWidget));
     });
 
     testWidgets('snapshot_late_joiner: the whole stack in order, the top page renders', (tester) async {
@@ -172,21 +178,26 @@ void main() {
       expect(find.text('Timer set'), findsOneWidget);
     });
 
-    test('status_events: spec topics drive the face; an unfollowed topic is reported once', () async {
+    test('status_events: spec topics drive the face: failures settle it, sleep and awoken close and open the eyes', () async {
       final face = FaceController();
       final attention = Attention(face);
       final state = GuiState();
       final gaps = freshGaps();
       final modes = <FaceMode>[];
+      final asleep = <bool>[];
       final faults = await collectFaults(() async {
         for (final frame in loadGui1Fixture('status_events')) {
           applyGui1(state, attention, frame, gaps: gaps);
-          if (frame is Gui1Status) modes.add(face.mode);
+          if (frame is! Gui1Status) continue;
+          modes.add(face.mode);
+          asleep.add(face.sleeping);
         }
       });
-      const listening = FaceMode.listening, thinking = FaceMode.thinking, speaking = FaceMode.speaking;
-      expect(modes, [listening, thinking, speaking, speaking, FaceMode.rest, FaceMode.rest]);
-      expect(faults.single.exceptionAsString(), contains('gui.ambient.weather'));
+      const listening = FaceMode.listening, thinking = FaceMode.thinking, speaking = FaceMode.speaking, rest = FaceMode.rest;
+      expect(modes, [listening, thinking, speaking, speaking, rest, rest, listening, rest, thinking, rest, rest, rest]);
+      expect(asleep, [...List.filled(10, false), true, false], reason: 'sleep closes the eyes, awoken opens them');
+      expect(faults, isEmpty, reason: 'gui.ambient.weather is kept, not an unknown topic');
+      expect(state.ambient[ambientWeather], {'current_temp': 22, 'condition': 'Clear', 'condition_code': 'clear'});
       expect(state.current(), const Target(hello, 'SYSTEM_status', 0));
       attention.dispose();
     });
@@ -194,7 +205,7 @@ void main() {
     testWidgets('status_events: SYSTEM_status with success true renders the success state', (tester) async {
       late GuiState state;
       final faults = await collectFaults(() async => state = replayGui1(loadGui1Fixture('status_events')));
-      expect(faults, hasLength(1), reason: 'gui.ambient.weather, once');
+      expect(faults, isEmpty);
       await tester.pumpWidget(host(pageOf(state)));
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('Done'), findsOneWidget);
@@ -216,7 +227,7 @@ void main() {
 
     test('every hand-written GUI-1 fixture says so and parses', () {
       final files = Directory('test/fixtures/gui1').listSync().whereType<File>().where((f) => f.path.endsWith('.jsonl'));
-      expect(files.length, 17);
+      expect(files.length, 18);
       for (final file in files) {
         final name = file.uri.pathSegments.last.replaceAll('.jsonl', '');
         expect(loadGui1Fixture(name).first, isA<Gui1Welcome>(), reason: name);

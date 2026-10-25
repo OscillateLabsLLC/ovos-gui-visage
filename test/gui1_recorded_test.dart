@@ -1,13 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
 import 'package:ovos_gui_visage/face/face.dart';
+import 'package:ovos_gui_visage/pages/fallback_page.dart';
+import 'package:ovos_gui_visage/pages/resting_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/pages/weather_model.dart' show missing;
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
+import 'package:ovos_gui_visage/protocol/wire_protocol.dart';
 import 'package:ovos_gui_visage/screen_link.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
+import 'package:ovos_gui_visage/widgets/weather_icon.dart';
 
 import 'faults.dart';
 import 'gui1_fixture.dart';
@@ -58,16 +62,20 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
   });
 
-  test('weather_then_clear: hello shows again, then the session empties and idle is honoured', () {
+  testWidgets('weather_then_clear: hello shows again, then the session empties and the resting page shows', (tester) async {
     final logs = <String>[];
     final frames = loadRecorded('weather_then_clear');
     expect(frames, hasLength(12));
     final gaps = freshGaps(logs);
     final state = replayGui1(frames.take(10).toList(), gaps: gaps);
     expect(state.current(), const Target(hello, 'SYSTEM_text', 0));
+    expect(restingPage(state, ChosenProtocol.gui1), isNull);
     replayGui1(frames.skip(10).toList(), state: state, gaps: gaps);
     expect([state.active, state.namespaces, logs], [isEmpty, isEmpty, isEmpty]);
     expect(frames.last, isA<Gui1Idle>());
+    await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
+    expect([find.byType(RestingPage), find.text('09:05')], everyElement(findsOneWidget));
+    expect(find.byType(WeatherIcon), findsNothing, reason: 'no gui.ambient.weather in this recording');
   });
 
   testWidgets('weather_then_clear: while weather is on top the weather page renders, not the fallback', (tester) async {

@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../faults.dart';
 import 'core_bus.dart';
 import 'gui1_client.dart';
 import 'gui_client.dart';
@@ -18,7 +19,14 @@ export 'wire_protocol.dart';
 const forwardedContext = {'gui_framework': framework};
 
 class GuiLink {
-  GuiLink({required this.mode, required this.legacy, required this.gui1, required this.bus, this.log}) {
+  GuiLink({
+    required this.mode,
+    required this.legacy,
+    required this.gui1,
+    required this.bus,
+    this.log,
+    this.retryDelay = reconnectDelay,
+  }) {
     title.value = protocolTitle(mode, null);
   }
 
@@ -30,6 +38,9 @@ class GuiLink {
   final CoreBus bus;
   final void Function(String)? log;
 
+  /// The pause between one connection ending and the next attempt.
+  final Duration retryDelay;
+
   /// What the current connection speaks; null until the first one is chosen.
   ChosenProtocol? get chosen => _chosen;
 
@@ -37,6 +48,7 @@ class GuiLink {
   final ValueNotifier<String> title = ValueNotifier('');
   ChosenProtocol? _chosen;
   bool _running = false;
+  bool _lossReported = false;
 
   void start() {
     if (mode == WireProtocol.legacy) {
@@ -72,18 +84,30 @@ class GuiLink {
   Future<void> _keepConnected() async {
     while (_running) {
       await _connectOnce();
-      if (_running) await Future.delayed(reconnectDelay);
+      if (_running) await Future.delayed(retryDelay);
     }
   }
 
   Future<void> _connectOnce() async {
     if (await gui1.connect()) {
       _choose(ChosenProtocol.gui1);
-      return gui1.listen();
+      await gui1.listen();
+      if (_running) _lost();
+      return;
     }
     if (mode == WireProtocol.gui1 || !_running) return;
     _choose(ChosenProtocol.legacy);
     await legacy.connectOnce();
+  }
+
+  /// The adapter closed a welcomed connection. The menu line says so until the next probe chooses again; the first
+  /// loss of the run is a fault, later ones are logged, so a flapping adapter does not flood the fault log.
+  void _lost() {
+    title.value = protocolTitle(mode, ChosenProtocol.gui1, lost: true);
+    final lost = StateError('the GUI-1 connection to ${gui1.url} closed; reconnecting');
+    if (_lossReported) return log?.call('$lost');
+    _lossReported = true;
+    reportFault('GUI-1 connection', lost);
   }
 
   void _choose(ChosenProtocol protocol) {

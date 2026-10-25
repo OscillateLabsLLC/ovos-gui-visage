@@ -15,10 +15,10 @@ const weather = 'ovos-skill-weather.openvoiceos';
 
 /// The `_note` of a hand-written fixture names its source: WIRE.md, or the spec section (with or without a section
 /// sign) and commit it was written from.
-final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+ at [0-9a-f]{7}), not recorded$'))};
+final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+( and §?[\d.]+)* at [0-9a-f]{7}), not recorded$'))};
 
 /// `written from gui-1.md <section> at <sha>, not recorded`, the section sign optional.
-final fromSpec = RegExp(r'^written from gui-1\.md §?\d+(\.\d+)* at [0-9a-f]{7,40}, not recorded$');
+final fromSpec = RegExp(r'^written from gui-1\.md §?\d+(\.\d+)*( and §?\d+(\.\d+)*)* at [0-9a-f]{7,40}, not recorded$');
 
 List<Gui1Frame> _parse(Iterable<String> lines) => [for (final line in lines) parseGui1Frame(jsonDecode(line) as Json)];
 
@@ -51,6 +51,9 @@ GuiState replayGui1(List<Gui1Frame> frames, {Gui1Gaps? gaps, GuiState? state}) {
 
 Gui1Template template(String skill, String name, Json data, {String session = defaultSessionId}) =>
     Gui1Template(skillId: skill, template: name, data: data, sessionId: session);
+
+/// The fixed time the resting page tests read: Saturday 17 October 2026, 09:05.
+final restingNow = DateTime(2026, 10, 17, 9, 5);
 
 Gui1Status status(String topic, [Json data = const {}]) => Gui1Status(eventName: topic, data: data, sessionId: defaultSessionId);
 

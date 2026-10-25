@@ -30,6 +30,28 @@ void main() {
     expect(visemeAt([], 0), isNull);
   });
 
+  test('the audio-out.md 5.4 example plays as written; a code outside the set is the rest shape', () {
+    final spoken = jsonDecode('{"visemes": [["4", 0.35], ["0", 0.52], ["3", 0.71]], "start": 1791688142.76}')['visemes'] as List;
+    expect(
+      [
+        for (final t in [0.0, 0.4, 0.6, 0.71]) visemeAt(spoken, t),
+      ],
+      [4, 0, 3, null],
+    );
+    final odd = [
+      ['7', 0.1],
+      ['x', 0.2],
+      [9, 0.3],
+      ['5', 0.4],
+    ];
+    expect(
+      [
+        for (final t in [0.05, 0.15, 0.25, 0.35]) visemeAt(odd, t),
+      ],
+      [restCode, restCode, restCode, 5],
+    );
+  });
+
   test("recorded 'what time is it' list plays through and ends", () {
     final recorded = recordedVisemes();
     expect(recorded.length, 27);

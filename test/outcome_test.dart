@@ -64,6 +64,22 @@ void main() {
     expect(model.showing, Outcome.failure);
   });
 
+  test('a handler error by its orchestrator name fails the turn at its end marker', () {
+    model.handle('ovos.intent.handler.error', {'exception': 'ZeroDivisionError'});
+    expect(model.showing, isNull);
+    model.handle(turnEndEvent, {});
+    expect(model.showing, Outcome.failure);
+  });
+
+  test('speech to text failing shows the failure at once, by either name, since no turn follows', () {
+    for (final event in sttFailedEvents) {
+      model.handle(event, {});
+      expect(model.showing, Outcome.failure, reason: event);
+      timers.fireAll();
+      expect(model.showing, isNull);
+    }
+  });
+
   test('a new utterance forgets the previous turn\'s verdict', () {
     model.handle('complete_intent_failure', {});
     model.handle(turnStartEvent, {

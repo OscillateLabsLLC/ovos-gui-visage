@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import '../app_config.dart';
 import '../face/face_spec.dart';
 import 'window_config.dart';
@@ -17,5 +19,9 @@ Future<void> setWidgetExpanded(WindowConfig config, {required bool expanded}) as
 Future<void> setWindowMode(WindowConfig config, {required WindowMode from, required bool expanded}) async {}
 
 Future<void> setWindowVisible(bool visible) async {}
+
+/// The browser tab's title, which is the document title.
+Future<void> setWindowTitle(String title) =>
+    SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription(label: title));
 
 Future<void> quitApp() async {}

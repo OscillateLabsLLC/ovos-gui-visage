@@ -24,8 +24,10 @@ WireProtocol? wireProtocolFrom(Object? value) {
   throw ArgumentError.value(value, 'protocol', 'not auto, gui1 or legacy');
 }
 
-/// The menu's line: what this connection speaks, or what Visage is still trying.
-String protocolTitle(WireProtocol mode, ChosenProtocol? chosen) => switch ((chosen, mode)) {
+/// The menu's line: what this connection speaks, or what Visage is still trying; [lost] once that connection has
+/// dropped and Visage is trying again.
+String protocolTitle(WireProtocol mode, ChosenProtocol? chosen, {bool lost = false}) => switch ((chosen, mode)) {
+  (final ChosenProtocol chosen?, _) when lost => 'Protocol: ${chosen.label} (reconnecting)',
   (final ChosenProtocol chosen?, _) => 'Protocol: ${chosen.label}',
   (null, WireProtocol.gui1) => 'Protocol: GUI-1 (connecting)',
   (null, WireProtocol.legacy) => 'Protocol: legacy',

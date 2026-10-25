@@ -4,8 +4,14 @@
 {"type": "status", "event_name": "ovos.listener.wakeword", "data": {"utterance": "hey mycroft"}, "session_id": "default"}
 {"type": "status", "event_name": "ovos.listener.record.ended", "data": {}, "session_id": "default"}
 {"type": "status", "event_name": "ovos.audio.output.started", "data": {}, "session_id": "default"}
-{"type": "status", "event_name": "gui.ambient.weather", "data": {"temperature": 21}, "session_id": "default"}
+{"type": "status", "event_name": "gui.ambient.weather", "data": {"current_temp": 21, "condition": "Cloudy"}, "session_id": "default"}
 {"type": "status", "event_name": "ovos.audio.output.ended", "data": {}, "session_id": "default"}
-{"type": "status", "event_name": "gui.ambient.weather", "data": {"temperature": 22}, "session_id": "default"}
+{"type": "status", "event_name": "gui.ambient.weather", "data": {"current_temp": 22, "condition": "Clear", "condition_code": "clear"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.listener.record.started", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.stt.failed", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.error", "data": {"exception": "ZeroDivisionError"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.listener.sleep", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.listener.awoken", "data": {}, "session_id": "default"}
 {"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_status", "data": {"label": "Done", "success": true}, "session_id": "default"}
 {"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}

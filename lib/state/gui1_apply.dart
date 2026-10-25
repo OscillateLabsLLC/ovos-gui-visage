@@ -10,11 +10,13 @@ import '../pages/router.dart';
 import '../pages/template_names.dart';
 import '../protocol/gui1_frames.dart';
 import '../status_topics.dart';
+import 'ambient.dart';
 import 'gui_state.dart';
 
 /// What GUI-1 frames ask for that Visage cannot do, each told once so a stream never spams the log. A template or a
-/// status topic without a page or a role is a fault ([TemplateGaps], [reportFault]); an `idle` while this session still
-/// holds a stack is the spec's device-wide idle (finding F16), logged.
+/// status topic without a page or a role, and an ambient payload without the keys gui-1.md 6.9.1 requires, is a fault
+/// ([TemplateGaps], [reportFault]); an `idle` while this session still holds a stack is the spec's device-wide idle
+/// (finding F16), logged.
 class Gui1Gaps {
   Gui1Gaps({TemplateGaps? templates, this.log = _debugLog}) : templates = templates ?? templateGaps;
 
@@ -27,6 +29,11 @@ class Gui1Gaps {
     reportFault('GUI-1 status', ArgumentError.value(topic, 'event_name', 'not a status topic Visage follows'));
   }
 
+  void incompleteAmbient(String topic, List<String> missing) {
+    if (!_told.add('ambient $topic')) return;
+    reportFault('GUI-1 ambient', ArgumentError.value(topic, 'event_name', 'lacks ${missing.join(', ')}; not shown'));
+  }
+
   void idleWhileShowing(List<String> active) {
     if (_told.add('idle')) log('GUI-1 (finding F16): idle while this session shows $active; ignored, logged once');
   }
@@ -36,8 +43,8 @@ void _debugLog(String line) => debugPrint(line);
 
 final gui1Gaps = Gui1Gaps();
 
-/// Applies one frame for [sessionId]. `welcome` and `error` change no state; `status` changes none either, and a topic
-/// Visage does not follow is told through [gaps]. A frame for another session is reported and ignored; an unknown
+/// Applies one frame for [sessionId]. `welcome` and `error` change no state; a `gui.ambient.*` status is kept in
+/// [GuiState.ambient], any other `status` changes none, and a topic Visage does not follow is told through [gaps]. A frame for another session is reported and ignored; an unknown
 /// `SYSTEM_*` template is told through [gaps] and still shown, as the fallback. `idle` empties the state only when this
 /// session's stack is already empty, since ovos-gui sends it when any session's stack empties.
 void applyGui1Frame(GuiState state, Gui1Frame frame, {String sessionId = defaultSessionId, Gui1Gaps? gaps}) {
@@ -64,6 +71,8 @@ void applyGui1Frame(GuiState state, Gui1Frame frame, {String sessionId = default
       told.idleWhileShowing(state.active);
     case Gui1Snapshot(:final stack):
       _replace(state, stack, told.templates);
+    case Gui1Status(:final eventName, :final data) when isAmbientTopic(eventName):
+      _keepAmbient(state, eventName, data, told);
     case Gui1Status(:final eventName) when statusRole(eventName) == null:
       told.unknownStatus(eventName);
     case Gui1Welcome() || Gui1Error() || Gui1Status():
@@ -80,11 +89,21 @@ String? _sessionOf(Gui1Frame frame) => switch (frame) {
   _ => null,
 };
 
+void _keepAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps) {
+  state.ambient[topic] = Json.of(data);
+  final missing = missingAmbientKeys(topic, data);
+  if (missing.isNotEmpty) gaps.incompleteAmbient(topic, missing);
+}
+
+const idleTemplate = 'SYSTEM_idle';
+
+/// `SYSTEM_idle` asks for the resting state and names no page (gui-1.md 3.4 and 6.9; finding F33): its namespace keeps its place
+/// on the stack without one, so the page beneath it, or the resting display, shows.
 void _show(GuiState state, String skillId, String? template, Json data) {
   final ns = state.namespace(skillId)
     ..data = Json.of(data)
     ..clearPages();
-  if (template != null) ns.pages = [template];
+  if (template != null && canonicalTemplate(template) != idleTemplate) ns.pages = [template];
 }
 
 void _activate(GuiState state, String skillId) {

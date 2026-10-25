@@ -13,6 +13,7 @@ cd ovos-gui-visage
 just sync          # flutter pub get
 just test          # flutter test
 just conformance   # docs/GUI1_CONFORMANCE.md matches the template names
+just test test/style_rules_test.dart test/a11y_guidelines_test.dart test/reduced_motion_test.dart  # docs/DESIGN.md guards
 just lint          # dart format check + flutter analyze
 just run           # flutter run -d macos
 ```
@@ -31,7 +32,8 @@ reference. Never change OVOS code to make the client work.
 Circles, rings and plain stacked text on black. No cards, nested panels, accent borders or
 edge stripes; gradients, glows and motion are welcome. Reuse `lib/widgets/circle.dart`
 (`Circle`, `Ring`, `Glow`, `StaggerEnter`, `RiseIn`) rather than inventing per-page effects.
-The fallback debug card is the one exception.
+The fallback debug card is the one exception. The full guide, with motion and glanceability rules, is
+`docs/DESIGN.md`.
 
 ## Icons
 

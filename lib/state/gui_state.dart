@@ -54,6 +54,10 @@ class GuiState {
   final String idleNamespace;
   final Map<String, Namespace> namespaces = {};
   final List<String> active = [];
+
+  /// The last payload per `gui.ambient.*` topic (GUI-1 only, `state/ambient.dart`). [reset] keeps it: no stack change
+  /// or reconnect sends it again.
+  final Map<String, Json> ambient = {};
   String? _lastActiveInsert;
 
   void reset() {
