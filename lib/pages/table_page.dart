@@ -1,6 +1,6 @@
-/// SYSTEM_table (gui-1.md §3.4, line 231): the muted title, a header row in the muted uppercase of template titles
-/// over an accent rule, then the rows with a faint rule between them. Columns share the width equally; cells wrap,
-/// and the rows scroll.
+/// SYSTEM_table (gui-1.md §3.4, line 231): the skill header, a header row in the muted uppercase of template titles,
+/// then the rows as plain stacked text with a thin divider between them. Columns share the width equally; cells wrap
+/// rather than shrink, and the rows scroll. Nothing moves.
 library;
 
 import 'package:flutter/material.dart';
@@ -9,12 +9,13 @@ import '../json.dart';
 import '../theme.dart';
 import 'content_models.dart';
 import 'page.dart';
+import 'skill_header.dart';
 import 'template_text.dart';
 
 const emptyTable = 'No rows';
 const _cellPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 10);
-const _rowRule = BorderSide(color: VisageColors.card);
-const _headerRule = BorderSide(color: VisageColors.accentDim, width: 2);
+const _divider = BorderSide(color: VisageColors.card);
+const _headerGapPx = 18.0;
 
 class TablePage extends StatelessWidget {
   const TablePage({super.key, required this.data});
@@ -29,7 +30,7 @@ class TablePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: 14)],
+        if (title.isNotEmpty) ...[SkillHeader(heading: title, location: ''), const SizedBox(height: _headerGapPx)],
         if (columns.isNotEmpty) _line(columns, header: true),
         Expanded(
           child: rows.isEmpty
@@ -41,7 +42,7 @@ class TablePage extends StatelessWidget {
   }
 
   Widget _line(List<String> cells, {bool header = false}) => DecoratedBox(
-    decoration: BoxDecoration(border: Border(bottom: header ? _headerRule : _rowRule)),
+    decoration: const BoxDecoration(border: Border(bottom: _divider)),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,7 +50,7 @@ class TablePage extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: _cellPadding,
-              child: Text(header ? cell.toUpperCase() : cell, style: header ? templateTitleStyle : VisageText.fg(18)),
+              child: Text(header ? cell.toUpperCase() : cell, style: header ? templateTitleStyle : VisageText.fg(20)),
             ),
           ),
       ],

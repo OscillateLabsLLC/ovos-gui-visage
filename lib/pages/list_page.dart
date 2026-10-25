@@ -1,20 +1,24 @@
-/// SYSTEM_list (gui-1.md §3.4, line 229): the muted title, then rows that scroll, each a round thumbnail (when the
-/// item has a usable image) with the title and the muted subtitle beside it, rising in one after another, as the OCP
-/// suggestion rows do.
+/// SYSTEM_list (gui-1.md §3.4, line 229): the skill header, then plain stacked rows that scroll, each a round
+/// thumbnail (when the item has a usable image) with the title and the muted subtitle beside it, rising in one after
+/// another, as the alerts and OCP lists do. Long text ends in an ellipsis; it never shrinks.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../resources/resources.dart';
-import '../theme.dart';
 import '../widgets/circle.dart';
+import '../theme.dart';
 import 'content_models.dart';
 import 'page.dart';
+import 'reduced_motion.dart';
+import 'skill_header.dart';
 import 'template_text.dart';
 
 const emptyList = 'Nothing to show';
-const listThumbPx = 56.0;
+const listThumbPx = 64.0;
+const _rowGapPx = 18.0;
+const _headerGapPx = 18.0;
 
 class ListPage extends StatelessWidget {
   const ListPage({super.key, required this.data});
@@ -25,20 +29,20 @@ class ListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (:title, :items) = listModel(data);
+    final (:title, :items) = systemListModel(data);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: 14)],
-        if (items.isEmpty) const Expanded(child: Center(child: TemplateHint(emptyList))),
-        if (items.isNotEmpty)
-          Expanded(
-            child: ListView.separated(
-              itemCount: items.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 14),
-              itemBuilder: (_, i) => RiseIn(index: i.clamp(0, 5), child: ListRow(items[i])),
-            ),
-          ),
+        if (title.isNotEmpty) ...[SkillHeader(heading: title, location: ''), const SizedBox(height: _headerGapPx)],
+        Expanded(
+          child: items.isEmpty
+              ? const Center(child: TemplateHint(emptyList))
+              : ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: _rowGapPx),
+                  itemBuilder: (_, i) => RiseOrStill(index: i, child: ListRow(items[i])),
+                ),
+        ),
       ],
     );
   }
@@ -53,25 +57,27 @@ class ListRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final image = imageFor(item.image, fit: BoxFit.cover);
     return Row(
-      spacing: 16,
+      spacing: 18,
       children: [
         if (image != null)
-          SizedBox(
-            width: listThumbPx,
-            height: listThumbPx,
-            child: ClipOval(
-              child: ColoredBox(color: VisageColors.card, child: image),
-            ),
+          Circle(
+            size: listThumbPx,
+            gradient: gradientFill,
+            children: [
+              ClipOval(
+                child: SizedBox.square(dimension: listThumbPx, child: image),
+              ),
+            ],
           ),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: VisageText.fg(20)),
+              Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: VisageText.fg(24)),
               if (item.subtitle.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Text(item.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: VisageText.muted(14)),
+                  child: Text(item.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: VisageText.muted(16)),
                 ),
             ],
           ),

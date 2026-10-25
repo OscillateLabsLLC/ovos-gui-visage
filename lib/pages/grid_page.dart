@@ -1,6 +1,6 @@
-/// SYSTEM_grid (gui-1.md §3.4, line 230): the muted title, then equal square tiles that scroll, the image filling
-/// each rounded tile and the title beneath. The column count follows the width (`gridColumns`). A tile without a
-/// usable image shows its title on the plain card colour instead.
+/// SYSTEM_grid (gui-1.md §3.4, line 230): the skill header, then equal round tiles that scroll, the image filling each
+/// circle and the title beneath, rising in one after another. The column count follows the width (`gridColumns`). A
+/// tile without a usable image is a gradient circle with its title inside instead.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,12 +10,17 @@ import '../resources/resources.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'content_models.dart';
+import 'image_frame_page.dart' show unavailable;
 import 'list_page.dart' show emptyList;
 import 'page.dart';
+import 'reduced_motion.dart';
+import 'skill_header.dart';
 import 'template_text.dart';
 
 const gridGapPx = 16.0;
-const _tileTitlePx = 30.0;
+const _tileTitlePx = 34.0;
+const _headerGapPx = 18.0;
+const _loneTitlePadding = 0.14;
 
 class GridPage extends StatelessWidget {
   const GridPage({super.key, required this.data});
@@ -30,7 +35,7 @@ class GridPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: 14)],
+        if (title.isNotEmpty) ...[SkillHeader(heading: title, location: ''), const SizedBox(height: _headerGapPx)],
         Expanded(child: tiles.isEmpty ? const Center(child: TemplateHint(emptyList)) : _grid(tiles)),
       ],
     );
@@ -48,50 +53,61 @@ class GridPage extends StatelessWidget {
           childAspectRatio: side / (side + _tileTitlePx),
         ),
         itemCount: tiles.length,
-        itemBuilder: (_, i) => RiseIn(index: i.clamp(0, 5), child: GridItemView(tiles[i])),
+        itemBuilder: (_, i) => RiseOrStill(
+          index: i,
+          child: GridItemView(tiles[i], side: side),
+        ),
       );
     },
   );
 }
 
 class GridItemView extends StatelessWidget {
-  const GridItemView(this.tile, {super.key});
+  const GridItemView(this.tile, {super.key, required this.side});
 
   final GridItem tile;
+  final double side;
 
   @override
   Widget build(BuildContext context) {
-    final image = imageFor(tile.image, fit: BoxFit.cover);
-    final lone = image == null && tile.title.isNotEmpty;
+    final image = imageFor(tile.image, fit: BoxFit.cover, broken: _loneTitle());
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AspectRatio(
-          aspectRatio: 1,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: ColoredBox(
-              color: VisageColors.card,
-              child:
-                  image ??
-                  Center(
-                    child: Text(lone ? tile.title : '', textAlign: TextAlign.center, style: VisageText.fg(18)),
+        Circle(
+          size: side,
+          gradient: gradientFill,
+          children: [
+            image == null
+                ? _loneTitle()
+                : ClipOval(
+                    child: SizedBox.square(dimension: side, child: image),
                   ),
-            ),
-          ),
+          ],
         ),
-        if (!lone && tile.title.isNotEmpty)
+        if (image != null && tile.title.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 8),
             child: Text(
               tile.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: VisageText.muted(15),
+              style: VisageText.fg(18),
             ),
           ),
       ],
     );
   }
+
+  /// The tile without its image: the title inside the circle, or the image page's hint when it has none.
+  Widget _loneTitle() => Padding(
+    padding: EdgeInsets.all(side * _loneTitlePadding),
+    child: Text(
+      tile.title.isEmpty ? unavailable : tile.title,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: VisageText.fg(20),
+    ),
+  );
 }

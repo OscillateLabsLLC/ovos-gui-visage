@@ -69,7 +69,7 @@ void main() {
   group('SYSTEM_list', () {
     test('title and items with optional subtitle and image', () async {
       final (model, faults) = await reported(
-        () => listModel({
+        () => systemListModel({
           'title': 'Groceries',
           'items': [
             {'title': 'Eggs', 'subtitle': 'A dozen', 'image': png},
@@ -83,13 +83,13 @@ void main() {
     });
 
     test('no title and no items is an empty list, no fault', () async {
-      final (model, faults) = await reported(() => listModel(const {}));
+      final (model, faults) = await reported(() => systemListModel(const {}));
       expect([model.title, model.items, faults], ['', isEmpty, isEmpty]);
     });
 
     test('a bare path image is reported and the item keeps its text', () async {
       final (model, faults) = await reported(
-        () => listModel({
+        () => systemListModel({
           'items': [
             {'title': 'Eggs', 'image': '/tmp/eggs.png'},
           ],
@@ -101,7 +101,7 @@ void main() {
 
     test('an item without a title shows its subtitle; one with neither and a non-object are dropped', () async {
       final (model, faults) = await reported(
-        () => listModel({
+        () => systemListModel({
           'items': [
             {'subtitle': 'Only this'},
             {'image': png},
@@ -114,7 +114,7 @@ void main() {
     });
 
     test('items that are not an array are reported', () async {
-      final (model, faults) = await reported(() => listModel(const {'items': 'Eggs, milk'}));
+      final (model, faults) = await reported(() => systemListModel(const {'items': 'Eggs, milk'}));
       expect(model.items, isEmpty);
       expect(faults.single, contains('items must be an array'));
     });

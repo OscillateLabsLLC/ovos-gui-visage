@@ -30,7 +30,7 @@ typedef ListItem = ({String title, String subtitle, String? image});
 
 /// `items` is optional (§3.4 marks only the item's `title`); absent or not an array gives an empty list. An item
 /// without `title` is reported and shows its subtitle in its place; one with neither is dropped.
-({String title, List<ListItem> items}) listModel(Json data) {
+({String title, List<ListItem> items}) systemListModel(Json data) {
   final items = readList(listTemplate, data, 'items') ?? const [];
   return (
     title: readText(listTemplate, data, 'title'),
