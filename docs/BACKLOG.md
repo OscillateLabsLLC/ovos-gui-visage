@@ -128,6 +128,17 @@ The popups follow ovos-shell's NotificationPop*.qml.
   level 0, so the display cannot show a Mac at 0 (reported in the log). Both are plugin fixes, not client ones.
 - **Media keys** are tested with synthetic key events only; check which desktops pass them to the app.
 
+## GUI-1 media templates (2026-10-25)
+
+- **SYSTEM_video_player shows no video.** Version 1 shows a film glyph, the title and the play state (§6.5). Real
+  playback needs a video dependency that builds on macOS, Linux and web, and a decision about who owns the stream
+  (§7.1 gives it to the media subsystem, not the display). Evidence first: which producer sends the template, and what
+  `uri` it carries. A poster image waits on finding F17.
+- **Queue and search-result rows cannot be tapped** in SYSTEM_media_player. OCP's `playlist.play` and `search.play`
+  take OCP's own entry shape, and GUI-1 names no "play this entry" control (F21). Wire them when the media subsystem's
+  control surface is specified, or record what OCP accepts for a `media_*` entry from the live bus first.
+- **Repeat and shuffle** have no `media_*` key (F22), so the media player cannot show them.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
