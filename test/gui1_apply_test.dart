@@ -139,7 +139,7 @@ void main() {
       expect(resolve(state.current(), gaps: TemplateGaps()), same(SystemWeatherPage.page));
       final faults = await collectFaults(() async => tester.pumpWidget(host(pageOf(state))));
       expect(find.text('San Antonio'), findsOneWidget);
-      expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F19');
+      expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F23');
     });
 
     test('two_namespaces_deactivate: the remaining namespace shows again', () {

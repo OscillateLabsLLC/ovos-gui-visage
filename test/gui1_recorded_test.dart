@@ -40,7 +40,7 @@ void main() {
     });
     expect(find.byType(SystemWeatherPage), findsOneWidget);
     expect([find.text('Clear'), find.text('San Antonio'), find.text(missing)], everyElement(findsOneWidget));
-    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F19');
+    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F23');
   });
 
   test('text_then_weather: its snapshot alone gives the same state as the stream', () {
@@ -76,7 +76,7 @@ void main() {
     final faults = await collectFaults(() async => tester.pumpWidget(host(pageOf(state))));
     expect(find.byType(SystemWeatherPage), findsOneWidget);
     expect(find.text('Clear'), findsOneWidget);
-    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F19');
+    expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F23');
   });
 
   test('weather_then_clear: its snapshot is the empty stack it ends with', () {

@@ -28,7 +28,7 @@ const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 String codeIcon(ConditionCode? code) => codeIcons[code] ?? noIcon;
 
-/// The temperature as the producer sent it, whole numbers without a decimal point, and no unit (finding F17).
+/// The temperature as the producer sent it, whole numbers without a decimal point, and no unit (finding F21).
 String temperature(double? value) {
   if (value == null) return missing;
   return value == value.roundToDouble() ? '${value.round()}°' : '$value°';
@@ -56,7 +56,7 @@ WeatherCard weatherCard(SpecWeather weather, {required bool use24Hour}) {
 }
 
 /// Entries closer than a day apart are labelled by hour, others by weekday: the spec gives no period length
-/// (finding F18). Times are shown in the device's time zone.
+/// (finding F32). Times are shown in the device's time zone.
 List<ForecastItem> forecastItems(List<SpecForecast> entries, {required bool use24Hour}) {
   final shown = entries.take(maxForecastShown).toList();
   final hourly = shown.length > 1 && shown[1].time - shown[0].time < _secondsPerDay;

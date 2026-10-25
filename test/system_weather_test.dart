@@ -73,7 +73,7 @@ void main() {
     });
   });
 
-  testWidgets('system_weather fixture: current conditions, the forecast beneath, then the data: icon', (tester) async {
+  testWidgets('system_weather fixture: conditions and forecast, the data: icon, then an unlisted code', (tester) async {
     tester.view
       ..physicalSize = const Size(480, 800)
       ..devicePixelRatio = 1;
@@ -89,11 +89,19 @@ void main() {
     expect(find.text(weekday(1793001600)), findsOneWidget);
     expect(find.byType(WeatherIcon), findsNWidgets(4), reason: 'partly cloudy now; clear, rain and thunder ahead');
 
-    replayGui1(frames.skip(3).toList(), state: state);
+    replayGui1([frames[3]], state: state);
     await tester.pumpWidget(host(pageOf(state)));
     expect(find.text('22°'), findsOneWidget);
     expect(find.byType(WeatherIcon), findsNothing);
     expect(find.byType(Image), findsOneWidget);
+
+    replayGui1([frames[4]], state: state);
+    final faults = await collectFaults(() async => tester.pumpWidget(host(pageOf(state))));
+    expect(faults.map((f) => '${f.exception}'), [
+      'FormatException: condition_code "hurricane" is not in the closed set, so it is ignored',
+    ]);
+    expect([find.text('23°'), find.text('Hurricane')], everyElement(findsOneWidget));
+    expect([find.byType(WeatherIcon), find.byType(Image), find.byType(ForecastCircle)], everyElement(findsNothing));
   });
 
   testWidgets('a missing current_temp is reported and the card keeps the condition', (tester) async {
