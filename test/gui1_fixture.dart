@@ -12,7 +12,7 @@ import 'package:ovos_gui_visage/state/gui_state.dart';
 const hello = 'ovos-skill-hello.openvoiceos';
 const alerts = 'ovos-skill-alerts.openvoiceos';
 const weather = 'ovos-skill-weather.openvoiceos';
-const handWritten = {'_note': 'written from WIRE.md, not recorded'};
+final _handWrittenNote = RegExp(r'^written from .+, not recorded$');
 
 List<Gui1Frame> _parse(Iterable<String> lines) => [for (final line in lines) parseGui1Frame(jsonDecode(line) as Json)];
 
@@ -21,7 +21,8 @@ List<String> _lines(String path) => File(path).readAsLinesSync().where((l) => l.
 /// A hand-written fixture's frames after its `_note` line, the handshake's `welcome` included.
 List<Gui1Frame> loadGui1Fixture(String scenario) {
   final lines = _lines('test/fixtures/gui1/$scenario.jsonl');
-  expect(jsonDecode(lines.first), handWritten, reason: '$scenario says it is hand-written');
+  final note = (jsonDecode(lines.first) as Json)['_note'];
+  expect(note, matches(_handWrittenNote), reason: '$scenario says it is hand-written, and from what');
   return _parse(lines.skip(1));
 }
 
@@ -43,6 +44,9 @@ GuiState replayGui1(List<Gui1Frame> frames, {Gui1Gaps? gaps, GuiState? state}) {
 
 Gui1Template template(String skill, String name, Json data, {String session = defaultSessionId}) =>
     Gui1Template(skillId: skill, template: name, data: data, sessionId: session);
+
+/// The fixed time the resting page tests read: Saturday 17 October 2026, 09:05.
+final restingNow = DateTime(2026, 10, 17, 9, 5);
 
 Gui1Status status(String topic, [Json data = const {}]) => Gui1Status(eventName: topic, data: data, sessionId: defaultSessionId);
 

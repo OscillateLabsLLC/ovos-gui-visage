@@ -280,6 +280,7 @@ class _ScreenState extends State<Screen> {
     commands: input.commands,
     send: gui.send,
     connected: guiConnected,
+    protocol: gui.chosen,
     captions: widget.config.captions ? captions : null,
     outcome: outcome,
     volume: volume.model,
