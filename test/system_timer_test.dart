@@ -68,7 +68,7 @@ void main() {
   });
 
   testWidgets('system_timer fixture: the ring counts down from the device clock, then expires', (tester) async {
-    final state = replayGui1(loadGui1Fixture('system_timer', note: fromSpec));
+    final state = replayGui1(loadGui1Fixture('system_timer'));
     expect(state.current(), const Target(alerts, 'SYSTEM_timer', 0));
     expect(resolve(state.current(), gaps: TemplateGaps()), same(SystemTimerPage.page));
     var now = secondsBefore(62);
@@ -83,7 +83,7 @@ void main() {
   });
 
   testWidgets('the routed page renders the ring with the real clock', (tester) async {
-    final state = replayGui1(loadGui1Fixture('system_timer', note: fromSpec));
+    final state = replayGui1(loadGui1Fixture('system_timer'));
     await tester.pumpWidget(host(pageOf(state)));
     expect(find.byType(TimerRing), findsOneWidget);
     expect(find.text('Pasta'), findsOneWidget);

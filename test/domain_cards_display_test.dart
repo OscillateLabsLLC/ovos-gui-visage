@@ -5,6 +5,7 @@ import 'package:ovos_gui_visage/pages/map_page.dart';
 import 'package:ovos_gui_visage/pages/system_timer_page.dart';
 import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/timer_page.dart';
+import 'package:ovos_gui_visage/shell_overlays.dart' show attentionStrip;
 import 'package:ovos_gui_visage/widgets/motion_icon.dart';
 
 const frame = Size(480, 800);
@@ -15,8 +16,12 @@ final pulse = find.descendant(of: find.byType(SystemTimerPage), matching: find.b
 
 DateTime secondsBefore(int seconds) => DateTime.fromMillisecondsSinceEpoch((endTime - seconds) * 1000);
 
+/// ScreenFrame's page padding: 24 at the sides, 32 above, and 32 below, or the attention strip while the face is
+/// compact (lib/screen_frame.dart, lib/shell_overlays.dart), leaving 432 x 736 or 432 x 650.
+EdgeInsets pagePadding({bool compactFace = false}) => EdgeInsets.fromLTRB(24, 32, 24, compactFace ? attentionStrip : 32);
+
 /// The page in the 480 x 800 frame, scaled into [window] as the shell does (lib/main.dart, FittedBox).
-Widget framed(Widget page, {Size window = frame, bool still = false}) => MaterialApp(
+Widget framed(Widget page, {Size window = frame, bool still = false, bool compactFace = false}) => MaterialApp(
   home: MediaQuery(
     data: MediaQueryData(size: window, disableAnimations: still),
     child: Center(
@@ -25,7 +30,12 @@ Widget framed(Widget page, {Size window = frame, bool still = false}) => Materia
         child: FittedBox(
           child: SizedBox.fromSize(
             size: frame,
-            child: Material(child: page),
+            child: Material(
+              child: Padding(
+                padding: pagePadding(compactFace: compactFace),
+                child: page,
+              ),
+            ),
           ),
         ),
       ),
@@ -36,19 +46,31 @@ Widget framed(Widget page, {Size window = frame, bool still = false}) => Materia
 Map<String, Widget> pages(DateTime Function() now) => {
   'clock': ClockPage(now: now),
   'timer': SystemTimerPage(data: const {'end_time': endTime, 'label': 'Pasta'}, now: now),
-  'weather': const SystemWeatherPage(
-    data: {'current_temp': 21, 'min_temp': 14, 'max_temp': 25, 'condition': 'Sunny', 'location': 'San Antonio'},
+  'weather': SystemWeatherPage(
+    data: {
+      'current_temp': 21,
+      'min_temp': 14,
+      'max_temp': 25,
+      'condition': 'Sunny',
+      'condition_code': 'clear',
+      'location': 'San Antonio',
+      'forecast': [
+        for (var day = 0; day < 4; day++)
+          {'time': endTime + day * 86400, 'min_temp': 12, 'max_temp': 101, 'condition_code': 'rain'},
+      ],
+    },
   ),
   'map': const MapPage(data: {'latitude': 29.4252, 'longitude': -98.4946, 'label': 'The Alamo'}),
 };
 
 void main() {
-  for (final window in [frame, cornerWidget]) {
-    testWidgets('every domain card lays out in ${window.width.round()} x ${window.height.round()} without overflow', (
+  for (final (window, compactFace) in [(frame, false), (frame, true), (cornerWidget, false), (cornerWidget, true)]) {
+    final size = '${window.width.round()} x ${window.height.round()}';
+    testWidgets('every domain card lays out in $size${compactFace ? ' beside the compact face' : ''} without overflow', (
       tester,
     ) async {
       for (final MapEntry(key: name, value: page) in pages(() => secondsBefore(90)).entries) {
-        await tester.pumpWidget(framed(page, window: window));
+        await tester.pumpWidget(framed(page, window: window, compactFace: compactFace));
         await tester.pump(const Duration(milliseconds: 300));
         expect(tester.takeException(), isNull, reason: name);
       }
@@ -84,7 +106,7 @@ void main() {
   testWidgets('reduced motion: the weather icon draws its still frame', (tester) async {
     await tester.pumpWidget(framed(pages(DateTime.now)['weather']!, still: true));
     await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(MotionIcon), findsOneWidget);
+    expect(find.byType(MotionIcon), findsNWidgets(4), reason: 'now, and three of the four forecast entries');
     expect(find.text('21°'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('system_map fixture: the card shows the label, the placeholder and the coordinates', (tester) async {
-    final state = replayGui1(loadGui1Fixture('system_map', note: fromSpec));
+    final state = replayGui1(loadGui1Fixture('system_map'));
     expect(state.current(), const Target(places, 'SYSTEM_map', 0));
     expect(resolve(state.current(), gaps: TemplateGaps()), same(MapPage.page));
     await tester.pumpWidget(host(pageOf(state)));

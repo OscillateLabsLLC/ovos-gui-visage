@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('system_clock fixture: the clock page shows the device time and ticks by itself', (tester) async {
-    final state = replayGui1(loadGui1Fixture('system_clock', note: fromSpec));
+    final state = replayGui1(loadGui1Fixture('system_clock'));
     expect(state.current(), const Target(dateTime, 'SYSTEM_clock', 0));
     expect(resolve(state.current(), gaps: TemplateGaps()), same(ClockPage.page));
     await tester.pumpWidget(host(pageOf(state)));

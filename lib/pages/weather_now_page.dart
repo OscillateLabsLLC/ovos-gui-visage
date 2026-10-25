@@ -23,17 +23,21 @@ class WeatherNowPage extends StatelessWidget {
   Widget build(BuildContext context) => WeatherNowCard(model: nowModel(page, data));
 }
 
-/// The big weather circle with its chips; SYSTEM_weather draws the same card, with the producer's image as [icon].
+/// The big weather circle with its chips; SYSTEM_weather draws the same card, with the producer's image as [icon] and
+/// its forecast as [footer].
 class WeatherNowCard extends StatelessWidget {
-  const WeatherNowCard({super.key, required this.model, this.icon});
+  const WeatherNowCard({super.key, required this.model, this.icon, this.footer});
 
   final NowModel model;
 
-  /// Shown in place of the bundled icon that [NowModel.icon] names.
+  /// Shown in place of the bundled icon that [NowModel.icon] names. With neither, the circle holds the number alone.
   final Widget? icon;
+
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
+    final glyph = icon ?? (model.icon.isEmpty ? null : WeatherIcon(model.icon, size: 120));
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 28,
@@ -46,8 +50,7 @@ class WeatherNowCard extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox.square(dimension: 120, child: icon ?? WeatherIcon(model.icon, size: 120)),
-                const SizedBox(height: 2),
+                if (glyph != null) ...[SizedBox.square(dimension: 120, child: glyph), const SizedBox(height: 2)],
                 Text(
                   model.big,
                   style: VisageText.fg(76, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),
@@ -57,7 +60,8 @@ class WeatherNowCard extends StatelessWidget {
           ],
         ),
         Row(mainAxisAlignment: MainAxisAlignment.center, spacing: 18, children: [for (final chip in model.chips) _chip(chip)]),
-        SkillDetails(model.details),
+        if (model.details.isNotEmpty) SkillDetails(model.details),
+        ?footer,
       ],
     );
   }

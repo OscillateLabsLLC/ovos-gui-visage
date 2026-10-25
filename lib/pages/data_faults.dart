@@ -1,40 +1,15 @@
-/// Session data that breaks a template's key list (gui-1.md §3.3, §3.4): a required key missing, a key of the wrong
-/// type, a value out of range. The page still renders the nearest useful presentation (§6.5); this reports each problem
-/// when it first appears, not on every rebuild.
+/// Reports session data that breaks a template's key list (spec_keys.dart): a required key missing, a key of the wrong
+/// type, a value out of range. The page still renders the nearest useful presentation
+/// ([gui-1.md 6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation));
+/// each problem is reported when it first appears, not on every rebuild.
 library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../faults.dart';
-import 'page.dart';
 
-/// The problem when a required string key is absent or not a string; null when it is fine.
-String? requiredString(Object? value, String key) => value is String ? null : _typeProblem(key, 'a string', value);
-
-/// The problem when an optional string key is present and not a string; null when it is absent or fine.
-String? optionalString(Object? value, String key) =>
-    value == null || value is String ? null : _typeProblem(key, 'a string', value);
-
-/// The problem when a required number key is absent or not a finite number; null when it is fine.
-String? requiredNumber(Object? value, String key) => _isFinite(value) ? null : _typeProblem(key, 'a finite number', value);
-
-/// The problem when an optional number key is present and not a finite number; null when it is absent or fine.
-String? optionalNumber(Object? value, String key) => value == null ? null : requiredNumber(value, key);
-
-/// The problem when an optional boolean key is present and not a boolean; null when it is absent or fine.
-String? optionalBool(Object? value, String key) => value == null || value is bool ? null : _typeProblem(key, 'a boolean', value);
-
-/// [value] as a double when it is a finite number, else null.
-double? finite(Object? value) => _isFinite(value) ? (value as num).toDouble() : null;
-
-/// An optional string key as text, or '' when it is absent or of the wrong type (reported by [optionalString]).
-String optionalText(Object? value) => value is String ? value : '';
-
-bool _isFinite(Object? value) => value is num && value.isFinite;
-
-String _typeProblem(String key, String expected, Object? value) =>
-    value == null ? '$key is required' : '$key must be $expected, got ${value.runtimeType} ${text(value)}';
+export 'spec_keys.dart';
 
 /// Reports [problems] for [template] through `reportFault`, again only when the list changes, and shows [child].
 class ReportsDataFaults extends StatefulWidget {

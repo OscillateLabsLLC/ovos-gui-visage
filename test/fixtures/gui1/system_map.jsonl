@@ -1,4 +1,4 @@
-{"_note": "written from gui-1.md §3.4 at b6c1583, not recorded"}
+{"_note": "written from gui-1.md 3.4 at b6c1583, not recorded"}
 {"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
 {"type": "template", "skill_id": "ovos-skill-places.openvoiceos", "template": "SYSTEM_map", "data": {"latitude": 29.4252, "longitude": -98.4946, "zoom": 12, "label": "The Alamo"}, "session_id": "default"}
 {"type": "activated", "skill_id": "ovos-skill-places.openvoiceos", "session_id": "default"}

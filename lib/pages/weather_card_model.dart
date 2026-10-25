@@ -1,34 +1,32 @@
-/// SYSTEM_weather (gui-1.md §3.4, line 261): `current_temp` and `condition` required; `min_temp`, `max_temp`, `icon`,
-/// `location` optional. Mapped onto the skill's current-weather card (weather_model.dart). Pure.
+/// What the SYSTEM_weather page shows from a [SpecWeather]: current conditions on the skill's current-weather card
+/// (weather_model.dart `NowModel`), and up to [maxForecastShown] forecast entries beneath it as the forecast page's
+/// small circles, in one screen. The icon comes from `condition_code`; a valid `icon` replaces it; with neither, the
+/// condition text shows with no icon. Pure.
 library;
 
-import '../json.dart';
-import 'data_faults.dart';
+import 'spec_weather.dart';
 import 'weather_model.dart';
 
-/// `condition` is free text (finding F18), so the bundled icon is chosen by English keywords, first match wins;
-/// anything else gets [unknownIcon].
-const _conditionIcons = [
-  (words: ['thunder', 'storm', 'lightning'], icon: 'storm'),
-  (words: ['snow', 'sleet', 'flurr', 'blizzard', 'hail'], icon: 'snow'),
-  (words: ['rain', 'drizzle', 'shower'], icon: 'rain'),
-  (words: ['fog', 'mist', 'haze', 'smoke', 'dust'], icon: 'fog'),
-  (words: ['partly', 'partial', 'few', 'scattered', 'broken', 'intervals'], icon: 'partial_clouds'),
-  (words: ['cloud', 'overcast'], icon: 'clouds'),
-  (words: ['night'], icon: 'night'),
-  (words: ['clear', 'sun', 'fair'], icon: 'sun'),
-];
+/// `wind` has no glyph in the bundled set, so it shows the text alone.
+const codeIcons = {
+  ConditionCode.clear: 'sun',
+  ConditionCode.partlyCloudy: 'partial_clouds',
+  ConditionCode.cloudy: 'clouds',
+  ConditionCode.fog: 'fog',
+  ConditionCode.drizzle: 'rain',
+  ConditionCode.rain: 'rain',
+  ConditionCode.snow: 'snow',
+  ConditionCode.sleet: 'snow',
+  ConditionCode.thunder: 'storm',
+};
 
-/// §3.5: an image key is an http(s) URL or a data: URI; a bare path is never loaded.
-final _imageUri = RegExp(r'^(https?://|data:image/)', caseSensitive: false);
+/// Three 108 px circles and their gaps fit the 432 px page; a fourth does not.
+const maxForecastShown = 3;
+const noIcon = '';
+const _secondsPerDay = 86400;
+const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-String conditionIcon(String condition) {
-  final lower = condition.toLowerCase();
-  for (final entry in _conditionIcons) {
-    if (entry.words.any(lower.contains)) return entry.icon;
-  }
-  return unknownIcon;
-}
+String codeIcon(ConditionCode? code) => codeIcons[code] ?? noIcon;
 
 /// The temperature as the producer sent it, whole numbers without a decimal point, and no unit (finding F17).
 String temperature(double? value) {
@@ -36,37 +34,51 @@ String temperature(double? value) {
   return value == value.roundToDouble() ? '${value.round()}°' : '$value°';
 }
 
-String? _iconProblem(Object? icon) {
-  if (icon == null) return null;
-  if (icon is! String) return optionalString(icon, 'icon');
-  return _imageUri.hasMatch(icon) ? null : 'icon must be an http(s) URL or a data:image URI (§3.5), got $icon';
-}
+typedef WeatherCard = ({NowModel now, String? image, List<ForecastItem> forecast});
 
-typedef WeatherCard = ({NowModel now, String? image, List<String> problems});
-
-WeatherCard weatherCard(Json data) {
-  final current = data['current_temp'], low = finite(data['min_temp']), high = finite(data['max_temp']);
-  final condition = data['condition'], icon = data['icon'];
+WeatherCard weatherCard(SpecWeather weather, {required bool use24Hour}) {
+  final high = weather.maxTemp, low = weather.minTemp;
   return (
     now: (
-      heading: optionalText(condition),
-      location: optionalText(data['location']),
-      icon: conditionIcon(optionalText(condition)),
-      big: temperature(finite(current)),
+      heading: weather.condition,
+      location: weather.location,
+      icon: codeIcon(weather.code),
+      big: temperature(weather.currentTemp),
       chips: [
         if (high != null) (value: temperature(high), label: 'high'),
         if (low != null) (value: temperature(low), label: 'low'),
       ],
       details: '',
     ),
-    image: _iconProblem(icon) == null && icon is String ? icon : null,
-    problems: [
-      requiredNumber(current, 'current_temp'),
-      optionalNumber(data['min_temp'], 'min_temp'),
-      optionalNumber(data['max_temp'], 'max_temp'),
-      requiredString(condition, 'condition'),
-      _iconProblem(icon),
-      optionalString(data['location'], 'location'),
-    ].nonNulls.toList(),
+    image: weather.icon,
+    forecast: forecastItems(weather.forecast, use24Hour: use24Hour),
   );
+}
+
+/// Entries closer than a day apart are labelled by hour, others by weekday: the spec gives no period length
+/// (finding F18). Times are shown in the device's time zone.
+List<ForecastItem> forecastItems(List<SpecForecast> entries, {required bool use24Hour}) {
+  final shown = entries.take(maxForecastShown).toList();
+  final hourly = shown.length > 1 && shown[1].time - shown[0].time < _secondsPerDay;
+  return [
+    for (final entry in shown)
+      (
+        label: periodLabel(entry.time, hourly: hourly, use24Hour: use24Hour),
+        icon: codeIcon(entry.code),
+        main: temperature(entry.maxTemp),
+        sub: temperature(entry.minTemp),
+      ),
+  ];
+}
+
+String _two(int value) => value.toString().padLeft(2, '0');
+
+/// `Mon`, or the hour: `15:00` on a 24-hour device, `3 PM` (or `3:30 PM`) on a 12-hour one.
+String periodLabel(double unixSeconds, {required bool hourly, required bool use24Hour}) {
+  final start = DateTime.fromMillisecondsSinceEpoch((unixSeconds * 1000).round());
+  if (!hourly) return _weekdays[start.weekday - 1];
+  if (use24Hour) return '${_two(start.hour)}:${_two(start.minute)}';
+  final hour = start.hour % 12 == 0 ? 12 : start.hour % 12;
+  final minutes = start.minute == 0 ? '' : ':${_two(start.minute)}';
+  return '$hour$minutes ${start.hour < 12 ? 'AM' : 'PM'}';
 }

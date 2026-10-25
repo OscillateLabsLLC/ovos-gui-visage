@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ovos_gui_visage/pages/forecast_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
+import 'package:ovos_gui_visage/pages/spec_weather.dart';
 import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/weather_card_model.dart';
 import 'package:ovos_gui_visage/pages/weather_model.dart';
@@ -10,7 +12,12 @@ import 'package:ovos_gui_visage/widgets/weather_icon.dart';
 import 'faults.dart';
 import 'gui1_fixture.dart';
 
-const full = {'current_temp': 21, 'min_temp': 14, 'max_temp': 25.5, 'condition': 'Clear', 'location': 'San Antonio'};
+const full = {'current_temp': 21, 'min_temp': 14, 'max_temp': 25.5, 'condition': 'Clear', 'condition_code': 'clear'};
+
+double unix(DateTime local) => local.millisecondsSinceEpoch / 1000;
+
+String weekday(double seconds) =>
+    ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][DateTime.fromMillisecondsSinceEpoch((seconds * 1000).round()).weekday - 1];
 
 Future<List<String>> pumpFaults(WidgetTester tester, Json data) async {
   final state = replayGui1([template(weather, 'SYSTEM_weather', data)]);
@@ -22,62 +29,65 @@ Future<List<String>> pumpFaults(WidgetTester tester, Json data) async {
 }
 
 void main() {
-  group('model', () {
-    test('every key on the card, temperatures as given, no unit', () {
-      final card = weatherCard(full);
+  group('card model', () {
+    test('current conditions on the card: temperatures as given, no unit, the code picks the icon', () {
+      final card = weatherCard(specWeather({...full, 'location': 'San Antonio'}), use24Hour: true);
       expect([card.now.heading, card.now.location, card.now.icon, card.now.big], ['Clear', 'San Antonio', 'sun', '21°']);
       expect(card.now.chips, [(value: '25.5°', label: 'high'), (value: '14°', label: 'low')]);
-      expect([card.image, card.problems], [null, isEmpty]);
+      expect([card.image, card.forecast], [null, isEmpty]);
     });
 
-    test('a missing optional key leaves its element out, without a problem', () {
-      final card = weatherCard({'current_temp': -3, 'condition': 'Snow'});
-      expect([card.now.big, card.now.location, card.now.chips, card.problems], ['-3°', '', isEmpty, isEmpty]);
+    test('every condition_code maps to a bundled icon except wind; no code means no icon', () {
+      expect(
+        {for (final code in ConditionCode.values) code.wire: codeIcon(code)},
+        {
+          'clear': 'sun',
+          'partly_cloudy': 'partial_clouds',
+          'cloudy': 'clouds',
+          'fog': 'fog',
+          'drizzle': 'rain',
+          'rain': 'rain',
+          'snow': 'snow',
+          'sleet': 'snow',
+          'thunder': 'storm',
+          'wind': noIcon,
+        },
+      );
+      expect(weatherCard(specWeather({'current_temp': 3, 'condition': 'Sunny'}), use24Hour: true).now.icon, noIcon);
     });
 
-    test('a missing required key or a wrong type is a problem; the rest still reads', () {
-      final card = weatherCard({'min_temp': '14', 'location': 'Austin'});
-      expect(card.problems, [
-        'current_temp is required',
-        'min_temp must be a finite number, got String 14',
-        'condition is required',
-      ]);
-      expect([card.now.big, card.now.icon, card.now.location, card.now.chips], [missing, unknownIcon, 'Austin', isEmpty]);
-    });
-
-    test('icon: an http(s) URL or data:image URI overrides; a bare path or other value is a problem', () {
-      expect(weatherCard({...full, 'icon': 'https://x/sun.png'}).image, 'https://x/sun.png');
-      expect(weatherCard({...full, 'icon': 'data:image/png;base64,AA=='}).image, 'data:image/png;base64,AA==');
-      final path = weatherCard({...full, 'icon': '/opt/skill/sun.png'});
-      expect([path.image, path.problems.single], [null, contains('§3.5')]);
-      expect(weatherCard({...full, 'icon': 4}).problems.single, 'icon must be a string, got int 4');
-    });
-
-    test('condition picks a bundled icon by keyword, unknown text the default', () {
-      final icons = {
-        'Thunderstorm': 'storm',
-        'light snow': 'snow',
-        'Showers': 'rain',
-        'Mist': 'fog',
-        'Partly cloudy': 'partial_clouds',
-        'Overcast': 'clouds',
-        'Clear night': 'night',
-        'Sunny': 'sun',
-        'Despejado': unknownIcon,
-      };
-      expect({for (final c in icons.keys) c: conditionIcon(c)}, icons);
+    test('forecast: at most three entries; a day apart by weekday, closer by hour', () {
+      final monday = DateTime(2026, 10, 26);
+      final days = [
+        for (var i = 0; i < 6; i++) (time: unix(monday.add(Duration(days: i))), minTemp: 10.0, maxTemp: 20.0, code: null),
+      ];
+      final daily = forecastItems(days, use24Hour: true);
+      expect(daily.map((item) => item.label), ['Mon', 'Tue', 'Wed']);
+      expect([daily.first.main, daily.first.sub, daily.first.icon], ['20°', '10°', noIcon]);
+      final hours = [
+        for (final h in [15, 18]) (time: unix(DateTime(2026, 10, 26, h)), minTemp: null, maxTemp: null, code: null),
+      ];
+      expect(forecastItems(hours, use24Hour: true).map((item) => item.label), ['15:00', '18:00']);
+      expect(forecastItems(hours, use24Hour: false).map((item) => item.label), ['3 PM', '6 PM']);
+      expect(periodLabel(unix(DateTime(2026, 10, 26, 0, 30)), hourly: true, use24Hour: false), '12:30 AM');
     });
   });
 
-  testWidgets('system_weather fixture: the card shows every key, then the update and its data: icon', (tester) async {
-    final frames = loadGui1Fixture('system_weather', note: fromSpec);
+  testWidgets('system_weather fixture: current conditions, the forecast beneath, then the data: icon', (tester) async {
+    tester.view
+      ..physicalSize = const Size(480, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final frames = loadGui1Fixture('system_weather');
     final state = replayGui1(frames.take(3).toList());
     expect(state.current(), const Target(weather, 'SYSTEM_weather', 0));
     expect(resolve(state.current(), gaps: TemplateGaps()), same(SystemWeatherPage.page));
     await tester.pumpWidget(host(pageOf(state)));
-    final shown = ['21°', 'Partly cloudy', 'San Antonio', '25.5°', 'high', '14°', 'low'];
+    final shown = ['21°', 'Partly cloudy', 'San Antonio', '25.5°', 'high', '14°', 'low', '27°', '24°', '19°'];
     expect(shown.map(find.text), everyElement(findsOneWidget));
-    expect(find.byType(WeatherIcon), findsOneWidget);
+    expect(find.byType(ForecastCircle), findsNWidgets(3));
+    expect(find.text(weekday(1793001600)), findsOneWidget);
+    expect(find.byType(WeatherIcon), findsNWidgets(4), reason: 'partly cloudy now; clear, rain and thunder ahead');
 
     replayGui1(frames.skip(3).toList(), state: state);
     await tester.pumpWidget(host(pageOf(state)));
@@ -87,12 +97,19 @@ void main() {
   });
 
   testWidgets('a missing current_temp is reported and the card keeps the condition', (tester) async {
-    final faults = await pumpFaults(tester, {'condition': 'Rain', 'location': 'Austin'});
+    final faults = await pumpFaults(tester, {'condition': 'Rain', 'condition_code': 'rain', 'location': 'Austin'});
     expect(faults, ['FormatException: current_temp is required']);
     expect([find.text(missing), find.text('Rain'), find.text('Austin')], everyElement(findsOneWidget));
   });
 
-  testWidgets('a bare path icon is reported and the bundled icon shows', (tester) async {
+  testWidgets('an unlisted condition_code is reported; the text shows with no icon', (tester) async {
+    final faults = await pumpFaults(tester, {...full, 'condition': 'Hurricane', 'condition_code': 'hurricane'});
+    expect(faults.single, contains('not in the closed set'));
+    expect(find.text('Hurricane'), findsOneWidget);
+    expect(find.byType(WeatherIcon), findsNothing);
+  });
+
+  testWidgets('a bare path icon is reported and the condition_code icon shows', (tester) async {
     final faults = await pumpFaults(tester, {...full, 'icon': 'sun.png'});
     expect(faults.single, contains('icon must be an http(s) URL'));
     expect(find.byType(WeatherIcon), findsOneWidget);
