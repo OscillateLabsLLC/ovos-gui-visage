@@ -1,4 +1,5 @@
-/// SYSTEM_map (gui-1.md §3.4): a card with the label, a static pin where a map would be, and the coordinates. No map
+/// SYSTEM_map ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// a card with the label, a static pin where a map would be, and the coordinates. No map
 /// provider and no network: which provider, and what to show offline, are open (docs/BACKLOG.md, GUI-1 templates).
 library;
 

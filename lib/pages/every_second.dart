@@ -1,5 +1,6 @@
-/// Rebuilds a page once a second, for the templates that derive what they show from the device clock (gui-1.md §3.4:
-/// `SYSTEM_clock`, `SYSTEM_timer`), so the producer never polls.
+/// Rebuilds a page once a second, for the templates that derive what they show from the device clock, so the producer
+/// never polls: `SYSTEM_clock` and `SYSTEM_timer` in
+/// [gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue).
 library;
 
 import 'dart:async';

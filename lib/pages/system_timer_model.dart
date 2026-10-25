@@ -1,4 +1,5 @@
-/// SYSTEM_timer (gui-1.md §3.4, line 260): `end_time` (Unix seconds, required), `label`, `count_up`. What the ring
+/// SYSTEM_timer ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// `end_time` (Unix seconds, required), `label`, `count_up`. What the ring
 /// shows is derived from the device clock, as the alerts skill's rings are drawn (alerts_model.dart). Pure, except that
 /// [timerAt] records the longest remaining time it has seen, the only progress total the template offers.
 library;

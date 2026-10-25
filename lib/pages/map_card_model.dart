@@ -1,5 +1,8 @@
-/// SYSTEM_map (gui-1.md §3.4, line 262): `latitude` and `longitude` (WGS-84, required), `zoom` (1–20), `label`. Visage
-/// has no map provider yet, so the card is the §6.5 degradation: the label and the coordinates as text. Pure.
+/// SYSTEM_map ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// `latitude` and `longitude` (WGS-84, required), `zoom` (1–20), `label`. Visage has no map provider yet, so the card
+/// is the degradation the spec suggests, the label and the coordinates as text:
+/// [6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation).
+/// Pure.
 library;
 
 import '../json.dart';

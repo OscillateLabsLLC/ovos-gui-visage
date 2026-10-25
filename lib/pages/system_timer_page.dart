@@ -1,4 +1,5 @@
-/// SYSTEM_timer (gui-1.md §3.4): one ring, the alerts skill's, ticking from the device clock with no producer polling.
+/// SYSTEM_timer ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// one ring, the alerts skill's, ticking from the device clock with no producer polling.
 /// The template holds one timer and offers no reply leg, so there is no cancel button (finding F8 for several timers).
 library;
 

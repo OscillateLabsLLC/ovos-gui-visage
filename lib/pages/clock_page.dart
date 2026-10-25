@@ -1,4 +1,5 @@
-/// SYSTEM_clock (gui-1.md §3.4): no session data; the time comes from the device clock and the page ticks by itself.
+/// SYSTEM_clock ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// no session data; the time comes from the device clock and the page ticks by itself.
 /// The 12/24-hour choice is the device's own setting (`MediaQuery.alwaysUse24HourFormat`), since the template has no
 /// key for it. Same ring as the date-time skill's time page.
 library;
