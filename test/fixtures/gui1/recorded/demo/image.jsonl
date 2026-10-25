@@ -1,0 +1,13 @@
+{"_note": "recorded 2026-10-25T16:16:31Z by ovos-gui-plugin-visage tool/dump_client.py (client-side wire frames) while ovos-skill-gui1-demo served: show me the image demo"}
+{"type": "status", "event_name": "recognizer_loop:utterance", "data": {"utterances": ["show me the image demo"], "lang": "en-us"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "GUI1DemoSkill.handle_show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "GUI1DemoSkill.handle_show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.complete", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.handled", "data": {}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAn0lEQVR4nO3VsQnAMAxEUQ2hITJTpss4Gccj2AGDsWK4whBd4ECVuOJ13/y8wpX7CPflxqg07WlUmgnEoBkgEk0H8WgeEJVmAcrVtKdRaSYQg2aASDQdxKMp73TkahagXI2rZXhjVBpXy/BGLUMbtUwt291EUK7G1TK8MSqNq2V4o5ahjVqmlu1uIihX42oZ3hiVxtUyvFHL0EYt+13LKpIOL8TguS+CAAAAAElFTkSuQmCC", "caption": "Stripes drawn in memory", "title": "SYSTEM_image", "fill": "fit", "background_color": "#101820"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_image", "data": {"image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAn0lEQVR4nO3VsQnAMAxEUQ2hITJTpss4Gccj2AGDsWK4whBd4ECVuOJ13/y8wpX7CPflxqg07WlUmgnEoBkgEk0H8WgeEJVmAcrVtKdRaSYQg2aASDQdxKMp73TkahagXI2rZXhjVBpXy/BGLUMbtUwt291EUK7G1TK8MSqNq2V4o5ahjVqmlu1uIihX42oZ3hiVxtUyvFHL0EYt+13LKpIOL8TguS+CAAAAAElFTkSuQmCC", "caption": "Stripes drawn in memory", "title": "SYSTEM_image", "fill": "fit", "background_color": "#101820"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Here is the image template.", "expect_response": false, "meta": {"dialog": "showing", "data": {"template": "image"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}

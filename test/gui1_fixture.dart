@@ -39,6 +39,22 @@ List<Gui1Frame> loadGui1Fixture(String scenario) {
 /// handshake, without a snapshot; `<scenario>_snapshot.jsonl` holds the snapshot a late joiner gets.
 List<Gui1Frame> loadRecorded(String name) => _parse(_lines('test/fixtures/gui1/recorded/$name.jsonl'));
 
+/// The `_note` of a recording the demo skill drove: when, the adapter's dump client, and the utterances it served.
+final recordedDemo = RegExp(
+  r'^recorded \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z by ovos-gui-plugin-visage tool/dump_client\.py \(client-side wire frames\) '
+  r'while ovos-skill-gui1-demo served: \S.*$',
+);
+
+/// A fixture `ovos-skill-gui1-demo` recorded through the adapter (`fixtures/gui1` there, copied unchanged): the frames
+/// after its `_note`, without the welcome or the first snapshot.
+List<Gui1Frame> loadDemo(String name) {
+  final lines = _lines('test/fixtures/gui1/recorded/demo/$name.jsonl');
+  final note = jsonDecode(lines.first) as Json;
+  expect(note.keys, ['_note'], reason: '$name starts with its note');
+  expect(note['_note'], matches(recordedDemo), reason: '$name says how it was recorded');
+  return _parse(lines.skip(1));
+}
+
 /// A Gui1Gaps of its own per test, so one test's reports never silence another's.
 Gui1Gaps freshGaps([List<String>? logs]) => Gui1Gaps(templates: TemplateGaps(), log: logs?.add ?? (_) {});
 

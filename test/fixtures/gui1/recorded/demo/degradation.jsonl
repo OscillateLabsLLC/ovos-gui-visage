@@ -1,0 +1,44 @@
+{"_note": "recorded 2026-10-25T16:25:29Z by ovos-gui-plugin-visage tool/dump_client.py (client-side wire frames) while ovos-skill-gui1-demo served: show the broken gui demo"}
+{"type": "status", "event_name": "recognizer_loop:utterance", "data": {"utterances": ["show the broken gui demo"], "lang": "en-us"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "demo_degradation"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "GUI1DemoSkill.handle_degradation_demo"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "GUI1DemoSkill.handle_degradation_demo"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.complete", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "demo_degradation"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.handled", "data": {}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: missing required key text"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_text", "data": {"title": "Fault: missing required key text"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: missing required key text.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "missing required key text"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: current_temp is a string", "current_temp": "seventy two", "condition": "Sunny"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_weather", "data": {"title": "Fault: current_temp is a string", "current_temp": "seventy two", "condition": "Sunny"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: wrong type: current_temp is a string.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "wrong type: current_temp is a string"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: bare file path as image", "image": "/usr/share/pixmaps/gui1-demo.png"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_image", "data": {"title": "Fault: bare file path as image", "image": "/usr/share/pixmaps/gui1-demo.png"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: bare file path as image.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "bare file path as image"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: table row of the wrong length", "columns": ["Route", "Stop", "Minutes"], "rows": [["2", "Main Plaza", 4], ["36", "Pearl"]]}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_table", "data": {"title": "Fault: table row of the wrong length", "columns": ["Route", "Stop", "Minutes"], "rows": [["2", "Main Plaza", 4], ["36", "Pearl"]]}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: table row of the wrong length.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "table row of the wrong length"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: unlisted condition_code", "current_temp": 24, "condition": "Ash cloud", "condition_code": "volcanic_ash"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_weather", "data": {"title": "Fault: unlisted condition_code", "current_temp": 24, "condition": "Ash cloud", "condition_code": "volcanic_ash"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: unlisted condition_code.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "unlisted condition_code"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {"title": "Fault: unknown template SYSTEM_hologram"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_hologram", "data": {"title": "Fault: unknown template SYSTEM_hologram"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Fault: unknown template SYSTEM_hologram.", "expect_response": false, "meta": {"dialog": "fault", "data": {"fault": "unknown template SYSTEM_hologram"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "The demo is finished.", "expect_response": false, "meta": {"dialog": "finished", "data": {}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}

@@ -1,0 +1,21 @@
+{"_note": "recorded 2026-10-25T16:26:20Z by ovos-gui-plugin-visage tool/dump_client.py (client-side wire frames) while ovos-skill-gui1-demo served: show me the clock demo stop"}
+{"type": "status", "event_name": "recognizer_loop:utterance", "data": {"utterances": ["show me the clock demo"], "lang": "en-us"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "GUI1DemoSkill.handle_show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "GUI1DemoSkill.handle_show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.complete", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "show_template"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.handled", "data": {}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "data": {}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "template": "SYSTEM_clock", "data": {}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "Here is the clock template.", "expect_response": false, "meta": {"dialog": "showing", "data": {"template": "clock"}, "skill": "ovos-skill-gui1-demo.oscillatelabs"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "status", "event_name": "recognizer_loop:utterance", "data": {"utterances": ["stop"], "lang": "en-us"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "stop"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "GUI1DemoSkill._handle_session_stop", "intent_name": "stop"}, "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-gui1-demo.oscillatelabs", "session_id": "default"}
+{"type": "idle"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "GUI1DemoSkill._handle_session_stop", "intent_name": "stop"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.complete", "data": {"skill_id": "ovos-skill-gui1-demo.oscillatelabs", "intent_name": "stop"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.handled", "data": {}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "StopService.handle_skill_stop"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "StopService.handle_skill_stop"}, "session_id": "default"}
