@@ -214,7 +214,7 @@ void main() {
 
     test('every hand-written GUI-1 fixture says so and parses', () {
       final files = Directory('test/fixtures/gui1').listSync().whereType<File>().where((f) => f.path.endsWith('.jsonl'));
-      expect(files.length, 6);
+      expect(files.length, 10);
       for (final file in files) {
         final name = file.uri.pathSegments.last.replaceAll('.jsonl', '');
         expect(loadGui1Fixture(name).first, isA<Gui1Welcome>(), reason: name);

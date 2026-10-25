@@ -1,0 +1,5 @@
+{"_note": "written from gui-1.md §3.4 at b6c1583, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-hello.openvoiceos", "data": {"label": "Could not reach the weather service", "detail": "The request timed out after 10 seconds."}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_error", "data": {"label": "Could not reach the weather service", "detail": "The request timed out after 10 seconds."}, "session_id": "default"}

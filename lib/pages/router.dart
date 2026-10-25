@@ -11,12 +11,15 @@ import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
 import 'date_page.dart';
+import 'error_page.dart';
 import 'fallback_page.dart';
 import 'forecast_page.dart';
+import 'grid_page.dart';
 import 'html_frame_page.dart';
 import 'idle_page.dart';
 import 'image_frame_page.dart';
 import 'input_box_page.dart';
+import 'list_page.dart';
 import 'loading_page.dart';
 import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
@@ -25,6 +28,7 @@ import 'page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
 import 'system_face_page.dart';
+import 'table_page.dart';
 import 'template_names.dart';
 import 'text_frame_page.dart';
 import 'time_page.dart';
@@ -58,8 +62,12 @@ const templates = <String, PageBuilder>{
   'SYSTEM_text': TextFramePage.page,
   'SYSTEM_loading': LoadingPage.page,
   'SYSTEM_status': StatusPage.page,
+  'SYSTEM_error': ErrorPage.page,
   'SYSTEM_image': ImageFramePage.page,
   'SYSTEM_animated_image': ImageFramePage.page,
+  'SYSTEM_list': ListPage.page,
+  'SYSTEM_grid': GridPage.page,
+  'SYSTEM_table': TablePage.page,
   'SYSTEM_html': HtmlFramePage.page,
   'SYSTEM_url': UrlFramePage.page,
   'SYSTEM_InputBox': InputBoxPage.page,

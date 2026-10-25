@@ -2,15 +2,19 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
+import 'package:ovos_gui_visage/pages/error_page.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
+import 'package:ovos_gui_visage/pages/grid_page.dart';
 import 'package:ovos_gui_visage/pages/html_frame_page.dart';
 import 'package:ovos_gui_visage/pages/image_frame_page.dart';
 import 'package:ovos_gui_visage/pages/input_box_page.dart';
+import 'package:ovos_gui_visage/pages/list_page.dart';
 import 'package:ovos_gui_visage/pages/loading_page.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
 import 'package:ovos_gui_visage/pages/system_face_page.dart';
+import 'package:ovos_gui_visage/pages/table_page.dart';
 import 'package:ovos_gui_visage/pages/template_names.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/pages/url_frame_page.dart';
@@ -61,14 +65,14 @@ const implemented = <String, PageBuilder>{
   'SYSTEM_status': StatusPage.page,
   'SYSTEM_loading': LoadingPage.page,
   'SYSTEM_face': SystemFacePage.page,
+  'SYSTEM_error': ErrorPage.page,
+  'SYSTEM_list': ListPage.page,
+  'SYSTEM_grid': GridPage.page,
+  'SYSTEM_table': TablePage.page,
 };
 
 const unimplemented = {
   'SYSTEM_idle',
-  'SYSTEM_error',
-  'SYSTEM_list',
-  'SYSTEM_grid',
-  'SYSTEM_table',
   'SYSTEM_audio_player',
   'SYSTEM_video_player',
   'SYSTEM_media_player',
