@@ -30,8 +30,22 @@ class OcpListPage extends StatelessWidget {
   final PageContext ctx;
 
   @override
+  Widget build(BuildContext context) => BrowseList(
+    model: ctx.page == 'Home' ? homeModel(data) : suggestionsModel(data),
+    onPlay: (play) => ctx.trigger(play.event, play.parameters),
+  );
+}
+
+/// A browse model's heading and rows or chips; a row with a [RowPlay] calls [onPlay] when tapped, and with no
+/// [onPlay] no row can be tapped.
+class BrowseList extends StatelessWidget {
+  const BrowseList({super.key, required this.model, this.onPlay});
+
+  final BrowseModel model;
+  final void Function(RowPlay play)? onPlay;
+
+  @override
   Widget build(BuildContext context) {
-    final model = ctx.page == 'Home' ? homeModel(data) : suggestionsModel(data);
     final chips = model.layout == BrowseLayout.chips;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -63,7 +77,10 @@ class OcpListPage extends StatelessWidget {
     );
   }
 
-  VoidCallback? _player(RowPlay? play) => play == null ? null : () => ctx.trigger(play.event, play.parameters);
+  VoidCallback? _player(RowPlay? play) {
+    final onPlay = this.onPlay;
+    return play == null || onPlay == null ? null : () => onPlay(play);
+  }
 }
 
 /// A round thumbnail: the cover when it loads, else the vinyl glyph on a dark gradient.

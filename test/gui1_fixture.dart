@@ -17,6 +17,9 @@ const weather = 'ovos-skill-weather.openvoiceos';
 /// sign) and commit it was written from.
 final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+ at [0-9a-f]{7}), not recorded$'))};
 
+/// `written from gui-1.md <section> at <sha>, not recorded`, the section sign optional.
+final fromSpec = RegExp(r'^written from gui-1\.md §?\d+(\.\d+)* at [0-9a-f]{7,40}, not recorded$');
+
 List<Gui1Frame> _parse(Iterable<String> lines) => [for (final line in lines) parseGui1Frame(jsonDecode(line) as Json)];
 
 List<String> _lines(String path) => File(path).readAsLinesSync().where((l) => l.trim().isNotEmpty).toList();
@@ -24,7 +27,9 @@ List<String> _lines(String path) => File(path).readAsLinesSync().where((l) => l.
 /// A hand-written fixture's frames after its `_note` line, the handshake's `welcome` included.
 List<Gui1Frame> loadGui1Fixture(String scenario) {
   final lines = _lines('test/fixtures/gui1/$scenario.jsonl');
-  expect(jsonDecode(lines.first), handWritten, reason: '$scenario says it is hand-written');
+  final note = jsonDecode(lines.first) as Json;
+  expect(note.keys, ['_note'], reason: '$scenario starts with its note');
+  expect(note['_note'], anyOf(handWritten['_note'], matches(fromSpec)), reason: '$scenario says it is hand-written');
   return _parse(lines.skip(1));
 }
 

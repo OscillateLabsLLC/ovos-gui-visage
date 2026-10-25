@@ -26,6 +26,7 @@ const _coverInset = 24.0;
 const _washInset = 56.0;
 const _turnPeriod = Duration(seconds: 20);
 const _settle = Duration(milliseconds: 600);
+const _dim = Duration(milliseconds: 300);
 
 class NowPlayingPage extends StatelessWidget {
   const NowPlayingPage({super.key, required this.data, required this.ctx});
@@ -38,26 +39,32 @@ class NowPlayingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isSyncPlayer(data)) return FallbackPage(data: data, ctx: ctx);
-    return _Player(data: data, send: ctx.trigger);
+    return NowPlayingView(data: data, send: ctx.trigger);
   }
 }
 
-class _Player extends StatefulWidget {
-  const _Player({required this.data, required this.send});
+/// Reads a page's data into the [Track] the view shows; [previous] is the last one, for models that compare.
+typedef TrackModel = Track Function(Json data, [Track? previous]);
+
+/// The player itself, for any data a [model] can read: OCP's session keys by default, or a GUI-1 template's.
+class NowPlayingView extends StatefulWidget {
+  const NowPlayingView({super.key, required this.data, required this.send, this.model = trackModel});
 
   final Json data;
   final OcpSend send;
+  final TrackModel model;
 
   @override
-  State<_Player> createState() => _PlayerState();
+  State<NowPlayingView> createState() => _NowPlayingViewState();
 }
 
-class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
+class _NowPlayingViewState extends State<NowPlayingView> with SingleTickerProviderStateMixin {
   final _clock = Stopwatch()..start();
-  late Track _track = trackModel(widget.data);
+  late Track _track = widget.model(widget.data);
   late Anchor _anchor = anchorFor(null, _track, _nowMs);
   late final AnimationController _turn = AnimationController(vsync: this, lowerBound: 0, upperBound: 360);
   Timer? _ticker;
+  bool? _still;
 
   double get _nowMs => _clock.elapsedMicroseconds / 1000;
 
@@ -65,21 +72,34 @@ class _PlayerState extends State<_Player> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+  }
+
+  /// Reduced motion (the platform setting) is read here, before the first paint and whenever it changes.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still == _still) return;
+    _still = still;
     _paint(previousId: null, wasPlaying: false);
   }
 
   @override
-  void didUpdateWidget(_Player old) {
+  void didUpdateWidget(NowPlayingView old) {
     super.didUpdateWidget(old);
     final previous = _track;
-    _track = trackModel(widget.data, previous);
+    _track = widget.model(widget.data, previous);
     _anchor = anchorFor(_anchor, _track, _nowMs);
     _paint(previousId: previous.id, wasPlaying: previous.state == PlaybackState.playing);
   }
 
   /// Playing (or a new track while playing) starts the record turn from upright; leaving playing eases it back
-  /// upright from wherever it stopped, so a paused logo never sits upside down.
+  /// upright from wherever it stopped, so a paused logo never sits upside down. Under reduced motion it holds upright.
   void _paint({required String? previousId, required bool wasPlaying}) {
+    if (_still ?? false) {
+      _turn.value = 0;
+      return;
+    }
     final playing = _track.state == PlaybackState.playing;
     if (playing && (!wasPlaying || previousId != _track.id)) {
       _turn.repeat(min: 0, max: 360, period: _turnPeriod);
@@ -152,6 +172,7 @@ class _Stage extends StatelessWidget {
   Widget build(BuildContext context) {
     final playing = track.state == PlaybackState.playing;
     final paused = track.state == PlaybackState.paused;
+    final fade = (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ? 0.0 : 1.0;
     final cover = imageFor(
       track.cover,
       fit: BoxFit.cover,
@@ -185,7 +206,7 @@ class _Stage extends StatelessWidget {
                 child: ImageFiltered(
                   imageFilter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
                   child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 600),
+                    duration: _settle * fade,
                     opacity: playing ? 0.42 : (paused ? 0.2 : 0),
                     child: SizedBox.expand(child: imageFor(track.cover, fit: BoxFit.cover)),
                   ),
@@ -198,7 +219,7 @@ class _Stage extends StatelessWidget {
             ring: Ring(fraction: progress.fraction, value: ringColour),
             children: [
               AnimatedOpacity(
-                duration: const Duration(milliseconds: 300),
+                duration: _dim * fade,
                 opacity: paused ? 0.45 : 1,
                 child: AnimatedBuilder(
                   animation: turn,

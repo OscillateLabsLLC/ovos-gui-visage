@@ -1,0 +1,7 @@
+{"_note": "written from gui-1.md 3.4 at b6c1583, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "snapshot", "session_id": "default", "stack": []}
+{"type": "activated", "skill_id": "ovos-skill-youtube.openvoiceos", "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-youtube.openvoiceos", "data": {"uri": "https://example.org/videos/big_buck_bunny.mp4", "title": "Big Buck Bunny", "playing": true}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-youtube.openvoiceos", "template": "SYSTEM_video_player", "data": {"uri": "https://example.org/videos/big_buck_bunny.mp4", "title": "Big Buck Bunny", "playing": true}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-youtube.openvoiceos", "data": {"uri": "https://example.org/videos/big_buck_bunny.mp4", "title": "Big Buck Bunny", "playing": false}, "session_id": "default"}

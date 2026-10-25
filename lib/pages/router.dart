@@ -21,6 +21,7 @@ import 'image_frame_page.dart';
 import 'input_box_page.dart';
 import 'list_page.dart';
 import 'loading_page.dart';
+import 'media_pages.dart';
 import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
 import 'ocp_list_page.dart';
@@ -70,6 +71,9 @@ const templates = <String, PageBuilder>{
   'SYSTEM_table': TablePage.page,
   'SYSTEM_html': HtmlFramePage.page,
   'SYSTEM_url': UrlFramePage.page,
+  'SYSTEM_audio_player': AudioPlayerPage.page,
+  'SYSTEM_video_player': VideoPlayerPage.page,
+  'SYSTEM_media_player': MediaPlayerPage.page,
   'SYSTEM_InputBox': InputBoxPage.page,
 };
 
