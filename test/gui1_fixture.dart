@@ -15,7 +15,9 @@ const weather = 'ovos-skill-weather.openvoiceos';
 
 /// The `_note` of a hand-written fixture names its source: WIRE.md, or the spec section (with or without a section
 /// sign) and commit it was written from.
-final handWritten = {'_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+( and §?[\d.]+)* at [0-9a-f]{7}), not recorded$'))};
+final handWritten = {
+  '_note': matches(RegExp(r'^written from (WIRE\.md|gui-1\.md §?[\d.]+( and §?[\d.]+)* at [0-9a-f]{7}), not recorded$')),
+};
 
 /// `written from gui-1.md <section> at <sha>, not recorded`, the section sign optional.
 final fromSpec = RegExp(r'^written from gui-1\.md §?\d+(\.\d+)*( and §?\d+(\.\d+)*)* at [0-9a-f]{7,40}, not recorded$');

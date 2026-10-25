@@ -18,13 +18,8 @@ const notOwners = {'lib/pages/reduced_motion.dart'};
 /// polish audit. Fix one and take it off; the last test fails while a fixed file is still listed.
 const ignoring = {
   'lib/face/face.dart': 'audit: the face ticker runs blink, widen and the mouth tween',
-  'lib/lottie/cache_lottie.dart': 'audit: OVOS Lottie files play',
   'lib/pages/loading_page.dart': 'audit: the fallback thinking dots breathe',
-  'lib/pages/now_playing_page.dart': 'audit: the cover turns like a record',
-  'lib/pages/now_playing_status.dart': 'audit: the equaliser bars and the live dot pulse',
-  'lib/pages/ocp_busy_page.dart': 'audit: the fallback dashed arc turns',
   'lib/pages/sun_times_page.dart': 'audit: the sun rises and settles over 8 s',
-  'lib/pages/timer_page.dart': "audit: an expired timer's ring pulses",
 };
 
 List<String> animationOwners() => [

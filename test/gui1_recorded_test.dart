@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
 import 'package:ovos_gui_visage/face/face.dart';
-import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/resting_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/system_weather_page.dart';

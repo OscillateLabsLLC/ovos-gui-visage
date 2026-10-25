@@ -31,6 +31,9 @@ const audit = <String, Map<String, String>>{
   'resting (GUI-1)': {contrast: 'count badge, white on the accent, 2.92:1 at 15 px; the homescreen idle page shares it'},
   'SYSTEM_InputBox': {contrast: 'Confirm button label 2.92:1 at 20 px, under 3:1'},
   'SYSTEM_text': {contrast: 'the text "Hello" 2.92:1 at 72 px, under 3:1'},
+  'ovos-skill-hello.openvoiceos/SYSTEM_hologram': {
+    contrast: 'the fallback shows the recorded text "again" as the text page does: 2.92:1 at 72 px, under 3:1',
+  },
 };
 
 typedef Shown = ({Target target, Json data, Json events});

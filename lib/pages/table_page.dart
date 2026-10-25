@@ -13,7 +13,9 @@ import 'template_text.dart';
 
 const emptyTable = 'No rows';
 const _cellPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 10);
-const _divider = BorderSide(color: VisageColors.card);
+
+/// The faint hairline the design allows between rows (docs/DESIGN.md, Vocabulary); width 0 is Flutter's hairline.
+const _divider = BorderSide(color: Color(0x24FFFFFF), width: 0);
 const _titleGapPx = 14.0;
 
 class TablePage extends StatelessWidget {

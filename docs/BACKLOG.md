@@ -173,20 +173,16 @@ Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both p
 - `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
 - `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.
 - `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
-- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1.
+- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1. The fallback page shows
+  an unknown template's `text` the same way (`SYSTEM_hologram` fixture), so it fails for the same reason.
 - `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size (informative only).
 - No fixture reaches three routes, so they are not checked: alerts `ListView`, OCP `OVOSSyncPlayer`, `SYSTEM_face`.
 
 Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
 
 - `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
-- `lib/lottie/cache_lottie.dart`: OVOS Lottie files play.
 - `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
-- `lib/pages/now_playing_page.dart`: the cover turns like a record.
-- `lib/pages/now_playing_status.dart`: the equaliser bars and the live dot pulse.
-- `lib/pages/ocp_busy_page.dart`: the fallback dashed arc turns.
 - `lib/pages/sun_times_page.dart`: the sun rises and settles over 8 s.
-- `lib/pages/timer_page.dart`: an expired timer's ring pulses.
 
 Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
 
