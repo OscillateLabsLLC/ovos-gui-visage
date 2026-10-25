@@ -7,10 +7,10 @@ protocol and visual reference (`../ovos-visage/docs/SPEC.md` in Mike's checkout)
 ## Hard rules
 
 - **Never modify the live install.** The OVOS on this Mac (`~/.venvs/ovos`, `~/.venvs/ovos-gui`, bus 8181,
-  GUI 18181) is read-only and never a test target. Upstream OVOS work is in scope, in separate clones and virtualenvs
-  (today `~/coding/OscillateLabs/gui1-upstream/`, `~/.venvs/ovos-gui1*`), as PRs from OscillateLabsLLC forks.
-- **Never install into or upgrade the live install's virtualenvs.** `ovos-gui-service` and the
-  homescreen live in `~/.venvs/ovos-gui`; this app has no Python of its own.
+  GUI 18181) is read-only: never install into it, upgrade it, or point an experimental service at it. Visage may
+  connect to it as a client to verify a change; this app has no Python of its own. Upstream OVOS work is in scope, in
+  separate clones and virtualenvs on their own ports (today `~/coding/OscillateLabs/gui1-upstream/`,
+  `~/.venvs/ovos-gui1*`, bus 28181, adapter 28182), as PRs from OscillateLabsLLC forks.
 - **Branch + PR, never push `main`.** A maintainer merges. Conventional commit titles.
 - **Deterministic evidence.** Run the change against the live stack and look. ovos-visage's
   drivers (`docs/spike_say.py`, `tests/manual/demo.py`, `tests/manual/show_templates.py`) only
@@ -28,6 +28,8 @@ protocol and visual reference (`../ovos-visage/docs/SPEC.md` in Mike's checkout)
 ~/.venvs/ovos-gui/bin/ovos-skill-launcher ovos-skill-homescreen.openvoiceos
 VISAGE_MODE=window flutter run -d macos   # the default mode is a desktop widget in a corner
 ```
+
+The isolated GUI-1 stack (upstream clones, bus 28181, adapter 28182) is described in `~/coding/OscillateLabs/gui1-upstream/PROTOTYPE.md`.
 
 ## Conventions
 
