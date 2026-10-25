@@ -130,13 +130,13 @@ class ScreenFrame extends StatelessWidget {
 
   Widget _page() {
     final target = parts.state.current();
-    final count = target == null ? 0 : parts.state.namespace(target.namespace).pages.length;
+    final position = target == null ? (index: 0, count: 0) : parts.state.namespace(target.namespace).position;
     final bottom = parts.attention.compact ? attentionStrip : _pagePadding;
     return Padding(
       padding: EdgeInsets.fromLTRB(_sidePadding, _pagePadding, _sidePadding, bottom),
       child: PagePager(
-        index: target?.index ?? 0,
-        count: count,
+        index: position.index,
+        count: position.count,
         onStep: parts.onStep,
         onInteract: parts.onInteract,
         chevrons: parts.kiosk,

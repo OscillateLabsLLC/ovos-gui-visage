@@ -80,10 +80,13 @@ class GuiLink {
     return sent;
   }
 
-  /// A touch on GUI-1 is a focus on the active entry, which the `template` frame does not name (finding F45): reported
-  /// once per run, then logged.
+  /// A touch on GUI-1 is a `focus` on the active entry (`ScreenInput.interact`). A touch that reaches here came for a
+  /// namespace whose `template` frame named no entry (WIRE.md's optional `index` and `page_count`, finding F45):
+  /// reported once per run, then logged.
   bool _touchWithoutEntry(Json message) {
-    final unknown = StateError('a touch on GUI-1 needs the active entry, which no frame names; not sent: $message');
+    final unknown = StateError(
+      'a touch on GUI-1 needs the active entry, which this template frame did not name; not sent: $message',
+    );
     if (_touchReported) {
       log?.call('$unknown');
       return false;

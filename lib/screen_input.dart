@@ -5,9 +5,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import 'pages/page_pager.dart';
+import 'page_moves.dart';
 import 'protocol/core_bus.dart';
-import 'protocol/gui_events.dart';
 import 'protocol/utterance.dart';
 import 'state/gui_state.dart';
 import 'widgets/command_box.dart';
@@ -88,21 +87,13 @@ class ScreenInput {
     commands.open();
   }
 
-  /// A swipe, an arrow key or a chevron. On legacy the screen then reports the new focus as it does for any change; on
-  /// GUI-1 the step is a `focus` request, and the service's next `template` frame shows the entry.
+  /// A swipe, an arrow key or a chevron (`stepPage`).
   void step(int delta) {
-    final target = state.current();
-    if (target == null) return;
-    final next = pageStep(target.index, state.namespace(target.namespace).pages.length, delta);
-    if (next == null) return;
-    requestFocus(target.namespace, next);
-    if (state.focusPage(target.namespace, next)) onChanged();
+    if (stepPage(state, delta, requestFocus)) onChanged();
   }
 
-  void interact() {
-    final target = state.current();
-    if (target != null) sendGui(interactionMessage(target.namespace));
-  }
+  /// A press on the page (`touchPage`).
+  void interact() => touchPage(state, requestFocus, sendGui);
 
   void dispose() {
     menu.dispose();

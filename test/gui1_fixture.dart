@@ -40,9 +40,8 @@ List<Gui1Frame> loadGui1Fixture(String scenario) {
   return _parse(lines.skip(1));
 }
 
-/// A fixture recorded from ovos-gui-plugin-visage (`test/fixtures/gui1` there): the frames after the handshake, without
-/// a snapshot; `<scenario>_snapshot.jsonl` holds the snapshot a late joiner gets. The recordings predate amendment D,
-/// so their one `idle` frame was given `"session_id": "default"` by a script; they have no `_note` to say so.
+/// A fixture recorded from ovos-gui-plugin-visage (`test/fixtures/gui1` there, at `658cc3f`, copied unchanged): the
+/// frames after the handshake, without a snapshot; `<scenario>_snapshot.jsonl` holds the snapshot a late joiner gets.
 List<Gui1Frame> loadRecorded(String name) => _parse(_lines('test/fixtures/gui1/recorded/$name.jsonl'));
 
 /// The `_note` of a recording the demo skill drove: when, the adapter's dump client, and the utterances it served.

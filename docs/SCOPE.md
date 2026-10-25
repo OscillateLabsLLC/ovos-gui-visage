@@ -87,8 +87,10 @@ finding F16). Status topics are keyed by their [gui-1.md 5.3 System-wide signals
 On GUI-1 a page's control answers as an `interaction` frame on the GUI-1 socket, and a swipe or arrow key asks for
 another entry with a `focus` frame (WIRE.md, Client → server frames; drafted amendments A and B;
 `lib/protocol/gui1_outgoing.dart`, `test/fixtures/outgoing/gui1_interaction.jsonl` and `gui1_focus.jsonl`). Nothing
-goes on the core bus for a page. A touch and the focus announcement send nothing on GUI-1, since no frame names the
-active entry (finding F45). Typed commands, volume and notification actions use the core bus on both protocols. Pages
+goes on the core bus for a page. A `template` frame may name its entry (`index` of `page_count`); then the pager
+stands there, a step asks for `index ± 1`, a press sends `focus` with `index` (the touch), and the pager moves when the
+service's next `template` arrives. Without the fields nothing is sent, and a touch is reported once (finding F45). The
+focus announcement is legacy only. Typed commands, volume and notification actions use the core bus on both protocols. Pages
 learn the protocol from `PageContext.protocol`; over GUI-1 the image page refuses a filesystem path (finding F39). Fixtures: `test/fixtures/gui1/`, written
 from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 

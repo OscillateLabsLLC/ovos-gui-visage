@@ -19,8 +19,8 @@ Json interactionFrame(String namespace, String event, [Json data = const {}]) =>
 Json focusFrame(String namespace, int pageNumber) => {'type': 'focus', 'namespace': namespace, 'page_number': pageNumber};
 
 /// The GUI-1 frame for a page event built by gui_events.dart: a focus change becomes `focus`, any other event in a
-/// page's namespace becomes `interaction`. A touch ([userInteraction]) would be a `focus` on the active entry, but no
-/// server frame names that entry (finding F45), so it has no frame: null.
+/// page's namespace becomes `interaction`. A touch ([userInteraction]) names no entry, so it has no frame: null.
+/// `ScreenInput.interact` sends the touch as a `focus` on the known entry itself.
 Json? gui1FrameFor(Json event) {
   final name = event['event_name'] as String;
   final parameters = event['parameters'] as Json;

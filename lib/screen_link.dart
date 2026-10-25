@@ -67,10 +67,13 @@ class FocusAnnouncer {
 
   final GuiLink link;
   Target? _last;
+  bool _toldGui1 = false;
 
   void update(Target? target) {
     if (link.chosen == ChosenProtocol.gui1) {
       _last = null;
+      if (!_toldGui1) link.log?.call('GUI-1: the focus announcer sends nothing; focus is a request there');
+      _toldGui1 = true;
       return;
     }
     if (target == null) return;

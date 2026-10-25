@@ -57,9 +57,9 @@ void applyGui1Frame(GuiState state, Gui1Frame frame, {String sessionId = default
     return reportFault('GUI-1 frame', StateError('frame for session $session, this display is $sessionId'));
   }
   switch (frame) {
-    case Gui1Template(:final skillId, :final template, :final data):
+    case Gui1Template(:final skillId, :final template, :final data, :final entry):
       _checkTemplate(template, told.templates);
-      _show(state, skillId, template, data);
+      _show(state, skillId, template, data, entry);
       _activate(state, skillId);
     case Gui1SessionUpdate(:final skillId, :final data):
       state.namespace(skillId).data = Json.of(data);
@@ -104,11 +104,12 @@ const idleTemplate = 'SYSTEM_idle';
 
 /// `SYSTEM_idle` asks for the resting state and names no page (gui-1.md 3.4 and 6.9; finding F33): its namespace keeps its place
 /// on the stack without one, so the page beneath it, or the resting display, shows.
-void _show(GuiState state, String skillId, String? template, Json data) {
+void _show(GuiState state, String skillId, String? template, Json data, Gui1Entry? entry) {
   final ns = state.namespace(skillId)
     ..data = Json.of(data)
     ..clearPages();
   if (template != null && canonicalTemplate(template) != idleTemplate) ns.pages = [template];
+  ns.gui1Entry = entry;
 }
 
 void _activate(GuiState state, String skillId) {
@@ -121,7 +122,7 @@ void _replace(GuiState state, List<Gui1StackEntry> stack, TemplateGaps gaps) {
   state.reset();
   for (final entry in stack) {
     if (entry.template case final template?) _checkTemplate(template, gaps);
-    _show(state, entry.skillId, entry.template, entry.data);
+    _show(state, entry.skillId, entry.template, entry.data, entry.entry);
     state.active.add(entry.skillId);
   }
 }

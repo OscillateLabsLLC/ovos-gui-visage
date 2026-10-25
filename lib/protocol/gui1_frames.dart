@@ -44,14 +44,20 @@ class Gui1Error extends Gui1Frame {
 }
 
 /// Show [template] (a spec name, or a skill's own template name) for [skillId]; [data] is the full session data.
+/// [entry] is the active entry's place in the namespace's `page_names`, null when the adapter does not say.
 class Gui1Template extends Gui1Frame {
-  const Gui1Template({required this.skillId, required this.template, required this.data, required this.sessionId});
+  const Gui1Template({required this.skillId, required this.template, required this.data, required this.sessionId, this.entry});
 
   final String skillId;
   final String template;
   final Json data;
   final String sessionId;
+  final Gui1Entry? entry;
 }
+
+/// WIRE.md's optional `index` (zero-based, the active entry) and `page_count` (the length of `page_names`); both or
+/// neither, since a client can ask for another entry only when it knows both.
+typedef Gui1Entry = ({int index, int count});
 
 /// [data] is the namespace's full merged data after the change, never a delta.
 class Gui1SessionUpdate extends Gui1Frame {
@@ -93,13 +99,14 @@ class Gui1Status extends Gui1Frame {
 }
 
 class Gui1StackEntry {
-  const Gui1StackEntry({required this.skillId, required this.template, required this.data});
+  const Gui1StackEntry({required this.skillId, required this.template, required this.data, this.entry});
 
   final String skillId;
 
   /// Null while the namespace has data but no template yet.
   final String? template;
   final Json data;
+  final Gui1Entry? entry;
 }
 
 /// The session's whole stack, index 0 the active namespace; empty means idle. [ambient] is the adapter's last payload
@@ -137,6 +144,7 @@ final Map<String, Gui1Frame Function(Json)> _parsers = {
     template: f['template'] as String,
     data: _data(f),
     sessionId: f['session_id'] as String,
+    entry: _entryOf(f),
   ),
   'session_update': (f) =>
       Gui1SessionUpdate(skillId: f['skill_id'] as String, data: _data(f), sessionId: f['session_id'] as String),
@@ -155,7 +163,17 @@ final Map<String, Gui1Frame Function(Json)> _parsers = {
 };
 
 Gui1StackEntry _entry(Json e) =>
-    Gui1StackEntry(skillId: e['skill_id'] as String, template: e['template'] as String?, data: _data(e));
+    Gui1StackEntry(skillId: e['skill_id'] as String, template: e['template'] as String?, data: _data(e), entry: _entryOf(e));
+
+/// Both keys or neither; one alone, a negative index or an index outside the count is a malformed frame.
+Gui1Entry? _entryOf(Json f) {
+  final index = f['index'] as int?, count = f['page_count'] as int?;
+  if (index == null && count == null) return null;
+  if (index == null || count == null || index < 0 || index >= count) {
+    throw Gui1FrameException(f, 'index $index and page_count $count must come together, with 0 <= index < page_count');
+  }
+  return (index: index, count: count);
+}
 
 Json _data(Json f) => Json.of(f['data'] as Json);
 

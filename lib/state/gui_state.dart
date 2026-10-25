@@ -22,10 +22,19 @@ class Namespace {
   int focusedIndex = 0;
   Json events = {};
 
+  /// GUI-1 only: the active entry's index in `page_names` and its length, as the adapter said; null when it did not
+  /// (and always on legacy, where [pages] holds every entry).
+  ({int index, int count})? gui1Entry;
+
   void clearPages() {
     pages = [];
     focusedIndex = 0;
+    gui1Entry = null;
   }
+
+  /// Where the pager stands: the GUI-1 entry when known, else the page among [pages].
+  ({int index, int count}) get position =>
+      gui1Entry ?? (index: focusedIndex.clamp(0, pages.isEmpty ? 0 : pages.length - 1), count: pages.length);
 
   Json toJson() => {'skill_id': skillId, 'pages': List.of(pages), 'data': data, 'focused_index': focusedIndex, 'events': events};
 }
