@@ -1,0 +1,10 @@
+{"type": "status", "event_name": "recognizer_loop:utterance", "data": {"utterances": ["what time is it"], "lang": "en-us"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.start", "data": {"skill_id": "ovos-skill-date-time.openvoiceos", "intent_name": "what_time_is_it"}, "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.start", "data": {"name": "TimeSkill.handle_query_time"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.speak", "data": {"utterance": "It is three twenty nine p.m.", "expect_response": false, "meta": {"dialog": "time_current", "data": {"time": "three twenty nine p.m."}, "skill": "ovos-skill-date-time.openvoiceos"}, "lang": "en-US"}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-date-time.openvoiceos", "data": {"time_string": "3:29 PM", "ampm_string": "", "date_string": "25/10/2026"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-date-time.openvoiceos", "template": "time", "data": {"time_string": "3:29 PM", "ampm_string": "", "date_string": "25/10/2026"}, "session_id": "default", "index": 0, "page_count": 1}
+{"type": "activated", "skill_id": "ovos-skill-date-time.openvoiceos", "session_id": "default"}
+{"type": "status", "event_name": "mycroft.skill.handler.complete", "data": {"name": "TimeSkill.handle_query_time"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.intent.handler.complete", "data": {"skill_id": "ovos-skill-date-time.openvoiceos", "intent_name": "what_time_is_it"}, "session_id": "default"}
+{"type": "status", "event_name": "ovos.utterance.handled", "data": {}, "session_id": "default"}

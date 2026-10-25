@@ -1,0 +1,1 @@
+{"type": "snapshot", "session_id": "default", "stack": [{"skill_id": "ovos-skill-date-time.openvoiceos", "template": "time", "data": {"time_string": "3:29 PM", "ampm_string": "", "date_string": "25/10/2026"}, "index": 0, "page_count": 1}], "ambient": {}}

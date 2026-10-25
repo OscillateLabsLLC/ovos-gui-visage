@@ -40,7 +40,7 @@ List<Gui1Frame> loadGui1Fixture(String scenario) {
   return _parse(lines.skip(1));
 }
 
-/// A fixture recorded from ovos-gui-plugin-visage (`test/fixtures/gui1` there, at `658cc3f`, copied unchanged): the
+/// A fixture recorded from ovos-gui-plugin-visage (`test/fixtures/gui1` there, at `67fbaca`, copied unchanged): the
 /// frames after the handshake, without a snapshot; `<scenario>_snapshot.jsonl` holds the snapshot a late joiner gets.
 List<Gui1Frame> loadRecorded(String name) => _parse(_lines('test/fixtures/gui1/recorded/$name.jsonl'));
 
