@@ -26,6 +26,7 @@ import 'page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
 import 'system_face_page.dart';
+import 'system_timer_page.dart';
 import 'template_names.dart';
 import 'text_frame_page.dart';
 import 'time_page.dart';
@@ -65,6 +66,7 @@ const templates = <String, PageBuilder>{
   'SYSTEM_url': UrlFramePage.page,
   'SYSTEM_InputBox': InputBoxPage.page,
   'SYSTEM_clock': ClockPage.page,
+  'SYSTEM_timer': SystemTimerPage.page,
 };
 
 /// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
