@@ -1,6 +1,7 @@
-/// SYSTEM_media_player's views (gui-1.md §3.4, line 241): which ones its data can fill, and the queue and search
-/// results as the OCP list page's [BrowseModel]. Rows cannot be tapped: OCP's `playlist.play` takes its own entry
-/// shape, and GUI-1 leaves the media-control surface out of scope (§7.1, finding F21).
+/// SYSTEM_media_player's views ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)):
+/// which ones its data can fill, and the queue and search results as the OCP list page's [BrowseModel]. Rows cannot
+/// be tapped: OCP's `playlist.play` takes its own entry shape, and GUI-1 leaves the media-control surface out of scope
+/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F21).
 library;
 
 import '../json.dart';
@@ -68,12 +69,13 @@ BrowseRow _itemRow(MediaKeys keys, String list, Map item, {required bool current
 
 final _wireImage = RegExp(r'^(data:|https?://)', caseSensitive: false);
 
-/// §3.5 for list entries: http(s) and data: only; anything else is reported against [list] and dropped.
+/// [gui-1.md 3.5 Image delivery](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#35-image-delivery) for list entries: http(s) and data:
+/// only; anything else is reported against [list] and dropped.
 String? coverOf(MediaKeys keys, String list, Object? image) {
   final url = text(image);
   if (url.isEmpty) return null;
   if (_wireImage.hasMatch(url)) return url;
-  keys.fault(list, 'entry image must be an http(s) URL or a data: URI (§3.5)', image);
+  keys.fault(list, 'entry image must be an http(s) URL or a data: URI', image);
   return null;
 }
 

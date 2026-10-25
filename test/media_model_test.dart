@@ -81,6 +81,16 @@ void main() {
       expect(faults, isEmpty);
     });
 
+    test('a position of -1 is unknown and starts at 0 unreported; any other negative position is reported', () async {
+      late Track unknown, negative;
+      final faults = await faultsOf(() {
+        unknown = audioTrack({...audio, 'position': -1});
+        negative = audioTrack({...audio, 'position': -5});
+      });
+      expect((unknown.positionMs, negative.positionMs), (0, 0));
+      expect(faults, [contains('position must not be negative')]);
+    });
+
     test('optional keys can be missing; playing omitted reads as paused', () async {
       late Track track;
       expect(await faultsOf(() => track = audioTrack({'title': 'Only a title'})), isEmpty);
@@ -106,7 +116,7 @@ void main() {
       expect(faults.join('\n'), allOf(contains('title must be a string'), contains('position must be a finite number')));
       expect(
         faults.join('\n'),
-        allOf(contains('duration must be positive'), contains('playing must be a boolean'), contains('§3.5')),
+        allOf(contains('duration must be positive'), contains('playing must be a boolean'), contains('data: URI')),
       );
       expect((track.title, track.positionMs, track.live, track.cover), ('42', 0, true, null));
     });

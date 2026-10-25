@@ -119,7 +119,7 @@ void main() {
         () {
           expect(find.text('Big Buck Bunny'), findsOneWidget);
           expect(find.text('playing'), findsOneWidget);
-          expect(find.byIcon(Icons.movie_rounded), findsOneWidget);
+          expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
         },
         () => expect(find.text('paused'), findsOneWidget),
       ]),

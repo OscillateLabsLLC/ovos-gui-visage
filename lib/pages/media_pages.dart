@@ -1,7 +1,10 @@
-/// The GUI-1 media templates (gui-1.md §3.4, lines 239–241) on the OCP pages. SYSTEM_audio_player is the now-playing
-/// view; SYSTEM_media_player chooses between now-playing, search results, queue, busy and error; SYSTEM_video_player
-/// degrades to a still with the title and play state (§6.5), since Visage decodes no video yet. The transport answers
-/// in OCP's namespace whichever namespace showed the page (§7.1, finding F21).
+/// The GUI-1 media templates ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue))
+/// on the OCP pages. SYSTEM_audio_player is the now-playing view; SYSTEM_media_player chooses between now-playing,
+/// search results, queue, busy and error; SYSTEM_video_player degrades to the same circular card with a play glyph, its
+/// title and play state
+/// ([6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation)),
+/// since Visage decodes no video yet. The transport answers in OCP's namespace whichever namespace showed the page
+/// ([7.1 Media transport](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport), finding F21).
 library;
 
 import 'package:flutter/material.dart';
@@ -54,7 +57,7 @@ class VideoPlayerPage extends StatelessWidget {
           size: _stillPx,
           glow: playing ? const Glow() : null,
           ring: Ring(fraction: 1, value: playing ? VisageColors.accent : VisageColors.muted),
-          children: [Icon(Icons.movie_rounded, size: _stillPx * 0.4, color: VisageColors.fg)],
+          children: [Icon(Icons.play_arrow_rounded, size: _stillPx * 0.4, color: VisageColors.fg)],
         ),
         const SizedBox(height: 24),
         Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: VisageText.fg(28)),

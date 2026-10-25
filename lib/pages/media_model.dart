@@ -1,6 +1,7 @@
-/// View models for the GUI-1 media templates (gui-1.md §3.4, lines 239–249), onto the OCP pages' own models: a [Track]
-/// for the now-playing view and a [BrowseModel] for the queue and the search results. Positions and durations are
-/// milliseconds, `-1` is unknown or live; legacy OCP's seconds heuristic ([positionMs]) is never applied here.
+/// View models for the GUI-1 media templates ([gui-1.md 3.4 Catalogue](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#34-catalogue)),
+/// onto the OCP pages' own models: a [Track] for the now-playing view and a [BrowseModel] for the queue and the search
+/// results. Positions and durations are milliseconds, `-1` is unknown or live; legacy OCP's seconds heuristic
+/// ([positionMs]) is never applied here.
 library;
 
 import '../json.dart';
@@ -12,7 +13,7 @@ const audioPlayer = 'SYSTEM_audio_player';
 const videoPlayer = 'SYSTEM_video_player';
 const mediaPlayer = 'SYSTEM_media_player';
 
-/// Where the transport goes whichever namespace showed the template: §7.1 points controls at the media subsystem, and
+/// Where the transport goes whichever namespace showed the template: 7.1 points controls at the media subsystem, and
 /// OCP's `ovos.common_play.*` messages are the only media-control surface OVOS has (finding F21).
 const ocpNamespace = 'ovos.common_play';
 
@@ -28,9 +29,11 @@ double? _durationMs(MediaKeys keys) {
   return null;
 }
 
+/// `-1` is unknown here too: the convention covers the pair (finding F18). Any other negative value is reported.
 double _positionMs(MediaKeys keys) {
   final value = keys.number('position') ?? 0;
   if (value >= 0) return value;
+  if (value == unknownOrLive) return 0;
   keys.fault('position', 'must not be negative', value);
   return 0;
 }
@@ -60,7 +63,7 @@ Track gui1Track(MediaKeys keys, PlaybackState state, {bool required = false, boo
 /// `playing` true plays, false pauses; omitted, nothing is claimed to move, so it reads as paused.
 PlaybackState playingState(MediaKeys keys) => (keys.flag('playing') ?? false) ? PlaybackState.playing : PlaybackState.paused;
 
-/// SYSTEM_audio_player (§3.4, line 239): `title` is required.
+/// SYSTEM_audio_player: `title` is required.
 Track audioTrack(Json data, [Track? previous]) {
   final keys = MediaKeys(audioPlayer, data);
   return gui1Track(keys, playingState(keys), required: true);
@@ -68,7 +71,7 @@ Track audioTrack(Json data, [Track? previous]) {
 
 typedef VideoModel = ({String title, PlaybackState state});
 
-/// SYSTEM_video_player (§3.4, line 240), degraded to its title and play state: `uri` is required but not shown; with
+/// SYSTEM_video_player, degraded to its title and play state: `uri` is required but not shown; with
 /// no title the last part of the uri names it.
 VideoModel videoModel(Json data) {
   final keys = MediaKeys(videoPlayer, data);
@@ -79,7 +82,7 @@ VideoModel videoModel(Json data) {
   return (title: named, state: playingState(keys));
 }
 
-/// `media_playback_state` (§3.4, line 241). `loading` and `error` choose their own view, so they are not a [PlaybackState].
+/// `media_playback_state`. `loading` and `error` choose their own view, so they are not a [PlaybackState].
 enum MediaState { playing, paused, stopped, loading, error }
 
 /// Omitted reads as paused, as for the audio player; another value, a capitalised OCP status included, is reported.

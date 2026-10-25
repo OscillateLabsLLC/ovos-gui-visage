@@ -1,4 +1,4 @@
-{"_note": "written from gui-1.md §3.4 at b6c1583, not recorded"}
+{"_note": "written from gui-1.md 3.4 at b6c1583, not recorded"}
 {"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
 {"type": "snapshot", "session_id": "default", "stack": []}
 {"type": "activated", "skill_id": "ovos-skill-youtube.openvoiceos", "session_id": "default"}
