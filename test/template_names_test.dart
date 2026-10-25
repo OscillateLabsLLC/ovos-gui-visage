@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
+import 'package:ovos_gui_visage/pages/clock_page.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/html_frame_page.dart';
 import 'package:ovos_gui_visage/pages/image_frame_page.dart';
@@ -61,6 +62,7 @@ const implemented = <String, PageBuilder>{
   'SYSTEM_status': StatusPage.page,
   'SYSTEM_loading': LoadingPage.page,
   'SYSTEM_face': SystemFacePage.page,
+  'SYSTEM_clock': ClockPage.page,
 };
 
 const unimplemented = {
@@ -72,7 +74,6 @@ const unimplemented = {
   'SYSTEM_audio_player',
   'SYSTEM_video_player',
   'SYSTEM_media_player',
-  'SYSTEM_clock',
   'SYSTEM_timer',
   'SYSTEM_weather',
   'SYSTEM_map',

@@ -10,6 +10,7 @@ import '../widgets/notification_list.dart';
 import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
+import 'clock_page.dart';
 import 'date_page.dart';
 import 'fallback_page.dart';
 import 'forecast_page.dart';
@@ -63,6 +64,7 @@ const templates = <String, PageBuilder>{
   'SYSTEM_html': HtmlFramePage.page,
   'SYSTEM_url': UrlFramePage.page,
   'SYSTEM_InputBox': InputBoxPage.page,
+  'SYSTEM_clock': ClockPage.page,
 };
 
 /// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
