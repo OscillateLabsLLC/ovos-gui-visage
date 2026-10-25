@@ -81,7 +81,7 @@ does not switch while a connection holds; a reconnect probes again. With `gui1`,
 Under GUI-1 a namespace holds exactly one page, named with its spec template (`SYSTEM_text`), and its data is the full
 map of the last frame; Visage never merges. `deactivated` drops the namespace, a `snapshot` replaces the stack, and `status` frames drive the face. `idle` is
 device-wide, so it empties the screen only when this session's stack is already empty; otherwise it is ignored and logged
-once (finding F16). Status topics are keyed by their §5.3 `ovos.*` names, with the legacy bus names as aliases
+once (finding F16). Status topics are keyed by their [gui-1.md 5.3 System-wide signals](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#53-system-wide-signals) `ovos.*` names, with the legacy bus names as aliases
 (`lib/status_topics.dart`); a topic Visage does not follow is reported once. An unknown `SYSTEM_` name is reported once and shows the fallback.
 GUI-1 has no reply leg, so on GUI-1 Visage puts each page event (controls, focus, interaction) on the core bus itself,
 as the message legacy ovos-gui forwarded (finding F14, `test/fixtures/outgoing/gui1_page_events.jsonl`); typed
@@ -107,7 +107,7 @@ from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 
 ## Template names
 
-Template pages are keyed by their OVOS-GUI-1 name (gui-1.md §3); `lib/pages/template_names.dart` holds the
+Template pages are keyed by their OVOS-GUI-1 name (gui-1.md section 3); `lib/pages/template_names.dart` holds the
 vocabulary and the aliases, and nothing else names an alias. ovos-bus-client's frame names and the QML files that
 ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name:
 

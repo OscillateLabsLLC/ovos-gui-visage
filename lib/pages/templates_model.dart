@@ -84,7 +84,7 @@ List<String>? splitShort(String value) {
 
 String loadingLabel(Json? data) => text(data?['label']);
 
-/// GUI-1 sends `success: bool` (gui-1.md §3); GUIInterface.show_status_animation sends `status: "Enabled" | "Disabled"`,
+/// GUI-1 sends `success: bool` (gui-1.md 3); GUIInterface.show_status_animation sends `status: "Enabled" | "Disabled"`,
 /// and the QML does a string compare. A boolean `success` wins over the legacy key; any other non-null `success` is a
 /// protocol fault, reported once per value, and the legacy key decides.
 ({bool ok, String label}) statusModel(Json? data) {

@@ -65,7 +65,7 @@ class GuiLink {
     await legacy.stop();
   }
 
-  /// Legacy: the GUI socket, unchanged. GUI-1 has no reply leg (spec §7.2), so Visage puts a page event on the core
+  /// Legacy: the GUI socket, unchanged. GUI-1 has no reply leg (gui-1.md 7.2), so Visage puts a page event on the core
   /// bus itself, as the message legacy ovos-gui would have forwarded (bus.py `on_message`, `busMessageFor`), with its
   /// `gui_framework` context. Anything but a page event is logged, not sent (finding F14).
   bool send(Json message) {

@@ -64,7 +64,7 @@ void main() {
     const sample = '''
 | Item | Spec reference | Status | Visage files | Test | Notes |
 |---|---|---|---|---|---|
-| `SYSTEM_x` | §1 | done | `lib/a.dart` | `test/a_test.dart`, `test/b_test.dart` | n |
+| `SYSTEM_x` | gui-1.md 1 | done | `lib/a.dart` | `test/a_test.dart`, `test/b_test.dart` | n |
 | short | row |''';
     final parsed = parseMatrix(sample);
     expect(parsed.map((r) => (r.item, r.status)), [('SYSTEM_x', 'done')]);

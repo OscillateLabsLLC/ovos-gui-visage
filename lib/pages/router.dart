@@ -97,7 +97,7 @@ class TemplateGaps {
     return FallbackPage.page;
   }
 
-  /// A `SYSTEM_` name outside the GUI-1 vocabulary, which the GUI-1 adapter passes through (spec §6.5): reported the
+  /// A `SYSTEM_` name outside the GUI-1 vocabulary, which the GUI-1 adapter passes through (gui-1.md 6.5): reported the
   /// first time, and it shows the fallback like any name without a page.
   PageBuilder unknown(String template) {
     if (_reported.add(template)) {

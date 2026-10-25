@@ -1,11 +1,11 @@
-/// Template page names: the OVOS-GUI-1 vocabulary (gui-1.md §3) is canonical, and the names producers send today are
+/// Template page names: the OVOS-GUI-1 vocabulary (gui-1.md 3) is canonical, and the names producers send today are
 /// aliases of it. The router keys its template pages by canonical name only; no alias appears anywhere else.
 library;
 
 /// Every GUI-1 template name starts with this.
 const systemPrefix = 'SYSTEM_';
 
-/// The closed GUI-1 template set (gui-1.md §3.4).
+/// The closed GUI-1 template set (gui-1.md 3.4).
 const specTemplates = {
   'SYSTEM_idle',
   'SYSTEM_loading',
