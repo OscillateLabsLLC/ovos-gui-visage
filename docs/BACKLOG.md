@@ -128,6 +128,18 @@ The popups follow ovos-shell's NotificationPop*.qml.
   level 0, so the display cannot show a Mac at 0 (reported in the log). Both are plugin fixes, not client ones.
 - **Media keys** are tested with synthetic key events only; check which desktops pass them to the app.
 
+## GUI-1 templates (2026-10-25)
+
+- **A real map for `SYSTEM_map`.** The page is the §6.5 degradation only: label, a static pin and the coordinates
+  (`lib/pages/map_page.dart`). Open decisions before a map is drawn: the tile provider (OpenStreetMap tiles need
+  attribution and have a usage policy; a commercial provider needs a key Visage has nowhere to keep), whether that
+  adds a dependency such as `flutter_map`, and what an offline device shows (today's card is the answer until then).
+  `zoom` is read and range-checked but unused. Evidence needed: a producer that sends `SYSTEM_map`; none in the
+  cloned OVOS repos does yet.
+- **12/24-hour clock on Linux kiosks.** `SYSTEM_clock` follows `MediaQuery.alwaysUse24HourFormat`. On macOS that is
+  the system setting; on a Linux kiosk without a desktop session the engine's source for it is unchecked. Check on a
+  Pi before adding any config key.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar
