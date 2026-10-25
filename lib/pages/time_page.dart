@@ -29,6 +29,20 @@ class TimePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (:time, :ampm) = timeParts(data);
+    return ClockRing(time: time, ampm: ampm, date: text(data['date_string']));
+  }
+}
+
+/// The big clock ring with the time, an optional am/pm line and the date; SYSTEM_clock draws the same ring.
+class ClockRing extends StatelessWidget {
+  const ClockRing({super.key, required this.time, required this.ampm, required this.date});
+
+  final String time;
+  final String ampm;
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Circle(
         size: 380,
@@ -53,7 +67,7 @@ class TimePage extends StatelessWidget {
                   child: Text(ampm, style: VisageText.base.copyWith(color: VisageColors.accent, fontSize: 22, letterSpacing: 2)),
                 ),
               const SizedBox(height: 10),
-              Text(text(data['date_string']), style: VisageText.fg(22)),
+              Text(date, style: VisageText.fg(22)),
             ],
           ),
         ],

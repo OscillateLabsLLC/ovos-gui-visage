@@ -118,7 +118,7 @@ class TimerRing extends StatelessWidget {
   }
 }
 
-/// An expired timer's ring breathes between full and a third opacity once a second.
+/// An expired timer's ring breathes between full and a third opacity once a second; under reduced motion it holds full.
 class _Pulse extends StatefulWidget {
   const _Pulse({required this.child});
 
@@ -129,8 +129,19 @@ class _Pulse extends StatefulWidget {
 }
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))
-    ..repeat(reverse: true);
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+  bool get _still => MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_still) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -139,8 +150,11 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: Tween(begin: 1.0, end: 0.35).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
-    child: widget.child,
-  );
+  Widget build(BuildContext context) {
+    if (_still) return widget.child;
+    return FadeTransition(
+      opacity: Tween(begin: 1.0, end: 0.35).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
+      child: widget.child,
+    );
+  }
 }

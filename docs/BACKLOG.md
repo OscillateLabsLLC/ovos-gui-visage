@@ -139,6 +139,22 @@ The popups follow ovos-shell's NotificationPop*.qml.
   control surface is specified, or record what OCP accepts for a `media_*` entry from the live bus first.
 - **Repeat and shuffle** have no `media_*` key (F31), so the media player cannot show them.
 
+## GUI-1 templates (2026-10-25)
+
+- **A real map for `SYSTEM_map`.** The page is only the degradation of
+  [gui-1.md 6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation): label, a static pin and the coordinates
+  (`lib/pages/map_page.dart`). Open decisions before a map is drawn: the tile provider (OpenStreetMap tiles need
+  attribution and have a usage policy; a commercial provider needs a key Visage has nowhere to keep), whether that
+  adds a dependency such as `flutter_map`, and what an offline device shows (today's card is the answer until then).
+  `zoom` is read and range-checked but unused. Evidence needed: a producer that sends `SYSTEM_map`; none in the
+  cloned OVOS repos does yet.
+- **A wind icon.** `SYSTEM_weather`'s `condition_code` set includes `wind`, and the bundled weather icons have no
+  glyph for it, so the card shows the condition text with no icon (`lib/pages/weather_card_model.dart`). It needs a
+  sketch and an SVG in the motion-icon set.
+- **12/24-hour clock on Linux kiosks.** `SYSTEM_clock` follows `MediaQuery.alwaysUse24HourFormat`. On macOS that is
+  the system setting; on a Linux kiosk without a desktop session the engine's source for it is unchecked. Check on a
+  Pi before adding any config key.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar

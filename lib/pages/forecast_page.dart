@@ -31,12 +31,22 @@ class ForecastPage extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 20),
           child: SkillHeader(heading: model.heading, location: model.location),
         ),
-        for (final item in model.items) _item(item, subColour),
+        for (final item in model.items) ForecastCircle(item: item, subColour: subColour),
       ],
     );
   }
+}
 
-  Widget _item(ForecastItem item, Color subColour) {
+/// One forecast period in a small circle: label, icon, main and sub values. SYSTEM_weather lays them in a row. An
+/// empty icon name keeps the icon's space empty.
+class ForecastCircle extends StatelessWidget {
+  const ForecastCircle({super.key, required this.item, this.subColour = VisageColors.muted});
+
+  final ForecastItem item;
+  final Color subColour;
+
+  @override
+  Widget build(BuildContext context) {
     return Circle(
       size: 108,
       fill: VisageColors.card,
@@ -45,7 +55,7 @@ class ForecastPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(item.label, style: VisageText.muted(13)),
-            WeatherIcon(item.icon, size: 40),
+            item.icon.isEmpty ? const SizedBox.square(dimension: 40) : WeatherIcon(item.icon, size: 40),
             // Scales down rather than overflowing the circle with a wide font or a three-digit temperature.
             FittedBox(
               fit: BoxFit.scaleDown,

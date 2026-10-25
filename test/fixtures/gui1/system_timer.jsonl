@@ -1,0 +1,4 @@
+{"_note": "written from gui-1.md 3.4 at b6c1583, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "template", "skill_id": "ovos-skill-alerts.openvoiceos", "template": "SYSTEM_timer", "data": {"end_time": 1792929600, "label": "Pasta", "count_up": false}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-alerts.openvoiceos", "session_id": "default"}

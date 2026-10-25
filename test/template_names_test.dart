@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/attention.dart';
+import 'package:ovos_gui_visage/pages/clock_page.dart';
 import 'package:ovos_gui_visage/pages/error_page.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/grid_page.dart';
@@ -10,11 +11,14 @@ import 'package:ovos_gui_visage/pages/image_frame_page.dart';
 import 'package:ovos_gui_visage/pages/input_box_page.dart';
 import 'package:ovos_gui_visage/pages/list_page.dart';
 import 'package:ovos_gui_visage/pages/loading_page.dart';
+import 'package:ovos_gui_visage/pages/map_page.dart';
 import 'package:ovos_gui_visage/pages/media_pages.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
 import 'package:ovos_gui_visage/pages/system_face_page.dart';
+import 'package:ovos_gui_visage/pages/system_timer_page.dart';
+import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/table_page.dart';
 import 'package:ovos_gui_visage/pages/template_names.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
@@ -73,9 +77,13 @@ const implemented = <String, PageBuilder>{
   'SYSTEM_audio_player': AudioPlayerPage.page,
   'SYSTEM_video_player': VideoPlayerPage.page,
   'SYSTEM_media_player': MediaPlayerPage.page,
+  'SYSTEM_clock': ClockPage.page,
+  'SYSTEM_timer': SystemTimerPage.page,
+  'SYSTEM_weather': SystemWeatherPage.page,
+  'SYSTEM_map': MapPage.page,
 };
 
-const unimplemented = {'SYSTEM_idle', 'SYSTEM_clock', 'SYSTEM_timer', 'SYSTEM_weather', 'SYSTEM_map'};
+const unimplemented = {'SYSTEM_idle'};
 
 const unknown = ['SYSTEM_confirm', 'SYSTEM_select', 'Confirm.qml', 'Select.qml', 'SYSTEM_ocp_now_playing', 'Mystery'];
 

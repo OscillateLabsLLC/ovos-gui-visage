@@ -8,6 +8,7 @@ import 'package:ovos_gui_visage/face/face_theme.dart';
 import 'package:ovos_gui_visage/pages/fallback_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
 import 'package:ovos_gui_visage/pages/status_page.dart';
+import 'package:ovos_gui_visage/pages/system_weather_page.dart';
 import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/protocol/gui1_frames.dart';
 import 'package:ovos_gui_visage/screen_link.dart';
@@ -123,7 +124,7 @@ void main() {
   });
 
   group('hand-written fixtures', () {
-    testWidgets('text_then_weather: the text page renders, then weather degrades with one report', (tester) async {
+    testWidgets('text_then_weather: the text page renders, then the weather page, reporting its missing keys', (tester) async {
       final frames = loadGui1Fixture('text_then_weather');
       final state = replayGui1(frames.take(5).toList());
       expect(state.current(), const Target(hello, 'SYSTEM_text', 0));
@@ -135,9 +136,10 @@ void main() {
 
       replayGui1(frames.skip(5).toList(), state: state);
       expect(state.active, [weather, hello]);
-      final gaps = TemplateGaps();
-      final faults = await collectFaults(() async => expect(resolve(state.current(), gaps: gaps), same(FallbackPage.page)));
-      expect(faults.map((f) => '${f.exception}'), ['UnimplementedError: SYSTEM_weather has no page yet']);
+      expect(resolve(state.current(), gaps: TemplateGaps()), same(SystemWeatherPage.page));
+      final faults = await collectFaults(() async => tester.pumpWidget(host(pageOf(state))));
+      expect(find.text('San Antonio'), findsOneWidget);
+      expect(faults.map((f) => '${f.exception}'), ['FormatException: current_temp is required'], reason: 'finding F23');
     });
 
     test('two_namespaces_deactivate: the remaining namespace shows again', () {
@@ -214,7 +216,7 @@ void main() {
 
     test('every hand-written GUI-1 fixture says so and parses', () {
       final files = Directory('test/fixtures/gui1').listSync().whereType<File>().where((f) => f.path.endsWith('.jsonl'));
-      expect(files.length, 13);
+      expect(files.length, 17);
       for (final file in files) {
         final name = file.uri.pathSegments.last.replaceAll('.jsonl', '');
         expect(loadGui1Fixture(name).first, isA<Gui1Welcome>(), reason: name);

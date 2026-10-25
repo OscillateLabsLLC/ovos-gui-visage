@@ -10,6 +10,7 @@ import '../widgets/notification_list.dart';
 import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
+import 'clock_page.dart';
 import 'date_page.dart';
 import 'error_page.dart';
 import 'fallback_page.dart';
@@ -21,6 +22,7 @@ import 'image_frame_page.dart';
 import 'input_box_page.dart';
 import 'list_page.dart';
 import 'loading_page.dart';
+import 'map_page.dart';
 import 'media_pages.dart';
 import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
@@ -29,6 +31,8 @@ import 'page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
 import 'system_face_page.dart';
+import 'system_timer_page.dart';
+import 'system_weather_page.dart';
 import 'table_page.dart';
 import 'template_names.dart';
 import 'text_frame_page.dart';
@@ -75,6 +79,10 @@ const templates = <String, PageBuilder>{
   'SYSTEM_video_player': VideoPlayerPage.page,
   'SYSTEM_media_player': MediaPlayerPage.page,
   'SYSTEM_InputBox': InputBoxPage.page,
+  'SYSTEM_clock': ClockPage.page,
+  'SYSTEM_timer': SystemTimerPage.page,
+  'SYSTEM_weather': SystemWeatherPage.page,
+  'SYSTEM_map': MapPage.page,
 };
 
 /// Known templates that have no page yet, and unknown `SYSTEM_` names. Each one is reported the first time it is shown,
