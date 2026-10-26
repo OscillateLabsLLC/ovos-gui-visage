@@ -53,6 +53,9 @@ ringing alarm uses a looping red `Glow` (`lib/pages/alarms_page.dart`).
 - Stop every animation when the platform asks for reduced motion, and draw a defined still frame.
   Read `MediaQuery.maybeDisableAnimationsOf`, or `motionReduced` in `lib/widgets/circle.dart`.
   The glow holds a mid-breath frame. Entering items stand in place at full opacity. A ring shows its value at once.
+- `VISAGE_MOTION=cut` (`motion` in the config file, `lib/motion_setting.dart`) turns every move into a cut on any
+  platform: the app's root MediaQuery then reports animations disabled, so a widget that reads `motionReduced` needs
+  nothing more. Measure a Raspberry Pi with and without it (`VISAGE_FRAME_LOG=1`) before choosing its default.
 - Do not put an opacity widget over a widget that draws only a blur. Impeller drops it (measured 2026-10-18).
   Scale the colour's alpha instead, as `Glow` does. Do not animate a blur's radius either: `Glow` animates a gradient.
 

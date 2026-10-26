@@ -123,6 +123,7 @@ falls back to `ovos-gui`. Each new connection tries again. The menu shows which 
 | `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
 | `gui1Url` | `VISAGE_GUI1_URL` | the adapter's `ws://` URL | `ws://<bus host>:18182/gui1` |
 | | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
+| `motion` | `VISAGE_MOTION` | `full`, or `cut`: every move cuts to its final frame, as under the system's reduce-motion setting (for slow hardware) | `full` |
 | | `VISAGE_FRAME_LOG` | `1` logs each frame over 16.7 ms (build plus raster), each move's start and end, and a summary every 10 s, stamped `t=<ms since start>`; a frame's stamp is its vsync time, not when it was logged | off |
 
 The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The

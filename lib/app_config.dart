@@ -5,8 +5,11 @@ library;
 
 import 'face/face_spec.dart';
 import 'faults.dart';
+import 'motion_setting.dart';
 import 'protocol/wire_protocol.dart';
 import 'window/window_config.dart';
+
+export 'motion_setting.dart' show MotionSetting, motionBuilder;
 
 class AppConfig {
   const AppConfig({
@@ -17,13 +20,15 @@ class AppConfig {
     this.protocol = WireProtocol.auto,
     this.gui1Url,
     this.frameLog = false,
+    this.motion = MotionSetting.full,
   });
 
   /// [json] is the whole file (or null); [env] wins over it. `face` is a preset name, `eyes+mouth` tokens or an
   /// object (face/face_spec.dart); `VISAGE_FACE` takes the string forms. `captions` (`VISAGE_CAPTIONS`) is a flag, off by default;
   /// `lang` (`VISAGE_LANG`) a language tag. `protocol` (`VISAGE_PROTOCOL`) is `auto`, `gui1` or `legacy`; `gui1Url`
   /// (`VISAGE_GUI1_URL`) moves the GUI-1 endpoint off the bus host's port 18182. `VISAGE_FRAME_LOG`, a flag in the
-  /// environment only, turns on the frame-timing log (frame_log.dart).
+  /// environment only, turns on the frame-timing log (frame_log.dart). `motion` (`VISAGE_MOTION`) is `full` or `cut`
+  /// (motion_setting.dart).
   factory AppConfig.from(Map<String, dynamic>? json, Map<String, String> env) => AppConfig(
     window: WindowConfig.from(json?['window'] as Map<String, dynamic>?, env),
     face: FaceSpec.parse(env['VISAGE_FACE'] ?? json?['face']),
@@ -32,6 +37,7 @@ class AppConfig {
     protocol: _protocol(env['VISAGE_PROTOCOL'] ?? json?['protocol']),
     gui1Url: _wsUrl('gui1Url', env['VISAGE_GUI1_URL'] ?? json?['gui1Url']),
     frameLog: _flag('frameLog', env['VISAGE_FRAME_LOG']) ?? false,
+    motion: _motion(env['VISAGE_MOTION'] ?? json?['motion']),
   );
 
   final WindowConfig window;
@@ -50,6 +56,18 @@ class AppConfig {
 
   /// Log late frames and a timing summary (frame_log.dart).
   final bool frameLog;
+
+  /// `cut` makes every move a cut, for slow hardware.
+  final MotionSetting motion;
+}
+
+MotionSetting _motion(Object? value) {
+  try {
+    return motionSettingFrom(value) ?? MotionSetting.full;
+  } on ArgumentError catch (err) {
+    reportFault('config: motion, using full', err);
+    return MotionSetting.full;
+  }
 }
 
 WireProtocol _protocol(Object? value) {

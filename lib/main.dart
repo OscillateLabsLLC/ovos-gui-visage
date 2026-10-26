@@ -62,6 +62,7 @@ class VisageApp extends StatelessWidget {
     return MaterialApp(
       title: appTitle,
       debugShowCheckedModeBanner: false,
+      builder: motionBuilder(config.motion),
       home: Material(
         color: Colors.transparent,
         child: Center(child: Screen(config: config)),
