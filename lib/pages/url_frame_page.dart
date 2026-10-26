@@ -32,7 +32,7 @@ class UrlFramePage extends StatelessWidget {
           child: Circle(
             size: 180,
             gradient: gradientFill,
-            glow: Glow(),
+            glow: Glow(bloom: true),
             ring: Ring(),
             children: [MotionIcon('globe', size: 104)],
           ),

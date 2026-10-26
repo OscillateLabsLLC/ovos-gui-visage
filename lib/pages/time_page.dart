@@ -47,7 +47,7 @@ class ClockRing extends StatelessWidget {
       child: Circle(
         size: 380,
         gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
-        glow: const Glow(),
+        glow: const Glow(bloom: true),
         ring: const Ring(track: VisageColors.accentSoft, stroke: 5),
         children: [
           Column(

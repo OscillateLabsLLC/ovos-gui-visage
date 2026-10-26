@@ -215,7 +215,7 @@ class _Stage extends StatelessWidget {
             ),
           Circle(
             size: _stagePx,
-            glow: playing ? const Glow() : null,
+            glow: playing ? const Glow(bloom: true) : null,
             ring: Ring(fraction: progress.fraction, value: ringColour),
             children: [
               AnimatedOpacity(

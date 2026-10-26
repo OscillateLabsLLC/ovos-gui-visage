@@ -107,7 +107,7 @@ class _InputBoxPageState extends State<InputBoxPage> {
         Circle(
           size: 150,
           gradient: gradientFill,
-          glow: const Glow(),
+          glow: const Glow(bloom: true),
           ring: const Ring(),
           children: const [MotionIcon('mic', size: 84)],
         ),

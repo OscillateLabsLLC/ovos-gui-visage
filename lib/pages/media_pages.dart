@@ -59,7 +59,7 @@ class VideoPlayerPage extends StatelessWidget {
       children: [
         Circle(
           size: _stillPx,
-          glow: playing ? const Glow() : null,
+          glow: playing ? const Glow(bloom: true) : null,
           ring: Ring(fraction: 1, value: playing ? VisageColors.accent : VisageColors.muted),
           children: [Icon(Icons.play_arrow_rounded, size: _stillPx * 0.4, color: VisageColors.fg)],
         ),

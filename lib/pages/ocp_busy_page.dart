@@ -31,7 +31,7 @@ class OcpBusyPage extends StatelessWidget {
       children: [
         Circle(
           size: _chipPx,
-          glow: const Glow(),
+          glow: const Glow(bloom: true),
           children: [
             SizedBox.expand(
               child: CacheLottie(resource: installingAnimation, loop: true, fitRing: true, fallback: const _TurningArc()),

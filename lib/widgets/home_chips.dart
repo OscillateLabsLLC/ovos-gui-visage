@@ -56,7 +56,7 @@ class ClockChip extends StatelessWidget {
     return Circle(
       size: clockChipSize,
       gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
-      glow: const Glow(),
+      glow: const Glow(bloom: true),
       ring: const Ring(),
       children: [
         Column(

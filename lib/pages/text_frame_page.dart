@@ -105,7 +105,7 @@ class _TextFramePageState extends State<TextFramePage> {
         Circle(
           size: _chipPx,
           gradient: gradientFill,
-          glow: const Glow(),
+          glow: const Glow(bloom: true),
           ring: const Ring(),
           children: [
             Text(

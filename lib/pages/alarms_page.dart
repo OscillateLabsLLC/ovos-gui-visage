@@ -120,7 +120,7 @@ class _AlarmChip extends StatelessWidget {
     return Circle(
       size: size,
       gradient: gradientFill,
-      glow: alarm.expired ? const Glow(colour: _ringingGlow, loop: true) : (isNext ? const Glow() : null),
+      glow: alarm.expired ? const Glow(colour: _ringingGlow, loop: true, bloom: true) : (isNext ? const Glow(bloom: true) : null),
       ring: Ring(value: alarm.expired ? VisageColors.bad : VisageColors.accent),
       children: [
         Column(
@@ -154,7 +154,7 @@ class _AlarmCell extends StatelessWidget {
     return Circle(
       size: 170,
       gradient: gradientFill,
-      glow: alarm.expired ? const Glow(colour: _ringingGlow, loop: true) : (isNext ? const Glow() : null),
+      glow: alarm.expired ? const Glow(colour: _ringingGlow, loop: true, bloom: true) : (isNext ? const Glow(bloom: true) : null),
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,

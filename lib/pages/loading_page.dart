@@ -62,7 +62,7 @@ class _DotsState extends State<_Dots> with SingleTickerProviderStateMixin {
     return Circle(
       size: lottieChipPx,
       gradient: gradientFill,
-      glow: const Glow(),
+      glow: const Glow(bloom: true),
       ring: const Ring(),
       children: [
         AnimatedBuilder(
