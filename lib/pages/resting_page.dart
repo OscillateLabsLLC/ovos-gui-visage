@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../protocol/wire_protocol.dart';
 import '../state/ambient.dart';
 import '../state/gui_state.dart';
-import '../widgets/circle.dart';
+import '../widgets/chip_birth.dart';
 import '../widgets/device_clock.dart';
 import '../widgets/home_chips.dart';
 import 'every_second.dart';
@@ -31,8 +31,10 @@ Widget? restingPage(
 
 void _noList() {}
 
+const _chipGap = 28.0;
+
 /// Ticks each second, like the clock inside it, so the weather chip leaves when its payload ages out and the night
-/// icon arrives at the hour (`resting_model.dart`).
+/// icon arrives at the hour (`resting_model.dart`). Each time it appears, its chips are born from one disc (ChipBirth).
 class RestingPage extends StatefulWidget {
   const RestingPage({
     super.key,
@@ -58,12 +60,18 @@ class _RestingPageState extends State<RestingPage> with EverySecond {
     return WithCountBadge(
       count: restingNotificationCount(widget.ambient),
       onTap: widget.onShowNotifications,
-      child: StaggerEnter(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          if (weather != null) WeatherChip(temperature: weather.temperature, icon: weather.icon, condition: weather.condition),
-          DeviceClock(now: widget.now),
-        ],
+      child: ChipBirth(
+        chips: stackedChips([if (weather != null) weatherChipSize, clockChipSize], _chipGap),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (weather != null) ...[
+              WeatherChip(temperature: weather.temperature, icon: weather.icon, condition: weather.condition),
+              const SizedBox(height: _chipGap),
+            ],
+            DeviceClock(now: widget.now),
+          ],
+        ),
       ),
     );
   }
