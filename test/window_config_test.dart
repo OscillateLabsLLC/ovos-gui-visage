@@ -137,4 +137,10 @@ void _nearestCornerTests() {
     expect(nearestCorner(const Rect.fromLTWH(900, 500, 240, 400), area), Corner.bottomRight);
     expect(nearestCorner(const Rect.fromLTWH(700, 300, 240, 400), area), Corner.topLeft);
   });
+
+  test('an ordinary window opens at the full frame; the height sizes the corner widgets', () {
+    expect(const WindowConfig(mode: WindowMode.window).size, const Size(480, 800));
+    expect(const WindowConfig(mode: WindowMode.window, height: 400).size, const Size(480, 800));
+    expect(const WindowConfig(mode: WindowMode.float, height: 400).size, const Size(240, 400));
+  });
 }

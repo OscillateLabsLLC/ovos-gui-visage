@@ -125,7 +125,9 @@ class WithCountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      // The badge sits in the shell's padding, above the page box; Stack would clip it by default.
+      // The badge sits in the shell's padding, above the page box; Stack would clip it by default. The chips are
+      // narrower than the page, so without an alignment Stack would leave them at the left edge.
+      alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
         child,

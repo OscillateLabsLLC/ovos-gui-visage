@@ -343,8 +343,8 @@ same window above everything instead, and `window` is an ordinary window. Config
 
 `VISAGE_MODE`, `VISAGE_CORNER`, `VISAGE_HEIGHT`, `VISAGE_MARGIN`, `VISAGE_PEEK` and
 `VISAGE_PEEK_SIZE` override the file, so a launcher script can pick the mode. Corners are
-`top-left`, `top-right`, `bottom-left`, `bottom-right`; the height is in logical pixels and the
-width follows the 480 × 800 frame. This is a real window with the live sockets and animations,
+`top-left`, `top-right`, `bottom-left`, `bottom-right`; the height is the corner widget's, in logical pixels, and the
+width follows the 480 × 800 frame. `window` mode opens at the frame's own size, 480 × 800, and ignores the height. This is a real window with the live sockets and animations,
 which a WidgetKit widget cannot have: widget extensions get no sockets and only a handful of
 timeline refreshes an hour.
 

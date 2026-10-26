@@ -45,6 +45,8 @@ class WindowConfig {
 
   final WindowMode mode;
   final Corner corner;
+
+  /// The corner widget's height in logical pixels; its width follows the frame. An ordinary window ignores it.
   final double height;
   final double margin;
 
@@ -64,7 +66,10 @@ class WindowConfig {
 
   bool get peeks => peek && isWidget;
 
-  Size get size => Size(height * frameWidth / frameHeight, height);
+  /// An ordinary window opens at the frame's own size, 480 x 800, so text reads at the size it was designed at;
+  /// [height] sizes the corner widgets, which are the frame scaled down.
+  Size get size =>
+      mode == WindowMode.window ? const Size(frameWidth, frameHeight) : Size(height * frameWidth / frameHeight, height);
 
   Size get peekWindowSize => Size.square(peekSize);
 
