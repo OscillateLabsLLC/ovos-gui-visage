@@ -26,15 +26,7 @@ const labels = 'labelled tap targets';
 
 /// Pages that fail a guideline today, at both page sizes: page -> guideline -> the failure, as measured 2026-10-25.
 /// testWidgets takes no skip message, so the reason goes in the skipped test's name.
-const audit = <String, Map<String, String>>{
-  'ovos-skill-weather.openvoiceos/SunriseSunset': {contrast: 'SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1'},
-  'resting (GUI-1)': {contrast: 'count badge, white on the accent, 2.92:1 at 15 px; the homescreen idle page shares it'},
-  'SYSTEM_InputBox': {contrast: 'Confirm button label 2.92:1 at 20 px, under 3:1'},
-  'SYSTEM_text': {contrast: 'the text "Hello" 2.92:1 at 72 px, under 3:1'},
-  'ovos-skill-hello.openvoiceos/SYSTEM_hologram': {
-    contrast: 'the fallback shows the recorded text "again" as the text page does: 2.92:1 at 72 px, under 3:1',
-  },
-};
+const audit = <String, Map<String, String>>{};
 
 typedef Shown = ({Target target, Json data, Json events});
 

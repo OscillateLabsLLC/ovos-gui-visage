@@ -100,7 +100,10 @@ class CountBadge extends StatelessWidget {
             height: 28,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             alignment: Alignment.center,
-            child: Text('$count', style: VisageText.fg(15, weight: FontWeight.w600)),
+            child: Text(
+              '$count',
+              style: VisageText.fg(15, weight: FontWeight.w700).copyWith(color: VisageColors.onAccent),
+            ),
           ),
         ),
       ),

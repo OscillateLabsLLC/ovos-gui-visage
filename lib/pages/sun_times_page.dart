@@ -103,7 +103,7 @@ class _SunCircleState extends State<_SunCircle> with SingleTickerProviderStateMi
               style: VisageText.fg(40, weight: FontWeight.w300, height: 1).copyWith(fontFeatures: VisageText.tabular),
             ),
             const SizedBox(height: 4),
-            Text(widget.kind.toUpperCase(), style: VisageText.muted(16).copyWith(letterSpacing: 2)),
+            Text(widget.kind.toUpperCase(), style: VisageText.fg(16).copyWith(letterSpacing: 2)),
           ],
         ),
       ],

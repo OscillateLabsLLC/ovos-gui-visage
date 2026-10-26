@@ -146,7 +146,7 @@ class _InputBoxPageState extends State<InputBoxPage> {
     onPressed: onPressed,
     style: FilledButton.styleFrom(
       backgroundColor: fill,
-      foregroundColor: VisageColors.fg,
+      foregroundColor: fill == VisageColors.accent ? VisageColors.onAccent : VisageColors.fg,
       minimumSize: const Size(150, 56),
       textStyle: VisageText.fg(20, weight: FontWeight.w500),
     ),

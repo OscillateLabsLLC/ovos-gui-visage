@@ -163,13 +163,11 @@ run of the guards in that guide's "Enforced by" table. Decide each item: fix it,
 Style (`test/style_rules_test.dart`): no `audit:` entry remains. On 2026-10-25 the owner sanctioned the command box's
 accent outline, the volume pill and the notification popups as they are, and the in-window menu was redrawn.
 
-Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
-
-- `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
-- `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.
-- `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
-- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1. The fallback page shows
-  an unknown template's `text` the same way (`SYSTEM_hologram` fixture), so it fails for the same reason.
+Accessibility (`test/a11y_guidelines_test.dart`, both page sizes, 432 × 736 and 432 × 650): no page is skipped. The four
+contrast failures were fixed on 2026-10-25: the sunrise and sunset labels are white; the count badge and the input
+box's Confirm label are drawn in `VisageColors.onAccent` (the page background, 6.90:1 on the accent); and the text
+chip's words keep their box inside the ring, whose accent the guideline had measured as their background once the
+test font's block glyphs widened the box past the chip's inner width.
 - `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size. Informative, no
   audit entry: the Android tap-target check only prints. The re-run of 2026-10-25 printed "passes" for both resting
   screens, so the claim needs a check on a device before anyone acts on it.

@@ -143,10 +143,16 @@ class _TextFramePageState extends State<TextFramePage> {
           glow: const Glow(bloom: true),
           ring: const Ring(),
           children: [
-            Text(
-              lines.join('\n'),
-              textAlign: TextAlign.center,
-              style: VisageText.fg(px.toDouble(), weight: FontWeight.w300, height: 1.1),
+            // Inside the ring whatever the font: shortLayout fits the words to the inner width, and the box never
+            // reaches the ring, whose accent would then be measured as the text's background.
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _chipInnerPx),
+              child: Text(
+                lines.join('\n'),
+                textAlign: TextAlign.center,
+                textWidthBasis: TextWidthBasis.longestLine,
+                style: VisageText.fg(px.toDouble(), weight: FontWeight.w300, height: 1.1),
+              ),
             ),
           ],
         ),
