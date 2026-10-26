@@ -12,7 +12,7 @@ class AppConfig {
   const AppConfig({
     this.window = const WindowConfig(),
     this.face = FaceSpec.visage,
-    this.captions = true,
+    this.captions = false,
     this.lang,
     this.protocol = WireProtocol.auto,
     this.gui1Url,
@@ -20,14 +20,14 @@ class AppConfig {
   });
 
   /// [json] is the whole file (or null); [env] wins over it. `face` is a preset name, `eyes+mouth` tokens or an
-  /// object (face/face_spec.dart); `VISAGE_FACE` takes the string forms. `captions` (`VISAGE_CAPTIONS`) is a flag;
+  /// object (face/face_spec.dart); `VISAGE_FACE` takes the string forms. `captions` (`VISAGE_CAPTIONS`) is a flag, off by default;
   /// `lang` (`VISAGE_LANG`) a language tag. `protocol` (`VISAGE_PROTOCOL`) is `auto`, `gui1` or `legacy`; `gui1Url`
   /// (`VISAGE_GUI1_URL`) moves the GUI-1 endpoint off the bus host's port 18182. `VISAGE_FRAME_LOG`, a flag in the
   /// environment only, turns on the frame-timing log (frame_log.dart).
   factory AppConfig.from(Map<String, dynamic>? json, Map<String, String> env) => AppConfig(
     window: WindowConfig.from(json?['window'] as Map<String, dynamic>?, env),
     face: FaceSpec.parse(env['VISAGE_FACE'] ?? json?['face']),
-    captions: _flag('captions', env['VISAGE_CAPTIONS'] ?? json?['captions']) ?? true,
+    captions: _flag('captions', env['VISAGE_CAPTIONS'] ?? json?['captions']) ?? false,
     lang: _lang(env['VISAGE_LANG'] ?? json?['lang']),
     protocol: _protocol(env['VISAGE_PROTOCOL'] ?? json?['protocol']),
     gui1Url: _wsUrl('gui1Url', env['VISAGE_GUI1_URL'] ?? json?['gui1Url']),

@@ -33,17 +33,18 @@ void main() {
     expect(kiosk.window.kioskExit, WindowMode.float);
   });
 
-  test('captions are on by default, off from the file or the environment, and the environment wins', () {
-    expect(AppConfig.from(null, const {}).captions, isTrue);
-    expect(AppConfig.from({'captions': false}, const {}).captions, isFalse);
-    expect(AppConfig.from(null, const {'VISAGE_CAPTIONS': 'off'}).captions, isFalse);
-    expect(AppConfig.from({'captions': false}, const {'VISAGE_CAPTIONS': '1'}).captions, isTrue);
+  test('captions are off by default, on from the file or the environment, and the environment wins', () {
+    expect(AppConfig.from(null, const {}).captions, isFalse);
+    expect(const AppConfig().captions, isFalse);
+    expect(AppConfig.from({'captions': true}, const {}).captions, isTrue);
+    expect(AppConfig.from(null, const {'VISAGE_CAPTIONS': '1'}).captions, isTrue);
+    expect(AppConfig.from({'captions': true}, const {'VISAGE_CAPTIONS': 'off'}).captions, isFalse);
   });
 
-  test('a captions value that is not a flag is reported and keeps captions on', () async {
+  test('a captions value that is not a flag is reported and keeps captions off', () async {
     late AppConfig config;
     final faults = await collectFaults(() async => config = AppConfig.from({'captions': 'loud'}, const {}));
-    expect(config.captions, isTrue);
+    expect(config.captions, isFalse);
     expect(faults.single.context.toString(), contains('captions is not a flag'));
   });
 

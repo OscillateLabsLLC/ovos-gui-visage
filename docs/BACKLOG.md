@@ -196,6 +196,18 @@ Other:
 
 - `lib/theme.dart`: the page background is `#05070A`; ovos-visage SPEC 9 gives `#0b0f14`.
 
+## Captions (2026-10-25)
+
+Captions are off by default since 2026-10-25 (`AppConfig.captions`): the owner watched the demo and the strip covered
+the bottom of content pages (the forecast row, list rows) for the length of every spoken answer.
+
+- When captions are on, the page should give up a band for them, as it does for the face badge (`attentionStrip`),
+  instead of the strip drawing over content. The band's height is bounded by `captionMaxHeight` (260 px). Files:
+  `lib/widgets/caption_strip.dart`, `lib/screen_frame.dart`.
+- A reply never fades when `recognizer_loop:audio_output_end` never arrives (a stack with no audio service): it stays
+  for `captionMaxAge`, 60 s (`lib/captions.dart`). A shorter hold after `ovos.utterance.handled`, as the heard line
+  already gets (`heardHoldWithoutReply`, 4 s), may be right for replies too.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar

@@ -231,8 +231,9 @@ If the turn ends without speech, the heard line fades after 4 seconds. A long an
 smaller to fit; no words are cut off. On a page with content, the captions sit above the face
 badge. The collapsed peek badge never shows captions.
 
-Captions are on by default. To turn them off, set `"captions": false` in the config file, or
-`VISAGE_CAPTIONS=0`. The environment wins over the file.
+Captions are off by default: on a content page the strip draws over the bottom of the page. To turn them on, set
+`"captions": true` in the config file, or `VISAGE_CAPTIONS=1`. The environment wins over the file. The web build
+has no config file, so captions stay off there.
 
 ## Outcome
 
