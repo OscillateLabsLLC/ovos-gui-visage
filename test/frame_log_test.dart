@@ -27,9 +27,11 @@ void main() {
     expect(FrameTally().summary(), 'frames: 0 seen, 0 over 16.7 ms, 0 over 8.3 ms, worst build 0.0 ms, worst raster 0.0 ms');
   });
 
-  test('the late-frame line, stamped with the whole milliseconds since the log started', () {
+  test('the late-frame line, stamped in whole ms after the base on the engine clock', () {
     expect(frameLine(_ms(12.3), _ms(21)), 'frame: build 12.3 ms raster 21.0 ms');
-    expect(stamped(_ms(48213.9), 'move: squash start'), 't=48213 move: squash start');
+    const base = 9000000000;
+    expect(stampedAt(base + 48213900, base, 'move: squash start'), 't=48213 move: squash start');
+    expect(stampedAt(base + 999, base, 'frame: x'), 't=0 frame: x', reason: 'whole ms, rounded down');
   });
 
   test('a move marker is silent while the log is off', () {

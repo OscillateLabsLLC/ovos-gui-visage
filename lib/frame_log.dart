@@ -1,58 +1,48 @@
-/// Opt-in frame timing (`VISAGE_FRAME_LOG=1`, app_config.dart): each frame over 16.7 ms (build plus raster), the moves'
-/// starts and ends (logMove) and a summary every 10 s, each line stamped with the milliseconds since the log started.
+/// Opt-in frame timing (`VISAGE_FRAME_LOG=1`, app_config.dart): each frame over 16.7 ms (build plus raster) stamped at
+/// its vsync, the moves' starts and ends (logMove) and a summary every 10 s stamped with Timeline.now, all in ms since
+/// the log started on the engine's monotonic clock. The first batch of timings logs how far its vsync lies from now: a
+/// gap of seconds would mean the two clocks differ and the stamps cannot be compared.
 library;
 
 import 'dart:async';
+import 'dart:developer' show Timeline;
+import 'dart:ui' show FrameTiming, FramePhase;
 
 import 'package:flutter/scheduler.dart';
 
-const frameBudget = Duration(microseconds: 16700);
-const frameBudget120 = Duration(microseconds: 8300);
+import 'frame_tally.dart';
+
+export 'frame_tally.dart';
+
 const summaryEvery = Duration(seconds: 10);
 
-/// The frames of one summary period; each period starts a new one. Pure, so the arithmetic is tested without the binding.
-class FrameTally {
-  int frames = 0, over = 0, over120 = 0;
-  Duration worstBuild = Duration.zero, worstRaster = Duration.zero;
-
-  /// Counts one frame; true when its build plus raster time went over [frameBudget].
-  bool add(Duration build, Duration raster) {
-    frames++;
-    if (build > worstBuild) worstBuild = build;
-    if (raster > worstRaster) worstRaster = raster;
-    if (build + raster > frameBudget120) over120++;
-    final late = build + raster > frameBudget;
-    if (late) over++;
-    return late;
-  }
-
-  String summary() =>
-      'frames: $frames seen, $over over 16.7 ms, $over120 over 8.3 ms, '
-      'worst build ${_ms(worstBuild)} ms, worst raster ${_ms(worstRaster)} ms';
-}
-
-String frameLine(Duration build, Duration raster) => 'frame: build ${_ms(build)} ms raster ${_ms(raster)} ms';
-String stamped(Duration elapsed, String line) => 't=${elapsed.inMilliseconds} $line';
-String _ms(Duration span) => (span.inMicroseconds / 1000).toStringAsFixed(1);
-final _since = Stopwatch();
+var _base = 0;
 void Function(String line)? _sink;
-void _log(String line) => _sink?.call(stamped(_since.elapsed, line));
+
+void _stamp(int micros, String line) => _sink?.call(stampedAt(micros, _base, line));
 
 /// A move's start or end (`squash start`, `birth end`); nothing unless the log is on.
-void logMove(String event) => _log('move: $event');
+void logMove(String event) => _stamp(Timeline.now, 'move: $event');
 
 /// Logs every late frame through [log], and the tally every [summaryEvery].
 void startFrameLog(void Function(String line) log) {
   var tally = FrameTally();
+  var clockChecked = false;
   _sink = log;
-  _since.start();
+  _base = Timeline.now;
   SchedulerBinding.instance.addTimingsCallback((timings) {
+    if (!clockChecked) {
+      clockChecked = true;
+      _stamp(Timeline.now, 'frame log: last vsync ${(Timeline.now - _vsync(timings.last)) ~/ 1000} ms before now');
+    }
     for (final t in timings) {
-      if (tally.add(t.buildDuration, t.rasterDuration)) _log(frameLine(t.buildDuration, t.rasterDuration));
+      if (tally.add(t.buildDuration, t.rasterDuration)) _stamp(_vsync(t), frameLine(t.buildDuration, t.rasterDuration));
     }
   });
   Timer.periodic(summaryEvery, (_) {
-    _log(tally.summary());
+    _stamp(Timeline.now, tally.summary());
     tally = FrameTally();
   });
 }
+
+int _vsync(FrameTiming timing) => timing.timestampInMicroseconds(FramePhase.vsyncStart);
