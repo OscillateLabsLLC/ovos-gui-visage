@@ -16,7 +16,6 @@ import 'outcome.dart';
 import 'pages/page.dart';
 import 'pages/page_pager.dart';
 import 'pages/resting_model.dart';
-import 'pages/resting_page.dart';
 import 'pages/router.dart';
 import 'protocol/wire_protocol.dart';
 import 'shell_overlays.dart';
@@ -140,9 +139,7 @@ class ScreenFrame extends StatelessWidget {
         onStep: parts.onStep,
         onInteract: parts.onInteract,
         chevrons: parts.kiosk,
-        child:
-            restingPage(parts.state, parts.protocol, onShowNotifications: parts.notificationList.open) ??
-            PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
+        child: PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
       ),
     );
   }

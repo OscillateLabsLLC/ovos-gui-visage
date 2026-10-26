@@ -22,6 +22,20 @@ const enterScaleFrom = 0.9;
 /// When the item at [index] starts, counted from its build.
 Duration enterDelay(int index) => enterGap * index.clamp(0, enterMaxIndex);
 
+/// How the items of an arriving page enter (page_switch.dart): after [delay], once the page has finished its own
+/// arrival, or not at all when the page arrives [whole], as a page that slides in does.
+class EnterCue extends InheritedWidget {
+  const EnterCue({super.key, this.delay = Duration.zero, this.whole = false, required super.child});
+
+  final Duration delay;
+  final bool whole;
+
+  static EnterCue? maybeOf(BuildContext context) => context.dependOnInheritedWidgetOfExactType<EnterCue>();
+
+  @override
+  bool updateShouldNotify(EnterCue oldWidget) => oldWidget.delay != delay || oldWidget.whole != whole;
+}
+
 /// A column whose children pop in one after another (visage.css .stagger-enter, retimed to the campaign video).
 class StaggerEnter extends StatelessWidget {
   const StaggerEnter({super.key, required this.children, this.gap = 28, this.mainAxisSize = MainAxisSize.min});
@@ -64,12 +78,14 @@ class _Enter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (motionReduced(context)) return child;
-    final total = enterDuration + delay;
+    final cue = EnterCue.maybeOf(context);
+    if (motionReduced(context) || (cue?.whole ?? false)) return child;
+    final start = delay + (cue?.delay ?? Duration.zero);
+    final total = enterDuration + start;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: total,
-      curve: Interval(delay.inMicroseconds / total.inMicroseconds, 1),
+      curve: Interval(start.inMicroseconds / total.inMicroseconds, 1),
       builder: (context, t, child) => _pop(t, child!),
       child: child,
     );
