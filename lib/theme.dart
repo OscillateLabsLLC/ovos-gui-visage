@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 abstract final class VisageColors {
   static const bg = Color(0xFF0B0F14);
   static const pageBg = Color(0xFF05070A);
+
+  /// The dim over the page under the full attention face and the in-window menu.
+  static const scrim = Color(0xEB05070A);
   static const fg = Color(0xFFFFFFFF);
   static const muted = Color(0xFF8A96A8);
   static const accent = Color(0xFF1E9BFF);

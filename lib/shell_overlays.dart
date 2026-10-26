@@ -4,10 +4,10 @@ import 'attention.dart';
 import 'face/face.dart';
 import 'face/face_badge.dart';
 import 'face/face_theme.dart';
+import 'theme.dart';
 import 'widgets/circle.dart' show motionReduced;
 import 'widgets/dot_collapse.dart';
 
-const _dimBg = Color(0xEB05070A);
 const _badgeHeight = 104.0;
 const _badgeGap = 7.0;
 const _fade = Duration(milliseconds: 400);
@@ -62,7 +62,7 @@ class AttentionOverlay extends StatelessWidget {
         curve: attention.shown ? Curves.linear : _afterCollapse,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          color: attention.compact ? Colors.transparent : _dimBg,
+          color: attention.compact ? Colors.transparent : VisageColors.scrim,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             transform: Matrix4.translationValues(shift.dx, shift.dy, 0)
