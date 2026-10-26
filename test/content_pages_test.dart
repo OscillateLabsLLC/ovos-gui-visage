@@ -198,7 +198,7 @@ void main() {
     testWidgets('SYSTEM_error keeps its red halo standing still', (tester) async {
       await pumpFrame(tester, errorTemplate, still: true);
       expect(find.byType(Glow), findsOneWidget);
-      expect(find.descendant(of: find.byType(Glow), matching: find.byType(DecoratedBox)), findsOneWidget);
+      expect(find.descendant(of: find.byType(Glow), matching: find.byType(CustomPaint)), findsOneWidget);
     });
 
     testWidgets('with motion, SYSTEM_error blooms then breathes, and list rows rise in', (tester) async {

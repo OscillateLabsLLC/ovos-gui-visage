@@ -143,8 +143,8 @@ class Glow extends StatefulWidget {
   State<Glow> createState() => _GlowState();
 }
 
-/// The halo scales its shadow's alpha rather than sitting under an Opacity: Impeller drops an Opacity whose only child
-/// is a blur. Under reduced motion both controllers stop and the halo holds [glowStillPhase] with no bloom.
+/// The halo scales its own alpha rather than sitting under an Opacity, which would push a layer for one gradient. Under
+/// reduced motion both controllers stop and the halo holds [glowStillPhase] with no bloom.
 class _GlowState extends State<Glow> with TickerProviderStateMixin {
   late final AnimationController _breathing = AnimationController(vsync: this, duration: widget.loop ? glowSwell : _breath);
   late final AnimationController _bloom = AnimationController(vsync: this, duration: glowSwell * 2, value: widget.bloom ? 0 : 1);
@@ -183,17 +183,44 @@ class _GlowState extends State<Glow> with TickerProviderStateMixin {
     final lift = widget.loop ? math.max(t, swell) : swell;
     final restingAlpha = widget.loop ? 1.0 : 0.45 + 0.55 * t;
     final alpha = restingAlpha + (1 - restingAlpha) * swell;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: widget.colour.withValues(alpha: widget.colour.a * alpha),
-            blurRadius: 34 + 30 * lift,
-            spreadRadius: 2 + 12 * lift,
-          ),
-        ],
+    return CustomPaint(
+      painter: HaloPainter(
+        colour: widget.colour.withValues(alpha: widget.colour.a * alpha),
+        blur: 34 + 30 * lift,
+        spread: 2 + 12 * lift,
       ),
     );
   }
+}
+
+/// The halo as a radial gradient, not a blur: a Pi (Skia on GLES) cannot re-blur a 300 px circle every frame. It reads
+/// as the blurred shadow it replaces (a circle grown by [spread], blurred by [blur]): the gradient follows that blur's
+/// falloff, the normal curve at the blur's sigma, from the box's edge to transparent at radius + spread + blur.
+class HaloPainter extends CustomPainter {
+  const HaloPainter({required this.colour, required this.blur, required this.spread});
+
+  final Color colour;
+  final double blur;
+  final double spread;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final box = size.shortestSide / 2;
+    final outer = box + spread + blur;
+    final middle = box + spread + blur / 2;
+    final sigma = blur * 0.57735 + 0.5;
+    Color at(double r) => colour.withValues(alpha: colour.a * _normal((box + spread - r) / sigma));
+    final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: outer);
+    final gradient = RadialGradient(
+      colors: [at(box), at(box), at(middle), colour.withValues(alpha: 0)],
+      stops: [0, box / outer, middle / outer, 1],
+    );
+    canvas.drawCircle(rect.center, outer, Paint()..shader = gradient.createShader(rect));
+  }
+
+  /// The normal cumulative distribution, by its logistic approximation (within 1 percent).
+  static double _normal(double x) => 1 / (1 + math.exp(-1.702 * x));
+
+  @override
+  bool shouldRepaint(HaloPainter old) => old.colour != colour || old.blur != blur || old.spread != spread;
 }

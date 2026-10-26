@@ -33,7 +33,7 @@ Use these widgets. Do not make a new effect for one page.
 |---|---|---|
 | `Circle` (`lib/widgets/circle.dart`) | Every chip: a filled or gradient circle with its content centred | — |
 | `Ring` (`lib/widgets/circle.dart`) | A track and a value arc from twelve o'clock, for progress | 900 ms to a new value |
-| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `bloom` swells it once as its page arrives, `loop` keeps it swelling for a held state | 6 s each way; bloom 1.1 s up and 1.1 s back; 1.1 s each way when looping |
+| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `bloom` swells it once as its page arrives, `loop` keeps it swelling for a held state. It is a radial gradient that follows a blur's falloff, not a blur: the target is a Raspberry Pi (Skia on GLES), where re-blurring a 300 px circle every frame of a bloom or a loop is too slow | 6 s each way; bloom 1.1 s up and 1.1 s back; 1.1 s each way when looping |
 | `gradientFill` (`lib/widgets/circle.dart`) | The lit-from-above fill of a hero circle | — |
 | `StaggerEnter` (`lib/widgets/enter.dart`) | A column whose items pop in: up 16 px from 0.9 scale, `Curves.easeOutBack` | 200 ms each, 100 ms apart, the seventh on with the sixth |
 | `RiseIn` (`lib/widgets/enter.dart`) | One item of a list that is not a plain column, with the same entry | 200 ms, 100 ms per index, capped like `StaggerEnter` |
@@ -54,7 +54,7 @@ ringing alarm uses a looping red `Glow` (`lib/pages/alarms_page.dart`).
   Read `MediaQuery.maybeDisableAnimationsOf`, or `motionReduced` in `lib/widgets/circle.dart`.
   The glow holds a mid-breath frame. Entering items stand in place at full opacity. A ring shows its value at once.
 - Do not put an opacity widget over a widget that draws only a blur. Impeller drops it (measured 2026-10-18).
-  Scale the shadow's alpha instead, as `Glow` does.
+  Scale the colour's alpha instead, as `Glow` does. Do not animate a blur's radius either: `Glow` animates a gradient.
 
 ## Motion language
 
