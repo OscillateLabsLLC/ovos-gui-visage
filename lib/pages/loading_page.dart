@@ -1,19 +1,18 @@
-/// SYSTEM_Loading (SPEC 8.2): OVOS's own loading.json Lottie in a chip-sized circle, label beneath. Falls back to
-/// thinking dots in a glowing ring chip when the animation is not in this install's cache.
+/// SYSTEM_Loading (SPEC 8.2): thinking dots in a glowing ring chip, label beneath. Visage draws its own; OVOS's
+/// loading.json Lottie is not played (decided 2026-10-25: it did not match the rest of the screen).
 library;
 
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../lottie/cache_lottie.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'page.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
 
-const lottieChipPx = 220.0;
-const loadingAnimation = '/res/system/qt5/animations/loading.json';
+/// The hero chip of the loading, status and error templates.
+const templateChipPx = 220.0;
 
 class LoadingPage extends StatelessWidget {
   const LoadingPage({super.key, required this.data});
@@ -26,15 +25,7 @@ class LoadingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: lottieChipPx,
-          height: lottieChipPx,
-          child: CacheLottie(resource: loadingAnimation, loop: true, fitRing: true, fallback: const _Dots()),
-        ),
-        const SizedBox(height: 28),
-        TemplateLabel(loadingLabel(data)),
-      ],
+      children: [const _Dots(), const SizedBox(height: 28), TemplateLabel(loadingLabel(data))],
     );
   }
 }
@@ -60,7 +51,7 @@ class _DotsState extends State<_Dots> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Circle(
-      size: lottieChipPx,
+      size: templateChipPx,
       gradient: gradientFill,
       glow: const Glow(bloom: true),
       ring: const Ring(),

@@ -43,7 +43,6 @@ lib/
   state/gui_state.dart namespaces, pages, session data, active stack (port of state.py)
   attention.dart       listen/think/speak state machine (port of attention.js)
   face/                face_theme.dart (contract), visage_theme.dart (current look), face.dart (widget), visemes.dart
-  lottie/              segment.dart (liveSegment), cache_lottie.dart (OVOS animations from the cache)
   resources/           locate.dart (pure), platform_io.dart (disk) and platform_web.dart (sidecar routes) behind a conditional export
   protocol/endpoints*  where the sockets are per platform: the host (desktop) or the page's origin (web)
   faults.dart          reportFault: a survivable fault reaches the log before its fallback shows
@@ -105,7 +104,7 @@ from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 | `framing.py`, `/frameable` | not needed with a webview | A webview loads pages top-level, so sites that refuse framing work (verified with google.com on macOS). The web build's iframe cannot tell a refusal from inside the page, so it shows the browser's own refusal there; the URL chip stays as the fallback where there is no webview. |
 | `face.js`, `visemes.js` | `Face`, `FaceTheme`, `visemes.dart` | Same geometry and shapes; Catmull-Rom path in a `CustomPainter`. |
 | `attention.js` | `Attention` | Same events and timings. |
-| `lottie.js`, vendored lottie-web | `lottie` package | All six platforms. `liveSegment` ported. Fidelity on OVOS's files checked in the spike. |
+| `lottie.js`, vendored lottie-web | not ported | Visage draws its own loading dots, status check or cross, and OCP busy arc; OVOS's Lottie files are not played (2026-10-25: they did not match the rest of the screen). |
 | `static/icons/*.svg` | Flutter animations | `flutter_svg` does not run embedded CSS keyframes, so each icon is a static SVG part plus a Flutter animation. |
 | `pages/*.js`, `*_model.js` | `pages/*.dart` | View models stay pure and tested; `textFrame` pagination measures with `TextPainter`. |
 | CSS polish vocabulary | shared widgets | glow, gradient fill, stagger enter, bloom as reusable widgets; a theme file holds the colour tokens. |
@@ -142,7 +141,6 @@ legacy name only; `SYSTEM_input` reuses its page. An exact skill route still win
 | Read `~/.cache/ovos_gui` | yes | yes | no, via sidecar `/res/` and `/res-abs/` |
 | `SYSTEM_HtmlFrame` with scripts | WKWebView | no (plain text) | iframe |
 | `SYSTEM_UrlFrame` | WKWebView | URL chip | iframe; a refused site shows the browser's refusal |
-| Lottie | yes | yes | yes |
 
 ## Phases
 

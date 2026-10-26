@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lottie/lottie.dart';
 import 'package:ovos_gui_visage/pages/media_keys.dart';
 import 'package:ovos_gui_visage/pages/now_playing_status.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
@@ -56,21 +55,13 @@ Widget video() => pageFor(hello, 'SYSTEM_video_player', fixtureData('system_vide
 bool anythingRotated(WidgetTester tester) =>
     tester.widgetList<Transform>(find.byType(Transform)).any((t) => t.transform.storage[1].abs() > 1e-6);
 
-/// OCP's own Lottie where this machine has it cached, else the turning-arc fallback.
-bool busyMoving(WidgetTester tester) {
-  final lottie = find.byType(Lottie);
-  if (lottie.evaluate().isEmpty) return anythingRotated(tester);
-  return (tester.widget<Lottie>(lottie).controller! as AnimationController).isAnimating;
-}
+/// The busy view's turning arc.
+bool busyMoving(WidgetTester tester) => anythingRotated(tester);
 
-/// Reading and parsing the Lottie, or failing to, is real I/O: wait for the animation or the fallback's ring.
+/// The busy view draws at once: its ring is there on the first frame.
 Future<void> untilBusyArrives(WidgetTester tester) async {
-  bool arrived() => find.byType(Lottie).evaluate().isNotEmpty || find.byType(Ring).evaluate().isNotEmpty;
-  for (var round = 0; round < 40 && !arrived(); round++) {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
-    await tester.pump();
-  }
-  expect(arrived(), isTrue, reason: 'the busy animation or its fallback within 4 s');
+  await tester.pump();
+  expect(find.byType(Ring), findsWidgets, reason: 'the busy view\'s ring');
 }
 
 List<double> barHeights(WidgetTester tester) => [

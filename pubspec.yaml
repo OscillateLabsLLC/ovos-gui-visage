@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.3.0
   http: ^1.6.0
-  lottie: ^3.6.1
   path: ^1.9.1
   screen_retriever: ^0.2.0
   tray_manager: ^0.5.3

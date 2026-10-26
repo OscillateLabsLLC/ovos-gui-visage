@@ -9,7 +9,7 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'content_models.dart';
-import 'loading_page.dart' show lottieChipPx;
+import 'loading_page.dart' show templateChipPx;
 import 'page.dart';
 import 'reduced_motion.dart';
 import 'template_text.dart';
@@ -31,7 +31,7 @@ class ErrorPage extends StatelessWidget {
     return StaggerOrStill(
       children: [
         Circle(
-          size: lottieChipPx,
+          size: templateChipPx,
           gradient: gradientFill,
           glow: const Glow(colour: _badSoft, bloom: true),
           ring: const Ring(track: _badDim, value: VisageColors.bad),

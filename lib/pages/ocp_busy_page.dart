@@ -1,6 +1,6 @@
-/// ovos.common_play / busy: OCP searching for media (SPEC 8.6). OCP's own installing.json Lottie, as busy.qml plays
-/// it, in a chip-sized circle under a breathing halo with OCP's label beneath; a turning arc around thinking dots
-/// when the animation is not cached.
+/// ovos.common_play / busy: OCP searching for media (SPEC 8.6). A turning arc around thinking dots in a chip-sized
+/// circle under a breathing halo, OCP's label beneath. Visage draws its own; OCP's installing.json Lottie (busy.qml)
+/// is not played.
 library;
 
 import 'dart:math' as math;
@@ -8,13 +8,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../lottie/cache_lottie.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'ocp_browse_model.dart';
 import 'page.dart';
 
-const installingAnimation = '/res/ovos.common_play/qt5/animations/installing.json';
 const _chipPx = 200.0;
 
 class OcpBusyPage extends StatelessWidget {
@@ -32,11 +30,7 @@ class OcpBusyPage extends StatelessWidget {
         Circle(
           size: _chipPx,
           glow: const Glow(bloom: true),
-          children: [
-            SizedBox.expand(
-              child: CacheLottie(resource: installingAnimation, loop: true, fitRing: true, fallback: const _TurningArc()),
-            ),
-          ],
+          children: const [SizedBox.expand(child: _TurningArc())],
         ),
         const SizedBox(height: 28),
         Text(busyLabel(data), textAlign: TextAlign.center, style: VisageText.muted(22)),
