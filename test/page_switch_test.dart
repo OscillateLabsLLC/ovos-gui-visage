@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/resting_page.dart';
@@ -102,6 +104,15 @@ void main() {
       expect(peak, greaterThan(1));
       expect(_ms(arrivingPose, PageMove.swap, 520), restingPose);
       expect(swapLength, const Duration(milliseconds: 520));
+    });
+
+    test('the page expand overshoots by 2 to 4 percent of the page height; the item pop keeps easeOutBack', () {
+      double peak(Curve curve) => [for (var i = 0; i <= 10000; i++) curve.transform(i / 10000)].reduce(math.max);
+      expect(peak(expandCurve), inInclusiveRange(1.02, 1.04));
+      expect(peak(expandCurve), closeTo(1.0234, 0.0005), reason: 'the value page_moves.dart documents');
+      expect(arriveCurve, Curves.easeOutBack);
+      final heights = [for (var ms = 320; ms <= 520; ms += 2) _ms(arrivingPose, PageMove.swap, ms).scaleY];
+      expect(heights.reduce(math.max), inInclusiveRange(1.019, 1.04));
     });
 
     test('a slide moves both pages a full width together, in the step direction', () {

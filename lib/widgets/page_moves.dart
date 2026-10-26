@@ -20,8 +20,13 @@ const anticipateScale = 1.04;
 const lineScale = 0.02;
 const _lineOpacity = 0.6;
 
-/// The entry curve of the motion language.
+/// The entry curve of the motion language, for small moves: an item's pop (enter.dart). It overshoots by 8.7 percent of
+/// its range, 0.9 percent of an item's size over the pop's 0.9 to 1 scale.
 const arriveCurve = Curves.easeOutBack;
+
+/// The entry curve for a whole page expanding out of the line. arriveCurve would overshoot by 8.5 percent of the page's
+/// height; this cubic peaks at 1.0234 (measured in test/page_switch_test.dart), about 2.3 percent.
+const expandCurve = Cubic(0.2, 0.9, 0.3, 1.1);
 
 final swapLength = swapAnticipate + swapSquash + swapHold + swapExpand;
 final _squashEnds = swapAnticipate + swapSquash;
@@ -85,7 +90,7 @@ PagePose? arrivingPose(PageMove move, Duration elapsed) {
     return (scaleX: 1, scaleY: 1, dx: _direction(move) * (1 - p), opacity: 1);
   }
   if (elapsed < _expandStarts) return null;
-  final p = arriveCurve.transform(_progress(elapsed, _expandStarts, swapExpand));
+  final p = expandCurve.transform(_progress(elapsed, _expandStarts, swapExpand));
   return (scaleX: 1, scaleY: lineScale + (1 - lineScale) * p, dx: 0, opacity: 1);
 }
 

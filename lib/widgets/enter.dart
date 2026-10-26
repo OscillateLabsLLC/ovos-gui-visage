@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'circle.dart' show motionReduced;
+import 'page_moves.dart' show arriveCurve;
 
 /// One item's pop.
 const enterDuration = Duration(milliseconds: 200);
@@ -93,7 +94,7 @@ class _Enter extends StatelessWidget {
 
   /// The item [t] of the way in: it shows within the first half and pops up from below with a little overshoot.
   static Widget _pop(double t, Widget child) {
-    final pop = Curves.easeOutBack.transform(t);
+    final pop = arriveCurve.transform(t);
     return Opacity(
       opacity: (2 * t).clamp(0.0, 1.0),
       child: Transform.translate(
