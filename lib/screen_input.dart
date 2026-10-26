@@ -74,9 +74,9 @@ class ScreenInput {
     },
   );
 
-  /// The list belongs to the homescreen, as idle.qml's popup did: another page coming up closes it.
+  /// The list belongs to the resting screen, as idle.qml's popup did: another page coming up closes it.
   void syncNotificationList() {
-    if (state.current()?.namespace != state.idleNamespace) notificationList.close();
+    if (pageClosesNotificationList(state.current(), state.idleNamespace)) notificationList.close();
   }
 
   /// Escape closes the menu, else the notification list.

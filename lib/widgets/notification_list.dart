@@ -7,8 +7,14 @@ import 'package:flutter/foundation.dart';
 
 import '../faults.dart';
 import '../protocol/core_bus.dart';
+import '../state/gui_state.dart' show Target;
 import 'notification_actions.dart';
 import 'stored_notifications.dart';
+
+/// Whether [current] is a page the list must leave for: any page but the resting screen. On legacy the resting
+/// screen is the homescreen's idle page in [idleNamespace]; on GUI-1 it is Visage's own and no page is current, so
+/// a null [current] keeps the list (a tap on the badge used to open it and the next refresh closed it at once).
+bool pageClosesNotificationList(Target? current, String idleNamespace) => current != null && current.namespace != idleNamespace;
 
 class NotificationListController extends ChangeNotifier {
   NotificationListController({required this.bus, required this.storage, this.onOpenChanged}) {
