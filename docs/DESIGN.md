@@ -98,6 +98,19 @@ starts and scale that one image; mount the arriving page at the hold so its firs
 still, and scale its image through the expand; paint live again at rest. Re-measure both modes after any change to
 the moves.
 
+After the snapshots (same machine and cycle, full motion):
+
+| Build | Frames | Over 16.7 ms | Over 8.3 ms |
+|---|---|---|---|
+| Live pages, full motion (before) | 15352 | 47 | 106 |
+| Snapshots, full motion (after) | 15345 | 29 | 80 |
+| Snapshots, `cut` (the floor: no motion at all) | — | 25 | 50 |
+
+The cluster 8 ms after `squash start` is gone. What remains per page swap is close to the floor: one 20 to 80 ms raster
+frame on the frame the move starts (capturing the leaving page, or the page change itself), and the arriving page's
+first build and paint at +224 ms, the start of the hold (build 10 to 33 ms, raster up to 62 ms). Nothing spikes at
+the item pops, so a swapped-in page keeps them.
+
 ## Glanceability
 
 A user reads the screen from across the room, often in one look.
