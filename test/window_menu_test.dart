@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/face/face_spec.dart';
 import 'package:ovos_gui_visage/volume_controls.dart';
+import 'package:ovos_gui_visage/window/menu_rows.dart';
 import 'package:ovos_gui_visage/window/status_menu.dart';
 import 'package:ovos_gui_visage/window/window_config.dart';
 import 'package:ovos_gui_visage/window/window_menu.dart';
@@ -76,7 +77,11 @@ void main() {
     final click = tester.getTopLeft(find.byType(WindowMenu)) + const Offset(20, 20);
     await tester.tapAt(click, buttons: kSecondaryButton);
     await tester.pumpAndSettle();
-    expect((tester.getTopLeft(find.text('Type a command…')) - click).distance, lessThan(60), reason: 'opens at the click');
+    expect(
+      tester.getCenter(find.byType(MenuLevelView)).dx,
+      closeTo(tester.getCenter(find.byType(WindowMenu)).dx, 1),
+      reason: 'centred in the frame, wherever the click was',
+    );
     await tester.tap(find.text('under'));
     await tester.pumpAndSettle();
     expect(find.text('Full screen'), findsNothing);

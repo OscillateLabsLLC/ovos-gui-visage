@@ -165,8 +165,6 @@ Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
 - `lib/widgets/command_box.dart`: the typed-command box has an accent outline.
 - `lib/widgets/volume_indicator.dart`: the volume pill is a filled rounded box; allow it as a status pill or redraw it.
 - `lib/widgets/notification_stack.dart`: notification popups are filled rounded boxes, close to cards.
-- `lib/window/window_menu.dart`: the in-window menu has an accent outline.
-- `lib/window/window_menu.dart`: the in-window menu separators are accent, not the faint hairline.
 
 Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
 

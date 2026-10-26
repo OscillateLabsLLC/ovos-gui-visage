@@ -1,14 +1,19 @@
 /// The menu inside the window, the third host of status_menu.dart beside the macOS menu bar item and the Linux tray, so
 /// a desktop with neither (stock GNOME, a Pi, a browser tab) can still change mode, leave kiosk and quit (issue #14).
 /// [WindowMenuHost] takes the controller's items like the other hosts and holds open requests; [WindowMenu] draws them
-/// with Flutter's MenuAnchor once the window is [WindowMenu.ready], so a collapsed peek badge expands first.
+/// once the window is [WindowMenu.ready], so a collapsed peek badge expands first. The menu is plain stacked text on the
+/// attention face's scrim, centred in the 480 x 800 frame (menu_rows.dart); a submenu drills in with a Back row.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../face/face_theme.dart' show frameHeight, frameWidth;
 import '../theme.dart';
+import '../widgets/circle.dart' show motionReduced;
+import 'menu_rows.dart';
 import 'status_menu.dart';
 
 class WindowMenuHost extends ChangeNotifier {
@@ -75,10 +80,16 @@ class WindowMenuHost extends ChangeNotifier {
   }
 }
 
-/// A menu closes whenever the view changes size (RawMenuAnchor), so a request waits until the window has held its
-/// size this long: an expanding peek widget animates its growth over several frames.
+/// A peek widget grows over several frames, so a request waits until the window has held its size this long.
 const menuSettle = Duration(milliseconds: 250);
-const _menuInset = 12.0;
+
+/// Closing fades the menu; opening is the item cadence of its rows.
+const menuFade = Duration(milliseconds: 120);
+
+const _framePadding = EdgeInsets.symmetric(horizontal: 24, vertical: 32);
+
+/// The scrim's name to a screen reader: a tap on it closes the menu.
+const closeMenuLabel = 'Close the menu';
 
 class WindowMenu extends StatefulWidget {
   const WindowMenu({super.key, required this.host, required this.child, this.ready = true});
@@ -94,10 +105,15 @@ class WindowMenu extends StatefulWidget {
 }
 
 class _WindowMenuState extends State<WindowMenu> {
-  final controller = MenuController();
   Size _size = Size.zero;
   bool _settled = false;
   Timer? _settle;
+  bool _shown = false;
+  bool _fading = false;
+
+  /// The submenus drilled into, outermost first, by entry id.
+  List<String> _path = const [];
+  int _focus = -1;
 
   @override
   void initState() {
@@ -119,16 +135,36 @@ class _WindowMenuState extends State<WindowMenu> {
   }
 
   void _changed() {
-    if (widget.host.takeDismiss()) controller.isOpen ? controller.close() : widget.host.closed();
+    if (widget.host.takeDismiss()) _close();
     if (mounted) setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) => _openPending());
   }
 
+  /// The request's position stays with the host for the tray hosts; this menu always sits in the frame's centre.
   void _openPending() {
     if (!mounted || !widget.ready || !_settled || widget.host.pending == null) return;
-    final at = widget.host.take()!;
-    final inside = Offset(at.dx.clamp(_menuInset, _size.width), at.dy.clamp(_menuInset, _size.height));
-    controller.open(position: inside);
+    widget.host.take();
+    setState(() {
+      _shown = true;
+      _fading = false;
+      _goTo(const []);
+    });
+  }
+
+  void _close() {
+    if (_shown && mounted) {
+      setState(() {
+        _shown = false;
+        _fading = !motionReduced(context);
+      });
+    }
+    widget.host.closed();
+  }
+
+  /// Shows the level [path] reaches, with nothing focused.
+  void _goTo(List<String> path) {
+    _path = path;
+    _focus = -1;
   }
 
   void _resized(Size size) {
@@ -141,71 +177,91 @@ class _WindowMenuState extends State<WindowMenu> {
     });
   }
 
+  void _activate(MenuEntry entry) {
+    if (entry == backEntry) return _back();
+    if (entry.children.isNotEmpty) return setState(() => _goTo([..._path, entry.id]));
+    _close();
+    widget.host.onSelected(entry.id);
+  }
+
+  void _back() => setState(() => _goTo(_path.sublist(0, _path.length - 1)));
+
+  KeyEventResult _key(KeyEvent event, List<MenuEntry> rows) {
+    if (!_shown || event is KeyUpEvent) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.arrowUp) {
+      setState(() => _focus = nextFocus(rows, _focus, key == LogicalKeyboardKey.arrowDown ? 1 : -1));
+    } else if (_selectKeys.contains(key)) {
+      if (_focus >= 0) _activate(rows[_focus]);
+    } else if (_path.isNotEmpty && (key == LogicalKeyboardKey.escape || key == LogicalKeyboardKey.arrowLeft)) {
+      _back();
+    } else if (key == LogicalKeyboardKey.escape) {
+      _close();
+    } else if (key != LogicalKeyboardKey.arrowLeft && key != LogicalKeyboardKey.arrowRight) {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.biggest != _size) _resized(constraints.biggest);
-        return Theme(
-          data: Theme.of(context).copyWith(colorScheme: _menuColours),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              widget.child,
-              Positioned(left: 0, top: 0, child: _anchor()),
-            ],
-          ),
-        );
+        return Stack(fit: StackFit.expand, children: [widget.child, if (_shown || _fading) _overlay(context)]);
       },
     );
   }
 
-  /// An empty anchor at the window's origin: MenuAnchor counts its child as inside the menu, so a window-sized child
-  /// would leave no outside to click.
-  Widget _anchor() => MenuAnchor(
-    controller: controller,
-    consumeOutsideTap: true,
-    onClose: widget.host.closed,
-    style: _menuStyle,
-    menuChildren: [for (final entry in widget.host.items) _entry(entry)],
-    child: const SizedBox.shrink(),
+  /// The scrim over the window, and the level centred in a box the frame's size, scaled as the frame is.
+  Widget _overlay(BuildContext context) {
+    final level = menuLevel(widget.host.items, _path);
+    return IgnorePointer(
+      ignoring: !_shown,
+      child: AnimatedOpacity(
+        opacity: _shown ? 1 : 0,
+        duration: motionReduced(context) ? Duration.zero : menuFade,
+        onEnd: () => setState(() => _fading = false),
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: (_, event) => _key(event, level.rows),
+          child: Stack(fit: StackFit.expand, children: [_scrim(), _framed(_level(level))]),
+        ),
+      ),
+    );
+  }
+
+  /// The attention face's dim over the whole window; a tap on it closes the menu.
+  Widget _scrim() => Semantics(
+    container: true,
+    button: true,
+    label: closeMenuLabel,
+    child: GestureDetector(
+      onTap: _close,
+      child: const ColoredBox(color: VisageColors.scrim),
+    ),
   );
 
-  Widget _entry(MenuEntry entry) {
-    if (entry.separator) return const Divider(height: 9, thickness: 1, color: VisageColors.accentDim);
-    final select = entry.enabled ? () => widget.host.onSelected(entry.id) : null;
-    final label = Text(entry.title);
-    if (entry.children.isNotEmpty) {
-      return SubmenuButton(
-        style: _itemStyle,
-        menuStyle: _menuStyle,
-        menuChildren: [for (final c in entry.children) _entry(c)],
-        child: label,
-      );
-    }
-    if (isCheckable(entry)) {
-      return CheckboxMenuButton(
-        style: _itemStyle,
-        value: entry.checked,
-        onChanged: select == null ? null : (_) => select(),
-        child: label,
-      );
-    }
-    return MenuItemButton(style: _itemStyle, onPressed: select, child: label);
-  }
+  /// [level] centred at the page's padding in a box the frame's size, scaled into the window as the frame is.
+  Widget _framed(Widget level) => FittedBox(
+    child: SizedBox(
+      width: frameWidth,
+      height: frameHeight,
+      child: Padding(
+        padding: _framePadding,
+        child: Center(child: SingleChildScrollView(child: level)),
+      ),
+    ),
+  );
+
+  Widget _level(({String? heading, List<MenuEntry> rows}) level) => MenuLevelView(
+    key: ValueKey(_path.join('/')),
+    heading: level.heading,
+    rows: level.rows,
+    focus: _focus,
+    onHover: (i) => setState(() => _focus = i),
+    onActivate: (i) => _activate(level.rows[i]),
+  );
 }
 
-const _menuStyle = MenuStyle(
-  backgroundColor: WidgetStatePropertyAll(VisageColors.card),
-  side: WidgetStatePropertyAll(BorderSide(color: VisageColors.accentDim)),
-);
-
-/// Compact rows, so the whole menu fits a 400 px widget without scrolling.
-final _itemStyle = MenuItemButton.styleFrom(
-  foregroundColor: VisageColors.fg,
-  disabledForegroundColor: VisageColors.muted,
-  minimumSize: const Size(0, 32),
-  visualDensity: VisualDensity.compact,
-);
-
-const _menuColours = ColorScheme.dark(primary: VisageColors.accent, surface: VisageColors.card);
+final _selectKeys = {LogicalKeyboardKey.enter, LogicalKeyboardKey.numpadEnter, LogicalKeyboardKey.space};

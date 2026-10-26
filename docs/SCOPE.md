@@ -257,8 +257,10 @@ Those steps stop at either end, and the text's own turning waits three page time
 zones exist only on such a page; a page's own controls win the tap, since the shell's detector sits behind them.
 
 A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt delegate did. The menu is the one
-`lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time with
-Flutter's MenuAnchor (`lib/window/window_menu.dart`), without "Hide face" (hiding the window from inside it would
+`lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time in Visage's
+own vocabulary (`lib/window/window_menu.dart`, `lib/window/menu_rows.dart`: plain stacked text on the attention face's
+scrim, centred in the frame, submenus drilling in with a Back row; arrow keys, Enter or Space, Left and Escape),
+without "Hide face" (hiding the window from inside it would
 strand a desktop with no menu bar item or tray) and, in a browser, without "Quit". A peeking widget stays
 expanded while the menu or the command box is up.
 

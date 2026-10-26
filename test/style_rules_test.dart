@@ -28,10 +28,6 @@ const allowed = <String, Map<String, String>>{
   },
   'lib/widgets/volume_indicator.dart': {roundedFill: 'audit: the volume pill, a status pill like the offline one'},
   'lib/widgets/notification_stack.dart': {roundedFill: 'audit: notification popups are filled rounded boxes, close to cards'},
-  'lib/window/window_menu.dart': {
-    border: 'audit: the in-window menu has an accent outline',
-    divider: 'audit: the in-window menu separators are accent, not the hairline',
-  },
 };
 
 class Hit {

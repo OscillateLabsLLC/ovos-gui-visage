@@ -285,7 +285,9 @@ Each display lists what its own popups put in the store, less what any client or
 You can use the screen with a mouse or a touch screen, as you could with the Qt GUI.
 
 - **Menu**: right-click anywhere in the window, tap with two fingers, or press the Menu key. The same menu as
-  the menu bar item and the Linux tray opens inside the window, on every platform, the web build too. So a
+  the menu bar item and the Linux tray opens inside the window, on every platform, the web build too. It is plain
+  text over the dimmed screen; Face, Colours and Volume open in place with a Back row at the top, and the arrow keys,
+  Enter, Left and Escape work as well as the pointer. So a
   desktop with no tray, such as stock GNOME or a Raspberry Pi, can still change the mode, leave kiosk and quit.
   The menu inside the window has no **Hide face**, because you could not get the window back without a tray,
   and in a browser it has no **Quit**. On a collapsed peek badge, the window opens first, then the menu.
