@@ -9,7 +9,9 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import '../widgets/home_chips.dart';
+import 'data_faults.dart';
 import 'page.dart';
+import 'weather_model.dart' show parseNumber;
 
 export '../widgets/home_chips.dart' show showNotificationsLabel;
 
@@ -34,6 +36,14 @@ String dateLine(Json data) {
 }
 
 bool hasWeather(Json data) => truthy(data['weather_api_enabled']) && data['weather_temp'] != null;
+
+/// `weather_temp` as the homescreen sends it (a number, or a string with a point or a comma); null when it cannot be
+/// read, and then the chip is hidden and the fault reported rather than a 0 shown (a tester saw "0°" on 2026-10-24).
+double? weatherTemp(Json data) => hasWeather(data) ? parseNumber(data['weather_temp']) : null;
+
+List<String> idleProblems(Json data) => [
+  if (hasWeather(data) && weatherTemp(data) == null) 'weather_temp ${data['weather_temp']} is not a number; weather chip hidden',
+];
 
 /// The badge counts the stored list it opens, as WidgetsArea.qml shows `notificationModel.count`; the session's
 /// `notifcation_counter` (sic) only ever grows, so it is not shown.
@@ -63,25 +73,29 @@ class IdlePage extends StatelessWidget {
     final timer = events[timerEvent] as Map?;
     final alarm = events[alarmEvent] as Map?;
     final media = events[mediaEvent] as Map?;
-    return WithCountBadge(
-      count: storedNotifications,
-      onTap: onShowNotifications,
-      child: StaggerEnter(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          if (hasWeather(data))
-            WeatherChip(icon: weatherIconName(data['weather_code']), temperature: '${number(data['weather_temp']).round()}°'),
-          ClockChip(time: text(data['time_string']), date: dateLine(data)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 18,
-            children: [
-              if (number(timer?['count']) > 0) _countChip(number(timer?['count']).toInt(), 'timer'),
-              if (number(alarm?['count']) > 0) _countChip(number(alarm?['count']).toInt(), 'alarm'),
-              if (media?['state'] == 'playing') _mediaChip(media?['widget'] as Map? ?? const {}),
-            ],
-          ),
-        ],
+    final temp = weatherTemp(data);
+    return ReportsDataFaults(
+      template: 'homescreen idle',
+      problems: idleProblems(data),
+      child: WithCountBadge(
+        count: storedNotifications,
+        onTap: onShowNotifications,
+        child: StaggerEnter(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            if (temp != null) WeatherChip(icon: weatherIconName(data['weather_code']), temperature: '${temp.round()}°'),
+            ClockChip(time: text(data['time_string']), date: dateLine(data)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 18,
+              children: [
+                if (number(timer?['count']) > 0) _countChip(number(timer?['count']).toInt(), 'timer'),
+                if (number(alarm?['count']) > 0) _countChip(number(alarm?['count']).toInt(), 'alarm'),
+                if (media?['state'] == 'playing') _mediaChip(media?['widget'] as Map? ?? const {}),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

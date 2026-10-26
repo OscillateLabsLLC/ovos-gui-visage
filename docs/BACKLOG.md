@@ -214,3 +214,27 @@ the bottom of content pages (the forecast row, list rows) for the length of ever
 - A Dart recorder for protocol fixtures, so contributors do not need ovos-visage's `--record`.
 - The `/res-abs/` route in the sidecar serves whatever is mounted under `/srv/host`; ovos-visage
   only served paths that had appeared in session data. Mount narrowly until the sidecar checks.
+
+## Community feedback on v2.1 (2026-10-24, a tester on the OVOS chat)
+
+What the motion branch already answers, and what is still open. Items marked upstream are not Visage's to fix.
+
+- Done here: the keyboard button overlapped the captions in kiosk; captions are off by default now, and the caption
+  band item above covers the layout when they are on.
+- Done here: the right-click menu duplicates the menu bar; in a container there is no menu bar, so the in-window
+  menu stays. The tester would like the type-command button shown all the time, as a config: open, see below.
+- Open: show the type-command button on the resting screen in the corner-widget modes too (`typeOnHome` is true
+  only in window and kiosk; `lib/screen_frame.dart`), or a config key that always shows it.
+- Open: place the widget anywhere, not only in a corner. Drag already moves it, then it snaps to the nearest corner
+  (`nearestCorner`, `lib/window/window_config.dart`); a config key to keep the dropped position is the smallest change.
+- Open: keyboard shortcuts for the menu's choices, at least hide peek and open the face picker.
+- Open, Linux: kiosk leaves the menu bar's strip uncovered on the tester's desktop (the Linux issues under the
+  `linux` label).
+- Open: the face picker opens in a browser behind the kiosk window, so it looks as if the option vanished; leave
+  kiosk to float when the picker opens, or draw the picker in the window.
+- Open: the homescreen weather chip shows 0 degrees on the tester's install. `weather_temp` is parsed with
+  `number()` (fallback 0, `lib/pages/page.dart`) and the chip shows whatever comes back; a value the parser cannot
+  read must be reported and the chip hidden instead (CLAUDE.md, never swallow a failure). Needs the tester's data.
+- Upstream: the OCP YouTube track duration (the `fix/ocp-length-total` item above) and the volume dropping during
+  barge-in (the listener's ducking). A volume slider in place of the pill is a design question for later.
+
