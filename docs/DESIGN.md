@@ -33,15 +33,15 @@ Use these widgets. Do not make a new effect for one page.
 |---|---|---|
 | `Circle` (`lib/widgets/circle.dart`) | Every chip: a filled or gradient circle with its content centred | — |
 | `Ring` (`lib/widgets/circle.dart`) | A track and a value arc from twelve o'clock, for progress | 900 ms to a new value |
-| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `loop` makes it swell for a held state | 6 s each way; 1.1 s each way when looping |
+| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `bloom` swells it once as its page arrives, `loop` keeps it swelling for a held state | 6 s each way; bloom 1.1 s up and 1.1 s back; 1.1 s each way when looping |
 | `gradientFill` (`lib/widgets/circle.dart`) | The lit-from-above fill of a hero circle | — |
-| `StaggerEnter` (`lib/widgets/circle.dart`) | A column whose items fade and rise in | 260 ms each, 60 ms apart |
-| `RiseIn` (`lib/widgets/circle.dart`) | One item of a list that is not a plain column, with the same entry | 260 ms, 60 ms per index |
+| `StaggerEnter` (`lib/widgets/enter.dart`) | A column whose items pop in: up 16 px from 0.9 scale, `Curves.easeOutBack` | 200 ms each, 100 ms apart, the seventh on with the sixth |
+| `RiseIn` (`lib/widgets/enter.dart`) | One item of a list that is not a plain column, with the same entry | 200 ms, 100 ms per index, capped like `StaggerEnter` |
 | `MotionIcon` (`lib/widgets/motion_icon.dart`) | The animated weather and status icons, from their SVG keyframes | per icon |
 | Home chips (`lib/widgets/home_chips.dart`) | The weather chip, the clock chip and the notification badge of both resting screens | — |
 
-A bloom swells the glow when a state arrives. A held state keeps it swelling: a ringing alarm uses a looping red
-`Glow` (`lib/pages/alarms_page.dart`). No widget makes a one-time bloom yet (docs/BACKLOG.md, Pre-announcement polish audit).
+A bloom swells the glow when a state arrives: `Glow(bloom: true)` on a hero circle. A held state keeps it swelling: a
+ringing alarm uses a looping red `Glow` (`lib/pages/alarms_page.dart`).
 
 ## Motion rules
 

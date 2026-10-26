@@ -1,5 +1,5 @@
 /// The shared vocabulary of ovos-visage SPEC 9: circles, rings, the breathing glow, the gradient fill and the
-/// stagger-enter motion. Pages compose these instead of inventing per-page effects.
+/// stagger-enter motion (enter.dart). Pages compose these instead of inventing per-page effects.
 library;
 
 import 'dart:math' as math;
@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+
+export 'enter.dart';
 
 const ringStroke = 6.0;
 const ringRadiusFraction = 0.46;
@@ -118,122 +120,80 @@ class _RingPainter extends CustomPainter {
       old.fraction != fraction || old.track != track || old.value != value || old.stroke != stroke;
 }
 
-/// The breathing halo behind a hero ring (visage.css .hero-glow); [colour] tints it, [loop] keeps it swelling.
+/// The bloom's swell, and the loop's swell each way (docs/DESIGN.md, Motion language).
+const glowSwell = Duration(milliseconds: 1100);
+const _breath = Duration(seconds: 6);
+
+/// The bloom: the halo swells once (ease-out) and settles back over the same time while the breath runs beneath it.
+final _bloomSwell = TweenSequence<double>([
+  TweenSequenceItem(tween: Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
+  TweenSequenceItem(tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.easeInOut)), weight: 1),
+]);
+
+/// The breathing halo behind a hero ring (visage.css .hero-glow); [colour] tints it, [loop] keeps it swelling, and
+/// [bloom] swells it once when it first builds, as its state arrives.
 class Glow extends StatefulWidget {
-  const Glow({super.key, this.colour = VisageColors.accentSoft, this.loop = false});
+  const Glow({super.key, this.colour = VisageColors.accentSoft, this.loop = false, this.bloom = false});
 
   final Color colour;
   final bool loop;
+  final bool bloom;
 
   @override
   State<Glow> createState() => _GlowState();
 }
 
 /// The halo scales its shadow's alpha rather than sitting under an Opacity: Impeller drops an Opacity whose only child
-/// is a blur. Under reduced motion the controller stops and the halo holds [glowStillPhase].
-class _GlowState extends State<Glow> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: widget.loop ? const Duration(milliseconds: 1100) : const Duration(seconds: 6),
-  );
+/// is a blur. Under reduced motion both controllers stop and the halo holds [glowStillPhase] with no bloom.
+class _GlowState extends State<Glow> with TickerProviderStateMixin {
+  late final AnimationController _breathing = AnimationController(vsync: this, duration: widget.loop ? glowSwell : _breath);
+  late final AnimationController _bloom = AnimationController(vsync: this, duration: glowSwell * 2, value: widget.bloom ? 0 : 1);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (motionReduced(context)) {
-      _controller.stop();
-    } else if (!_controller.isAnimating) {
-      _controller.repeat(reverse: true);
+      _breathing.stop();
+      _bloom.value = 1;
+      return;
     }
+    if (!_breathing.isAnimating) _breathing.repeat(reverse: true);
+    if (_bloom.value < 1 && !_bloom.isAnimating) _bloom.forward();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _breathing.dispose();
+    _bloom.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (motionReduced(context)) return _halo(glowStillPhase);
-    return AnimatedBuilder(animation: _controller, builder: (context, _) => _halo(Curves.easeInOut.transform(_controller.value)));
+    if (motionReduced(context)) return _halo(glowStillPhase, 0);
+    return AnimatedBuilder(
+      animation: Listenable.merge([_breathing, _bloom]),
+      builder: (context, _) => _halo(Curves.easeInOut.transform(_breathing.value), _bloomSwell.transform(_bloom.value)),
+    );
   }
 
-  Widget _halo(double t) {
-    final blur = widget.loop ? 34 + 30 * t : 34.0;
-    final spread = widget.loop ? 2 + 12 * t : 2.0;
-    final colour = widget.loop ? widget.colour : widget.colour.withValues(alpha: widget.colour.a * (0.45 + 0.55 * t));
+  /// The halo at breath phase [t], lifted by the bloom's [swell]. A looping glow swells blur and spread with either; a
+  /// breathing glow keeps its blur and breathes its alpha, and the bloom swells it as the loop does.
+  Widget _halo(double t, double swell) {
+    final lift = widget.loop ? math.max(t, swell) : swell;
+    final restingAlpha = widget.loop ? 1.0 : 0.45 + 0.55 * t;
+    final alpha = restingAlpha + (1 - restingAlpha) * swell;
     return DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: colour, blurRadius: blur, spreadRadius: spread)],
-      ),
-    );
-  }
-}
-
-/// Children fade and rise in, 260 ms each, 60 ms apart (visage.css .stagger-enter); under reduced motion they stand in
-/// place at full opacity.
-class StaggerEnter extends StatelessWidget {
-  const StaggerEnter({super.key, required this.children, this.gap = 28, this.mainAxisSize = MainAxisSize.min});
-
-  final List<Widget> children;
-  final double gap;
-  final MainAxisSize mainAxisSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) SizedBox(height: gap),
-          _Enter(
-            delay: Duration(milliseconds: 60 * math.min(i, 5)),
-            child: children[i],
+        boxShadow: [
+          BoxShadow(
+            color: widget.colour.withValues(alpha: widget.colour.a * alpha),
+            blurRadius: 34 + 30 * lift,
+            spreadRadius: 2 + 12 * lift,
           ),
         ],
-      ],
-    );
-  }
-}
-
-/// One item rising and fading in after [delay], for lists that are not a plain column (StaggerEnter does columns).
-class RiseIn extends StatelessWidget {
-  const RiseIn({super.key, required this.index, required this.child});
-
-  final int index;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => _Enter(
-    delay: Duration(milliseconds: 60 * index),
-    child: child,
-  );
-}
-
-class _Enter extends StatelessWidget {
-  const _Enter({required this.delay, required this.child});
-
-  final Duration delay;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (motionReduced(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 260) + delay,
-      curve: Interval(delay.inMilliseconds / (260 + delay.inMilliseconds), 1, curve: Curves.easeOut),
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, 12 * (1 - t)),
-          child: Transform.scale(scale: 0.97 + 0.03 * t, child: child),
-        ),
       ),
-      child: child,
     );
   }
 }
