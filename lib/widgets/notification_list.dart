@@ -19,13 +19,16 @@ class NotificationListController extends ChangeNotifier {
   final ValueListenable<List<Json>> storage;
   final void Function(bool open)? onOpenChanged;
   bool _open = false;
+  bool _hadItems = false;
 
   bool get isOpen => _open;
 
   List<StoredNotification> get items => [for (final record in storage.value) StoredNotification(record)];
 
-  /// Nothing opens over an empty store, as the homescreen hides its button then.
-  void open() => _set(storage.value.isNotEmpty);
+  /// Opens over an empty store too: on GUI-1 the badge's count comes from a producer (`gui.ambient.notifications`),
+  /// so a tap can land before anything has expired into storage, and a tap that does nothing reads as broken. The
+  /// panel says the store is empty.
+  void open() => _set(true);
 
   void close() => _set(false);
 
@@ -53,8 +56,11 @@ class NotificationListController extends ChangeNotifier {
     return false;
   }
 
+  /// A store that empties under an open list (clear all, the last clear) closes it; a list opened over an empty
+  /// store stays until the person closes it.
   void _stored() {
-    if (storage.value.isEmpty) close();
+    if (storage.value.isEmpty && _hadItems) close();
+    _hadItems = storage.value.isNotEmpty;
     notifyListeners();
   }
 

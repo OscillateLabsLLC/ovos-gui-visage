@@ -61,9 +61,10 @@ void main() {
     expect(texts(), [_texts[0], _texts[2]]);
   });
 
-  test('it opens only over something stored, and closes by itself once storage empties', () {
+  test('it opens over an empty store too (the badge count can be a producer\'s), and closes once a filled store empties', () {
     list.open();
-    expect(list.isOpen, isFalse);
+    expect(list.isOpen, isTrue, reason: 'a tap on the badge always shows the list, empty or not');
+    list.close();
     storeThree();
     list.open();
     expect(list.isOpen, isTrue);

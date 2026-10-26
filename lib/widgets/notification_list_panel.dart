@@ -14,6 +14,8 @@ import 'stored_notifications.dart';
 const _panelBackground = Color(0xF505070A);
 const _hairline = Color(0x24FFFFFF);
 const listTitle = 'Notifications';
+const emptyListText = 'Nothing kept yet';
+const emptyListHint = 'Notices that time out or that you close come here.';
 
 const _arrows = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
@@ -97,7 +99,21 @@ class _NotificationListPanelState extends State<NotificationListPanel> {
     ],
   );
 
-  Widget _list(NotificationListController controller) => ListView.separated(
+  Widget _list(NotificationListController controller) => widget.items.isEmpty ? _empty() : _rows(controller);
+
+  Widget _empty() => Padding(
+    padding: const EdgeInsets.only(top: 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(emptyListText, style: VisageText.fg(22)),
+        const SizedBox(height: 6),
+        Text(emptyListHint, style: VisageText.muted(17)),
+      ],
+    ),
+  );
+
+  Widget _rows(NotificationListController controller) => ListView.separated(
     padding: EdgeInsets.zero,
     itemCount: widget.items.length,
     separatorBuilder: (_, _) => const Divider(height: 1, thickness: 1, color: _hairline),
