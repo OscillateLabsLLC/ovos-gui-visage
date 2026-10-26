@@ -39,6 +39,10 @@ Use these widgets. Do not make a new effect for one page.
 | `RiseIn` (`lib/widgets/enter.dart`) | One item of a list that is not a plain column, with the same entry | 200 ms, 100 ms per index, capped like `StaggerEnter` |
 | `MotionIcon` (`lib/widgets/motion_icon.dart`) | The animated weather and status icons, from their SVG keyframes | per icon |
 | Home chips (`lib/widgets/home_chips.dart`) | The weather chip, the clock chip and the notification badge of both resting screens | — |
+| `PageSwitch` (`lib/widgets/page_switch.dart`, timeline in `page_moves.dart`) | Every page change in `PageHost`: squash to a line and expand for a new shape, a slide for a step between a skill's pages | 520 ms; 200 ms |
+| `EnterCue` (`lib/widgets/enter.dart`) | Set by `PageSwitch`: an arriving page's items wait for its expand, a sliding page arrives whole | — |
+| `ChipBirth` (`lib/widgets/chip_birth.dart`) | The GUI-1 resting chips, born from one disc each time the page appears | 500 ms |
+| `DotCollapse` (`lib/widgets/dot_collapse.dart`) | The attention face going: it collapses to a dot at its centre, then fades | 300 ms |
 
 A bloom swells the glow when a state arrives: `Glow(bloom: true)` on a hero circle. A held state keeps it swelling: a
 ringing alarm uses a looping red `Glow` (`lib/pages/alarms_page.dart`).
@@ -60,9 +64,9 @@ same footage), not from the stills. The screen moves like a cartoon: it winds up
 | Move | What the video does | Timing | Where it goes in Visage |
 |---|---|---|---|
 | Birth | One accent disc pops in, stretches into a peanut, splits into two discs, and the two become the weather and clock chips; their content fades in last. | pop 100 ms, stretch 200 ms, split 100 ms, content 100 ms | The resting screen the first time it shows and after a page leaves (`RestingPage`) |
-| Page swap, same shape | The old chips slide out to the left while the new ones slide in from the right; both are on screen together. | 200 ms, overlapping | Paging inside a namespace (`PagePager`), swipe and arrow keys |
-| Page swap, new shape | The whole page squashes to a horizontal line at its centre, holds a beat, and the next page expands out of the line. | squash 200 ms, hold 100 ms, expand 200 ms | Any template change and the return to the resting screen (`PageHost`) |
-| Collapse to a dot | When listening ends, the bars shrink to dots, the dots to one dot, and the answer bursts out of it. | shrink 300 ms, burst 100 ms | The attention face giving way to a page (`AttentionOverlay` with `PageHost`) |
+| Page swap, same shape | The old chips slide out to the left while the new ones slide in from the right; both are on screen together. | 200 ms, overlapping | Paging inside a namespace: the step `PagePager` makes (swipe, arrow keys, chevrons), drawn by `PageSwitch` |
+| Page swap, new shape | The whole page squashes to a horizontal line at its centre, holds a beat, and the next page expands out of the line. | squash 200 ms (60 ms of it a grow), hold 100 ms, expand 200 ms | Any template change and the return to the resting screen (`PageSwitch` in `PageHost`) |
+| Collapse to a dot | When listening ends, the bars shrink to dots, the dots to one dot, and the answer bursts out of it. | shrink 300 ms, burst 100 ms | The attention face going (`DotCollapse` in `AttentionOverlay`); a page arriving in the same frame expands at 320 ms, after the dot |
 | Item cadence | List items arrive one after another, each a sharp pop, not a drift. | 100 ms apart | `StaggerEnter` and `RiseIn` on every list, grid, table and chip row |
 | Bloom | A hero glow swells once when its state arrives, then breathes. | swell 1.1 s, then the 6 s breath | `Glow(bloom: true)` on every hero circle when its page arrives |
 
@@ -112,7 +116,8 @@ Never show an empty screen without a report. Never hide a failure in an empty `c
 | `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 432 × 736 or 432 × 650, and is not on the audit list; or the rendering library reports a fault while it lays out at either size (an overflowing flex) |
 | `test/resting_centering_test.dart` | the resting chips leave the page's centre line, on either resting screen |
 | `test/reduced_motion_test.dart` | a file that animates does not read the reduced-motion setting and is not on the audit list |
-| `test/circle_motion_test.dart` | the shared widgets move under reduced motion |
+| `test/circle_motion_test.dart` | the shared widgets move under reduced motion, or the bloom and the item cadence leave their timings |
+| `test/page_switch_test.dart`, `test/chip_birth_test.dart`, `test/dot_collapse_test.dart` | a signature move leaves its timeline, or moves under reduced motion |
 | `test/styles_test.dart` | a face pairing does not paint every frame without a fault |
 | `test/motion_test.dart` | an animated icon layer has no motion or painter |
 

@@ -114,7 +114,7 @@ void main() {
     double scaleOf(WidgetTester tester, String text) => tester
         .widget<Transform>(find.ancestor(of: find.text(text), matching: find.byType(Transform)).first)
         .transform
-        .getMaxScaleOnAxis();
+        .entry(0, 0);
 
     testWidgets('each item pops in over 200 ms, 100 ms after the one before', (tester) async {
       await tester.pumpWidget(_frame(const StaggerEnter(children: [Text('a'), Text('b'), Text('c')]), still: false));

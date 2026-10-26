@@ -1,5 +1,6 @@
 /// Reduced motion for the template pages: when the platform asks for no animation, a page draws its still frame, as
-/// MotionIcon does. StaggerEnter and RiseIn do not check the flag themselves, so these wrap them.
+/// MotionIcon does. StaggerEnter and RiseIn stand still by themselves; these wrappers also leave them out of the tree,
+/// which the template pages' still-frame test checks.
 library;
 
 import 'package:flutter/widgets.dart';
