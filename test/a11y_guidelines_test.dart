@@ -126,6 +126,23 @@ Future<Evaluation> evaluate(WidgetTester tester, String key, Size view, Accessib
   return result;
 }
 
+/// What the rendering library reports while [key] lays out at [view]: an overflowing flex, a child without bounds. A
+/// data fault a fixture plants on purpose is not a rendering fault and is left to that fixture's own test.
+Future<List<String>> renderingFaults(WidgetTester tester, String key, Size view) async {
+  tester.view
+    ..physicalSize = view
+    ..devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final faults = await collectFaults(() async {
+    await tester.pumpWidget(framed(pageFor(key)));
+    await tester.pump(const Duration(seconds: 1));
+  });
+  return [
+    for (final fault in faults)
+      if (fault.library == 'rendering library') fault.exceptionAsString(),
+  ];
+}
+
 void main() {
   collectShownPages();
   final keys = [...shown.keys.toList()..sort(), 'resting (GUI-1)', 'blank'];
@@ -147,6 +164,12 @@ void main() {
           expect(result.passed, isTrue, reason: result.reason);
         });
       }
+    }
+    for (final view in pageSizes) {
+      testWidgets('$key: lays out without a rendering fault at ${view.width.round()} x ${view.height.round()}', (tester) async {
+        final faults = await renderingFaults(tester, key, view);
+        expect(faults, isEmpty, reason: faults.join('\n'));
+      });
     }
     testWidgets('$key: Android tap-target size (informative on the desktop)', (tester) async {
       final result = await evaluate(tester, key, pageSizes.first, androidTapTargetGuideline);

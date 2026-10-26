@@ -125,8 +125,23 @@ falls back to `ovos-gui`. Each new connection tries again. The menu shows which 
 | | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
 
 The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
-GUI-1 path is a prototype. On it, buttons inside pages send their events on the core bus, so Visage needs the core bus
-(`OVOS_HOST`, `OVOS_PORT`) for them to work.
+GUI-1 path is a prototype. On it, a page's controls answer as `interaction` frames on the GUI-1 socket and the adapter
+puts them on the core bus as `gui.interaction`; Visage still uses the core bus (`OVOS_HOST`, `OVOS_PORT`) for the face,
+volume and notifications.
+
+### For skill authors (GUI-1)
+
+`docs/GUI1_CONFORMANCE.md` says what Visage does with every key of every template. The rules that surprise people:
+
+- `SYSTEM_weather`: `condition_code` picks Visage's own animated glyph. `icon` is the spec's override: an image that
+  loads replaces the glyph in the current-conditions circle, so send it only when you want a particular picture there.
+  The forecast circles have no override and keep the glyphs.
+- Images are `https://` URLs or `data:` URIs. A file path is refused over GUI-1 (finding F39), since the display may
+  not share a filesystem with the skill.
+- `gui.ambient.weather` feeds the resting screen for three hours from its arrival, then the clock stands alone until
+  the next one. Send it on a schedule, not once.
+- A template page is the only page of its namespace. Send a new template to change the page, `gui.value.set` to change
+  its data, and `SYSTEM_idle` to return to the resting screen.
 
 ## How it works
 

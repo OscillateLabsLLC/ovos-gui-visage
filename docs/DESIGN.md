@@ -87,7 +87,8 @@ Never show an empty screen without a report. Never hide a failure in an empty `c
 | Test | It fails when |
 |---|---|
 | `test/style_rules_test.dart` | a card, a filled box with rounded corners, a border with a width, or a divider other than the hairline is outside its allowlist |
-| `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 432 × 736 or 432 × 650, and is not on the audit list |
+| `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 432 × 736 or 432 × 650, and is not on the audit list; or the rendering library reports a fault while it lays out at either size (an overflowing flex) |
+| `test/resting_centering_test.dart` | the resting chips leave the page's centre line, on either resting screen |
 | `test/reduced_motion_test.dart` | a file that animates does not read the reduced-motion setting and is not on the audit list |
 | `test/circle_motion_test.dart` | the shared widgets move under reduced motion |
 | `test/styles_test.dart` | a face pairing does not paint every frame without a fault |
