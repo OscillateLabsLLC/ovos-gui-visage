@@ -1,5 +1,7 @@
 /// SYSTEM_TextFrame (SPEC 8.2, SPEC 9): short answers in a glowing ring chip, title small above; long text as large
-/// centred lines split into pages that fit the frame, stepped at reading pace, with page dots.
+/// centred lines split into pages that fit the frame, turned at reading pace, with page dots. The pages are published
+/// as an [InnerPager] (inner_pager.dart), so a person can step through them with the shell's gestures; the turning
+/// then waits before it goes on from the page shown.
 library;
 
 import 'dart:async';
@@ -10,6 +12,7 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import 'data_faults.dart';
+import 'inner_pager.dart';
 import 'page.dart';
 import 'templates_model.dart';
 import 'template_text.dart';
@@ -46,24 +49,55 @@ class _TextFramePageState extends State<TextFramePage> {
   Timer? _timer;
   String _laidOut = '';
   double _laidOutHeight = 0;
+  InnerPager? _pager;
+  InnerPagerSlot? _slot;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _slot = InnerPagerScope.maybeOf(context);
+  }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _withdraw();
     super.dispose();
   }
 
-  void _step() {
+  Duration _pageTime(int index) => Duration(milliseconds: pageDurationMs(_pages[index].split(RegExp(r'\s+')).length));
+
+  /// Turns by itself after [after]; then every page for its own time, looping.
+  void _turnAfter(Duration after) {
     _timer?.cancel();
     if (_pages.length < 2) return;
-    final words = _pages[_index].split(RegExp(r'\s+')).length;
-    _timer = Timer(
-      Duration(milliseconds: pageDurationMs(words)),
-      () => setState(() {
-        _index = (_index + 1) % _pages.length;
-        _step();
-      }),
-    );
+    _timer = Timer(after, () {
+      setState(() => _index = (_index + 1) % _pages.length);
+      _pager?.turnTo(_index);
+      _turnAfter(_pageTime(_index));
+    });
+  }
+
+  void _publish() {
+    _withdraw();
+    if (_pages.length < 2) return;
+    final pager = _pager = InnerPager(count: _pages.length, pageTime: _pageTime)..addListener(_onStepped);
+    _slot?.publish(pager);
+  }
+
+  void _withdraw() {
+    final pager = _pager;
+    if (pager == null) return;
+    _slot?.withdraw(pager);
+    pager.dispose();
+    _pager = null;
+  }
+
+  /// A person stepped: show their page, and turn on from it once the hold is over.
+  void _onStepped() {
+    final pager = _pager!;
+    if (pager.index != _index) setState(() => _index = pager.index);
+    if (pager.takeHold() case final hold?) _turnAfter(hold);
   }
 
   /// Pages the long text against the available height; re-run only when the text or the frame changes.
@@ -73,7 +107,8 @@ class _TextFramePageState extends State<TextFramePage> {
     _laidOutHeight = height;
     _pages = paginate(body, (candidate) => measureText(candidate, _longStyle, width) <= height);
     _index = 0;
-    _step();
+    _publish();
+    if (_pages.length > 1) _turnAfter(_pageTime(0));
   }
 
   @override
