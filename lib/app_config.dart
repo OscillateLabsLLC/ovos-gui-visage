@@ -16,12 +16,14 @@ class AppConfig {
     this.lang,
     this.protocol = WireProtocol.auto,
     this.gui1Url,
+    this.frameLog = false,
   });
 
   /// [json] is the whole file (or null); [env] wins over it. `face` is a preset name, `eyes+mouth` tokens or an
   /// object (face/face_spec.dart); `VISAGE_FACE` takes the string forms. `captions` (`VISAGE_CAPTIONS`) is a flag;
   /// `lang` (`VISAGE_LANG`) a language tag. `protocol` (`VISAGE_PROTOCOL`) is `auto`, `gui1` or `legacy`; `gui1Url`
-  /// (`VISAGE_GUI1_URL`) moves the GUI-1 endpoint off the bus host's port 18182.
+  /// (`VISAGE_GUI1_URL`) moves the GUI-1 endpoint off the bus host's port 18182. `VISAGE_FRAME_LOG`, a flag in the
+  /// environment only, turns on the frame-timing log (frame_log.dart).
   factory AppConfig.from(Map<String, dynamic>? json, Map<String, String> env) => AppConfig(
     window: WindowConfig.from(json?['window'] as Map<String, dynamic>?, env),
     face: FaceSpec.parse(env['VISAGE_FACE'] ?? json?['face']),
@@ -29,6 +31,7 @@ class AppConfig {
     lang: _lang(env['VISAGE_LANG'] ?? json?['lang']),
     protocol: _protocol(env['VISAGE_PROTOCOL'] ?? json?['protocol']),
     gui1Url: _wsUrl('gui1Url', env['VISAGE_GUI1_URL'] ?? json?['gui1Url']),
+    frameLog: _flag('frameLog', env['VISAGE_FRAME_LOG']) ?? false,
   );
 
   final WindowConfig window;
@@ -44,6 +47,9 @@ class AppConfig {
 
   /// Null leaves the GUI-1 endpoint to the platform (protocol/endpoints.dart).
   final Uri? gui1Url;
+
+  /// Log late frames and a timing summary (frame_log.dart).
+  final bool frameLog;
 }
 
 WireProtocol _protocol(Object? value) {

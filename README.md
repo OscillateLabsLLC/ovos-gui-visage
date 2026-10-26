@@ -123,6 +123,7 @@ falls back to `ovos-gui`. Each new connection tries again. The menu shows which 
 | `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
 | `gui1Url` | `VISAGE_GUI1_URL` | the adapter's `ws://` URL | `ws://<bus host>:18182/gui1` |
 | | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
+| | `VISAGE_FRAME_LOG` | `1` logs each frame over 16.7 ms (build plus raster) and a summary every 10 s | off |
 
 The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
 GUI-1 path is a prototype. On it, a page's controls answer as `interaction` frames on the GUI-1 socket and the adapter

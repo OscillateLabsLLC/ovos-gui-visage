@@ -12,6 +12,7 @@ import 'captions.dart';
 import 'face/face.dart';
 import 'face/face_remote.dart';
 import 'faults.dart';
+import 'frame_log.dart';
 import 'outcome.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
@@ -46,12 +47,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   logFaultsPlainly();
   final config = await loadAppConfig();
+  if (config.frameLog) startFrameLog(debugPrint);
   await applyWindowConfig(config.window);
   runApp(VisageApp(config: config));
 }
-
-/// The browser tab and the task switcher show this; without it Flutter web blanks the page title.
-const appTitle = 'OVOS Visage';
 
 class VisageApp extends StatelessWidget {
   const VisageApp({super.key, this.config = const AppConfig()});
