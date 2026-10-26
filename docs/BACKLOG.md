@@ -185,7 +185,6 @@ Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both p
 Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
 
 - `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
-- `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
 
 Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
 

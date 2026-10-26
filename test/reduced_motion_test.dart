@@ -16,10 +16,7 @@ const notOwners = {'lib/pages/reduced_motion.dart'};
 
 /// Animation owners that ignore the setting today (first run, 2026-10-25), for docs/BACKLOG.md, Pre-announcement
 /// polish audit. Fix one and take it off; the last test fails while a fixed file is still listed.
-const ignoring = {
-  'lib/face/face.dart': 'audit: the face ticker runs blink, widen and the mouth tween',
-  'lib/pages/loading_page.dart': 'audit: the fallback thinking dots breathe',
-};
+const ignoring = {'lib/face/face.dart': 'audit: the face ticker runs blink, widen and the mouth tween'};
 
 List<String> animationOwners() => [
   for (final entity in Directory('lib').listSync(recursive: true))
