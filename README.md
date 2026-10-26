@@ -295,7 +295,8 @@ You can use the screen with a mouse or a touch screen, as you could with the Qt 
   language.
 - **Pages**: when a skill shows more than one page, swipe left or right across the page, or press the left and
   right arrow keys. In kiosk mode, arrows in the bottom corners do the same. The swipe must be clearly sideways:
-  on a widget, any other drag still moves the window.
+  on a widget, any other drag still moves the window. A long text that turns its own pages steps through them first,
+  and a tap on the left or right third of it goes back or ahead; its own turning then waits a while.
 - **Input box**: when a skill asks for text (`show_input_box`), type the answer and press Enter or the confirm
   button; the exit button closes it. The skill receives the answer as `<skill_id>.input.box.response`.
 - **Media**: on the now-playing page, the buttons skip back, pause or play, stop and skip forward. Drag the

@@ -239,16 +239,22 @@ apply:
 | Click or tap a control in a page | activates it | activates it | (no page shows) | activates it |
 | Click or tap the badge | | | expands for 10 s | |
 | Drag on empty surface | nothing | moves the widget; it snaps to the nearest corner | moves the widget | nothing |
-| Clearly horizontal drag (2:1) on a skill with 2+ pages | next or previous page | next or previous page | | next or previous page |
+| Clearly horizontal drag (2:1) on a skill with 2+ pages, or on a page with inner pages | next or previous page | next or previous page | | next or previous page |
 | Left and right arrow keys | next or previous page | next or previous page | | next or previous page |
 | Volume up, down and mute keys, where the desktop passes them on | volume up, down, mute toggle | the same | the same | the same |
 | Chevrons in the bottom corners | | | | next or previous page |
+| Click or tap the left or right third of a page with inner pages, off its controls | previous or next inner page | the same | | the same |
 | Long press | try-on mode | try-on mode | | try-on mode |
 | Right-click, two-finger tap, Menu key | opens the menu | opens the menu | expands, then opens the menu | opens the menu |
 | Keyboard button on the homescreen | opens the command box | | | opens the command box |
 | Escape | closes the menu or command box | the same | | the same, else leaves kiosk |
 | Click or tap the notification count on the homescreen | opens the stored notification list | the same | | the same |
 | In the notification list: arrow keys, Enter or Space, Escape | move between its buttons, press one, close the list (before Escape does anything else) | the same | | the same |
+
+A page with inner pages (a long `SYSTEM_text` split to fit, `lib/pages/inner_pager.dart`) takes "next or previous page"
+first: a swipe, an arrow key or a chevron steps its inner pages while it can step that way, then the skill's pages.
+Those steps stop at either end, and the text's own turning waits three page times (at least 20 s) after one. The tap
+zones exist only on such a page; a page's own controls win the tap, since the shell's detector sits behind them.
 
 A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt delegate did. The menu is the one
 `lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time with
