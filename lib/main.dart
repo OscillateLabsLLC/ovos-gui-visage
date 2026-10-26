@@ -292,8 +292,7 @@ class _ScreenState extends State<Screen> {
     expanded: peek.expanded,
     kiosk: mode == WindowMode.kiosk,
     typeOnHome: mode == WindowMode.window || mode == WindowMode.kiosk,
-    onStep: input.step,
-    onInteract: input.interact,
+    input: input,
     onTryOn: _onTryOn,
   );
 }

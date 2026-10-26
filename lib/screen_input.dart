@@ -6,6 +6,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'page_moves.dart';
+import 'pages/inner_pager.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/utterance.dart';
 import 'state/gui_state.dart';
@@ -87,8 +88,12 @@ class ScreenInput {
     commands.open();
   }
 
-  /// A swipe, an arrow key or a chevron (`stepPage`).
+  /// The inner pages of the page on screen, a long text's (pages/inner_pager.dart).
+  final innerPages = InnerPagerSlot();
+
+  /// A swipe, an arrow key or a chevron: the inner pages while they can step that way, else the skill's (`stepPage`).
   void step(int delta) {
+    if (innerPages.step(delta)) return;
     if (stepPage(state, delta, requestFocus)) onChanged();
   }
 
@@ -99,5 +104,6 @@ class ScreenInput {
     menu.dispose();
     commands.dispose();
     notificationList.dispose();
+    innerPages.dispose();
   }
 }
