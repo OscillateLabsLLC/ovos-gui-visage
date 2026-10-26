@@ -43,12 +43,13 @@ class WeatherChip extends StatelessWidget {
   }
 }
 
-/// The hero clock: the time large in a glowing blue ring, the date beneath.
+/// The hero clock: the time large in a glowing blue ring, AM or PM beneath it on a 12-hour device, then the date.
 class ClockChip extends StatelessWidget {
-  const ClockChip({super.key, required this.time, required this.date});
+  const ClockChip({super.key, required this.time, required this.date, this.ampm = ''});
 
   final String time;
   final String date;
+  final String ampm;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +70,11 @@ class ClockChip extends StatelessWidget {
                 height: 1,
               ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
             ),
+            if (ampm.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(ampm, style: VisageText.base.copyWith(color: VisageColors.accent, fontSize: 20, letterSpacing: 2)),
+              ),
             const SizedBox(height: 10),
             Text(date, style: VisageText.muted(20)),
           ],

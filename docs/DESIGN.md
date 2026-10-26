@@ -14,6 +14,11 @@ Read it before you add a page, a widget or an animation.
   ([gui-1.md 6.9 Idle / resting display ownership](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#69-idle--resting-display-ownership)),
   and fills it from the kept ambient data
   ([gui-1.md 6.9.1 Ambient data](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#691-ambient-data)).
+- The weather chip shows the last `gui.ambient.weather` for three hours from its arrival, then the clock stands alone
+  until the next one (`lib/pages/resting_model.dart`). A clear sky takes the night icon from 20:00 to 06:00 by the
+  device clock, since the spec's condition codes have no night variant (docs/GUI1_FINDINGS.md F53).
+- Every clock reads the device's 12-hour or 24-hour setting (`clockView` in `lib/widgets/device_clock.dart`); no
+  template or ambient topic carries one.
 - Use white text, one blue accent, and yellow for the sun. Use the system font. Do not use web fonts.
 - The colours are tokens in `lib/theme.dart`. Its page background is `#05070A`; SPEC 9 says `#0b0f14`
   (docs/BACKLOG.md, Pre-announcement polish audit).

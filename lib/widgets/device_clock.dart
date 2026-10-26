@@ -24,7 +24,21 @@ const _months = [
   'December',
 ];
 
-String clockLine(DateTime now) => '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+typedef ClockView = ({String time, String ampm, String date});
+
+String _twoDigits(int value) => value.toString().padLeft(2, '0');
+
+/// What a clock shows at [now]: `21:05` on a 24-hour device, `9:05` plus `PM` on a 12-hour one. The 12/24-hour choice
+/// is the device's own setting (`MediaQuery.alwaysUse24HourFormat`); neither the resting display nor `SYSTEM_clock`
+/// has a key for it, so every clock Visage draws reads the same setting.
+ClockView clockView(DateTime now, {required bool use24Hour}) {
+  final date = dateLine(now);
+  if (use24Hour) return (time: '${_twoDigits(now.hour)}:${_twoDigits(now.minute)}', ampm: '', date: date);
+  final hour = now.hour % 12 == 0 ? 12 : now.hour % 12;
+  return (time: '$hour:${_twoDigits(now.minute)}', ampm: now.hour < 12 ? 'AM' : 'PM', date: date);
+}
+
+String clockLine(DateTime now) => clockView(now, use24Hour: true).time;
 
 String dateLine(DateTime now) => '${_weekdays[now.weekday - 1]}, ${now.day} ${_months[now.month - 1]}';
 
@@ -55,7 +69,7 @@ class _DeviceClockState extends State<DeviceClock> {
 
   @override
   Widget build(BuildContext context) {
-    final now = widget.now();
-    return ClockChip(time: clockLine(now), date: dateLine(now));
+    final view = clockView(widget.now(), use24Hour: MediaQuery.alwaysUse24HourFormatOf(context));
+    return ClockChip(time: view.time, ampm: view.ampm, date: view.date);
   }
 }

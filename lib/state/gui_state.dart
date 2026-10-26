@@ -67,6 +67,10 @@ class GuiState {
   /// The last payload per `gui.ambient.*` topic (GUI-1 only, `state/ambient.dart`). [reset] keeps it: no stack change
   /// or reconnect sends it again.
   final Map<String, Json> ambient = {};
+
+  /// When each [ambient] payload arrived, by the device clock, so the resting display can let one age out
+  /// (`pages/resting_model.dart`). A snapshot's payload is stamped at the snapshot, the only time known for it.
+  final Map<String, DateTime> ambientAt = {};
   String? _lastActiveInsert;
 
   void reset() {

@@ -72,7 +72,7 @@ void main() {
     expect([state.active, state.namespaces], [isEmpty, isEmpty]);
     expect(frames.last, isA<Gui1Idle>());
     await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
-    expect([find.byType(RestingPage), find.text('09:05')], everyElement(findsOneWidget));
+    expect([find.byType(RestingPage), find.text('9:05')], everyElement(findsOneWidget));
     expect(find.byType(WeatherIcon), findsNothing, reason: 'no gui.ambient.weather in this recording');
   });
 

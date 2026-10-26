@@ -49,7 +49,13 @@ final gui1Gaps = Gui1Gaps();
 /// through [gaps]. A frame for another session is reported and ignored (an `idle` once per session); an unknown
 /// `SYSTEM_*` template is told through [gaps] and still shown, as the fallback. This session's `idle` empties the state,
 /// so the resting page shows (amendment D; it supersedes finding F16).
-void applyGui1Frame(GuiState state, Gui1Frame frame, {String sessionId = defaultSessionId, Gui1Gaps? gaps}) {
+void applyGui1Frame(
+  GuiState state,
+  Gui1Frame frame, {
+  String sessionId = defaultSessionId,
+  Gui1Gaps? gaps,
+  DateTime Function() now = DateTime.now,
+}) {
   final told = gaps ?? gui1Gaps;
   if (frame case Gui1Idle(sessionId: final session) when session != sessionId) return told.foreignIdle(session, sessionId);
   final session = _sessionOf(frame);
@@ -72,9 +78,9 @@ void applyGui1Frame(GuiState state, Gui1Frame frame, {String sessionId = default
       state.reset();
     case Gui1Snapshot(:final stack, :final ambient):
       _replace(state, stack, told.templates);
-      ambient.forEach((topic, data) => _keepSnapshotAmbient(state, topic, data, told));
+      ambient.forEach((topic, data) => _keepSnapshotAmbient(state, topic, data, told, now()));
     case Gui1Status(:final eventName, :final data) when isAmbientTopic(eventName):
-      _keepAmbient(state, eventName, data, told);
+      _keepAmbient(state, eventName, data, told, now());
     case Gui1Status(:final eventName) when statusRole(eventName) == null:
       told.unknownStatus(eventName);
     case Gui1Welcome() || Gui1Error() || Gui1Status():
@@ -91,11 +97,12 @@ String? _sessionOf(Gui1Frame frame) => switch (frame) {
   _ => null,
 };
 
-void _keepSnapshotAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps) =>
-    isAmbientTopic(topic) ? _keepAmbient(state, topic, data, gaps) : gaps.notAmbient(topic);
+void _keepSnapshotAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps, DateTime at) =>
+    isAmbientTopic(topic) ? _keepAmbient(state, topic, data, gaps, at) : gaps.notAmbient(topic);
 
-void _keepAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps) {
+void _keepAmbient(GuiState state, String topic, Json data, Gui1Gaps gaps, DateTime at) {
   state.ambient[topic] = Json.of(data);
+  state.ambientAt[topic] = at;
   final missing = missingAmbientKeys(topic, data);
   if (missing.isNotEmpty) gaps.incompleteAmbient(topic, missing);
 }

@@ -142,7 +142,7 @@ void main() {
       expect(isContentPage(state.current(), state.idleNamespace), isFalse);
       await tester.pumpWidget(host(restingPage(state, ChosenProtocol.gui1, now: () => restingNow)!));
       expect(find.byType(RestingPage), findsOneWidget);
-      expect([find.text('09:05'), find.text('Saturday, 17 October')], everyElement(findsOneWidget));
+      expect([find.text('9:05'), find.text('AM'), find.text('Saturday, 17 October')], everyElement(findsOneWidget));
     });
 
     testWidgets('snapshot_late_joiner: the whole stack in order, the top page renders', (tester) async {
