@@ -206,7 +206,7 @@ void main() {
       expect([find.byType(Glow), find.byType(TweenAnimationBuilder<double>)], everyElement(findsWidgets));
       expect(tester.hasRunningAnimations, isTrue);
       await pumpFrame(tester, listTemplate);
-      expect(find.byType(RiseIn), findsNWidgets(3));
+      expect(find.byType(RiseIn), findsNWidgets(4), reason: 'the title, then the three rows');
     });
   });
 

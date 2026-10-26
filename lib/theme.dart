@@ -12,6 +12,7 @@ abstract final class VisageColors {
   static const accentDim = Color(0xFF0F4C80);
   static const accentSoft = Color(0x2E1E9BFF);
   static const sun = Color(0xFFFFC93C);
+  static const sunSoft = Color(0x52FFC93C);
   static const ok = Color(0xFF3DDC84);
   static const bad = Color(0xFFFF5C5C);
   static const card = Color(0xFF141B24);

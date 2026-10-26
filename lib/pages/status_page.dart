@@ -11,6 +11,7 @@ import '../theme.dart';
 import '../widgets/circle.dart';
 import 'loading_page.dart' show lottieChipPx;
 import 'page.dart';
+import 'reduced_motion.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
 
@@ -26,18 +27,18 @@ class StatusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (:ok, :label) = statusModel(data);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: lottieChipPx,
-          height: lottieChipPx,
-          // Keyed on ok so a change replays the one-shot from the start.
-          child: CacheLottie(key: ValueKey(ok), resource: statusAnimation(ok), loop: false, fallback: _Glyph(ok)),
-        ),
-        const SizedBox(height: 28),
-        TemplateLabel(label),
-      ],
+    return Center(
+      child: StaggerOrStill(
+        children: [
+          SizedBox(
+            width: lottieChipPx,
+            height: lottieChipPx,
+            // Keyed on ok so a change replays the one-shot from the start.
+            child: CacheLottie(key: ValueKey(ok), resource: statusAnimation(ok), loop: false, fallback: _Glyph(ok)),
+          ),
+          TemplateLabel(label),
+        ],
+      ),
     );
   }
 }
@@ -54,7 +55,7 @@ class _Glyph extends StatelessWidget {
       child: Circle(
         size: lottieChipPx,
         gradient: gradientFill,
-        glow: const Glow(),
+        glow: const Glow(bloom: true),
         ring: const Ring(),
         children: [SizedBox.expand(child: CustomPaint(painter: _GlyphPainter(ok)))],
       ),

@@ -66,15 +66,12 @@ class IdlePage extends StatelessWidget {
     return WithCountBadge(
       count: storedNotifications,
       onTap: onShowNotifications,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: StaggerEnter(
+        mainAxisSize: MainAxisSize.max,
         children: [
-          if (hasWeather(data)) ...[
+          if (hasWeather(data))
             WeatherChip(icon: weatherIconName(data['weather_code']), temperature: '${number(data['weather_temp']).round()}°'),
-            const SizedBox(height: 28),
-          ],
           ClockChip(time: text(data['time_string']), date: dateLine(data)),
-          const SizedBox(height: 28),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 18,

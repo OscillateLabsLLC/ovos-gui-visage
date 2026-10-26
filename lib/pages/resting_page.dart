@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../protocol/wire_protocol.dart';
 import '../state/ambient.dart';
 import '../state/gui_state.dart';
+import '../widgets/circle.dart';
 import '../widgets/device_clock.dart';
 import '../widgets/home_chips.dart';
 import 'every_second.dart';
@@ -57,13 +58,10 @@ class _RestingPageState extends State<RestingPage> with EverySecond {
     return WithCountBadge(
       count: restingNotificationCount(widget.ambient),
       onTap: widget.onShowNotifications,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: StaggerEnter(
+        mainAxisSize: MainAxisSize.max,
         children: [
-          if (weather != null) ...[
-            WeatherChip(temperature: weather.temperature, icon: weather.icon, condition: weather.condition),
-            const SizedBox(height: 28),
-          ],
+          if (weather != null) WeatherChip(temperature: weather.temperature, icon: weather.icon, condition: weather.condition),
           DeviceClock(now: widget.now),
         ],
       ),

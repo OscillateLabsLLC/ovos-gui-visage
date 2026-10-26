@@ -186,7 +186,6 @@ Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore t
 
 - `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
 - `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
-- `lib/pages/sun_times_page.dart`: the sun rises and settles over 8 s.
 
 Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
 
@@ -195,8 +194,6 @@ Impeller opacity over a blur: no opacity widget wraps a child that draws only a 
 
 Other:
 
-- `lib/pages/status_page.dart`: the comment says the glyph "blooms as it arrives", but no code blooms; add the bloom or
-  correct the comment. No shared widget makes a one-time bloom (`docs/DESIGN.md`, Shared widgets).
 - `lib/theme.dart`: the page background is `#05070A`; ovos-visage SPEC 9 gives `#0b0f14`.
 
 ## Carried over

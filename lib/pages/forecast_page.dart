@@ -23,9 +23,9 @@ class ForecastPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final model = forecastModel(page, data);
     final subColour = model.hourly ? VisageColors.accent : VisageColors.muted;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 8,
+    return StaggerEnter(
+      mainAxisSize: MainAxisSize.max,
+      gap: 8,
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 20),

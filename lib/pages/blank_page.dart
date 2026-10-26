@@ -14,21 +14,22 @@ class BlankPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return const StaggerEnter(
+      mainAxisSize: MainAxisSize.max,
       children: [
         Circle(
           size: 120,
-          ring: const Ring(),
-          children: const [
+          gradient: gradientFill,
+          glow: Glow(bloom: true),
+          ring: Ring(),
+          children: [
             DecoratedBox(
               decoration: BoxDecoration(shape: BoxShape.circle, color: VisageColors.accent),
               child: SizedBox(width: 36, height: 36),
             ),
           ],
         ),
-        const SizedBox(height: 28),
-        const DeviceClock(),
+        DeviceClock(),
       ],
     );
   }

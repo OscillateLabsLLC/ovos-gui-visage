@@ -38,14 +38,14 @@ class WeatherNowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glyph = icon ?? (model.icon.isEmpty ? null : WeatherIcon(model.icon, size: 120));
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 28,
+    return StaggerEnter(
+      mainAxisSize: MainAxisSize.max,
       children: [
         SkillHeader(heading: model.heading, location: model.location),
         Circle(
           size: 270,
           gradient: gradientFill,
+          glow: const Glow(bloom: true),
           children: [
             Column(
               mainAxisSize: MainAxisSize.min,

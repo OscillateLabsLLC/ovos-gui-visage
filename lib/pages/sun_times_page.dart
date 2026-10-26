@@ -1,5 +1,5 @@
 /// ovos-skill-weather SunriseSunset: a sunrise circle and a sunset circle, each a horizon gradient with the sun
-/// rising or settling over 8 s (SPEC 8.3, skills.css .sun-time).
+/// rising or settling over 8 s (SPEC 8.3, skills.css .sun-time); under reduced motion the sun holds its first frame.
 library;
 
 import 'package:flutter/material.dart';
@@ -35,9 +35,8 @@ class SunTimesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = sunTimesModel(data);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 28,
+    return StaggerEnter(
+      mainAxisSize: MainAxisSize.max,
       children: [
         SkillHeader(heading: model.heading, location: model.location),
         _SunCircle(kind: 'sunrise', value: model.sunrise, gradient: _sunrise, rising: true),
@@ -64,7 +63,17 @@ class _SunCircleState extends State<_SunCircle> with SingleTickerProviderStateMi
     vsync: this,
     duration: const Duration(seconds: 8),
     value: widget.rising ? 0 : 1,
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (motionReduced(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -77,6 +86,7 @@ class _SunCircleState extends State<_SunCircle> with SingleTickerProviderStateMi
     return Circle(
       size: 205,
       gradient: widget.gradient,
+      glow: const Glow(colour: VisageColors.sunSoft, bloom: true),
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,

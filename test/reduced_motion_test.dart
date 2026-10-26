@@ -19,7 +19,6 @@ const notOwners = {'lib/pages/reduced_motion.dart'};
 const ignoring = {
   'lib/face/face.dart': 'audit: the face ticker runs blink, widen and the mouth tween',
   'lib/pages/loading_page.dart': 'audit: the fallback thinking dots breathe',
-  'lib/pages/sun_times_page.dart': 'audit: the sun rises and settles over 8 s',
 };
 
 List<String> animationOwners() => [

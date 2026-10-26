@@ -33,14 +33,23 @@ class SelectPage extends StatelessWidget {
       spacing: 24,
       children: [
         if (prompt.isNotEmpty)
-          Text(prompt, textAlign: TextAlign.center, maxLines: 3, overflow: TextOverflow.ellipsis, style: VisageText.fg(30)),
+          RiseOrStill(
+            index: 0,
+            child: Text(
+              prompt,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: VisageText.fg(30),
+            ),
+          ),
         Expanded(
           child: choices.isEmpty
               ? const Center(child: TemplateHint(noChoices))
               : ListView.separated(
                   itemCount: choices.length,
                   separatorBuilder: (_, _) => const SizedBox(height: _rowGapPx),
-                  itemBuilder: (_, i) => RiseOrStill(index: i, child: _button(choices[i])),
+                  itemBuilder: (_, i) => RiseOrStill(index: i + 1, child: _button(choices[i])),
                 ),
         ),
       ],

@@ -1,6 +1,6 @@
 /// SYSTEM_table (gui-1.md 3.4 Catalogue): the template title, a header row in the muted uppercase of template titles,
 /// then the rows as plain stacked text with a thin divider between them. Columns share the width equally; cells wrap
-/// rather than shrink, and the rows scroll. Nothing moves.
+/// rather than shrink, and the rows scroll, rising in one after another after the title and the header.
 library;
 
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import '../json.dart';
 import '../theme.dart';
 import 'content_models.dart';
 import 'page.dart';
+import 'reduced_motion.dart';
 import 'template_text.dart';
 
 const emptyTable = 'No rows';
@@ -31,12 +32,16 @@ class TablePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: _titleGapPx)],
-        if (columns.isNotEmpty) _line(columns, header: true),
+        if (title.isNotEmpty) ...[RiseOrStill(index: 0, child: TemplateTitle(title)), const SizedBox(height: _titleGapPx)],
+        if (columns.isNotEmpty) RiseOrStill(index: 1, child: _line(columns, header: true)),
         Expanded(
           child: rows.isEmpty
               ? const Center(child: TemplateHint(emptyTable))
-              : SingleChildScrollView(child: Column(children: [for (final row in rows) _line(row)])),
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [for (final (i, row) in rows.indexed) RiseOrStill(index: i + 2, child: _line(row))],
+                  ),
+                ),
         ),
       ],
     );
