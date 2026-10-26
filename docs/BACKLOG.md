@@ -228,8 +228,9 @@ What the motion branch already answers, and what is still open. Items marked ups
 - Open: place the widget anywhere, not only in a corner. Drag already moves it, then it snaps to the nearest corner
   (`nearestCorner`, `lib/window/window_config.dart`); a config key to keep the dropped position is the smallest change.
 - Open: keyboard shortcuts for the menu's choices, at least hide peek and open the face picker.
-- Open, Linux: kiosk leaves the menu bar's strip uncovered on the tester's desktop (the Linux issues under the
-  `linux` label).
+- Open, macOS: kiosk leaves the menu bar's strip uncovered on the tester's Mac. Kiosk hides the menu bar with the
+  presentation options (`macos/Runner/Kiosk.swift`); check a second display and the "Displays have separate Spaces"
+  setting, which keep the menu bar on one screen.
 - Open: the face picker opens in a browser behind the kiosk window, so it looks as if the option vanished; leave
   kiosk to float when the picker opens, or draw the picker in the window.
 - Open: the homescreen weather chip shows 0 degrees on the tester's install. `weather_temp` is parsed with
