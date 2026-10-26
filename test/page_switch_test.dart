@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/resting_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
@@ -43,6 +44,63 @@ double _dx(WidgetTester tester, String text) => tester
     .widget<FractionalTranslation>(find.ancestor(of: find.text(text), matching: find.byType(FractionalTranslation)).first)
     .translation
     .dx;
+
+SnapshotController _snapOf(WidgetTester tester, String text) =>
+    tester.widget<SnapshotWidget>(find.ancestor(of: find.text(text), matching: find.byType(SnapshotWidget))).controller;
+
+class _PaintCount {
+  int count = 0;
+}
+
+/// A page that repaints whenever [ticks] changes, counting its paints, as a breathing glow would.
+class _Ticking extends StatelessWidget {
+  const _Ticking(this.label, this.paints, this.ticks);
+
+  final String label;
+  final _PaintCount paints;
+  final ValueNotifier<int> ticks;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(painter: _CountingPainter(paints, ticks), child: Text(label));
+}
+
+class _CountingPainter extends CustomPainter {
+  _CountingPainter(this.paints, Listenable ticks) : super(repaint: ticks);
+
+  final _PaintCount paints;
+
+  @override
+  void paint(Canvas canvas, Size size) => paints.count++;
+
+  @override
+  bool shouldRepaint(_CountingPainter old) => false;
+}
+
+/// A page that holds a platform view, as the web-view pages do, so it cannot be captured in a snapshot.
+class _PlatformViewPage extends StatelessWidget {
+  const _PlatformViewPage();
+
+  @override
+  Widget build(BuildContext context) => PlatformViewSurface(
+    controller: _FakeView(),
+    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+    gestureRecognizers: const {},
+  );
+}
+
+class _FakeView extends PlatformViewController {
+  @override
+  int get viewId => 7;
+
+  @override
+  Future<void> dispatchPointerEvent(PointerEvent event) async {}
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<void> clearFocus() async {}
+}
 
 /// Counts its mounts and disposals, to see when a page is kept alive.
 class _Probe extends StatefulWidget {
@@ -97,8 +155,10 @@ void main() {
       expect(leavingPose(PageMove.swap, const Duration(milliseconds: 320)), isNull);
     });
 
-    test('the new page expands out of the line from 320 ms, overshoots, and stands at 520 ms', () {
-      expect(arrivingPose(PageMove.swap, const Duration(milliseconds: 319)), isNull);
+    test('the new page mounts as the line at 220 ms, expands out of it from 320 ms, overshoots, and stands at 520 ms', () {
+      expect(arrivingPose(PageMove.swap, const Duration(milliseconds: 219)), isNull);
+      expect(_ms(arrivingPose, PageMove.swap, 220).scaleY, lineScale);
+      expect(_ms(arrivingPose, PageMove.swap, 319).scaleY, lineScale, reason: 'it holds as the line');
       expect(_ms(arrivingPose, PageMove.swap, 320).scaleY, lineScale);
       final peak = [for (var ms = 320; ms <= 520; ms += 5) _ms(arrivingPose, PageMove.swap, ms).scaleY]
           .reduce((a, b) => a > b ? a : b);
@@ -126,14 +186,16 @@ void main() {
   });
 
   group('PageSwitch', () {
-    testWidgets('a new shape: the old page stays mounted through its exit, the new one arrives at 320 ms', (tester) async {
+    testWidgets('a new shape: the old page stays mounted through its exit, the new one mounts at the hold', (tester) async {
       final log = <String>[];
       await _show(tester, 'a', child: _Probe('a', log));
       await _show(tester, 'b', child: _Probe('b', log));
-      await _at(tester, 250, from: 0);
-      expect(find.text('a'), findsOneWidget, reason: 'the line holds');
-      expect(find.text('b'), findsNothing);
+      await _at(tester, 200, from: 0);
+      expect([find.text('a'), find.text('b')], [findsOneWidget, findsNothing], reason: 'still squashing');
       expect(log, ['+a']);
+      await _at(tester, 250, from: 200);
+      expect([find.text('a'), find.text('b')], [findsOneWidget, findsOneWidget], reason: 'both are the line in the hold');
+      expect(log, ['+a', '+b']);
       await _at(tester, 330, from: 250);
       expect([find.text('a'), find.text('b')], [findsNothing, findsOneWidget]);
       expect(log, unorderedEquals(['+a', '-a', '+b']));
@@ -212,15 +274,15 @@ void main() {
         gui1.template(gui1.hello, 'SYSTEM_text', {'text': 'Hi'}),
       ], state: state);
       await render();
-      await _at(tester, 250, from: 0);
+      await _at(tester, 200, from: 0);
       expect([find.byType(RestingPage), find.text('Hi')], [findsOneWidget, findsNothing]);
-      await _at(tester, 600, from: 250);
+      await _at(tester, 600, from: 200);
       expect([find.byType(RestingPage), find.text('Hi')], [findsNothing, findsOneWidget]);
       gui1.replayGui1([gui1.template(gui1.hello, 'Idle.qml', {})], state: state);
       await render();
-      await _at(tester, 250, from: 0);
+      await _at(tester, 200, from: 0);
       expect([find.byType(RestingPage), find.text('Hi')], [findsNothing, findsOneWidget]);
-      await _at(tester, 600, from: 250);
+      await _at(tester, 600, from: 200);
       expect([find.byType(RestingPage), find.text('Hi')], [findsOneWidget, findsNothing]);
     });
 
@@ -243,6 +305,50 @@ void main() {
       expect(opacityLayers(), hasLength(1), reason: 'the squashing page fades');
       await _at(tester, 600, from: 150);
       expect(opacityLayers(), isEmpty);
+    });
+
+    testWidgets('a move scales one snapshot of each page: a ticking page is not painted live until the move ends', (
+      tester,
+    ) async {
+      final paints = _PaintCount();
+      final ticks = ValueNotifier(0);
+      addTearDown(ticks.dispose);
+      bool snapshotted(String key) => _snapOf(tester, key).allowSnapshotting;
+      Future<void> tick(int frames) async {
+        for (var i = 0; i < frames; i++) {
+          ticks.value++;
+          await tester.pump(const Duration(milliseconds: 10));
+        }
+      }
+
+      await _show(tester, 'a', child: _Ticking('a', paints, ticks));
+      await tick(3);
+      expect([snapshotted('a'), paints.count], [false, greaterThanOrEqualTo(3)], reason: 'at rest it paints live');
+      await _show(tester, 'b');
+      await tick(2);
+      final captured = paints.count;
+      expect(snapshotted('a'), isTrue);
+      await tick(10);
+      expect(paints.count, captured, reason: 'the squash scales its image; the page is not painted again');
+      await _at(tester, 250, from: 120);
+      expect(paints.count, captured, reason: 'still the image, through the hold');
+      expect(snapshotted('b'), isTrue, reason: 'the arriving page paints once into its snapshot at the hold');
+      await _at(tester, 700, from: 250);
+      expect(snapshotted('b'), isFalse, reason: 'live again at rest');
+    });
+
+    testWidgets('a page holding a platform view moves live instead of throwing', (tester) async {
+      await _show(tester, 'web', child: const _PlatformViewPage());
+      await _show(tester, 'b');
+      await _at(tester, 600, from: 0);
+      expect(tester.takeException(), isNull);
+      expect(find.text('b'), findsOneWidget);
+    });
+
+    testWidgets('under reduced motion no snapshot is taken', (tester) async {
+      await _show(tester, 'a', still: true);
+      await _show(tester, 'b', still: true);
+      expect(_snapOf(tester, 'b').allowSnapshotting, isFalse);
     });
 
     testWidgets('under reduced motion every change is a cut', (tester) async {

@@ -2,6 +2,10 @@
 /// of it; a step within a skill's pages slides the old page out and the new one in together (page_moves.dart). The old
 /// page stays mounted until its exit ends, and the new page's items enter once it has arrived (EnterCue). Under reduced
 /// motion every change is a cut.
+///
+/// A move transforms a snapshot, never a live page (docs/DESIGN.md, Measured): the leaving page is captured as it starts,
+/// and the arriving page mounts at the hold and paints once into its snapshot, which the expand then scales; at the
+/// end of the move it paints live again. A page holding a platform view (a web view) cannot be captured and moves live.
 library;
 
 import 'package:flutter/rendering.dart';
@@ -30,8 +34,8 @@ class PageSwitch extends StatefulWidget {
 /// How a page's items enter (EnterCue).
 typedef _Cue = ({Duration delay, bool whole});
 
-/// A page and its cue, kept for the length of its exit.
-typedef _Shown = ({Object key, Widget child, _Cue cue});
+/// A page, its cue and its snapshot, kept for the length of its exit.
+typedef _Shown = ({Object key, Widget child, _Cue cue, SnapshotController snap});
 
 const _firstCue = (delay: Duration.zero, whole: false);
 
@@ -40,6 +44,9 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
   _Shown? _leaving;
   PageMove? _move;
   _Cue _cue = _firstCue;
+
+  /// The snapshot of the page on screen; on while it moves, off at rest.
+  SnapshotController _snap = SnapshotController();
 
   Duration get _elapsed => (_clock.duration ?? Duration.zero) * _clock.value;
 
@@ -59,7 +66,9 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
     if (motionReduced(context)) return _cut();
     if (_arrivalPending) return;
     final move = pageMove(fromGroup: old.group, fromIndex: old.index, toGroup: widget.group, toIndex: widget.index);
-    _leaving = (key: old.pageKey, child: old.child, cue: _cue);
+    if (_leaving case final interrupted?) _retire(interrupted.snap);
+    _leaving = (key: old.pageKey, child: old.child, cue: _cue, snap: _snap..allowSnapshotting = true);
+    _snap = SnapshotController(allowSnapshotting: true);
     _move = move;
     _cue = (delay: arrivalLength(move), whole: move != PageMove.swap);
     _clock
@@ -74,6 +83,9 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
     setState(_forget);
   }
 
+  /// Disposed after the frame, once the snapshot that listens to [snap] has left the tree.
+  static void _retire(SnapshotController snap) => WidgetsBinding.instance.addPostFrameCallback((_) => snap.dispose());
+
   static String _moveName(PageMove move) => move == PageMove.swap ? 'squash' : 'slide';
 
   void _cut() {
@@ -81,7 +93,10 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
     _forget();
   }
 
+  /// The move is over: the leaving page goes and the page on screen paints live.
   void _forget() {
+    if (_leaving case final leaving?) _retire(leaving.snap);
+    _snap.allowSnapshotting = false;
     _leaving = null;
     _move = null;
   }
@@ -89,6 +104,8 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
   @override
   void dispose() {
     _clock.dispose();
+    if (_leaving case final leaving?) _retire(leaving.snap);
+    _retire(_snap);
     super.dispose();
   }
 
@@ -104,7 +121,7 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
           fit: StackFit.expand,
           children: [
             if (leaving != null && outPose != null) _posed(leaving, outPose, leaving: true),
-            if (inPose != null) _posed((key: widget.pageKey, child: widget.child, cue: _cue), inPose),
+            if (inPose != null) _posed((key: widget.pageKey, child: widget.child, cue: _cue, snap: _snap), inPose),
           ],
         );
       },
@@ -123,7 +140,11 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
           transform: Matrix4.diagonal3Values(pose.scaleX, pose.scaleY, 1),
           child: _Fade(
             opacity: pose.opacity,
-            child: EnterCue(delay: page.cue.delay, whole: page.cue.whole, child: page.child),
+            child: SnapshotWidget(
+              controller: page.snap,
+              mode: SnapshotMode.permissive,
+              child: EnterCue(delay: page.cue.delay, whole: page.cue.whole, child: page.child),
+            ),
           ),
         ),
       ),

@@ -46,8 +46,9 @@ PageMove pageMove({Object? fromGroup, int fromIndex = 0, Object? toGroup, int to
 
 Duration moveLength(PageMove move) => move == PageMove.swap ? swapLength : slideLength;
 
-/// How long after it first shows the arriving page is still arriving; its items wait that long.
-Duration arrivalLength(PageMove move) => move == PageMove.swap ? swapExpand : slideLength;
+/// How long after it mounts the arriving page is still arriving; its items wait that long. A swap mounts it at the
+/// start of the hold, so its first paint (into a snapshot, page_switch.dart) lands while the line sits still.
+Duration arrivalLength(PageMove move) => move == PageMove.swap ? swapHold + swapExpand : slideLength;
 
 double _progress(Duration elapsed, Duration from, Duration length) =>
     ((elapsed - from).inMicroseconds / length.inMicroseconds).clamp(0.0, 1.0);
@@ -83,13 +84,15 @@ PagePose? leavingPose(PageMove move, Duration elapsed) {
   return null;
 }
 
-/// The arriving page [elapsed] into [move]; null before it shows.
+/// The arriving page [elapsed] into [move]; null before it mounts. In a swap it mounts at the hold, as the line the
+/// old page squashed to, and expands out of it.
 PagePose? arrivingPose(PageMove move, Duration elapsed) {
   if (move != PageMove.swap) {
     final p = Curves.easeInOut.transform(_progress(elapsed, Duration.zero, slideLength));
     return (scaleX: 1, scaleY: 1, dx: _direction(move) * (1 - p), opacity: 1);
   }
-  if (elapsed < _expandStarts) return null;
+  if (elapsed < _squashEnds) return null;
+  if (elapsed < _expandStarts) return (scaleX: 1, scaleY: lineScale, dx: 0, opacity: 1);
   final p = expandCurve.transform(_progress(elapsed, _expandStarts, swapExpand));
   return (scaleX: 1, scaleY: lineScale + (1 - lineScale) * p, dx: 0, opacity: 1);
 }

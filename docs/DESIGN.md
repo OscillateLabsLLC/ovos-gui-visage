@@ -80,6 +80,23 @@ Rules that follow from the table:
 - A transition is 200 to 300 ms. The old page never just vanishes; it leaves while the new one arrives.
 - Every hero circle on every page has the glow and the gradient fill; a template page is not exempt because it is new.
 - Under reduced motion every move is a cut to the final frame, as before.
+- A move transforms a snapshot, never a live page (`SnapshotWidget` in `PageSwitch`, permissive, so a page with a
+  web view moves live instead).
+
+Measured (2026-10-25, profile build, 120 Hz MacBook, one demo cycle per mode, `VISAGE_FRAME_LOG=1`, the frame and move
+clocks agreeing to within 82 to 89 ms):
+
+- `VISAGE_MOTION=full`: 15352 frames, 47 over 16.7 ms. Thirty sat 8 ms after `squash start` (raster 50 to 73 ms,
+  build under 1 ms): the first frame that drew the leaving page through the transform, before any fade. Three sat at
+  +325 ms with build 20 to 50 ms: the arriving page's first build at the expand. The rest were idle spikes.
+- `VISAGE_MOTION=cut`: 15413 frames, 25 over 16.7 ms, one per page change (raster 40 to 82 ms, build under 8 ms): the
+  first paint of each new page, with no move at all.
+
+So a page's first paint and a page drawn at a changing scale (new glyph sizes, icons and photos re-rendered every
+frame) each cost a 40 to 80 ms raster frame on Impeller. The rule that follows: capture the leaving page as the move
+starts and scale that one image; mount the arriving page at the hold so its first paint lands while the line sits
+still, and scale its image through the expand; paint live again at rest. Re-measure both modes after any change to
+the moves.
 
 ## Glanceability
 
