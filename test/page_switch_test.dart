@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/resting_page.dart';
 import 'package:ovos_gui_visage/pages/router.dart';
@@ -192,7 +193,11 @@ void main() {
         child: const StaggerEnter(children: [Text('item')]),
       );
       await tester.pump();
-      expect(opacity(), 1, reason: 'no pop inside a slide');
+      expect(
+        find.ancestor(of: find.text('item'), matching: find.byType(Opacity)),
+        findsNothing,
+        reason: 'no pop in a slide',
+      );
     });
 
     testWidgets('PageHost: a template squashes the resting page away, and a clear brings it back the same way', (tester) async {
@@ -217,6 +222,27 @@ void main() {
       expect([find.byType(RestingPage), find.text('Hi')], [findsNothing, findsOneWidget]);
       await _at(tester, 600, from: 250);
       expect([find.byType(RestingPage), find.text('Hi')], [findsOneWidget, findsNothing]);
+    });
+
+    testWidgets('a page at rest is painted with no opacity layer; only a fading page gets one', (tester) async {
+      // A bare host: MaterialApp's route transitions push opacity layers of their own.
+      Iterable<OpacityLayer> opacityLayers() => tester.layers.whereType<OpacityLayer>();
+      Future<void> bare(String key) => tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(size: Size(432, 736)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: PageSwitch(pageKey: key, child: Text(key)),
+          ),
+        ),
+      );
+      await bare('a');
+      expect(opacityLayers(), isEmpty, reason: 'nothing fades at rest');
+      await bare('b');
+      await _at(tester, 150, from: 0);
+      expect(opacityLayers(), hasLength(1), reason: 'the squashing page fades');
+      await _at(tester, 600, from: 150);
+      expect(opacityLayers(), isEmpty);
     });
 
     testWidgets('under reduced motion every change is a cut', (tester) async {

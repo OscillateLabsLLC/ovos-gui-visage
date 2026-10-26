@@ -4,6 +4,7 @@
 /// motion every change is a cut.
 library;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'circle.dart';
@@ -114,7 +115,7 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.diagonal3Values(pose.scaleX, pose.scaleY, 1),
-          child: Opacity(
+          child: _Fade(
             opacity: pose.opacity,
             child: EnterCue(delay: page.cue.delay, whole: page.cue.whole, child: page.child),
           ),
@@ -122,4 +123,49 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
       ),
     ),
   );
+}
+
+/// An Opacity that paints its child directly when opaque. Flutter's Opacity pushes a layer even at 1.0, and it would sit
+/// over every page at rest; dropping the wrapper at rest instead would remount the page when its move ends.
+class _Fade extends SingleChildRenderObjectWidget {
+  const _Fade({required this.opacity, super.child});
+
+  final double opacity;
+
+  int get _alpha => Color.getAlphaFromOpacity(opacity);
+
+  @override
+  _RenderFade createRenderObject(BuildContext context) => _RenderFade(_alpha);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderFade renderObject) => renderObject.alpha = _alpha;
+}
+
+class _RenderFade extends RenderProxyBox {
+  _RenderFade(this._alpha);
+
+  int _alpha;
+
+  set alpha(int value) {
+    if (value == _alpha) return;
+    final wasLayered = _layered;
+    _alpha = value;
+    if (wasLayered != _layered) markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  bool get _layered => _alpha < 255;
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && _layered;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null || _alpha == 0 || !_layered) {
+      layer = null;
+      if (_alpha != 0) super.paint(context, offset);
+      return;
+    }
+    layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+  }
 }
