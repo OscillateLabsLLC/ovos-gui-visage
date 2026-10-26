@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 
+import '../frame_log.dart';
 import 'circle.dart';
 
 const dotCollapse = Duration(milliseconds: 300);
@@ -30,18 +31,28 @@ class _DotCollapseState extends State<DotCollapse> with SingleTickerProviderStat
     vsync: this,
     duration: dotCollapse,
     value: widget.collapsed ? 1 : 0,
-  );
+  )..addStatusListener(_logEnd);
+  bool _collapsing = false;
+
+  void _logEnd(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !_collapsing) return;
+    _collapsing = false;
+    logMove('collapse end');
+  }
 
   @override
   void didUpdateWidget(DotCollapse old) {
     super.didUpdateWidget(old);
     if (old.collapsed == widget.collapsed) return;
     if (!widget.collapsed) {
+      _collapsing = false;
       _shrink.value = 0;
     } else if (motionReduced(context)) {
       _shrink.value = 1;
     } else {
       _shrink.forward(from: 0);
+      _collapsing = true;
+      logMove('collapse start');
     }
   }
 

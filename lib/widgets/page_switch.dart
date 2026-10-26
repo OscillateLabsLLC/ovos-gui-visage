@@ -7,6 +7,7 @@ library;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../frame_log.dart';
 import 'circle.dart';
 import 'page_moves.dart';
 
@@ -64,11 +65,16 @@ class _PageSwitchState extends State<PageSwitch> with SingleTickerProviderStateM
     _clock
       ..duration = moveLength(move)
       ..forward(from: 0);
+    logMove('${_moveName(move)} start');
   }
 
   void _settle(AnimationStatus status) {
-    if (status == AnimationStatus.completed) setState(_forget);
+    if (status != AnimationStatus.completed) return;
+    if (_move case final move?) logMove('${_moveName(move)} end');
+    setState(_forget);
   }
+
+  static String _moveName(PageMove move) => move == PageMove.swap ? 'squash' : 'slide';
 
   void _cut() {
     _clock.stop();

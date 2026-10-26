@@ -8,6 +8,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/widgets.dart';
 
+import '../frame_log.dart';
 import '../theme.dart';
 import 'circle.dart';
 
@@ -94,7 +95,8 @@ class ChipBirth extends StatefulWidget {
 }
 
 class _ChipBirthState extends State<ChipBirth> with SingleTickerProviderStateMixin {
-  late final AnimationController _clock = AnimationController(vsync: this, duration: birthLength);
+  late final AnimationController _clock = AnimationController(vsync: this, duration: birthLength)..addStatusListener(_logEnd);
+  bool _born = false;
 
   @override
   void didChangeDependencies() {
@@ -103,7 +105,13 @@ class _ChipBirthState extends State<ChipBirth> with SingleTickerProviderStateMix
       _clock.value = 1;
     } else if (_clock.isDismissed) {
       _clock.forward();
+      _born = true;
+      logMove('birth start');
     }
+  }
+
+  void _logEnd(AnimationStatus status) {
+    if (status == AnimationStatus.completed && _born) logMove('birth end');
   }
 
   @override
