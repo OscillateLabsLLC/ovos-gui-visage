@@ -3,8 +3,6 @@
 /// under it. With reduced motion the halo stands still.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../json.dart';
@@ -19,7 +17,6 @@ import 'template_text.dart';
 const errorMark = '!';
 const _badSoft = Color(0x2EFF5C5C);
 const _badDim = Color(0x66FF5C5C);
-const _bloom = Duration(milliseconds: 900);
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({super.key, required this.data});
@@ -36,7 +33,7 @@ class ErrorPage extends StatelessWidget {
         Circle(
           size: lottieChipPx,
           gradient: gradientFill,
-          glow: const ErrorGlow(),
+          glow: const Glow(colour: _badSoft, bloom: true),
           ring: const Ring(track: _badDim, value: VisageColors.bad),
           children: [
             Text(
@@ -50,44 +47,4 @@ class ErrorPage extends StatelessWidget {
       ],
     );
   }
-}
-
-/// The red hero glow: a bloom (the halo swells once and settles) over the breathing [Glow]. The bloom scales the
-/// shadow's alpha rather than an Opacity, since an Opacity over a blur-only box breaks on Impeller.
-class ErrorGlow extends StatelessWidget {
-  const ErrorGlow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    if (reducedMotion(context)) return halo(alpha: 1, swell: 0);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const Glow(colour: _badSoft),
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: _bloom,
-          builder: (context, t, _) {
-            final swell = math.sin(math.pi * t);
-            return halo(alpha: swell, swell: swell);
-          },
-        ),
-      ],
-    );
-  }
-
-  /// The red halo at [alpha] times its resting alpha, at rest ([swell] 0) or swollen ([swell] 1). The bloom fades to
-  /// alpha 0, so the breathing glow alone remains; the still frame is the resting halo.
-  static Widget halo({required double alpha, required double swell}) => DecoratedBox(
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          color: _badSoft.withValues(alpha: _badSoft.a * alpha),
-          blurRadius: 34 + 30 * swell,
-          spreadRadius: 2 + 12 * swell,
-        ),
-      ],
-    ),
-  );
 }
