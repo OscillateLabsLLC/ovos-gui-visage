@@ -160,11 +160,8 @@ The popups follow ovos-shell's NotificationPop*.qml.
 Before the finished product is announced, every v2 feature is checked against `docs/DESIGN.md`. This list is the first
 run of the guards in that guide's "Enforced by" table. Decide each item: fix it, or record why it is allowed.
 
-Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
-
-- `lib/widgets/command_box.dart`: the typed-command box has an accent outline.
-- `lib/widgets/volume_indicator.dart`: the volume pill is a filled rounded box; allow it as a status pill or redraw it.
-- `lib/widgets/notification_stack.dart`: notification popups are filled rounded boxes, close to cards.
+Style (`test/style_rules_test.dart`): no `audit:` entry remains. On 2026-10-25 the owner sanctioned the command box's
+accent outline, the volume pill and the notification popups as they are, and the in-window menu was redrawn.
 
 Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
 
