@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
+import '../widgets/hero_time.dart';
 import 'page.dart';
 
 final _trailingAmPm = RegExp(r'^(.*?)\s*([AaPp][Mm])$');
@@ -18,6 +19,9 @@ final _trailingAmPm = RegExp(r'^(.*?)\s*([AaPp][Mm])$');
   if (match == null) return (time: time, ampm: ampm);
   return (time: match.group(1)!, ampm: match.group(2)!.toUpperCase());
 }
+
+const _ringSize = 380.0;
+const _timeSize = 120.0;
 
 class TimePage extends StatelessWidget {
   const TimePage({super.key, required this.data});
@@ -45,7 +49,7 @@ class ClockRing extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Circle(
-        size: 380,
+        size: _ringSize,
         gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
         glow: const Glow(bloom: true),
         ring: const Ring(track: VisageColors.accentSoft, stroke: 5),
@@ -53,14 +57,7 @@ class ClockRing extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                time.isEmpty ? '--:--' : time,
-                style: VisageText.fg(
-                  120,
-                  weight: FontWeight.w300,
-                  height: 1,
-                ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
-              ),
+              HeroTime(time: time, circleSize: _ringSize, fontSize: _timeSize),
               if (ampm.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
