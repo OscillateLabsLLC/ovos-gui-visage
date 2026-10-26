@@ -14,9 +14,9 @@ final _honours = RegExp(r'maybeDisableAnimationsOf|motionReduced\(');
 /// Wrappers that only swap the shared animations for still widgets; they own no motion of their own.
 const notOwners = {'lib/pages/reduced_motion.dart'};
 
-/// Animation owners that ignore the setting today (first run, 2026-10-25), for docs/BACKLOG.md, Pre-announcement
-/// polish audit. Fix one and take it off; the last test fails while a fixed file is still listed.
-const ignoring = {'lib/face/face.dart': 'audit: the face ticker runs blink, widen and the mouth tween'};
+/// Animation owners that ignore the setting, for docs/BACKLOG.md, Pre-announcement polish audit. Empty since
+/// 2026-10-25, when the face became the last to hold a still frame; a new entry needs a reason and a backlog item.
+const ignoring = <String, String>{};
 
 List<String> animationOwners() => [
   for (final entity in Directory('lib').listSync(recursive: true))

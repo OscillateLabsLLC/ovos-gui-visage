@@ -175,9 +175,9 @@ test font's block glyphs widened the box past the chip's inner width.
   fixtures. `SYSTEM_face`, `SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input` are checked and pass both guidelines at
   both sizes. No fixture reaches two routes, so they are not checked: alerts `ListView` and OCP `OVOSSyncPlayer`.
 
-Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
-
-- `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
+Reduced motion (`test/reduced_motion_test.dart`): no file ignores the setting. The face was the last; since
+2026-10-25 it holds a still frame (eyes open, mouth at rest, no blink, widen or tween), and while it speaks the mouth
+still switches viseme shapes as discrete frames.
 
 Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
 

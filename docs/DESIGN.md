@@ -154,5 +154,6 @@ Never show an empty screen without a report. Never hide a failure in an empty `c
 | `test/styles_test.dart` | a face pairing does not paint every frame without a fault |
 | `test/motion_test.dart` | an animated icon layer has no motion or painter |
 
-Each allowlist and audit entry has a reason. An entry marked `audit:` is not known to be allowed;
-docs/BACKLOG.md lists it under "Pre-announcement polish audit".
+Each allowlist entry has a reason. An entry marked `audit:` would be one not yet known to be allowed, listed in
+docs/BACKLOG.md under "Pre-announcement polish audit"; since 2026-10-25 none remains in any of the three guards (style,
+accessibility, reduced motion), and the accessibility guard skips no page.

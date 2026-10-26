@@ -1,4 +1,6 @@
-/// The face widget: owns mode, blink, widen and viseme timing, tweens the mouth, and paints through a [FaceTheme].
+/// The face widget: owns mode, blink, widen and viseme timing, tweens the mouth, and paints through a [FaceTheme]. Under
+/// reduced motion (or VISAGE_MOTION=cut) it draws a still frame: eyes open, mouth at rest, no blink, widen or tween;
+/// while it speaks the mouth still switches viseme shapes, as discrete frames, since that is speech, not decoration.
 /// Port of face.js. The widget paints in 480 x 800 frame coordinates; the parent sizes and positions it.
 library;
 
@@ -8,6 +10,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../widgets/circle.dart' show motionReduced;
 import 'face_theme.dart';
 import 'visage_theme.dart';
 import 'visemes.dart';
@@ -137,7 +140,32 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _scheduleBlink();
-    _ticker = createTicker(_tick)..start();
+    _ticker = createTicker(_tick);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncTicker();
+  }
+
+  @override
+  void didUpdateWidget(Face old) {
+    super.didUpdateWidget(old);
+    _syncTicker();
+  }
+
+  bool get _still => motionReduced(context);
+
+  /// Ticks always with motion; under reduced motion only while speaking, so visemes switch and nothing else moves.
+  void _syncTicker() {
+    final run = !_still || widget.controller.mode == FaceMode.speaking;
+    if (run && !_ticker.isActive) {
+      _last = Duration.zero;
+      _ticker.start();
+    } else if (!run && _ticker.isActive) {
+      _ticker.stop();
+    }
   }
 
   @override
@@ -154,6 +182,7 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
   double _ease(Duration dt, double ms) => 1 - math.exp(-dt.inMicroseconds / 1000 / ms);
 
   void _tick(Duration elapsed) {
+    if (_still) return setState(() {});
     final dt = elapsed - _last;
     _last = elapsed;
     _now = elapsed;
@@ -175,17 +204,37 @@ class _FaceState extends State<Face> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final frame = FaceFrame(
-      mode: widget.controller.mode,
-      eyeOpen: _eyeOpen,
-      eyeScale: _eyeScale,
-      lips: _lips,
-      viseme: _viseme,
-      elapsed: _now.inMicroseconds / 1e6,
+    final frame = _still ? _stillFrame() : _movingFrame();
+    return CustomPaint(size: const Size(frameWidth, frameHeight), painter: FacePainter(widget.theme, frame));
+  }
+
+  FaceFrame _movingFrame() => FaceFrame(
+    mode: widget.controller.mode,
+    eyeOpen: _eyeOpen,
+    eyeScale: _eyeScale,
+    lips: _lips,
+    viseme: _viseme,
+    elapsed: _now.inMicroseconds / 1e6,
+    compact: widget.compact,
+    palette: widget.theme.palette,
+  );
+
+  /// The face at its targets with no tween: eyes as the mode and sleep set them, the mouth at the current viseme (rest
+  /// unless speaking), and the styles' own clock held at zero.
+  FaceFrame _stillFrame() {
+    final c = widget.controller;
+    final shapes = widget.theme.mouthShapes;
+    final viseme = c.targetCode(c.clock.elapsed);
+    return FaceFrame(
+      mode: c.mode,
+      eyeOpen: c.targetEyeOpen,
+      eyeScale: 1,
+      lips: shapes[viseme] ?? shapes[restCode]!,
+      viseme: viseme,
+      elapsed: 0,
       compact: widget.compact,
       palette: widget.theme.palette,
     );
-    return CustomPaint(size: const Size(frameWidth, frameHeight), painter: FacePainter(widget.theme, frame));
   }
 }
 
