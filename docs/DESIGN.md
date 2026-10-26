@@ -52,6 +52,28 @@ A bloom swells the glow when a state arrives. A held state keeps it swelling: a 
 - Do not put an opacity widget over a widget that draws only a blur. Impeller drops it (measured 2026-10-18).
   Scale the shadow's alpha instead, as `Glow` does.
 
+## Motion language
+
+Measured from the Mark II campaign video (the Indiegogo cut, 2:42, at ten frames a second; the Kickstarter cut has the
+same footage), not from the stills. The screen moves like a cartoon: it winds up, then sprints. Nothing fades gently.
+
+| Move | What the video does | Timing | Where it goes in Visage |
+|---|---|---|---|
+| Birth | One accent disc pops in, stretches into a peanut, splits into two discs, and the two become the weather and clock chips; their content fades in last. | pop 100 ms, stretch 200 ms, split 100 ms, content 100 ms | The resting screen the first time it shows and after a page leaves (`RestingPage`) |
+| Page swap, same shape | The old chips slide out to the left while the new ones slide in from the right; both are on screen together. | 200 ms, overlapping | Paging inside a namespace (`PagePager`), swipe and arrow keys |
+| Page swap, new shape | The whole page squashes to a horizontal line at its centre, holds a beat, and the next page expands out of the line. | squash 200 ms, hold 100 ms, expand 200 ms | Any template change and the return to the resting screen (`PageHost`) |
+| Collapse to a dot | When listening ends, the bars shrink to dots, the dots to one dot, and the answer bursts out of it. | shrink 300 ms, burst 100 ms | The attention face giving way to a page (`AttentionOverlay` with `PageHost`) |
+| Item cadence | List items arrive one after another, each a sharp pop, not a drift. | 100 ms apart | `StaggerEnter` and `RiseIn` on every list, grid, table and chip row |
+| Bloom | A hero glow swells once when its state arrives, then breathes. | swell 1.1 s, then the 6 s breath | `Glow(bloom: true)` on every hero circle when its page arrives |
+
+Rules that follow from the table:
+
+- Enter and exit are different moves. An exit anticipates (a tiny grow, 60 ms) and then goes fast (ease in); an entry
+  arrives fast and overshoots a little (`Curves.easeOutBack`, about 3 percent), never a plain ease-out fade.
+- A transition is 200 to 300 ms. The old page never just vanishes; it leaves while the new one arrives.
+- Every hero circle on every page has the glow and the gradient fill; a template page is not exempt because it is new.
+- Under reduced motion every move is a cut to the final frame, as before.
+
 ## Glanceability
 
 A user reads the screen from across the room, often in one look.
