@@ -8,6 +8,7 @@ import '../faults.dart';
 import '../protocol/wire_protocol.dart';
 import '../state/gui_state.dart';
 import '../widgets/notification_list.dart';
+import '../widgets/page_switch.dart';
 import 'alarms_page.dart';
 import 'alert_list_page.dart';
 import 'blank_page.dart';
@@ -30,6 +31,7 @@ import 'now_playing_page.dart';
 import 'ocp_busy_page.dart';
 import 'ocp_list_page.dart';
 import 'page.dart';
+import 'resting_page.dart';
 import 'select_page.dart';
 import 'status_page.dart';
 import 'sun_times_page.dart';
@@ -125,8 +127,12 @@ PageBuilder resolve(Target? target, {TemplateGaps? gaps}) {
   return templates[template] ?? (gaps ?? templateGaps).fallbackFor(template);
 }
 
-/// Hosts the current page. A new (namespace, page, index) replaces the subtree, so page state resets; the same
-/// target with new data rebuilds the same widget, so a page keeps its tickers and animations across updates.
+/// The resting page's place in the [PageSwitch], so arriving at rest and leaving it move like any page.
+const restingKey = 'resting';
+
+/// Hosts the current page, or Visage's resting page when it shows (resting_page.dart). A new (namespace, page, index)
+/// moves to a new subtree through a [PageSwitch], so page state resets; the same target with new data rebuilds the
+/// same widget, so a page keeps its tickers and animations across updates.
 class PageHost extends StatelessWidget {
   const PageHost({super.key, required this.state, required this.send, required this.notifications, this.protocol});
 
@@ -144,6 +150,16 @@ class PageHost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final target = state.current();
+    final resting = restingPage(state, protocol, onShowNotifications: notifications.open);
+    return PageSwitch(
+      pageKey: resting == null ? target?.toString() ?? '' : restingKey,
+      group: resting == null ? target?.namespace : null,
+      index: target?.index ?? 0,
+      child: resting ?? _routed(target),
+    );
+  }
+
+  Widget _routed(Target? target) {
     final ns = target == null ? null : state.namespace(target.namespace);
     final ctx = PageContext(
       namespace: target?.namespace ?? '',
@@ -154,7 +170,6 @@ class PageHost extends StatelessWidget {
       storedNotifications: notifications.storage.value.length,
       protocol: protocol,
     );
-    final data = Json.of(ns?.data ?? const {});
-    return KeyedSubtree(key: ValueKey(target?.toString() ?? ''), child: resolve(target)(data, ctx));
+    return resolve(target)(Json.of(ns?.data ?? const {}), ctx);
   }
 }

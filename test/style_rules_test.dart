@@ -24,13 +24,11 @@ const allowed = <String, Map<String, String>>{
   'lib/pages/now_playing_status.dart': {roundedFill: 'the listening bars: 3 px wide with 2 px corners, fully rounded'},
   'lib/widgets/command_box.dart': {
     roundedFill: 'the typed-command box: corner radius is half its height, a full pill',
-    border: 'audit: the command box has an accent outline',
+    border: 'the one text field: its accent outline marks where to type (decided 2026-10-25)',
   },
-  'lib/widgets/volume_indicator.dart': {roundedFill: 'audit: the volume pill, a status pill like the offline one'},
-  'lib/widgets/notification_stack.dart': {roundedFill: 'audit: notification popups are filled rounded boxes, close to cards'},
-  'lib/window/window_menu.dart': {
-    border: 'audit: the in-window menu has an accent outline',
-    divider: 'audit: the in-window menu separators are accent, not the hairline',
+  'lib/widgets/volume_indicator.dart': {roundedFill: 'the volume pill: a status pill like the offline pill (decided 2026-10-25)'},
+  'lib/widgets/notification_stack.dart': {
+    roundedFill: 'notification popups: short-lived notices, rounded like the pills (decided 2026-10-25)',
   },
 };
 

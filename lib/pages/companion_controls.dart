@@ -5,11 +5,12 @@ library;
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../widgets/circle.dart';
 
 const answerCirclePx = 148.0;
 const choiceRowPx = 64.0;
 
-/// A round answer button: [primary] takes the dim accent, the other the card fill.
+/// A round answer button: [primary] takes the dim accent and the hero glow, the other the card fill.
 class AnswerCircle extends StatelessWidget {
   const AnswerCircle({super.key, required this.label, required this.onPressed, this.primary = false});
 
@@ -18,19 +19,22 @@ class AnswerCircle extends StatelessWidget {
   final bool primary;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: answerCirclePx,
-    child: FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        shape: const CircleBorder(),
-        padding: const EdgeInsets.all(16),
-        backgroundColor: primary ? VisageColors.accentDim : VisageColors.card,
-        foregroundColor: VisageColors.fg,
-        textStyle: VisageText.fg(26, weight: FontWeight.w500),
-      ),
-      child: Text(label, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+  Widget build(BuildContext context) => Circle(
+    size: answerCirclePx,
+    glow: primary ? const Glow(bloom: true) : null,
+    children: [SizedBox.square(dimension: answerCirclePx, child: _button())],
+  );
+
+  Widget _button() => FilledButton(
+    onPressed: onPressed,
+    style: FilledButton.styleFrom(
+      shape: const CircleBorder(),
+      padding: const EdgeInsets.all(16),
+      backgroundColor: primary ? VisageColors.accentDim : VisageColors.card,
+      foregroundColor: VisageColors.fg,
+      textStyle: VisageText.fg(26, weight: FontWeight.w500),
     ),
+    child: Text(label, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
   );
 }
 

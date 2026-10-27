@@ -23,7 +23,7 @@ Color toneColour(TimerTone tone) => switch (tone) {
 
 Color toneGlow(TimerTone tone) => switch (tone) {
   TimerTone.calm => VisageColors.accentSoft,
-  TimerTone.warm => const Color(0x52FFC93C),
+  TimerTone.warm => VisageColors.sunSoft,
   TimerTone.hot || TimerTone.done => const Color(0x61FF5C5C),
 };
 
@@ -82,7 +82,7 @@ class TimerRing extends StatelessWidget {
     return Circle(
       size: size,
       gradient: gradientFill,
-      glow: Glow(colour: toneGlow(timer.tone), loop: timer.expired),
+      glow: Glow(colour: toneGlow(timer.tone), loop: timer.expired, bloom: true),
       ring: timer.expired ? _Pulse(child: ring) : ring,
       children: [
         Padding(

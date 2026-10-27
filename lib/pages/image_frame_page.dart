@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../json.dart';
 import '../resources/resources.dart';
 import 'page.dart';
+import 'reduced_motion.dart';
 import 'template_names.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
@@ -39,17 +40,20 @@ class ImageFramePage extends StatelessWidget {
     final image = imageFor(model.src, fit: model.fit);
     return Column(
       children: [
-        if (model.title.isNotEmpty) ...[TemplateTitle(model.title), const SizedBox(height: 14)],
+        if (model.title.isNotEmpty) ...[RiseOrStill(index: 0, child: TemplateTitle(model.title)), const SizedBox(height: 14)],
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: ColoredBox(
-              color: parseColor(model.background),
-              child: SizedBox.expand(child: image ?? const Center(child: TemplateHint(unavailable))),
+          child: RiseOrStill(
+            index: 1,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: ColoredBox(
+                color: parseColor(model.background),
+                child: SizedBox.expand(child: image ?? const Center(child: TemplateHint(unavailable))),
+              ),
             ),
           ),
         ),
-        if (model.caption.isNotEmpty) ...[const SizedBox(height: 14), TemplateHint(model.caption)],
+        if (model.caption.isNotEmpty) ...[const SizedBox(height: 14), RiseOrStill(index: 2, child: TemplateHint(model.caption))],
       ],
     );
   }

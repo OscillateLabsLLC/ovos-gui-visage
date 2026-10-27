@@ -1,6 +1,6 @@
 /// SYSTEM_list (gui-1.md 3.4 Catalogue): the template title, then plain stacked rows that scroll, each a round
 /// thumbnail (when the item has a usable image) with the title and the muted subtitle beside it, rising in one after
-/// another, as the alerts and OCP lists do. Long text ends in an ellipsis; it never shrinks.
+/// another after the title, as the alerts and OCP lists do. Long text ends in an ellipsis; it never shrinks.
 library;
 
 import 'package:flutter/material.dart';
@@ -32,14 +32,14 @@ class ListPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: _titleGapPx)],
+        if (title.isNotEmpty) ...[RiseOrStill(index: 0, child: TemplateTitle(title)), const SizedBox(height: _titleGapPx)],
         Expanded(
           child: items.isEmpty
               ? const Center(child: TemplateHint(emptyList))
               : ListView.separated(
                   itemCount: items.length,
                   separatorBuilder: (_, _) => const SizedBox(height: _rowGapPx),
-                  itemBuilder: (_, i) => RiseOrStill(index: i, child: ListRow(items[i])),
+                  itemBuilder: (_, i) => RiseOrStill(index: i + 1, child: ListRow(items[i])),
                 ),
         ),
       ],

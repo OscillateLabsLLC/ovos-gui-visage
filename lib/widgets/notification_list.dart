@@ -7,8 +7,14 @@ import 'package:flutter/foundation.dart';
 
 import '../faults.dart';
 import '../protocol/core_bus.dart';
+import '../state/gui_state.dart' show Target;
 import 'notification_actions.dart';
 import 'stored_notifications.dart';
+
+/// Whether [current] is a page the list must leave for: any page but the resting screen. On legacy the resting
+/// screen is the homescreen's idle page in [idleNamespace]; on GUI-1 it is Visage's own and no page is current, so
+/// a null [current] keeps the list (a tap on the badge used to open it and the next refresh closed it at once).
+bool pageClosesNotificationList(Target? current, String idleNamespace) => current != null && current.namespace != idleNamespace;
 
 class NotificationListController extends ChangeNotifier {
   NotificationListController({required this.bus, required this.storage, this.onOpenChanged}) {
@@ -19,13 +25,16 @@ class NotificationListController extends ChangeNotifier {
   final ValueListenable<List<Json>> storage;
   final void Function(bool open)? onOpenChanged;
   bool _open = false;
+  bool _hadItems = false;
 
   bool get isOpen => _open;
 
   List<StoredNotification> get items => [for (final record in storage.value) StoredNotification(record)];
 
-  /// Nothing opens over an empty store, as the homescreen hides its button then.
-  void open() => _set(storage.value.isNotEmpty);
+  /// Opens over an empty store too: on GUI-1 the badge's count comes from a producer (`gui.ambient.notifications`),
+  /// so a tap can land before anything has expired into storage, and a tap that does nothing reads as broken. The
+  /// panel says the store is empty.
+  void open() => _set(true);
 
   void close() => _set(false);
 
@@ -53,8 +62,11 @@ class NotificationListController extends ChangeNotifier {
     return false;
   }
 
+  /// A store that empties under an open list (clear all, the last clear) closes it; a list opened over an empty
+  /// store stays until the person closes it.
   void _stored() {
-    if (storage.value.isEmpty) close();
+    if (storage.value.isEmpty && _hadItems) close();
+    _hadItems = storage.value.isNotEmpty;
     notifyListeners();
   }
 

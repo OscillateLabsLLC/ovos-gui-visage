@@ -160,21 +160,14 @@ The popups follow ovos-shell's NotificationPop*.qml.
 Before the finished product is announced, every v2 feature is checked against `docs/DESIGN.md`. This list is the first
 run of the guards in that guide's "Enforced by" table. Decide each item: fix it, or record why it is allowed.
 
-Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
+Style (`test/style_rules_test.dart`): no `audit:` entry remains. On 2026-10-25 the owner sanctioned the command box's
+accent outline, the volume pill and the notification popups as they are, and the in-window menu was redrawn.
 
-- `lib/widgets/command_box.dart`: the typed-command box has an accent outline.
-- `lib/widgets/volume_indicator.dart`: the volume pill is a filled rounded box; allow it as a status pill or redraw it.
-- `lib/widgets/notification_stack.dart`: notification popups are filled rounded boxes, close to cards.
-- `lib/window/window_menu.dart`: the in-window menu has an accent outline.
-- `lib/window/window_menu.dart`: the in-window menu separators are accent, not the faint hairline.
-
-Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
-
-- `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
-- `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.
-- `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
-- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1. The fallback page shows
-  an unknown template's `text` the same way (`SYSTEM_hologram` fixture), so it fails for the same reason.
+Accessibility (`test/a11y_guidelines_test.dart`, both page sizes, 432 × 736 and 432 × 650): no page is skipped. The four
+contrast failures were fixed on 2026-10-25: the sunrise and sunset labels are white; the count badge and the input
+box's Confirm label are drawn in `VisageColors.onAccent` (the page background, 6.90:1 on the accent); and the text
+chip's words keep their box inside the ring, whose accent the guideline had measured as their background once the
+test font's block glyphs widened the box past the chip's inner width.
 - `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size. Informative, no
   audit entry: the Android tap-target check only prints. The re-run of 2026-10-25 printed "passes" for both resting
   screens, so the claim needs a check on a device before anyone acts on it.
@@ -182,11 +175,9 @@ Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both p
   fixtures. `SYSTEM_face`, `SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input` are checked and pass both guidelines at
   both sizes. No fixture reaches two routes, so they are not checked: alerts `ListView` and OCP `OVOSSyncPlayer`.
 
-Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
-
-- `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
-- `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
-- `lib/pages/sun_times_page.dart`: the sun rises and settles over 8 s.
+Reduced motion (`test/reduced_motion_test.dart`): no file ignores the setting. The face was the last; since
+2026-10-25 it holds a still frame (eyes open, mouth at rest, no blink, widen or tween), and while it speaks the mouth
+still switches viseme shapes as discrete frames.
 
 Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
 
@@ -195,9 +186,19 @@ Impeller opacity over a blur: no opacity widget wraps a child that draws only a 
 
 Other:
 
-- `lib/pages/status_page.dart`: the comment says the glyph "blooms as it arrives", but no code blooms; add the bloom or
-  correct the comment. No shared widget makes a one-time bloom (`docs/DESIGN.md`, Shared widgets).
 - `lib/theme.dart`: the page background is `#05070A`; ovos-visage SPEC 9 gives `#0b0f14`.
+
+## Captions (2026-10-25)
+
+Captions are off by default since 2026-10-25 (`AppConfig.captions`): the owner watched the demo and the strip covered
+the bottom of content pages (the forecast row, list rows) for the length of every spoken answer.
+
+- When captions are on, the page should give up a band for them, as it does for the face badge (`attentionStrip`),
+  instead of the strip drawing over content. The band's height is bounded by `captionMaxHeight` (260 px). Files:
+  `lib/widgets/caption_strip.dart`, `lib/screen_frame.dart`.
+- A reply never fades when `recognizer_loop:audio_output_end` never arrives (a stack with no audio service): it stays
+  for `captionMaxAge`, 60 s (`lib/captions.dart`). A shorter hold after `ovos.utterance.handled`, as the heard line
+  already gets (`heardHoldWithoutReply`, 4 s), may be right for replies too.
 
 ## Carried over
 
@@ -206,3 +207,28 @@ Other:
 - A Dart recorder for protocol fixtures, so contributors do not need ovos-visage's `--record`.
 - The `/res-abs/` route in the sidecar serves whatever is mounted under `/srv/host`; ovos-visage
   only served paths that had appeared in session data. Mount narrowly until the sidecar checks.
+
+## Community feedback on v2.1 (2026-10-24, a tester on the OVOS chat)
+
+What the motion branch already answers, and what is still open. Items marked upstream are not Visage's to fix.
+
+- Done here: the keyboard button overlapped the captions in kiosk; captions are off by default now, and the caption
+  band item above covers the layout when they are on.
+- Done here: the right-click menu duplicates the menu bar; in a container there is no menu bar, so the in-window
+  menu stays. The tester would like the type-command button shown all the time, as a config: open, see below.
+- Open: show the type-command button on the resting screen in the corner-widget modes too (`typeOnHome` is true
+  only in window and kiosk; `lib/screen_frame.dart`), or a config key that always shows it.
+- Open: place the widget anywhere, not only in a corner. Drag already moves it, then it snaps to the nearest corner
+  (`nearestCorner`, `lib/window/window_config.dart`); a config key to keep the dropped position is the smallest change.
+- Open: keyboard shortcuts for the menu's choices, at least hide peek and open the face picker.
+- Open, macOS: kiosk leaves the menu bar's strip uncovered on the tester's Mac. Kiosk hides the menu bar with the
+  presentation options (`macos/Runner/Kiosk.swift`); check a second display and the "Displays have separate Spaces"
+  setting, which keep the menu bar on one screen.
+- Open: the face picker opens in a browser behind the kiosk window, so it looks as if the option vanished; leave
+  kiosk to float when the picker opens, or draw the picker in the window.
+- Open: the homescreen weather chip shows 0 degrees on the tester's install. `weather_temp` is parsed with
+  `number()` (fallback 0, `lib/pages/page.dart`) and the chip shows whatever comes back; a value the parser cannot
+  read must be reported and the chip hidden instead (CLAUDE.md, never swallow a failure). Needs the tester's data.
+- Upstream: the OCP YouTube track duration (the `fix/ocp-length-total` item above) and the volume dropping during
+  barge-in (the listener's ducking). A volume slider in place of the pill is a design question for later.
+

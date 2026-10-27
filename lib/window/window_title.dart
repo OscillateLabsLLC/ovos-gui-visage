@@ -11,6 +11,9 @@ import 'window_config.dart';
 import 'window_remote.dart';
 
 const titleAppName = 'Visage';
+
+/// The browser tab and the task switcher show this; without it Flutter web blanks the page title.
+const appTitle = 'OVOS Visage';
 const _separator = ' · ';
 
 /// `Visage · GUI-1 · window`. Before the probe decides, `auto` reads `detecting…`; `gui1` and `legacy` name their

@@ -1,5 +1,5 @@
 /// SYSTEM_grid (gui-1.md 3.4 Catalogue): the template title, then equal round tiles that scroll, the image filling each
-/// circle and the title beneath, rising in one after another. The column count follows the width (`gridColumns`). A
+/// circle and the title beneath, rising in one after another after the title. The column count follows the width (`gridColumns`). A
 /// tile without a usable image is a gradient circle with its title inside instead.
 library;
 
@@ -34,7 +34,7 @@ class GridPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) ...[TemplateTitle(title), const SizedBox(height: _titleGapPx)],
+        if (title.isNotEmpty) ...[RiseOrStill(index: 0, child: TemplateTitle(title)), const SizedBox(height: _titleGapPx)],
         Expanded(child: tiles.isEmpty ? const Center(child: TemplateHint(emptyList)) : _grid(tiles)),
       ],
     );
@@ -53,7 +53,7 @@ class GridPage extends StatelessWidget {
         ),
         itemCount: tiles.length,
         itemBuilder: (_, i) => RiseOrStill(
-          index: i,
+          index: i + 1,
           child: GridItemView(tiles[i], side: side),
         ),
       );

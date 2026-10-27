@@ -11,6 +11,7 @@ import '../widgets/circle.dart';
 import 'data_faults.dart';
 import 'map_card_model.dart';
 import 'page.dart';
+import 'reduced_motion.dart';
 import 'skill_header.dart';
 
 class MapPage extends StatelessWidget {
@@ -27,20 +28,21 @@ class MapPage extends StatelessWidget {
     return ReportsDataFaults(
       template: 'SYSTEM_map',
       problems: card.problems,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 28,
-        children: [
-          SkillHeader(heading: nothingToShow ? noLocation : card.label, location: ''),
-          const Circle(
-            size: 270,
-            gradient: gradientFill,
-            ring: Ring(),
-            children: [Icon(Icons.place, size: 120, color: VisageColors.accent)],
-          ),
-          if (card.coordinates.isNotEmpty)
-            Text(card.coordinates, style: VisageText.muted(18).copyWith(fontFeatures: VisageText.tabular)),
-        ],
+      child: Center(
+        child: StaggerOrStill(
+          children: [
+            SkillHeader(heading: nothingToShow ? noLocation : card.label, location: ''),
+            const Circle(
+              size: 270,
+              gradient: gradientFill,
+              glow: Glow(bloom: true),
+              ring: Ring(),
+              children: [Icon(Icons.place, size: 120, color: VisageColors.accent)],
+            ),
+            if (card.coordinates.isNotEmpty)
+              Text(card.coordinates, style: VisageText.muted(18).copyWith(fontFeatures: VisageText.tabular)),
+          ],
+        ),
       ),
     );
   }

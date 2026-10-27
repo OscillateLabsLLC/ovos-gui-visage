@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 import 'circle.dart';
+import 'hero_time.dart';
 import 'weather_icon.dart';
 
 const showNotificationsLabel = 'Show notifications';
@@ -56,20 +57,13 @@ class ClockChip extends StatelessWidget {
     return Circle(
       size: clockChipSize,
       gradient: const RadialGradient(colors: [VisageColors.clockTop, VisageColors.clockBottom], stops: [0, 0.7]),
-      glow: const Glow(),
+      glow: const Glow(bloom: true),
       ring: const Ring(),
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              time.isEmpty ? '--:--' : time,
-              style: VisageText.fg(
-                92,
-                weight: FontWeight.w300,
-                height: 1,
-              ).copyWith(letterSpacing: -2, fontFeatures: VisageText.tabular),
-            ),
+            HeroTime(time: time, circleSize: clockChipSize, fontSize: 92),
             if (ampm.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -106,7 +100,10 @@ class CountBadge extends StatelessWidget {
             height: 28,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             alignment: Alignment.center,
-            child: Text('$count', style: VisageText.fg(15, weight: FontWeight.w600)),
+            child: Text(
+              '$count',
+              style: VisageText.fg(15, weight: FontWeight.w700).copyWith(color: VisageColors.onAccent),
+            ),
           ),
         ),
       ),

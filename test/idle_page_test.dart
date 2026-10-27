@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/pages/idle_page.dart';
+import 'package:ovos_gui_visage/widgets/home_chips.dart';
 import 'package:ovos_gui_visage/pages/page.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
@@ -95,5 +96,21 @@ void main() {
     expect(find.text('2'), findsOneWidget);
     expect(find.text('timers'), findsOneWidget);
     expect(find.text('alarms'), findsNothing);
+  });
+
+  testWidgets('a temperature the parser cannot read hides the weather chip and is reported, never shown as 0', (tester) async {
+    Json data(Object temp) => {'weather_api_enabled': true, 'weather_temp': temp, 'weather_code': 0, 'time_string': '09:05'};
+    final faults = await collectFaults(() async {
+      await tester.pumpWidget(
+        host(IdlePage(data: data('n/a'), events: const {}, storedNotifications: 0, onShowNotifications: () {})),
+      );
+    });
+    expect(find.byType(WeatherChip), findsNothing);
+    expect(find.text('0°'), findsNothing);
+    expect(faults.single.exceptionAsString(), contains('weather_temp'));
+    await tester.pumpWidget(
+      host(IdlePage(data: data('21,5'), events: const {}, storedNotifications: 0, onShowNotifications: () {})),
+    );
+    expect(find.text('22°'), findsOneWidget, reason: 'a comma decimal reads as the skill meant it');
   });
 }

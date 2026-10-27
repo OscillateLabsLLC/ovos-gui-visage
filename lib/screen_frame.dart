@@ -16,9 +16,9 @@ import 'outcome.dart';
 import 'pages/page.dart';
 import 'pages/page_pager.dart';
 import 'pages/resting_model.dart';
-import 'pages/resting_page.dart';
 import 'pages/router.dart';
 import 'protocol/wire_protocol.dart';
+import 'screen_input.dart';
 import 'shell_overlays.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
@@ -58,8 +58,7 @@ class FrameParts {
     required this.expanded,
     required this.kiosk,
     required this.typeOnHome,
-    required this.onStep,
-    required this.onInteract,
+    required this.input,
     required this.onTryOn,
   });
 
@@ -91,8 +90,9 @@ class FrameParts {
 
   /// Window and kiosk mode put a keyboard button on the homescreen.
   final bool typeOnHome;
-  final void Function(int delta) onStep;
-  final VoidCallback onInteract;
+
+  /// Steps between pages and reports use of the page; holds the inner pages of the page on screen.
+  final ScreenInput input;
   final void Function(bool active) onTryOn;
 }
 
@@ -137,12 +137,11 @@ class ScreenFrame extends StatelessWidget {
       child: PagePager(
         index: position.index,
         count: position.count,
-        onStep: parts.onStep,
-        onInteract: parts.onInteract,
+        onStep: parts.input.step,
+        onInteract: parts.input.interact,
+        inner: parts.input.innerPages,
         chevrons: parts.kiosk,
-        child:
-            restingPage(parts.state, parts.protocol, onShowNotifications: parts.notificationList.open) ??
-            PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
+        child: PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
       ),
     );
   }

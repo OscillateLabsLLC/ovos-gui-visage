@@ -8,6 +8,7 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/web_frame.dart';
 import 'page.dart';
+import 'reduced_motion.dart';
 
 final _dropBlocks = RegExp(r'<(script|style)[^>]*>.*?</\1>', caseSensitive: false, dotAll: true);
 final _breaks = RegExp(r'</(p|div|h[1-6]|li|tr|br)\s*>|<br\s*/?>', caseSensitive: false);
@@ -38,6 +39,9 @@ class HtmlFramePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final html = text(data['html']);
     if (hasWebView) return WebFrame.html(html);
-    return SingleChildScrollView(child: Text(htmlToText(html), style: VisageText.fg(20, height: 1.4)));
+    return RiseOrStill(
+      index: 0,
+      child: SingleChildScrollView(child: Text(htmlToText(html), style: VisageText.fg(20, height: 1.4))),
+    );
   }
 }

@@ -4,10 +4,16 @@ import 'attention.dart';
 import 'face/face.dart';
 import 'face/face_badge.dart';
 import 'face/face_theme.dart';
+import 'theme.dart';
+import 'widgets/circle.dart' show motionReduced;
+import 'widgets/dot_collapse.dart';
 
-const _dimBg = Color(0xEB05070A);
 const _badgeHeight = 104.0;
 const _badgeGap = 7.0;
+const _fade = Duration(milliseconds: 400);
+
+/// The face stays opaque while it collapses (DotCollapse), and the dot fades in the time left of the fade.
+final _afterCollapse = Interval(dotCollapse.inMilliseconds / _fade.inMilliseconds, 1);
 
 /// Content pages keep this much of the bottom free for the badge (SPEC 5.3: badge plus a 7 px gap above and below).
 const attentionStrip = _badgeHeight + 2 * _badgeGap;
@@ -34,7 +40,9 @@ class PeekBadge extends StatelessWidget {
   }
 }
 
-/// The face over the page: full and dimming over idle, else scaled into a disc at the bottom centre (SPEC 5.3).
+/// The face over the page: full and dimming over idle, else scaled into a disc at the bottom centre (SPEC 5.3). When it
+/// goes, it collapses to a dot at its centre (DotCollapse) and only then fades, so a page arriving at the same moment
+/// expands out of the line where the dot ended. Under reduced motion the face comes and goes at once.
 class AttentionOverlay extends StatelessWidget {
   const AttentionOverlay({super.key, required this.attention, required this.face});
 
@@ -50,17 +58,22 @@ class AttentionOverlay extends StatelessWidget {
     return IgnorePointer(
       child: AnimatedOpacity(
         opacity: attention.shown ? 1 : 0,
-        duration: const Duration(milliseconds: 400),
+        duration: motionReduced(context) ? Duration.zero : _fade,
+        curve: attention.shown ? Curves.linear : _afterCollapse,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          color: attention.compact ? Colors.transparent : _dimBg,
+          color: attention.compact ? Colors.transparent : VisageColors.scrim,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             transform: Matrix4.translationValues(shift.dx, shift.dy, 0)
               ..translateByDouble(geometry.centre.dx, geometry.centre.dy, 0, 1)
               ..scaleByDouble(attention.compact ? scale : 1, attention.compact ? scale : 1, 1, 1)
               ..translateByDouble(-geometry.centre.dx, -geometry.centre.dy, 0, 1),
-            child: BadgeFace(controller: face, compact: attention.compact),
+            child: DotCollapse(
+              collapsed: !attention.shown,
+              centre: geometry.centre,
+              child: BadgeFace(controller: face, compact: attention.compact),
+            ),
           ),
         ),
       ),

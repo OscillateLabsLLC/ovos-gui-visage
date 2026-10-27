@@ -107,7 +107,7 @@ class _InputBoxPageState extends State<InputBoxPage> {
         Circle(
           size: 150,
           gradient: gradientFill,
-          glow: const Glow(),
+          glow: const Glow(bloom: true),
           ring: const Ring(),
           children: const [MotionIcon('mic', size: 84)],
         ),
@@ -146,7 +146,7 @@ class _InputBoxPageState extends State<InputBoxPage> {
     onPressed: onPressed,
     style: FilledButton.styleFrom(
       backgroundColor: fill,
-      foregroundColor: VisageColors.fg,
+      foregroundColor: fill == VisageColors.accent ? VisageColors.onAccent : VisageColors.fg,
       minimumSize: const Size(150, 56),
       textStyle: VisageText.fg(20, weight: FontWeight.w500),
     ),

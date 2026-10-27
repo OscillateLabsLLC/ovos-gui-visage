@@ -33,15 +33,19 @@ Use these widgets. Do not make a new effect for one page.
 |---|---|---|
 | `Circle` (`lib/widgets/circle.dart`) | Every chip: a filled or gradient circle with its content centred | — |
 | `Ring` (`lib/widgets/circle.dart`) | A track and a value arc from twelve o'clock, for progress | 900 ms to a new value |
-| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `loop` makes it swell for a held state | 6 s each way; 1.1 s each way when looping |
+| `Glow` (`lib/widgets/circle.dart`) | The soft halo behind a hero circle; `bloom` swells it once as its page arrives, `loop` keeps it swelling for a held state. It is a radial gradient that follows a blur's falloff, not a blur: the target is a Raspberry Pi (Skia on GLES), where re-blurring a 300 px circle every frame of a bloom or a loop is too slow | 6 s each way; bloom 1.1 s up and 1.1 s back; 1.1 s each way when looping |
 | `gradientFill` (`lib/widgets/circle.dart`) | The lit-from-above fill of a hero circle | — |
-| `StaggerEnter` (`lib/widgets/circle.dart`) | A column whose items fade and rise in | 260 ms each, 60 ms apart |
-| `RiseIn` (`lib/widgets/circle.dart`) | One item of a list that is not a plain column, with the same entry | 260 ms, 60 ms per index |
+| `StaggerEnter` (`lib/widgets/enter.dart`) | A column whose items pop in: up 16 px from 0.9 scale, `Curves.easeOutBack` | 200 ms each, 100 ms apart, the seventh on with the sixth |
+| `RiseIn` (`lib/widgets/enter.dart`) | One item of a list that is not a plain column, with the same entry | 200 ms, 100 ms per index, capped like `StaggerEnter` |
 | `MotionIcon` (`lib/widgets/motion_icon.dart`) | The animated weather and status icons, from their SVG keyframes | per icon |
 | Home chips (`lib/widgets/home_chips.dart`) | The weather chip, the clock chip and the notification badge of both resting screens | — |
+| `PageSwitch` (`lib/widgets/page_switch.dart`, timeline in `page_moves.dart`) | Every page change in `PageHost`: squash to a line and expand for a new shape, a slide for a step between a skill's pages | 520 ms; 200 ms |
+| `EnterCue` (`lib/widgets/enter.dart`) | Set by `PageSwitch`: an arriving page's items wait for its expand, a sliding page arrives whole | — |
+| `ChipBirth` (`lib/widgets/chip_birth.dart`) | The GUI-1 resting chips, born from one disc each time the page appears | 500 ms |
+| `DotCollapse` (`lib/widgets/dot_collapse.dart`) | The attention face going: it collapses to a dot at its centre, then fades | 300 ms |
 
-A bloom swells the glow when a state arrives. A held state keeps it swelling: a ringing alarm uses a looping red
-`Glow` (`lib/pages/alarms_page.dart`). No widget makes a one-time bloom yet (docs/BACKLOG.md, Pre-announcement polish audit).
+A bloom swells the glow when a state arrives: `Glow(bloom: true)` on a hero circle. A held state keeps it swelling: a
+ringing alarm uses a looping red `Glow` (`lib/pages/alarms_page.dart`).
 
 ## Motion rules
 
@@ -49,8 +53,63 @@ A bloom swells the glow when a state arrives. A held state keeps it swelling: a 
 - Stop every animation when the platform asks for reduced motion, and draw a defined still frame.
   Read `MediaQuery.maybeDisableAnimationsOf`, or `motionReduced` in `lib/widgets/circle.dart`.
   The glow holds a mid-breath frame. Entering items stand in place at full opacity. A ring shows its value at once.
+- `VISAGE_MOTION=cut` (`motion` in the config file, `lib/motion_setting.dart`) turns every move into a cut on any
+  platform: the app's root MediaQuery then reports animations disabled, so a widget that reads `motionReduced` needs
+  nothing more. Measure a Raspberry Pi with and without it (`VISAGE_FRAME_LOG=1`) before choosing its default.
 - Do not put an opacity widget over a widget that draws only a blur. Impeller drops it (measured 2026-10-18).
-  Scale the shadow's alpha instead, as `Glow` does.
+  Scale the colour's alpha instead, as `Glow` does. Do not animate a blur's radius either: `Glow` animates a gradient.
+
+## Motion language
+
+Measured from the Mark II campaign video (the Indiegogo cut, 2:42, at ten frames a second; the Kickstarter cut has the
+same footage), not from the stills. The screen moves like a cartoon: it winds up, then sprints. Nothing fades gently.
+
+| Move | What the video does | Timing | Where it goes in Visage |
+|---|---|---|---|
+| Birth | One accent disc pops in, stretches into a peanut, splits into two discs, and the two become the weather and clock chips; their content fades in last. | pop 100 ms, stretch 200 ms, split 100 ms, content 100 ms | The resting screen the first time it shows and after a page leaves (`RestingPage`) |
+| Page swap, same shape | The old chips slide out to the left while the new ones slide in from the right; both are on screen together. | 200 ms, overlapping | Paging inside a namespace: the step `PagePager` makes (swipe, arrow keys, chevrons), drawn by `PageSwitch` |
+| Page swap, new shape | The whole page squashes to a horizontal line at its centre, holds a beat, and the next page expands out of the line. | squash 200 ms (60 ms of it a grow), hold 100 ms, expand 200 ms | Any template change and the return to the resting screen (`PageSwitch` in `PageHost`) |
+| Collapse to a dot | When listening ends, the bars shrink to dots, the dots to one dot, and the answer bursts out of it. | shrink 300 ms, burst 100 ms | The attention face going (`DotCollapse` in `AttentionOverlay`); a page arriving in the same frame expands at 320 ms, after the dot |
+| Item cadence | List items arrive one after another, each a sharp pop, not a drift. | 100 ms apart | `StaggerEnter` and `RiseIn` on every list, grid, table and chip row |
+| Bloom | A hero glow swells once when its state arrives, then breathes. | swell 1.1 s, then the 6 s breath | `Glow(bloom: true)` on every hero circle when its page arrives |
+
+Rules that follow from the table:
+
+- Enter and exit are different moves. An exit anticipates (a tiny grow, 60 ms) and then goes fast (ease in); an entry
+  arrives fast and overshoots a little (`Curves.easeOutBack`, about 3 percent), never a plain ease-out fade.
+- A transition is 200 to 300 ms. The old page never just vanishes; it leaves while the new one arrives.
+- Every hero circle on every page has the glow and the gradient fill; a template page is not exempt because it is new.
+- Under reduced motion every move is a cut to the final frame, as before.
+- A move transforms a snapshot, never a live page (`SnapshotWidget` in `PageSwitch`, permissive, so a page with a
+  web view moves live instead).
+
+Measured (2026-10-25, profile build, 120 Hz MacBook, one demo cycle per mode, `VISAGE_FRAME_LOG=1`, the frame and move
+clocks agreeing to within 82 to 89 ms):
+
+- `VISAGE_MOTION=full`: 15352 frames, 47 over 16.7 ms. Thirty sat 8 ms after `squash start` (raster 50 to 73 ms,
+  build under 1 ms): the first frame that drew the leaving page through the transform, before any fade. Three sat at
+  +325 ms with build 20 to 50 ms: the arriving page's first build at the expand. The rest were idle spikes.
+- `VISAGE_MOTION=cut`: 15413 frames, 25 over 16.7 ms, one per page change (raster 40 to 82 ms, build under 8 ms): the
+  first paint of each new page, with no move at all.
+
+So a page's first paint and a page drawn at a changing scale (new glyph sizes, icons and photos re-rendered every
+frame) each cost a 40 to 80 ms raster frame on Impeller. The rule that follows: capture the leaving page as the move
+starts and scale that one image; mount the arriving page at the hold so its first paint lands while the line sits
+still, and scale its image through the expand; paint live again at rest. Re-measure both modes after any change to
+the moves.
+
+After the snapshots (same machine and cycle, full motion):
+
+| Build | Frames | Over 16.7 ms | Over 8.3 ms |
+|---|---|---|---|
+| Live pages, full motion (before) | 15352 | 47 | 106 |
+| Snapshots, full motion (after) | 15345 | 29 | 80 |
+| Snapshots, `cut` (the floor: no motion at all) | — | 25 | 50 |
+
+The cluster 8 ms after `squash start` is gone. What remains per page swap is close to the floor: one 20 to 80 ms raster
+frame on the frame the move starts (capturing the leaving page, or the page change itself), and the arriving page's
+first build and paint at +224 ms, the start of the hold (build 10 to 33 ms, raster up to 62 ms). Nothing spikes at
+the item pops, so a swapped-in page keeps them.
 
 ## Glanceability
 
@@ -90,9 +149,11 @@ Never show an empty screen without a report. Never hide a failure in an empty `c
 | `test/a11y_guidelines_test.dart` | a page fails text contrast or labelled tap targets, at 432 × 736 or 432 × 650, and is not on the audit list; or the rendering library reports a fault while it lays out at either size (an overflowing flex) |
 | `test/resting_centering_test.dart` | the resting chips leave the page's centre line, on either resting screen |
 | `test/reduced_motion_test.dart` | a file that animates does not read the reduced-motion setting and is not on the audit list |
-| `test/circle_motion_test.dart` | the shared widgets move under reduced motion |
+| `test/circle_motion_test.dart` | the shared widgets move under reduced motion, or the bloom and the item cadence leave their timings |
+| `test/page_switch_test.dart`, `test/chip_birth_test.dart`, `test/dot_collapse_test.dart` | a signature move leaves its timeline, or moves under reduced motion |
 | `test/styles_test.dart` | a face pairing does not paint every frame without a fault |
 | `test/motion_test.dart` | an animated icon layer has no motion or painter |
 
-Each allowlist and audit entry has a reason. An entry marked `audit:` is not known to be allowed;
-docs/BACKLOG.md lists it under "Pre-announcement polish audit".
+Each allowlist entry has a reason. An entry marked `audit:` would be one not yet known to be allowed, listed in
+docs/BACKLOG.md under "Pre-announcement polish audit"; since 2026-10-25 none remains in any of the three guards (style,
+accessibility, reduced motion), and the accessibility guard skips no page.

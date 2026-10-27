@@ -43,7 +43,6 @@ lib/
   state/gui_state.dart namespaces, pages, session data, active stack (port of state.py)
   attention.dart       listen/think/speak state machine (port of attention.js)
   face/                face_theme.dart (contract), visage_theme.dart (current look), face.dart (widget), visemes.dart
-  lottie/              segment.dart (liveSegment), cache_lottie.dart (OVOS animations from the cache)
   resources/           locate.dart (pure), platform_io.dart (disk) and platform_web.dart (sidecar routes) behind a conditional export
   protocol/endpoints*  where the sockets are per platform: the host (desktop) or the page's origin (web)
   faults.dart          reportFault: a survivable fault reaches the log before its fallback shows
@@ -105,7 +104,7 @@ from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
 | `framing.py`, `/frameable` | not needed with a webview | A webview loads pages top-level, so sites that refuse framing work (verified with google.com on macOS). The web build's iframe cannot tell a refusal from inside the page, so it shows the browser's own refusal there; the URL chip stays as the fallback where there is no webview. |
 | `face.js`, `visemes.js` | `Face`, `FaceTheme`, `visemes.dart` | Same geometry and shapes; Catmull-Rom path in a `CustomPainter`. |
 | `attention.js` | `Attention` | Same events and timings. |
-| `lottie.js`, vendored lottie-web | `lottie` package | All six platforms. `liveSegment` ported. Fidelity on OVOS's files checked in the spike. |
+| `lottie.js`, vendored lottie-web | not ported | Visage draws its own loading dots, status check or cross, and OCP busy arc; OVOS's Lottie files are not played (2026-10-25: they did not match the rest of the screen). |
 | `static/icons/*.svg` | Flutter animations | `flutter_svg` does not run embedded CSS keyframes, so each icon is a static SVG part plus a Flutter animation. |
 | `pages/*.js`, `*_model.js` | `pages/*.dart` | View models stay pure and tested; `textFrame` pagination measures with `TextPainter`. |
 | CSS polish vocabulary | shared widgets | glow, gradient fill, stagger enter, bloom as reusable widgets; a theme file holds the colour tokens. |
@@ -142,7 +141,6 @@ legacy name only; `SYSTEM_input` reuses its page. An exact skill route still win
 | Read `~/.cache/ovos_gui` | yes | yes | no, via sidecar `/res/` and `/res-abs/` |
 | `SYSTEM_HtmlFrame` with scripts | WKWebView | no (plain text) | iframe |
 | `SYSTEM_UrlFrame` | WKWebView | URL chip | iframe; a refused site shows the browser's refusal |
-| Lottie | yes | yes | yes |
 
 ## Phases
 
@@ -241,10 +239,11 @@ apply:
 | Click or tap a control in a page | activates it | activates it | (no page shows) | activates it |
 | Click or tap the badge | | | expands for 10 s | |
 | Drag on empty surface | nothing | moves the widget; it snaps to the nearest corner | moves the widget | nothing |
-| Clearly horizontal drag (2:1) on a skill with 2+ pages | next or previous page | next or previous page | | next or previous page |
+| Clearly horizontal drag (2:1) on a skill with 2+ pages, or on a page with inner pages | next or previous page | next or previous page | | next or previous page |
 | Left and right arrow keys | next or previous page | next or previous page | | next or previous page |
 | Volume up, down and mute keys, where the desktop passes them on | volume up, down, mute toggle | the same | the same | the same |
 | Chevrons in the bottom corners | | | | next or previous page |
+| Click or tap the left or right third of a page with inner pages, off its controls | previous or next inner page | the same | | the same |
 | Long press | try-on mode | try-on mode | | try-on mode |
 | Right-click, two-finger tap, Menu key | opens the menu | opens the menu | expands, then opens the menu | opens the menu |
 | Keyboard button on the homescreen | opens the command box | | | opens the command box |
@@ -252,9 +251,16 @@ apply:
 | Click or tap the notification count on the homescreen | opens the stored notification list | the same | | the same |
 | In the notification list: arrow keys, Enter or Space, Escape | move between its buttons, press one, close the list (before Escape does anything else) | the same | | the same |
 
+A page with inner pages (a long `SYSTEM_text` split to fit, `lib/pages/inner_pager.dart`) takes "next or previous page"
+first: a swipe, an arrow key or a chevron steps its inner pages while it can step that way, then the skill's pages.
+Those steps stop at either end, and the text's own turning waits three page times (at least 20 s) after one. The tap
+zones exist only on such a page; a page's own controls win the tap, since the shell's detector sits behind them.
+
 A press anywhere on a page also sends `system.gui.user.interaction`, as the Qt delegate did. The menu is the one
-`lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time with
-Flutter's MenuAnchor (`lib/window/window_menu.dart`), without "Hide face" (hiding the window from inside it would
+`lib/window/status_menu.dart` builds for the macOS menu bar item and the Linux tray, drawn a third time in Visage's
+own vocabulary (`lib/window/window_menu.dart`, `lib/window/menu_rows.dart`: plain stacked text on the attention face's
+scrim, centred in the frame, submenus drilling in with a Back row; arrow keys, Enter or Space, Left and Escape),
+without "Hide face" (hiding the window from inside it would
 strand a desktop with no menu bar item or tray) and, in a browser, without "Quit". A peeking widget stays
 expanded while the menu or the command box is up.
 

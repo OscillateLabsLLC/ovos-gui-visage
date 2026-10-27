@@ -123,6 +123,8 @@ falls back to `ovos-gui`. Each new connection tries again. The menu shows which 
 | `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
 | `gui1Url` | `VISAGE_GUI1_URL` | the adapter's `ws://` URL | `ws://<bus host>:18182/gui1` |
 | | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
+| `motion` | `VISAGE_MOTION` | `full`, or `cut`: every move cuts to its final frame, as under the system's reduce-motion setting (for slow hardware) | `full` |
+| | `VISAGE_FRAME_LOG` | `1` logs each frame over 16.7 ms (build plus raster), each move's start and end, and a summary every 10 s, stamped `t=<ms since start>`; a frame's stamp is its vsync time, not when it was logged | off |
 
 The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
 GUI-1 path is a prototype. On it, a page's controls answer as `interaction` frames on the GUI-1 socket and the adapter
@@ -230,8 +232,9 @@ If the turn ends without speech, the heard line fades after 4 seconds. A long an
 smaller to fit; no words are cut off. On a page with content, the captions sit above the face
 badge. The collapsed peek badge never shows captions.
 
-Captions are on by default. To turn them off, set `"captions": false` in the config file, or
-`VISAGE_CAPTIONS=0`. The environment wins over the file.
+Captions are off by default: on a content page the strip draws over the bottom of the page. To turn them on, set
+`"captions": true` in the config file, or `VISAGE_CAPTIONS=1`. The environment wins over the file. The web build
+has no config file, so captions stay off there.
 
 ## Outcome
 
@@ -282,7 +285,9 @@ Each display lists what its own popups put in the store, less what any client or
 You can use the screen with a mouse or a touch screen, as you could with the Qt GUI.
 
 - **Menu**: right-click anywhere in the window, tap with two fingers, or press the Menu key. The same menu as
-  the menu bar item and the Linux tray opens inside the window, on every platform, the web build too. So a
+  the menu bar item and the Linux tray opens inside the window, on every platform, the web build too. It is plain
+  text over the dimmed screen; Face, Colours and Volume open in place with a Back row at the top, and the arrow keys,
+  Enter, Left and Escape work as well as the pointer. So a
   desktop with no tray, such as stock GNOME or a Raspberry Pi, can still change the mode, leave kiosk and quit.
   The menu inside the window has no **Hide face**, because you could not get the window back without a tray,
   and in a browser it has no **Quit**. On a collapsed peek badge, the window opens first, then the menu.
@@ -293,7 +298,8 @@ You can use the screen with a mouse or a touch screen, as you could with the Qt 
   language.
 - **Pages**: when a skill shows more than one page, swipe left or right across the page, or press the left and
   right arrow keys. In kiosk mode, arrows in the bottom corners do the same. The swipe must be clearly sideways:
-  on a widget, any other drag still moves the window.
+  on a widget, any other drag still moves the window. A long text that turns its own pages steps through them first,
+  and a tap on the left or right third of it goes back or ahead; its own turning then waits a while.
 - **Input box**: when a skill asks for text (`show_input_box`), type the answer and press Enter or the confirm
   button; the exit button closes it. The skill receives the answer as `<skill_id>.input.box.response`.
 - **Media**: on the now-playing page, the buttons skip back, pause or play, stop and skip forward. Drag the

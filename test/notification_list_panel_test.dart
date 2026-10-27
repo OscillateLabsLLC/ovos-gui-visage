@@ -121,4 +121,20 @@ void main() {
     await tester.pump();
     expect(surface.hasPrimaryFocus, isTrue);
   });
+
+  testWidgets('over an empty store the list opens and says so, with the close button still there', (tester) async {
+    bus.send('ovos.notification.api.storage.clear', <String, dynamic>{});
+    expect(list.items, isEmpty);
+    list.open();
+    await pumpOpen(tester);
+    expect([
+      find.text(emptyListText),
+      find.text(emptyListHint),
+      find.byTooltip('Close notifications'),
+    ], everyElement(findsOneWidget));
+    expect(find.byType(StoredRow), findsNothing);
+    await tester.tap(find.byTooltip('Close notifications'));
+    await tester.pump();
+    expect(list.isOpen, isFalse);
+  });
 }

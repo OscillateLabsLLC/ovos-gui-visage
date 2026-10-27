@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ovos_gui_visage/protocol/core_bus.dart';
+import 'package:ovos_gui_visage/state/gui_state.dart';
 import 'package:ovos_gui_visage/widgets/notification_list.dart';
 import 'package:ovos_gui_visage/widgets/notification_popups.dart';
 import 'package:ovos_gui_visage/widgets/stored_notifications.dart';
@@ -61,9 +62,10 @@ void main() {
     expect(texts(), [_texts[0], _texts[2]]);
   });
 
-  test('it opens only over something stored, and closes by itself once storage empties', () {
+  test('it opens over an empty store too (the badge count can be a producer\'s), and closes once a filled store empties', () {
     list.open();
-    expect(list.isOpen, isFalse);
+    expect(list.isOpen, isTrue, reason: 'a tap on the badge always shows the list, empty or not');
+    list.close();
     storeThree();
     list.open();
     expect(list.isOpen, isTrue);
@@ -138,5 +140,12 @@ void main() {
     expect([plain.type, plain.data], [lines[2]['type'], lines[2]['data']]);
     final all = clearAllMessage();
     expect([all.type, all.data], [lines[3]['type'], lines[3]['data']]);
+  });
+
+  test('only a content page closes the list: the resting screen keeps it, on legacy and on GUI-1', () {
+    const idle = 'ovos-skill-homescreen.openvoiceos';
+    expect(pageClosesNotificationList(null, idle), isFalse, reason: 'GUI-1 resting screen: no page is current');
+    expect(pageClosesNotificationList(const Target(idle, 'idle', 0), idle), isFalse, reason: 'the homescreen itself');
+    expect(pageClosesNotificationList(const Target('ovos-skill-weather.openvoiceos', 'SYSTEM_weather', 0), idle), isTrue);
   });
 }

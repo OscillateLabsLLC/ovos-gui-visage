@@ -190,19 +190,15 @@ void main() {
       testWidgets(template, (tester) async {
         await pumpFrame(tester, template, still: true);
         expect(tester.hasRunningAnimations, isFalse, reason: 'nothing moves on the first frame');
-        expect([
-          find.byType(StaggerEnter),
-          find.byType(RiseIn),
-          find.byType(Glow),
-          find.byType(Opacity),
-        ], everyElement(findsNothing));
+        expect([find.byType(StaggerEnter), find.byType(RiseIn), find.byType(Opacity)], everyElement(findsNothing));
+        expect(find.descendant(of: find.byType(Glow), matching: find.byType(AnimatedBuilder)), findsNothing);
       });
     }
 
     testWidgets('SYSTEM_error keeps its red halo standing still', (tester) async {
       await pumpFrame(tester, errorTemplate, still: true);
-      expect(find.byType(ErrorGlow), findsOneWidget);
-      expect(find.descendant(of: find.byType(ErrorGlow), matching: find.byType(DecoratedBox)), findsOneWidget);
+      expect(find.byType(Glow), findsOneWidget);
+      expect(find.descendant(of: find.byType(Glow), matching: find.byType(CustomPaint)), findsOneWidget);
     });
 
     testWidgets('with motion, SYSTEM_error blooms then breathes, and list rows rise in', (tester) async {
@@ -210,7 +206,7 @@ void main() {
       expect([find.byType(Glow), find.byType(TweenAnimationBuilder<double>)], everyElement(findsWidgets));
       expect(tester.hasRunningAnimations, isTrue);
       await pumpFrame(tester, listTemplate);
-      expect(find.byType(RiseIn), findsNWidgets(3));
+      expect(find.byType(RiseIn), findsNWidgets(4), reason: 'the title, then the three rows');
     });
   });
 

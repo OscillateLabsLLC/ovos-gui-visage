@@ -1,20 +1,17 @@
-/// SYSTEM_Status (SPEC 8.2): OVOS's status-success / status-fail Lottie, played once and held on its last frame, in
-/// a chip-sized circle with the label beneath. Without the file: an accent ring with a check, or a dimmed ring with
-/// a cross, blooming as it arrives (SPEC 9).
+/// SYSTEM_Status (SPEC 8.2): an accent ring with a check, or a dimmed ring with a cross, blooming as it arrives (SPEC
+/// 9), in a chip-sized circle with the label beneath. Visage draws its own; OVOS's status Lotties are not played.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../json.dart';
-import '../lottie/cache_lottie.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
-import 'loading_page.dart' show lottieChipPx;
+import 'loading_page.dart' show templateChipPx;
 import 'page.dart';
+import 'reduced_motion.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
-
-String statusAnimation(bool ok) => '/res/system/qt5/animations/status-${ok ? 'success' : 'fail'}.json';
 
 class StatusPage extends StatelessWidget {
   const StatusPage({super.key, required this.data});
@@ -26,24 +23,20 @@ class StatusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (:ok, :label) = statusModel(data);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: lottieChipPx,
-          height: lottieChipPx,
-          // Keyed on ok so a change replays the one-shot from the start.
-          child: CacheLottie(key: ValueKey(ok), resource: statusAnimation(ok), loop: false, fallback: _Glyph(ok)),
-        ),
-        const SizedBox(height: 28),
-        TemplateLabel(label),
-      ],
+    return Center(
+      child: StaggerOrStill(
+        children: [
+          // Keyed on ok so a change blooms again.
+          _Glyph(ok, key: ValueKey(ok)),
+          TemplateLabel(label),
+        ],
+      ),
     );
   }
 }
 
 class _Glyph extends StatelessWidget {
-  const _Glyph(this.ok);
+  const _Glyph(this.ok, {super.key});
 
   final bool ok;
 
@@ -52,9 +45,9 @@ class _Glyph extends StatelessWidget {
     return Opacity(
       opacity: ok ? 1 : 0.45,
       child: Circle(
-        size: lottieChipPx,
+        size: templateChipPx,
         gradient: gradientFill,
-        glow: const Glow(),
+        glow: const Glow(bloom: true),
         ring: const Ring(),
         children: [SizedBox.expand(child: CustomPaint(painter: _GlyphPainter(ok)))],
       ),
