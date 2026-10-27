@@ -1,5 +1,86 @@
 # Changelog
 
+## [2.5.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.4.0...v2.5.0) (2026-10-27)
+
+
+### Features
+
+* **captions:** off by default; backlog a caption band ([b50a1c5](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b50a1c5fef0b6d23644425230ee861d3494b4f3f))
+* **diagnostics:** opt-in frame-timing log, VISAGE_FRAME_LOG=1 ([81edb11](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/81edb11fbb2badd76b9cc0507dbc36be3b3f0f4b))
+* **diagnostics:** timestamps, move markers and a 120 Hz count ([4c79a90](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/4c79a90021d92ded5c37c01c0fa9452400fe47c2))
+* **gui1:** backend-owned resting display with ambient weather ([e3f3a65](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/e3f3a65f97e561f0fa68eaf955cc9a19f76fb1a0))
+* **gui1:** follow the proposed GUI-1 amendments (idle per session, client frames, companions) ([ed8e723](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ed8e723548efbad750e63a33fe273abd0639fe8c))
+* **gui1:** follow the remaining four §5.3 status topics ([528b2f0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/528b2f0523419e4628da489ba670e64682fab435))
+* **gui1:** honour idle only on an empty stack, tell gaps once, replay recorded fixtures ([d28e965](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/d28e9650e1a51fd60af81799e917e79c5fcea9f5))
+* **gui1:** page entries from index and page_count; focus for steps and touches ([4d22ff1](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/4d22ff1420a0b7ae5e0deb78163e7b8d421039b9))
+* **gui1:** put page events on the core bus as legacy ovos-gui forwarded them ([b471e3e](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b471e3ede4ea588cf7039d68bd95557c6b0ace99))
+* **gui1:** render SYSTEM_audio_player, SYSTEM_video_player and SYSTEM_media_player ([004fb6b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/004fb6b24e28d257d1970f40c9f9b9da68e26bb6))
+* **gui1:** render SYSTEM_clock from the device clock ([201856e](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/201856e19d70254ab7f0de056fdc2e3e03fef4fb))
+* **gui1:** render SYSTEM_error, SYSTEM_list, SYSTEM_grid and SYSTEM_table ([09ea42e](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/09ea42ea67f992337f8afccdbed0a2eb3e917974))
+* **gui1:** render SYSTEM_map as a label and coordinates card ([1296ae0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/1296ae0a488e1a7639a7e8acfa3979291a736969))
+* **gui1:** render SYSTEM_timer as one ring ticking from the device clock ([90bd0d0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/90bd0d01a956a41b581e34fde524c765dd0ffa97))
+* **gui1:** render SYSTEM_weather on the current-weather card ([0599e09](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0599e09f365a37290667476aa750f50e220b8302))
+* **gui1:** resting page reuses the homescreen chips, with the count badge ([db91e47](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/db91e47cfb9c6a76dbdf69f066aa4f56a25fc4db))
+* **gui1:** show and report a dropped GUI-1 connection ([bb83be4](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/bb83be4e2a3f7c5bb2ca230e53200ccd7468ca87))
+* **gui1:** SYSTEM_weather styles from condition_code and shows the forecast ([319f6be](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/319f6be211ab26a14a4ce8f48f510505e901dbf2))
+* **menu:** redraw the in-window menu in Visage's vocabulary ([df25951](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/df259515d37655235ce8c28bd4b8a7d64ddc7fcb))
+* **menu:** show the GUI protocol the connection speaks ([c2922b4](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/c2922b4630667368e408ff15521ba6bed9bce089))
+* motion language, long-text paging and the polish audit, stacks on [#44](https://github.com/OscillateLabsLLC/ovos-gui-visage/issues/44) ([2d90da0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/2d90da0c7b3749fbf8fde0577bd63b086112a6ff))
+* **motion:** VISAGE_MOTION=cut makes every move a cut ([9034aa0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9034aa0872743687145ea32b8fce66318cddb94e))
+* **pages:** a long text publishes its pages as an InnerPager ([35a735b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/35a735ba8baccabef383c9d10995848fbe2faa00))
+* **pages:** degrade the fallback page to the text or image page ([238da5b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/238da5b4f82ee279a1d52d02de386e4e7dfd6a34))
+* **pages:** existing hero glows bloom as their page arrives ([4544539](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/45445397041c10ee8e9201e57a8bf47d272e7f87))
+* **pages:** hero glows and the item cadence on every stacked page ([dc52493](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/dc5249383e0fd2bb46da1163b9b3b64f29cd9e92))
+* **pages:** honour reduced motion on the now-playing and busy views ([1bc7d8e](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/1bc7d8eecb3d8a54c1b33a703830d67d320546da))
+* **protocol:** speak GUI-1 to ovos-gui-plugin-visage beside legacy ovos-gui ([3e33b1c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/3e33b1ce2f819478cf6646847296a7ccd94d2f93))
+* **resting:** the chips are born from one disc when the page appears ([d6ac19e](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/d6ac19e04a61d75bf57de2e044132cde31b8dded))
+* **router:** accept OVOS-GUI-1 template names beside the legacy ones ([7928fa4](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/7928fa4bb7a750615ca8fd5015ef0a22ff950224))
+* **shell:** gestures step a page's inner pages first; tap thirds ([43b46c2](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/43b46c20ebfc8f4ac2a3db5ea7da697a364a8851))
+* **shell:** pages squash to a line or slide, through PageSwitch ([0d4c1b0](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0d4c1b091b29325f11f8397ffcda302aac46942a))
+* **shell:** the attention face collapses to a dot when it goes ([31cee54](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/31cee5489092b2ac147cf39a24ab4529bcc41a52))
+* **sidecar:** proxy /gui1 to the GUI-1 adapter ([cca0f16](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/cca0f162ab96beb8658b92616a4371568d4993d8))
+* speak OVOS-GUI-1 beside legacy ovos-gui, as its reference client ([ab5825c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ab5825cc9e1eb32f31fc6f645b127f29e2eca84d))
+* **templates:** report a non-bool status success as a protocol fault ([bf5b3a4](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/bf5b3a42d85d2010719293eb1d2c141303635f8e))
+* **templates:** status accepts the GUI-1 success flag ([f8c6abf](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/f8c6abf33abf2c22e9df9c2d0ae2ca8cd4e480e7))
+* **widgets:** glow bloom and the campaign video's item cadence ([ddfb483](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/ddfb4831d58838cfe6d779c1d95e91a7f21e31cb))
+* **window:** title the window with the protocol and the mode ([230963f](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/230963f8d56824125eee5fe0ce5aed87c232e74b))
+
+
+### Bug Fixes
+
+* **a11y:** fix the four text-contrast failures; the guard skips nothing ([a3ef614](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/a3ef6144bcce947d7dbff08a33fb85a8771c1d32))
+* **clock:** a five-glyph time no longer meets the ring ([3f6dcb2](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/3f6dcb20ab0d4cb91f7d3214b3444957a7358cc2))
+* **diagnostics:** stamp late frames at their vsync, moves on the same clock ([4f22bbd](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/4f22bbdf3ffbe5b8bc0c91e0bf0aadcf15ea97c1))
+* **face:** cancel a running blink or widen when the controller is disposed ([932a2d6](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/932a2d6e7dff0529690713bd651f24867eeb1bc4))
+* **face:** hold a still frame under reduced motion; the audit lists are empty ([81d3177](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/81d3177b91dbd89b861dd71eefeb3af5e4926ef4))
+* **face:** read the audio-out §5.4 viseme shape, unknown codes at rest ([66e75bc](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/66e75bcc852b2c4a4af58db1ca528e5017196d58))
+* **faults:** print every reported fault in debug builds too ([a85edf8](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/a85edf816e9a8b4892341c2a39ede03d37fd3d0f))
+* **gui1:** announce a page again when it returns after the screen emptied ([2b3239f](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/2b3239f0d9d69515b66762f61ef4d4867639c7fd))
+* **gui1:** finger-sized view buttons, a shorter video line, brief checks in tests ([76184ea](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/76184eaff4a1fd3063164aa8563ed56a31b5f850))
+* **gui1:** hold the expired timer ring still under reduced motion ([0bf022a](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/0bf022a868b17e69aa4e7c31e073bcdf35c4d5c6))
+* **gui1:** play glyph on the video still, -1 position is unknown, cite the spec by link ([d4932e1](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/d4932e198807a5c6e7b0437e4f5f5a3f7bcfbcf0))
+* **gui1:** the merged template pages meet the design guards ([325d56c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/325d56cd60226052aba289777a8c5f03f1b6f847))
+* **idle:** report an unreadable homescreen temperature, never show 0 ([81e9d4c](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/81e9d4c6eaff387113760bb91d379fe50d96e68e))
+* **loading:** the thinking dots hold still under reduced motion ([125ffb5](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/125ffb5ae1435d71590893c30e5b7f04c8e46064))
+* **notifications:** the badge always opens the list; an empty store says so ([e7c6300](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/e7c6300356fe0d69cfe51f4e2f3ba8c0a204e843))
+* **notifications:** the resting screen on GUI-1 keeps the list open ([e5f0921](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/e5f092196c1156ef124ba73a18052bcf29eed58f))
+* **pages:** report a SYSTEM_text without its required text ([b3ac0b7](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b3ac0b7f62dd9e2d36033cce50c487ba20d08ed5))
+* **release:** release-please bumps the GUI-1 client version constant with pubspec ([263f012](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/263f01287217569834f88f893b18cbeca4343c1f))
+* **release:** release-please bumps the GUI-1 client version constant with pubspec ([1f0c172](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/1f0c1725bb27922183eb76df3fea400521da3811))
+* **release:** run release-please in manifest mode so extra-files apply ([2c403ed](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/2c403ed4531bf4159c33ba79d6fa4b9a642c7071))
+* **release:** run release-please in manifest mode so extra-files apply ([b122d67](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b122d67d23678ec42b00608166dbcda9430ec8ad))
+* **resting:** device hour format, ambient weather ages out, night icon ([89768a8](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/89768a88e7ef344c4bf6f5618bd95eaea3efa01b))
+* **shell:** cap the page expand's overshoot at about 2.3 percent ([d61c32f](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/d61c32f04cd30e70079828e31dcf2387c7664cd7))
+* **shell:** centre the resting chips, full-size window, upright captions ([9281e59](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/9281e59913a71e857ba12afd213b96e26f5ccff8))
+* **widgets:** Glow, Ring, StaggerEnter and RiseIn honour reduced motion ([b4f9426](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b4f942612e096ae9a2c27ce9586ecf62ad44df0f))
+
+
+### Performance Improvements
+
+* **shell:** a page move scales a snapshot, never a live page ([4ca345b](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/4ca345bbd31990dbb4d9a9170be0176c974e5f75))
+* **shell:** no opacity layer over a page at rest ([fa8d9a9](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/fa8d9a933fb8c51bfcbb742e70fdf6a41278ad22))
+* **widgets:** the glow is a radial gradient, not an animated blur ([b9e6893](https://github.com/OscillateLabsLLC/ovos-gui-visage/commit/b9e6893c4c708cd1883cc54b9b4f90ed1964d1a3))
+
 ## [2.4.0](https://github.com/OscillateLabsLLC/ovos-gui-visage/compare/v2.3.0...v2.4.0) (2026-10-24)
 
 

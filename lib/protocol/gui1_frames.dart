@@ -14,7 +14,7 @@ const defaultSessionId = 'default';
 
 /// release-please bumps this line with pubspec.yaml (release-please-config.json, extra-files);
 /// test/gui1_frames_test.dart checks the two agree.
-const visageVersion = '2.4.0'; // x-release-please-version
+const visageVersion = '2.5.0'; // x-release-please-version
 const gui1ClientName = 'visage/$visageVersion';
 
 Json helloFrame({String sessionId = defaultSessionId, String client = gui1ClientName}) => {
