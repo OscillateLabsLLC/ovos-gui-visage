@@ -72,12 +72,16 @@ Path toPath(List<Offset> points) {
 }
 
 /// The viseme code at `t` seconds after speech start, or null after the list ends. Pairs are [code, cumulative end
-/// time] (ovos_bus_client EnclosureApi.mouth_viseme): code k is shown from the previous end until its own end.
+/// time] (ovos_bus_client EnclosureApi.mouth_viseme; audio-out.md 5.4 `ovos.audio.output.visemes`, the same shape with
+/// string codes): code k is shown from the previous end until its own end. A code outside the set is the rest shape, as
+/// audio-out.md 5.4 asks.
 int? visemeAt(List<dynamic> visemes, double t) {
   if (t < 0) return null;
   for (final pair in visemes) {
     final end = double.parse(pair[1].toString());
-    if (t < end) return int.parse(pair[0].toString());
+    if (t < end) return _knownCode(int.tryParse(pair[0].toString()));
   }
   return null;
 }
+
+int _knownCode(int? code) => mouthShapeSpecs.containsKey(code) ? code! : restCode;

@@ -2,6 +2,10 @@
 /// confirm and exit buttons. It answers as ovos-core's own SYSTEM_InputBox.qml did (mycroft/res/ui, added in #298,
 /// removed with the rest of mycroft/ in #439): Enter or confirm sends `input.box.response` with `{"text": ...}` and
 /// exit sends `input.box.close`, both in the skill's namespace, so the skill hears `<skill_id>.input.box.response`.
+///
+/// SYSTEM_input (drafted amendment A, companions_model.dart) is the same page with the `prompt`, a masked field when
+/// `secret`, and one Send button: Enter or Send sends `input` with `{"text": ...}`. It has no exit event, since the
+/// spoken path covers a user who does not answer.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,18 +14,62 @@ import '../json.dart';
 import '../theme.dart';
 import '../widgets/circle.dart';
 import '../widgets/motion_icon.dart';
+import 'companions_model.dart';
 import 'page.dart';
 import 'templates_model.dart';
 
 const inputBoxResponse = 'input.box.response';
 const inputBoxClose = 'input.box.close';
+const sendLabel = 'Send';
+
+/// What the page shows and sends: [exitEvent] null means no exit button.
+typedef InputSpec = ({
+  String prompt,
+  String placeholder,
+  String confirmLabel,
+  String? exitLabel,
+  bool secret,
+  String confirmEvent,
+  String? exitEvent,
+  bool primaryDim,
+});
+
+InputSpec legacyInputSpec(Json data) {
+  final model = inputBoxModel(data);
+  return (
+    prompt: model.title,
+    placeholder: model.placeholder,
+    confirmLabel: model.confirm.isEmpty ? 'Confirm' : model.confirm,
+    exitLabel: model.exit.isEmpty ? 'Exit' : model.exit,
+    secret: false,
+    confirmEvent: inputBoxResponse,
+    exitEvent: inputBoxClose,
+    primaryDim: false,
+  );
+}
+
+InputSpec companionInputSpec(Json data) {
+  final model = inputModel(data);
+  return (
+    prompt: model.prompt,
+    placeholder: model.placeholder,
+    confirmLabel: sendLabel,
+    exitLabel: null,
+    secret: model.secret,
+    confirmEvent: inputEvent,
+    exitEvent: null,
+    primaryDim: true,
+  );
+}
 
 class InputBoxPage extends StatefulWidget {
-  const InputBoxPage({super.key, required this.data, required this.ctx});
+  const InputBoxPage({super.key, required this.spec, required this.ctx});
 
-  static Widget page(Json data, PageContext ctx) => InputBoxPage(data: data, ctx: ctx);
+  static Widget page(Json data, PageContext ctx) => InputBoxPage(spec: legacyInputSpec(data), ctx: ctx);
 
-  final Json data;
+  static Widget companion(Json data, PageContext ctx) => InputBoxPage(spec: companionInputSpec(data), ctx: ctx);
+
+  final InputSpec spec;
   final PageContext ctx;
 
   @override
@@ -46,13 +94,13 @@ class _InputBoxPageState extends State<InputBoxPage> {
     super.dispose();
   }
 
-  void _confirm() => widget.ctx.trigger(inputBoxResponse, {'text': field.text});
+  void _confirm() => widget.ctx.trigger(widget.spec.confirmEvent, inputAnswer(field.text));
 
-  void _exit() => widget.ctx.trigger(inputBoxClose);
+  void _exit() => widget.ctx.trigger(widget.spec.exitEvent!);
 
   @override
   Widget build(BuildContext context) {
-    final model = inputBoxModel(widget.data);
+    final spec = widget.spec;
     return StaggerEnter(
       gap: 24,
       children: [
@@ -63,23 +111,24 @@ class _InputBoxPageState extends State<InputBoxPage> {
           ring: const Ring(),
           children: const [MotionIcon('mic', size: 84)],
         ),
-        if (model.title.isNotEmpty) Text(model.title, textAlign: TextAlign.center, style: VisageText.fg(30)),
-        _field(model.placeholder),
+        if (spec.prompt.isNotEmpty) Text(spec.prompt, textAlign: TextAlign.center, style: VisageText.fg(30)),
+        _field(spec.placeholder, secret: spec.secret),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 16,
           children: [
-            _button(model.confirm.isEmpty ? 'Confirm' : model.confirm, _confirm, primary: true),
-            _button(model.exit.isEmpty ? 'Exit' : model.exit, _exit),
+            _button(spec.confirmLabel, _confirm, fill: spec.primaryDim ? VisageColors.accentDim : VisageColors.accent),
+            if (spec.exitLabel case final exit?) _button(exit, _exit),
           ],
         ),
       ],
     );
   }
 
-  Widget _field(String placeholder) => TextField(
+  Widget _field(String placeholder, {required bool secret}) => TextField(
     controller: field,
     focusNode: focus,
+    obscureText: secret,
     textAlign: TextAlign.center,
     style: VisageText.fg(24),
     cursorColor: VisageColors.accent,
@@ -93,10 +142,10 @@ class _InputBoxPageState extends State<InputBoxPage> {
     ),
   );
 
-  Widget _button(String label, VoidCallback onPressed, {bool primary = false}) => FilledButton(
+  Widget _button(String label, VoidCallback onPressed, {Color fill = VisageColors.card}) => FilledButton(
     onPressed: onPressed,
     style: FilledButton.styleFrom(
-      backgroundColor: primary ? VisageColors.accent : VisageColors.card,
+      backgroundColor: fill,
       foregroundColor: VisageColors.fg,
       minimumSize: const Size(150, 56),
       textStyle: VisageText.fg(20, weight: FontWeight.w500),

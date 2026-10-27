@@ -9,6 +9,8 @@ import 'package:ovos_gui_visage/pages/text_frame_page.dart';
 import 'package:ovos_gui_visage/pages/url_frame_page.dart';
 import 'package:ovos_gui_visage/state/gui_state.dart';
 
+import 'faults.dart';
+
 const ctx = PageContext(namespace: 'some.skill', page: 'SYSTEM_TextFrame', events: {});
 
 Widget host(Widget page) => MaterialApp(
@@ -50,6 +52,14 @@ void main() {
     expect(tester.widget<PageDots>(find.byType(PageDots)).active, 0, reason: 'a page stays at least 4 s');
     await tester.pump(const Duration(seconds: 61));
     expect(tester.widget<PageDots>(find.byType(PageDots)).active, isNot(0));
+  });
+
+  testWidgets('a text frame without its required text is reported and shows its title (F38)', (tester) async {
+    final faults = await collectFaults(() async => tester.pumpWidget(host(TextFramePage.page({'title': 'Coin flip'}, ctx))));
+    expect(find.byType(TextFramePage), findsOneWidget);
+    expect(faults.map((f) => '${f.context?.toDescription()}: ${f.exception}'), [
+      'SYSTEM_text data: FormatException: text is required',
+    ]);
   });
 
   testWidgets('status without a cached animation draws the glyph and label', (tester) async {

@@ -77,5 +77,6 @@ class CaptionStrip extends StatelessWidget {
   }
 }
 
-final _heardStyle = VisageText.muted(19).copyWith(fontStyle: FontStyle.italic);
+/// The heard line is quieter than the reply by colour alone: small italic text was unreadable in a half-size window.
+final _heardStyle = VisageText.muted(22);
 final _replyStyle = VisageText.fg(24, height: 1.25);

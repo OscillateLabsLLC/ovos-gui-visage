@@ -1,0 +1,9 @@
+{"_note": "written from gui-1.md 5.3 and 6.9.1 at b6c1583, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "snapshot", "session_id": "default", "stack": []}
+{"type": "status", "event_name": "gui.ambient.weather", "data": {"current_temp": 21, "condition": "Cloudy", "condition_code": "cloudy", "location": "San Antonio"}, "session_id": "default"}
+{"type": "status", "event_name": "gui.ambient.notifications", "data": {"count": 2}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_text", "data": {"title": "Hi", "text": "Hello"}, "session_id": "default"}
+{"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
+{"type": "deactivated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
+{"type": "idle", "session_id": "default"}

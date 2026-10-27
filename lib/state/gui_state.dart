@@ -22,10 +22,19 @@ class Namespace {
   int focusedIndex = 0;
   Json events = {};
 
+  /// GUI-1 only: the active entry's index in `page_names` and its length, as the adapter said; null when it did not
+  /// (and always on legacy, where [pages] holds every entry).
+  ({int index, int count})? gui1Entry;
+
   void clearPages() {
     pages = [];
     focusedIndex = 0;
+    gui1Entry = null;
   }
+
+  /// Where the pager stands: the GUI-1 entry when known, else the page among [pages].
+  ({int index, int count}) get position =>
+      gui1Entry ?? (index: focusedIndex.clamp(0, pages.isEmpty ? 0 : pages.length - 1), count: pages.length);
 
   Json toJson() => {'skill_id': skillId, 'pages': List.of(pages), 'data': data, 'focused_index': focusedIndex, 'events': events};
 }
@@ -54,6 +63,14 @@ class GuiState {
   final String idleNamespace;
   final Map<String, Namespace> namespaces = {};
   final List<String> active = [];
+
+  /// The last payload per `gui.ambient.*` topic (GUI-1 only, `state/ambient.dart`). [reset] keeps it: no stack change
+  /// or reconnect sends it again.
+  final Map<String, Json> ambient = {};
+
+  /// When each [ambient] payload arrived, by the device clock, so the resting display can let one age out
+  /// (`pages/resting_model.dart`). A snapshot's payload is stamped at the snapshot, the only time known for it.
+  final Map<String, DateTime> ambientAt = {};
   String? _lastActiveInsert;
 
   void reset() {

@@ -151,6 +151,13 @@ Future<void> setWindowVisible(bool visible) async {
   await _attempt(visible ? 'show' : 'hide', visible ? windowManager.show : windowManager.hide);
 }
 
+/// The title bar and the window lists show this (window_title.dart). window_manager's macOS `setTitle` needs the window
+/// it learns in `ensureInitialized`, which the widget and kiosk setups call and an ordinary window does not.
+Future<void> setWindowTitle(String title) async {
+  await attemptPluginCall('preparing to set the window title', windowManager.ensureInitialized);
+  await attemptPluginCall('setting the window title', () => windowManager.setTitle(title));
+}
+
 Future<void> quitApp() async {
   await releaseKioskIdleInhibit();
   await windowManager.destroy();

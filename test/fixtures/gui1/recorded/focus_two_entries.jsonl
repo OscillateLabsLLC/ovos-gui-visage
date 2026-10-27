@@ -1,0 +1,4 @@
+{"type": "session_update", "skill_id": "gui1-focus-probe.oscillatelabs", "data": {"title": "Focus probe", "text": "Entry 0 of 2", "image": "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"}, "session_id": "default"}
+{"type": "template", "skill_id": "gui1-focus-probe.oscillatelabs", "template": "SYSTEM_text", "data": {"title": "Focus probe", "text": "Entry 0 of 2", "image": "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"}, "session_id": "default", "index": 0, "page_count": 2}
+{"type": "activated", "skill_id": "gui1-focus-probe.oscillatelabs", "session_id": "default"}
+{"type": "template", "skill_id": "gui1-focus-probe.oscillatelabs", "template": "SYSTEM_image", "data": {"title": "Focus probe", "text": "Entry 0 of 2", "image": "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"}, "session_id": "default", "index": 1, "page_count": 2}

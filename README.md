@@ -112,6 +112,37 @@ menu bar for everything else ([As a desktop widget](#as-a-desktop-widget)); on L
 and the clock shows. If the face never reacts, check that the GUI service is listening on port
 18181 (`lsof -iTCP:18181 -sTCP:LISTEN` on macOS, `ss -ltn | grep 18181` on Linux).
 
+## GUI protocol
+
+Visage talks to stock `ovos-gui` (the legacy protocol, port 18181) or to the OVOS-GUI-1 adapter
+`ovos-gui-plugin-visage` (port 18182, path `/gui1`). By default it tries the adapter first, for up to 3 seconds, and
+falls back to `ovos-gui`. Each new connection tries again. The menu shows which one is in use.
+
+| Config file key | Environment | Values | Default |
+|---|---|---|---|
+| `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
+| `gui1Url` | `VISAGE_GUI1_URL` | the adapter's `ws://` URL | `ws://<bus host>:18182/gui1` |
+| | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port | `127.0.0.1`, `8181` |
+
+The environment wins over `~/.config/ovos-gui-visage/config.json`. `docs/SCOPE.md` (Protocols) has the details. The
+GUI-1 path is a prototype. On it, a page's controls answer as `interaction` frames on the GUI-1 socket and the adapter
+puts them on the core bus as `gui.interaction`; Visage still uses the core bus (`OVOS_HOST`, `OVOS_PORT`) for the face,
+volume and notifications.
+
+### For skill authors (GUI-1)
+
+`docs/GUI1_CONFORMANCE.md` says what Visage does with every key of every template. The rules that surprise people:
+
+- `SYSTEM_weather`: `condition_code` picks Visage's own animated glyph. `icon` is the spec's override: an image that
+  loads replaces the glyph in the current-conditions circle, so send it only when you want a particular picture there.
+  The forecast circles have no override and keep the glyphs.
+- Images are `https://` URLs or `data:` URIs. A file path is refused over GUI-1 (finding F39), since the display may
+  not share a filesystem with the skill.
+- `gui.ambient.weather` feeds the resting screen for three hours from its arrival, then the clock stands alone until
+  the next one. Send it on a schedule, not once.
+- A template page is the only page of its namespace. Send a new template to change the page, `gui.value.set` to change
+  its data, and `SYSTEM_idle` to return to the resting screen.
+
 ## How it works
 
 - **Seam.** `lib/protocol/` announces `framework: html` on the core bus, gets the port, opens
@@ -327,8 +358,8 @@ same window above everything instead, and `window` is an ordinary window. Config
 
 `VISAGE_MODE`, `VISAGE_CORNER`, `VISAGE_HEIGHT`, `VISAGE_MARGIN`, `VISAGE_PEEK` and
 `VISAGE_PEEK_SIZE` override the file, so a launcher script can pick the mode. Corners are
-`top-left`, `top-right`, `bottom-left`, `bottom-right`; the height is in logical pixels and the
-width follows the 480 × 800 frame. This is a real window with the live sockets and animations,
+`top-left`, `top-right`, `bottom-left`, `bottom-right`; the height is the corner widget's, in logical pixels, and the
+width follows the 480 × 800 frame. `window` mode opens at the frame's own size, 480 × 800, and ignores the height. This is a real window with the live sockets and animations,
 which a WidgetKit widget cannot have: widget extensions get no sockets and only a handful of
 timeline refreshes an hour.
 
@@ -532,6 +563,7 @@ its `tests/manual/demo.py` tour; both only talk to the bus, so they drive this a
 
 ```bash
 just test      # flutter test
+just conformance  # docs/GUI1_CONFORMANCE.md matches the template names
 just lint      # dart format check + flutter analyze
 just run       # flutter run -d macos
 ```

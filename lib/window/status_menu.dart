@@ -27,6 +27,7 @@ const volumeUpItem = 'volume.up';
 const volumeDownItem = 'volume.down';
 const muteItem = 'volume.mute';
 const quitItem = 'quit';
+const protocolItem = 'protocol';
 const facePrefix = 'face.';
 const coloursPrefix = 'colours.';
 
@@ -61,6 +62,7 @@ class StatusMenuState {
     required this.face,
     this.volume,
     this.muted = false,
+    this.protocol,
   });
 
   final WindowMode mode;
@@ -71,6 +73,9 @@ class StatusMenuState {
   /// 0 to 1, null until a volume plugin has reported.
   final double? volume;
   final bool muted;
+
+  /// The GUI protocol line (protocol/wire_protocol.dart `protocolTitle`), shown greyed out; null shows none.
+  final String? protocol;
 }
 
 class StatusMenuActions {
@@ -116,6 +121,7 @@ List<MenuEntry> buildStatusMenu(StatusMenuState state) {
     MenuEntry('colours', 'Colours', children: _choices(facePalettes.keys, coloursPrefix, state.face.colours.name)),
     const MenuEntry(pickerItem, 'Face picker…'),
     const MenuEntry.separator(),
+    if (state.protocol case final protocol?) MenuEntry(protocolItem, protocol, enabled: false),
     const MenuEntry(quitItem, 'Quit OVOS Visage'),
   ];
 }

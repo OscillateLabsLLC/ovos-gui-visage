@@ -25,6 +25,7 @@ visual reference; this file records what changes in the port and why.
 ```
 ovos-core ──core bus 8181──▶ ovos-gui-service ──GUI ws 18181──▶ ovos-gui-visage (Dart)
 skills, homescreen                 ▲ ovos.widgets.* translation       GuiClient, GuiState, WidgetManager
+                                   └─ or GUI-1 adapter ──ws 18182/gui1──▶ Gui1Client (Protocols below)
                                                                       pages, face, attention
                                                                       ~/.cache/ovos_gui read directly
 ```
@@ -55,6 +56,44 @@ test/
   fixtures/expected/   the Python reference's state snapshot per fixture; gui_state_test requires a match
 ```
 
+## Protocols (2026-10-24)
+
+Visage speaks one of two GUI protocols per connection. Both fill the same `GuiState`, so the router, the pages and the
+face do not know which one is in use.
+
+| Protocol | Server | Socket | Client code |
+|---|---|---|---|
+| legacy | ovos-gui 1.x (`mycroft.gui.connected` on the core bus, then the port it names) | `ws://<host>:18181/gui` | `lib/protocol/gui_client.dart`, `GuiState.apply` |
+| GUI-1 | `ovos-gui-plugin-visage`, an OVOS-GUI-1 adapter (`gui1-upstream/WIRE.md`, plan section 2.2) | `ws://<host>:18182/gui1` | `lib/protocol/gui1_client.dart`, `lib/state/gui1_apply.dart` |
+
+`lib/protocol/gui_link.dart` chooses. With `auto`, the default, it opens the GUI-1 endpoint before every connection
+and sends `hello`. A `welcome` within 3 s selects GUI-1 for that connection. A refused connection, a timeout or an
+`error` selects legacy. The choice is logged and the menu shows it ("Protocol: GUI-1" or "Protocol: legacy"). Visage
+does not switch while a connection holds; a reconnect probes again. With `gui1`, Visage retries the adapter only. With
+`legacy`, `GuiClient` runs as before and nothing probes.
+
+| Config key | Environment | Values | Default |
+|---|---|---|---|
+| `protocol` | `VISAGE_PROTOCOL` | `auto`, `gui1`, `legacy` | `auto` |
+| `gui1Url` | `VISAGE_GUI1_URL` | a `ws://` or `wss://` URL | the bus host, port 18182, path `/gui1`; the sidecar's `/gui1` on the web |
+| — | `OVOS_HOST`, `OVOS_PORT` | the core bus host and port (desktop) | `127.0.0.1`, `8181` |
+
+Under GUI-1 a namespace holds exactly one page, named with its spec template (`SYSTEM_text`), and its data is the full
+map of the last frame; Visage never merges. `deactivated` drops the namespace, a `snapshot` replaces the stack and
+keeps its `ambient` map, and `status` frames drive the face. `idle` names its session: Visage's own session's `idle`
+empties the screen to the resting page, and another session's is reported once (drafted amendment D; it supersedes
+finding F16). Status topics are keyed by their [gui-1.md 5.3 System-wide signals](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#53-system-wide-signals) `ovos.*` names, with the legacy bus names as aliases
+(`lib/status_topics.dart`); a topic Visage does not follow is reported once. An unknown `SYSTEM_` name is reported once and shows the fallback.
+On GUI-1 a page's control answers as an `interaction` frame on the GUI-1 socket, and a swipe or arrow key asks for
+another entry with a `focus` frame (WIRE.md, Client → server frames; drafted amendments A and B;
+`lib/protocol/gui1_outgoing.dart`, `test/fixtures/outgoing/gui1_interaction.jsonl` and `gui1_focus.jsonl`). Nothing
+goes on the core bus for a page. A `template` frame may name its entry (`index` of `page_count`); then the pager
+stands there, a step asks for `index ± 1`, a press sends `focus` with `index` (the touch), and the pager moves when the
+service's next `template` arrives. Without the fields nothing is sent, and a touch is reported once (finding F45). The
+focus announcement is legacy only. Typed commands, volume and notification actions use the core bus on both protocols. Pages
+learn the protocol from `PageContext.protocol`; over GUI-1 the image page refuses a filesystem path (finding F39). Fixtures: `test/fixtures/gui1/`, written
+from WIRE.md, and `test/fixtures/gui1/recorded/`, recorded from the adapter.
+
 ## What ports how
 
 | ovos-visage | ovos-gui-visage | Notes |
@@ -71,6 +110,29 @@ test/
 | `pages/*.js`, `*_model.js` | `pages/*.dart` | View models stay pure and tested; `textFrame` pagination measures with `TextPainter`. |
 | CSS polish vocabulary | shared widgets | glow, gradient fill, stagger enter, bloom as reusable widgets; a theme file holds the colour tokens. |
 | `tests/test_style_rules.py` | golden tests plus a token check | No cards, no accent borders: enforced by review of goldens and by keeping fills to circles in the shared widgets. |
+
+## Template names
+
+Template pages are keyed by their OVOS-GUI-1 name (gui-1.md section 3); `lib/pages/template_names.dart` holds the
+vocabulary and the aliases, and nothing else names an alias. ovos-bus-client's frame names and the QML files that
+ovos-legacy-mycroft-gui-plugin shows reach the same page as the spec name:
+
+| Spec name | Aliases | Page |
+|---|---|---|
+| `SYSTEM_text` | `SYSTEM_TextFrame`, `Text.qml` | text frame |
+| `SYSTEM_image` | `SYSTEM_ImageFrame`, `Image.qml` | image frame |
+| `SYSTEM_animated_image` | `SYSTEM_AnimatedImageFrame`, `AnimatedImage.qml` | image frame |
+| `SYSTEM_status` | `SYSTEM_Status`, `Status.qml` | status (`success: bool`, or legacy `status: "Enabled"`) |
+| `SYSTEM_loading` | `SYSTEM_Loading`, `Loading.qml` | loading |
+| `SYSTEM_face` | `SYSTEM_Face`, `Face.qml` | face |
+| `SYSTEM_html` | `SYSTEM_HtmlFrame`, `Html.qml` | html frame |
+| `SYSTEM_url` | `SYSTEM_UrlFrame`, `Url.qml` | url frame |
+
+Every other catalogue template has its own page under its spec name and its `.qml` name, except `SYSTEM_idle`, which
+names no page (`docs/GUI1_CONFORMANCE.md`). The three interactive companions of the drafted amendment A,
+`SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input`, have pages too and answer with `confirm`, `select` and `input`
+(`lib/pages/companions_model.dart`); their `.qml` names have no alias. `SYSTEM_InputBox` is not in GUI-1 and keeps its
+legacy name only; `SYSTEM_input` reuses its page. An exact skill route still wins over a template name.
 
 ## Platform gating
 

@@ -11,6 +11,13 @@ import '../theme.dart';
 const ringStroke = 6.0;
 const ringRadiusFraction = 0.46;
 
+/// The glow's phase in its still frame: halfway through a breath.
+const glowStillPhase = 0.5;
+
+/// The platform asks for no motion (reduce motion, or a test that turns animations off); every animation here then
+/// draws its still frame.
+bool motionReduced(BuildContext context) => MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+
 /// A filled circle with its children stacked and centred; [ring] draws a progress ring on its edge.
 class Circle extends StatelessWidget {
   const Circle({super.key, required this.size, this.fill, this.gradient, this.ring, this.glow, this.children = const []});
@@ -71,8 +78,10 @@ class Ring extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final target = fraction.clamp(0, 1).toDouble();
+    if (motionReduced(context)) return CustomPaint(painter: _RingPainter(target, track, value, stroke));
     return TweenAnimationBuilder<double>(
-      tween: Tween(end: fraction.clamp(0, 1).toDouble()),
+      tween: Tween(end: target),
       duration: const Duration(milliseconds: 900),
       builder: (context, animated, _) => CustomPaint(painter: _RingPainter(animated, track, value, stroke)),
     );
@@ -120,11 +129,23 @@ class Glow extends StatefulWidget {
   State<Glow> createState() => _GlowState();
 }
 
+/// The halo scales its shadow's alpha rather than sitting under an Opacity: Impeller drops an Opacity whose only child
+/// is a blur. Under reduced motion the controller stops and the halo holds [glowStillPhase].
 class _GlowState extends State<Glow> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: widget.loop ? const Duration(milliseconds: 1100) : const Duration(seconds: 6),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (motionReduced(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -134,25 +155,25 @@ class _GlowState extends State<Glow> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = Curves.easeInOut.transform(_controller.value);
-        final blur = widget.loop ? 34 + 30 * t : 34.0;
-        final spread = widget.loop ? 2 + 12 * t : 2.0;
-        final colour = widget.loop ? widget.colour : widget.colour.withValues(alpha: widget.colour.a * (0.45 + 0.55 * t));
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: colour, blurRadius: blur, spreadRadius: spread)],
-          ),
-        );
-      },
+    if (motionReduced(context)) return _halo(glowStillPhase);
+    return AnimatedBuilder(animation: _controller, builder: (context, _) => _halo(Curves.easeInOut.transform(_controller.value)));
+  }
+
+  Widget _halo(double t) {
+    final blur = widget.loop ? 34 + 30 * t : 34.0;
+    final spread = widget.loop ? 2 + 12 * t : 2.0;
+    final colour = widget.loop ? widget.colour : widget.colour.withValues(alpha: widget.colour.a * (0.45 + 0.55 * t));
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: colour, blurRadius: blur, spreadRadius: spread)],
+      ),
     );
   }
 }
 
-/// Children fade and rise in, 260 ms each, 60 ms apart (visage.css .stagger-enter).
+/// Children fade and rise in, 260 ms each, 60 ms apart (visage.css .stagger-enter); under reduced motion they stand in
+/// place at full opacity.
 class StaggerEnter extends StatelessWidget {
   const StaggerEnter({super.key, required this.children, this.gap = 28, this.mainAxisSize = MainAxisSize.min});
 
@@ -200,6 +221,7 @@ class _Enter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (motionReduced(context)) return child;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 260) + delay,

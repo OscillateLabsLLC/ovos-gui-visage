@@ -70,17 +70,23 @@ class GuiClient {
 
   Future<void> _keepConnected() async {
     while (_running) {
-      try {
-        final port = await _negotiatePort();
-        await _holdGuiSocket(port);
-      } on Object catch (err) {
-        log?.call('GUI socket unavailable: $err');
-      }
-      if (_channel != null) {
-        _channel = null;
-        onStatus(false);
-      }
+      await connectOnce();
       if (_running) await Future.delayed(reconnectDelay);
+    }
+  }
+
+  /// One negotiation and one GUI socket, held until it closes. `auto` protocol selection (gui_link.dart) calls this
+  /// after a failed GUI-1 probe, so the next reconnect probes again.
+  Future<void> connectOnce() async {
+    try {
+      final port = await _negotiatePort();
+      await _holdGuiSocket(port);
+    } on Object catch (err) {
+      log?.call('GUI socket unavailable: $err');
+    }
+    if (_channel != null) {
+      _channel = null;
+      onStatus(false);
     }
   }
 

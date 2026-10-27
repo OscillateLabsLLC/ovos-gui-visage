@@ -28,6 +28,22 @@ List<String> _checked(MenuEntry submenu) => [
 ];
 
 void main() {
+  test('the protocol line sits greyed out above Quit, in every menu, and only when given', () {
+    const state = StatusMenuState(
+      mode: WindowMode.float,
+      peek: true,
+      visible: true,
+      face: FaceSpec.visage,
+      protocol: 'Protocol: GUI-1',
+    );
+    final items = buildStatusMenu(state);
+    final protocol = _item(items, protocolItem);
+    expect([protocol.title, protocol.enabled, isCheckable(protocol)], ['Protocol: GUI-1', false, false]);
+    expect(items.indexOf(protocol), items.length - 2);
+    expect(_item(windowMenuEntries(items, canQuit: false), protocolItem).title, 'Protocol: GUI-1');
+    expect(buildStatusMenu(_state).where((i) => i.id == protocolItem), isEmpty);
+  });
+
   test('the items top to bottom, for a floating peeking widget showing visage', () {
     final items = buildStatusMenu(_state);
     expect(

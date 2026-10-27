@@ -7,9 +7,13 @@ default:
 sync:
     flutter pub get
 
-# Run the test suite
-test:
-    flutter test
+# Run the test suite, or the files named: `just test test/gui1_client_test.dart`
+test *ARGS:
+    flutter test {{ARGS}}
+
+# Check docs/GUI1_CONFORMANCE.md against the template names
+conformance:
+    flutter test test/conformance_test.dart
 
 # Format check and static analysis
 lint:

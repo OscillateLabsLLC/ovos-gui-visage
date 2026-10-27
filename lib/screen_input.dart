@@ -5,9 +5,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import 'pages/page_pager.dart';
+import 'page_moves.dart';
 import 'protocol/core_bus.dart';
-import 'protocol/gui_events.dart';
 import 'protocol/utterance.dart';
 import 'state/gui_state.dart';
 import 'widgets/command_box.dart';
@@ -25,6 +24,7 @@ class ScreenInput {
     required this.state,
     required this.bus,
     required this.sendGui,
+    required this.requestFocus,
     required this.peek,
     required this.window,
     required this.dispatchMenu,
@@ -36,6 +36,9 @@ class ScreenInput {
   final GuiState state;
   final CoreBus bus;
   final bool Function(Json message) sendGui;
+
+  /// Asks the GUI service for another entry of a namespace (`GuiLink.requestFocus`).
+  final bool Function(String namespace, int page) requestFocus;
   final PeekController peek;
   final WindowRemote window;
   final void Function(String id) dispatchMenu;
@@ -84,18 +87,13 @@ class ScreenInput {
     commands.open();
   }
 
-  /// A swipe, an arrow key or a chevron; the screen tells ovos-gui about the new focus as it does for any change.
+  /// A swipe, an arrow key or a chevron (`stepPage`).
   void step(int delta) {
-    final target = state.current();
-    if (target == null) return;
-    final next = pageStep(target.index, state.namespace(target.namespace).pages.length, delta);
-    if (next != null && state.focusPage(target.namespace, next)) onChanged();
+    if (stepPage(state, delta, requestFocus)) onChanged();
   }
 
-  void interact() {
-    final target = state.current();
-    if (target != null) sendGui(interactionMessage(target.namespace));
-  }
+  /// A press on the page (`touchPage`).
+  void interact() => touchPage(state, requestFocus, sendGui);
 
   void dispose() {
     menu.dispose();

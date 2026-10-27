@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../json.dart';
 import '../resources/resources.dart';
 import 'page.dart';
+import 'template_names.dart';
 import 'template_text.dart';
 import 'templates_model.dart';
 
@@ -22,15 +23,19 @@ Color parseColor(String value) {
 }
 
 class ImageFramePage extends StatelessWidget {
-  const ImageFramePage({super.key, required this.data});
+  const ImageFramePage({super.key, required this.data, this.gui1Template});
 
-  static Widget page(Json data, PageContext ctx) => ImageFramePage(data: data);
+  static Widget page(Json data, PageContext ctx) =>
+      ImageFramePage(data: data, gui1Template: ctx.gui1 ? canonicalTemplate(ctx.page) ?? ctx.page : null);
 
   final Json data;
 
+  /// The template's name when the page came over GUI-1, whose image rules are stricter (`imageModel`).
+  final String? gui1Template;
+
   @override
   Widget build(BuildContext context) {
-    final model = imageModel(data);
+    final model = imageModel(data, gui1Template: gui1Template);
     final image = imageFor(model.src, fit: model.fit);
     return Column(
       children: [

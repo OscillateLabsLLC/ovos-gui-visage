@@ -12,25 +12,45 @@ git clone https://github.com/OscillateLabsLLC/ovos-gui-visage
 cd ovos-gui-visage
 just sync          # flutter pub get
 just test          # flutter test
+just conformance   # docs/GUI1_CONFORMANCE.md matches the template names
+just test test/style_rules_test.dart test/a11y_guidelines_test.dart test/reduced_motion_test.dart  # docs/DESIGN.md guards
 just lint          # dart format check + flutter analyze
 just run           # flutter run -d macos
 ```
 
-## Protocol rule
+## Protocol rules
 
-ovos-visage's `docs/SPEC.md` is the contract. Protocol behaviour is tested from recorded
-traffic in `test/fixtures/*.jsonl`; `test/fixtures/expected/` holds the Python reference's
-state snapshot per fixture, and `gui_state_test.dart` requires a match. When you change how a
-GUI message is handled, record the real sequence from a live `ovos-gui-service` with
-`ovos-visage --record`, add it as a fixture, and regenerate the goldens from the Python
-reference. Never change OVOS code to make the client work.
+Visage speaks two protocols, and each has its own contract:
+
+- **Legacy** (ovos-gui 1.x, the GUI socket on port 18181): ovos-visage's `docs/SPEC.md` is the
+  contract. Protocol behaviour is tested from recorded traffic in `test/fixtures/*.jsonl`;
+  `test/fixtures/expected/` holds the Python reference's state snapshot per fixture, and
+  `gui_state_test.dart` requires a match. When you change how a GUI message is handled, record
+  the real sequence from a live `ovos-gui-service` with `ovos-visage --record`, add it as a
+  fixture, and regenerate the goldens from the Python reference.
+- **GUI-1** (an OVOS-GUI-1 adapter, port 18182): the contract is
+  [gui-1.md](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md) in
+  `OpenVoiceOS/architecture`, pinned at `b6c1583`, together with the adapter wire protocol in
+  gui1-upstream `WIRE.md`. Fixtures are in `test/fixtures/gui1/`: hand-written ones say what they
+  were written from in their first line, and `recorded/` holds the adapter's and the demo skill's
+  recordings. `docs/GUI1_CONFORMANCE.md` tracks every clause, and `docs/GUI1_FINDINGS.md` every
+  place where the code and the spec disagree.
+
+The OVOS install you use every day is read-only to this work: never install into it, upgrade it
+or point an experimental service at it. Visage may connect to it as a client, to record or to
+check a change. A change to OVOS code is in scope: make it in a separate clone and virtualenv on
+its own ports, and send it upstream as a PR. When the code and GUI-1 disagree, follow the
+Process in `docs/GUI1_FINDINGS.md`: propose the spec change, and make the code follow the
+proposed text.
 
 ## Visual rule
 
 Circles, rings and plain stacked text on black. No cards, nested panels, accent borders or
 edge stripes; gradients, glows and motion are welcome. Reuse `lib/widgets/circle.dart`
 (`Circle`, `Ring`, `Glow`, `StaggerEnter`, `RiseIn`) rather than inventing per-page effects.
-The fallback debug card is the one exception.
+The exceptions are the allowlist in `test/style_rules_test.dart`, each with its reason; an entry
+marked `audit:` still waits for a decision (`docs/BACKLOG.md`). The full guide, with motion and
+glanceability rules, is `docs/DESIGN.md`.
 
 ## Icons
 

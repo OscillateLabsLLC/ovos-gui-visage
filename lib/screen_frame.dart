@@ -15,7 +15,10 @@ import 'face/try_on.dart';
 import 'outcome.dart';
 import 'pages/page.dart';
 import 'pages/page_pager.dart';
+import 'pages/resting_model.dart';
+import 'pages/resting_page.dart';
 import 'pages/router.dart';
+import 'protocol/wire_protocol.dart';
 import 'shell_overlays.dart';
 import 'state/gui_state.dart';
 import 'theme.dart';
@@ -44,6 +47,7 @@ class FrameParts {
     required this.commands,
     required this.send,
     required this.connected,
+    required this.protocol,
     required this.captions,
     required this.outcome,
     required this.volume,
@@ -66,6 +70,9 @@ class FrameParts {
   final CommandBoxController commands;
   final GuiSend send;
   final bool connected;
+
+  /// What the GUI connection speaks; on GUI-1 an empty stack shows Visage's resting page.
+  final ChosenProtocol? protocol;
 
   /// Null when captions are turned off.
   final Captions? captions;
@@ -123,17 +130,19 @@ class ScreenFrame extends StatelessWidget {
 
   Widget _page() {
     final target = parts.state.current();
-    final count = target == null ? 0 : parts.state.namespace(target.namespace).pages.length;
+    final position = target == null ? (index: 0, count: 0) : parts.state.namespace(target.namespace).position;
     final bottom = parts.attention.compact ? attentionStrip : _pagePadding;
     return Padding(
       padding: EdgeInsets.fromLTRB(_sidePadding, _pagePadding, _sidePadding, bottom),
       child: PagePager(
-        index: target?.index ?? 0,
-        count: count,
+        index: position.index,
+        count: position.count,
         onStep: parts.onStep,
         onInteract: parts.onInteract,
         chevrons: parts.kiosk,
-        child: PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList),
+        child:
+            restingPage(parts.state, parts.protocol, onShowNotifications: parts.notificationList.open) ??
+            PageHost(state: parts.state, send: parts.send, notifications: parts.notificationList, protocol: parts.protocol),
       ),
     );
   }
@@ -155,7 +164,8 @@ class ScreenFrame extends StatelessWidget {
       return [Positioned(left: 16, right: 16, bottom: 20, child: CommandBox(controller: commands))];
     }
     final target = parts.state.current();
-    final home = target != null && !isContentPage(target, parts.state.idleNamespace);
+    final home =
+        showsResting(parts.state, parts.protocol) || (target != null && !isContentPage(target, parts.state.idleNamespace));
     if (!parts.typeOnHome || !home) return const [];
     return [Positioned(right: 20, bottom: 20, child: CommandButton(onPressed: commands.open))];
   }

@@ -1,5 +1,7 @@
-/// Any (namespace, page) without a widget: namespace, page name and a dump of the session data (SPEC 8.7).
-/// The main debugging tool and the one place a card is allowed (SPEC 9).
+/// Any (namespace, page) without a widget degrades to the nearest page that can show its data (gui-1.md 6.5 and 8.5):
+/// an `image` shows as the image page would (with `title` and `caption`), else `title` and `text` show as the text
+/// page would. Data with none of these keys is dumped with the namespace and page name (SPEC 8.7): the main debugging
+/// tool and the one place a card is allowed (SPEC 9).
 library;
 
 import 'dart:convert';
@@ -8,9 +10,21 @@ import 'package:flutter/material.dart';
 
 import '../json.dart';
 import '../theme.dart';
+import 'image_frame_page.dart';
 import 'page.dart';
+import 'templates_model.dart';
+import 'text_frame_page.dart';
 
 const _mono = TextStyle(color: VisageColors.fg, fontSize: 12, fontFamily: 'Menlo', height: 1.3);
+
+/// The page the data degrades to, or null when it has nothing a text or image page reads.
+Widget? degradedPage(Json data) {
+  if (imageSource(data['image']) != null) return ImageFramePage(data: data);
+  final (:title, :text) = textFrameModel(data);
+  if (text.isNotEmpty) return TextFramePage(data: {'title': title, 'text': text});
+  if (title.isNotEmpty) return TextFramePage(data: {'text': title});
+  return null;
+}
 
 String describe(Object? value) => value is String ? value : const JsonEncoder.withIndent(' ').convert(value);
 
@@ -23,7 +37,9 @@ class FallbackPage extends StatelessWidget {
   final PageContext ctx;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => degradedPage(data) ?? _dump();
+
+  Widget _dump() {
     final keys = data.keys.toList()..sort();
     return Container(
       width: double.infinity,

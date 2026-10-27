@@ -1,13 +1,15 @@
 /// View models for the SYSTEM_* templates (SPEC 8.2), port of templates_model.js. Keys are those
-/// GUIInterface.show_* sets in ovos_bus_client/apis/gui.py. Every model tolerates null or missing keys. Pure.
+/// GUIInterface.show_* sets in ovos_bus_client/apis/gui.py. Every model tolerates null or missing keys. Pure, except that malformed data is reported.
 library;
 
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart' show BoxFit;
 
+import '../faults.dart';
 import '../json.dart';
 import 'page.dart';
+import 'template_keys.dart';
 
 const readingWpm = 180;
 const minPageMs = 4000;
@@ -83,8 +85,22 @@ List<String>? splitShort(String value) {
 
 String loadingLabel(Json? data) => text(data?['label']);
 
-/// GUIInterface.show_status_animation sends "Enabled" / "Disabled"; the QML does a string compare.
-({bool ok, String label}) statusModel(Json? data) => (ok: data?['status'] == 'Enabled', label: text(data?['label']));
+/// GUI-1 sends `success: bool` (gui-1.md 3); GUIInterface.show_status_animation sends `status: "Enabled" | "Disabled"`,
+/// and the QML does a string compare. A boolean `success` wins over the legacy key; any other non-null `success` is a
+/// protocol fault, reported once per value, and the legacy key decides.
+({bool ok, String label}) statusModel(Json? data) {
+  final success = data?['success'];
+  if (success != null && success is! bool) _reportBadSuccess(success);
+  return (ok: success is bool ? success : data?['status'] == 'Enabled', label: text(data?['label']));
+}
+
+final _reportedBadSuccess = <String>{};
+
+void _reportBadSuccess(Object value) {
+  final key = '${value.runtimeType}:$value';
+  if (!_reportedBadSuccess.add(key)) return;
+  reportFault('SYSTEM_status data', FormatException('success must be a bool, got ${value.runtimeType} $value'));
+}
 
 /// data:, http(s) and cache paths rewritten to /res/ are loadable; anything else (a bare producer path) is not.
 String? imageSource(Object? value) {
@@ -92,8 +108,10 @@ String? imageSource(Object? value) {
   return _safeImage.hasMatch(src) ? src : null;
 }
 
-({String? src, BoxFit fit, String background, String title, String caption}) imageModel(Json? data) => (
-  src: imageSource(data?['image']),
+/// [gui1Template] names the template when the page came over GUI-1: its `image` must then be an http(s) URL or a
+/// `data:image/` URI, and a path is reported and dropped (`readImage`, finding F39).
+({String? src, BoxFit fit, String background, String title, String caption}) imageModel(Json? data, {String? gui1Template}) => (
+  src: gui1Template == null ? imageSource(data?['image']) : readImage(gui1Template, data ?? const {}, 'image', required: true),
   fit: _fillToFit[text(data?['fill']).toLowerCase()] ?? BoxFit.contain,
   background: text(data?['background_color']),
   title: text(data?['title']),

@@ -14,10 +14,19 @@ class RecordingBus extends CoreBus {
   @override
   void on(String type, BusHandler handler) => handlers[type] = handler;
 
+  /// The extra context of each [emitWithContext] call, in order.
+  final List<Json> contexts = [];
+
   @override
   bool emit(String type, [Json? data]) {
     emitted.add([type, data]);
     return true;
+  }
+
+  @override
+  bool emitWithContext(String type, Json data, Json context) {
+    contexts.add(context);
+    return emit(type, data);
   }
 
   void send(String type, [Json? data]) => handlers[type]!({'type': type, 'data': data ?? {}});

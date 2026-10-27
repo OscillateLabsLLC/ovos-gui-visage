@@ -1,0 +1,8 @@
+{"type": "session_update", "skill_id": "ovos-skill-hello.openvoiceos", "data": {"title": "Hi", "text": "Hello"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_text", "data": {"title": "Hi", "text": "Hello"}, "session_id": "default", "index": 0, "page_count": 1}
+{"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
+{"type": "status", "event_name": "speak", "data": {"utterance": "Hello"}, "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-weather.openvoiceos", "data": {"current": 21, "min": 14, "max": 25, "condition": "Clear", "location": "San Antonio", "unit": "C"}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-weather.openvoiceos", "template": "SYSTEM_weather", "data": {"current": 21, "min": 14, "max": 25, "condition": "Clear", "location": "San Antonio", "unit": "C"}, "session_id": "default", "index": 0, "page_count": 1}
+{"type": "activated", "skill_id": "ovos-skill-weather.openvoiceos", "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-weather.openvoiceos", "data": {"current": 22, "min": 14, "max": 25, "condition": "Clear", "location": "San Antonio", "unit": "C"}, "session_id": "default"}

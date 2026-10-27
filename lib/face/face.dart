@@ -2,6 +2,7 @@
 /// Port of face.js. The widget paints in 480 x 800 frame coordinates; the parent sizes and positions it.
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ class FaceController extends ChangeNotifier {
   bool _blinking = false;
   bool _wide = false;
   List<dynamic>? _visemes;
+  final _flashes = <Timer>{};
   Duration _anchor = Duration.zero;
 
   FaceMode get mode => _mode;
@@ -85,13 +87,26 @@ class FaceController extends ChangeNotifier {
 
   double get targetEyeScale => _wide ? _wideEye : 1;
 
+  /// A blink or widen still running is cancelled by [dispose], so it never notifies a disposed controller.
   void _flash(void Function(bool) set, Duration length) {
     set(true);
     notifyListeners();
-    Future.delayed(length, () {
+    late final Timer timer;
+    timer = Timer(length, () {
+      _flashes.remove(timer);
       set(false);
       notifyListeners();
     });
+    _flashes.add(timer);
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _flashes) {
+      timer.cancel();
+    }
+    _flashes.clear();
+    super.dispose();
   }
 }
 

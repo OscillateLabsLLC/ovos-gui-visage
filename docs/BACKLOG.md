@@ -128,6 +128,77 @@ The popups follow ovos-shell's NotificationPop*.qml.
   level 0, so the display cannot show a Mac at 0 (reported in the log). Both are plugin fixes, not client ones.
 - **Media keys** are tested with synthetic key events only; check which desktops pass them to the app.
 
+## GUI-1 media templates (2026-10-25)
+
+- **SYSTEM_video_player shows no video.** Version 1 shows a play glyph, the title and the play state ([gui-1.md 6.5](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation)). Real
+  playback needs a video dependency that builds on macOS, Linux and web, and a decision about who owns the stream
+  ([7.1](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#71-media-transport) gives it to the media subsystem, not the display). Evidence first: which producer sends the template, and what
+  `uri` it carries. A poster image waits on finding F26.
+- **Queue and search-result rows cannot be tapped** in SYSTEM_media_player. OCP's `playlist.play` and `search.play`
+  take OCP's own entry shape, and GUI-1 names no "play this entry" control (F30). Wire them when the media subsystem's
+  control surface is specified, or record what OCP accepts for a `media_*` entry from the live bus first.
+- **Repeat and shuffle** have no `media_*` key (F31), so the media player cannot show them.
+
+## GUI-1 templates (2026-10-25)
+
+- **A real map for `SYSTEM_map`.** The page is only the degradation of
+  [gui-1.md 6.5 Capability and graceful degradation](https://github.com/OpenVoiceOS/architecture/blob/b6c1583/gui-1.md#65-capability-and-graceful-degradation): label, a static pin and the coordinates
+  (`lib/pages/map_page.dart`). Open decisions before a map is drawn: the tile provider (OpenStreetMap tiles need
+  attribution and have a usage policy; a commercial provider needs a key Visage has nowhere to keep), whether that
+  adds a dependency such as `flutter_map`, and what an offline device shows (today's card is the answer until then).
+  `zoom` is read and range-checked but unused. Evidence needed: a producer that sends `SYSTEM_map`; none in the
+  cloned OVOS repos does yet.
+- **A wind icon.** `SYSTEM_weather`'s `condition_code` set includes `wind`, and the bundled weather icons have no
+  glyph for it, so the card shows the condition text with no icon (`lib/pages/weather_card_model.dart`). It needs a
+  sketch and an SVG in the motion-icon set.
+- **12/24-hour clock on Linux kiosks.** `SYSTEM_clock` follows `MediaQuery.alwaysUse24HourFormat`. On macOS that is
+  the system setting; on a Linux kiosk without a desktop session the engine's source for it is unchecked. Check on a
+  Pi before adding any config key.
+
+## Pre-announcement polish audit (2026-10-25)
+
+Before the finished product is announced, every v2 feature is checked against `docs/DESIGN.md`. This list is the first
+run of the guards in that guide's "Enforced by" table. Decide each item: fix it, or record why it is allowed.
+
+Style (`test/style_rules_test.dart`, allowlist entries marked `audit:`):
+
+- `lib/widgets/command_box.dart`: the typed-command box has an accent outline.
+- `lib/widgets/volume_indicator.dart`: the volume pill is a filled rounded box; allow it as a status pill or redraw it.
+- `lib/widgets/notification_stack.dart`: notification popups are filled rounded boxes, close to cards.
+- `lib/window/window_menu.dart`: the in-window menu has an accent outline.
+- `lib/window/window_menu.dart`: the in-window menu separators are accent, not the faint hairline.
+
+Accessibility (`test/a11y_guidelines_test.dart`, skipped with `audit:` at both page sizes, 432 × 736 and 432 × 650):
+
+- `lib/pages/sun_times_page.dart`: SUNRISE 4.02:1 and SUNSET 4.38:1 at 16 px, under 4.5:1.
+- `lib/widgets/home_chips.dart`: the count badge, white on the accent, is 2.92:1 at 15 px; it is on both resting screens.
+- `lib/pages/input_box_page.dart`: the Confirm label is 2.92:1 at 20 px, under 3:1.
+- `lib/pages/text_frame_page.dart`: the recorded text "Hello" is 2.92:1 at 72 px, under 3:1. The fallback page shows
+  an unknown template's `text` the same way (`SYSTEM_hologram` fixture), so it fails for the same reason.
+- `lib/widgets/home_chips.dart`: the count badge is 28 px high, under the 48 px Android tap-target size. Informative, no
+  audit entry: the Android tap-target check only prints. The re-run of 2026-10-25 printed "passes" for both resting
+  screens, so the claim needs a check on a device before anyone acts on it.
+- The guard now also replays the demo skill's recordings (`test/fixtures/gui1/recorded/demo`) and the three companion
+  fixtures. `SYSTEM_face`, `SYSTEM_confirm`, `SYSTEM_select` and `SYSTEM_input` are checked and pass both guidelines at
+  both sizes. No fixture reaches two routes, so they are not checked: alerts `ListView` and OCP `OVOSSyncPlayer`.
+
+Reduced motion (`test/reduced_motion_test.dart`, files that animate and ignore the setting):
+
+- `lib/face/face.dart`: the face ticker runs blink, widen and the mouth tween.
+- `lib/pages/loading_page.dart`: the fallback thinking dots breathe.
+- `lib/pages/sun_times_page.dart`: the sun rises and settles over 8 s.
+
+Impeller opacity over a blur: no opacity widget wraps a child that draws only a blur. Check two near cases on a device:
+
+- `lib/pages/now_playing_page.dart`: the blurred cover wash fades an image inside its blur.
+- `lib/pages/status_page.dart`: the failure state fades the whole chip, its glow included.
+
+Other:
+
+- `lib/pages/status_page.dart`: the comment says the glyph "blooms as it arrives", but no code blooms; add the bloom or
+  correct the comment. No shared widget makes a one-time bloom (`docs/DESIGN.md`, Shared widgets).
+- `lib/theme.dart`: the page background is `#05070A`; ovos-visage SPEC 9 gives `#0b0f14`.
+
 ## Carried over
 
 - The web iframe cannot detect a site that refuses framing; a `/frameable` check in the sidecar

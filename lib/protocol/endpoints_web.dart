@@ -8,5 +8,5 @@ BusEndpoints endpoints() {
   }
   final page = Uri.base;
   final origin = Uri(scheme: page.scheme == 'https' ? 'wss' : 'ws', host: page.host, port: page.port, path: page.path);
-  return BusEndpoints(core: origin.resolve('core'), gui: (_) => origin.resolve('gui'));
+  return BusEndpoints(core: origin.resolve('core'), gui: (_) => origin.resolve('gui'), gui1: origin.resolve('gui1'));
 }

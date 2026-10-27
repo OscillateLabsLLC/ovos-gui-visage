@@ -1,0 +1,1 @@
+{"type": "snapshot", "session_id": "default", "stack": [{"skill_id": "gui1-focus-probe.oscillatelabs", "template": "SYSTEM_image", "data": {"title": "Focus probe", "text": "Entry 0 of 2", "image": "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"}, "index": 1, "page_count": 2}], "ambient": {}}

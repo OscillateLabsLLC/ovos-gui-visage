@@ -43,7 +43,10 @@ class CoreBus {
     _channel = null;
   }
 
-  bool emit(String type, [Json? data]) {
+  bool emit(String type, [Json? data]) => emitWithContext(type, data ?? {}, const {});
+
+  /// [context] goes beside this app's `source`, as a forwarding service adds its own keys (gui_link.dart).
+  bool emitWithContext(String type, Json data, Json context) {
     final channel = _channel;
     if (channel == null) {
       log?.call('bus not connected; dropping $type');
@@ -52,8 +55,8 @@ class CoreBus {
     channel.sink.add(
       jsonEncode({
         'type': type,
-        'data': data ?? {},
-        'context': {'source': _source},
+        'data': data,
+        'context': {'source': _source, ...context},
       }),
     );
     return true;

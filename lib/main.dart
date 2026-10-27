@@ -1,8 +1,7 @@
-// App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the
-// face for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable
-// while running, over the bus (face_remote.dart) and by hand on the screen (try_on.dart). A peeking widget shows only
-// the badge until the face is shown (window/peek.dart), and the window follows over the bus (window_remote.dart).
-// Pages answer back through the GUI socket; the menu opens inside the window too, and a command can be typed.
+// App shell: connects to OVOS, hosts the current page in the 480 x 800 frame scaled to the window, and overlays the face
+// for listen/think/speak (full over idle, compact badge over content pages, SPEC 5.3). The face is switchable over the
+// bus (face_remote.dart) and on the screen (try_on.dart). A peeking widget shows only the badge until the face is shown
+// (window/peek.dart); the window follows the bus (window_remote.dart). Pages answer back; a command can be typed.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -16,7 +15,7 @@ import 'faults.dart';
 import 'outcome.dart';
 import 'protocol/core_bus.dart';
 import 'protocol/endpoints.dart';
-import 'protocol/gui_client.dart';
+import 'protocol/gui_link.dart';
 import 'screen_frame.dart';
 import 'screen_input.dart';
 import 'state/gui_state.dart';
@@ -26,6 +25,7 @@ import 'volume_controls.dart';
 import 'widgets/notification_actions.dart';
 import 'widgets/notification_popups.dart';
 import 'widgets/widget_manager.dart';
+import 'screen_link.dart';
 import 'shell_overlays.dart';
 import 'window/desktop_extras.dart';
 import 'window/face_picker.dart';
@@ -36,6 +36,7 @@ import 'window/status_menu_host.dart';
 import 'window/window_config.dart';
 import 'window/window_remote.dart';
 import 'window/window_shell.dart';
+import 'window/window_title.dart';
 import 'window/window_menu.dart';
 import 'window/window_surface.dart';
 
@@ -116,6 +117,7 @@ class _ScreenState extends State<Screen> {
     state: state,
     bus: bus,
     sendGui: (message) => gui.send(message),
+    requestFocus: (namespace, page) => gui.requestFocus(namespace, page),
     peek: peek,
     window: window,
     dispatchMenu: (id) => menu.dispatch(id),
@@ -132,19 +134,22 @@ class _ScreenState extends State<Screen> {
     show: _showMenu,
     typeCommand: () => input.typeCommand(),
     quit: quitApp,
+    protocol: gui.title,
   );
   late bool windowExpanded;
   late WindowMode windowMode = widget.config.window.mode;
-  late final GuiClient gui = GuiClient(
+  late final GuiLink gui = screenLink(
+    config: widget.config,
+    sockets: sockets,
     bus: bus,
-    guiUrlOverride: sockets.gui,
-    guiId: 'ovos-gui-visage-${DateTime.now().millisecondsSinceEpoch % 100000}',
-    onMessage: _onGuiMessage,
+    state: state,
+    attention: attention,
+    onChanged: _refresh,
     onStatus: _onGuiStatus,
     log: _log,
   );
   bool guiConnected = false;
-  Target? lastFocus;
+  late final FocusAnnouncer focus = FocusAnnouncer(gui);
 
   void _log(String line) => debugPrint(line);
 
@@ -181,6 +186,7 @@ class _ScreenState extends State<Screen> {
     window.addListener(_onWindow);
     menu;
     drag.attach();
+    bindWindowTitle(gui, window, setWindowTitle);
     bus.start();
     gui.start();
   }
@@ -203,17 +209,9 @@ class _ScreenState extends State<Screen> {
     super.dispose();
   }
 
-  void _onGuiMessage(Json message) {
-    if (!state.apply(message)) _log('unknown GUI message $message');
-    if (message['type'] == 'mycroft.events.triggered' && message['namespace'] == systemNamespace) {
-      attention.handle(message['event_name'] as String, (message['data'] ?? <String, dynamic>{}) as Json);
-    }
-    _refresh();
-  }
-
   void _onGuiStatus(bool connected) {
     state.reset();
-    lastFocus = null;
+    focus.reset();
     guiConnected = connected;
     if (connected) volume.model.requestLevel();
     _refresh();
@@ -240,10 +238,7 @@ class _ScreenState extends State<Screen> {
     final target = state.current();
     attention.setCompact(isContentPage(target, state.idleNamespace));
     input.syncNotificationList();
-    if (target != null && target != lastFocus) {
-      lastFocus = target;
-      gui.send(focusMessage(target.namespace, target.index));
-    }
+    focus.update(target);
     setState(() {});
   }
 
@@ -287,6 +282,7 @@ class _ScreenState extends State<Screen> {
     commands: input.commands,
     send: gui.send,
     connected: guiConnected,
+    protocol: gui.chosen,
     captions: widget.config.captions ? captions : null,
     outcome: outcome,
     volume: volume.model,

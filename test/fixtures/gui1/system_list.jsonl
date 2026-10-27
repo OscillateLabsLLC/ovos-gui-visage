@@ -1,0 +1,5 @@
+{"_note": "written from gui-1.md 3.4 at b6c1583, not recorded"}
+{"type": "welcome", "protocol": "ovos-gui-1", "version": 1, "session_id": "default", "server": "ovos-gui-plugin-visage/0.1.0"}
+{"type": "activated", "skill_id": "ovos-skill-hello.openvoiceos", "session_id": "default"}
+{"type": "session_update", "skill_id": "ovos-skill-hello.openvoiceos", "data": {"title": "Shopping list", "items": [{"title": "Eggs", "subtitle": "A dozen", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="}, {"title": "Flour", "subtitle": "Plain, 1 kg"}, {"title": "Milk"}]}, "session_id": "default"}
+{"type": "template", "skill_id": "ovos-skill-hello.openvoiceos", "template": "SYSTEM_list", "data": {"title": "Shopping list", "items": [{"title": "Eggs", "subtitle": "A dozen", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="}, {"title": "Flour", "subtitle": "Plain, 1 kg"}, {"title": "Milk"}]}, "session_id": "default"}

@@ -33,4 +33,13 @@ void main() {
     controller.setSleeping(true);
     expect(controller.targetEyeOpen, lessThan(0.1));
   });
+
+  testWidgets('a blink or widen still in flight when the controller is disposed never notifies (finding F37)', (tester) async {
+    FaceController()
+      ..blink()
+      ..widen()
+      ..dispose();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  });
 }

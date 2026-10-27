@@ -41,15 +41,16 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
     }
   }
 
-  void _start(_Loaded loaded) {
+  /// Under reduced motion a loop holds its first frame and a one-shot jumps to the frame it would hold.
+  void _start(_Loaded loaded, {required bool still}) {
     _controller.duration = loaded.composition.duration;
     if (widget.loop) {
-      _controller.repeat();
+      if (!still) _controller.repeat();
       return;
     }
     final frames = loaded.composition.endFrame - loaded.composition.startFrame;
-    final end = (loaded.segment.end - loaded.composition.startFrame) / frames;
-    _controller.animateTo(end.clamp(0, 1));
+    final end = ((loaded.segment.end - loaded.composition.startFrame) / frames).clamp(0.0, 1.0);
+    still ? _controller.value = end : _controller.animateTo(end);
   }
 
   @override
@@ -65,7 +66,9 @@ class _CacheLottieState extends State<CacheLottie> with SingleTickerProviderStat
       builder: (context, snapshot) {
         final loaded = snapshot.data;
         if (loaded == null) return snapshot.connectionState == ConnectionState.done ? widget.fallback : const SizedBox();
-        if (!_controller.isAnimating && _controller.value == 0) _start(loaded);
+        if (!_controller.isAnimating && _controller.value == 0) {
+          _start(loaded, still: MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+        }
         final lottie = Lottie(composition: loaded.composition, controller: _controller, fit: BoxFit.contain);
         final fit = loaded.fit;
         if (fit == null) return lottie;
