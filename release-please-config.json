@@ -4,7 +4,13 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
-      "package-name": "ovos-gui-visage"
+      "package-name": "ovos-gui-visage",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "lib/protocol/gui1_frames.dart"
+        }
+      ]
     }
   }
 }
