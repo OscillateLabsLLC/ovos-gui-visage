@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 
+import '../date_locale.dart';
 import '../json.dart';
 import '../resources/resources.dart';
 import '../widgets/weather_icon.dart';
@@ -27,7 +28,7 @@ class SystemWeatherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final weather = specWeather(data);
-    final card = weatherCard(weather, use24Hour: MediaQuery.alwaysUse24HourFormatOf(context));
+    final card = weatherCard(weather, use24Hour: deviceUses24Hour(context));
     final fallback = card.now.icon.isEmpty ? const SizedBox.shrink() : WeatherIcon(card.now.icon, size: _iconSize);
     return ReportsDataFaults(
       template: 'SYSTEM_weather',

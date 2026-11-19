@@ -4,7 +4,12 @@ import '../app_config.dart';
 import '../face/face_spec.dart';
 import 'window_config.dart';
 
-Future<AppConfig> loadAppConfig() async => const AppConfig();
+/// The web build has no config file or environment; the page address may name the language (`?lang=da-DK`), as it
+/// names the bus (protocol/endpoints_web.dart).
+Future<AppConfig> loadAppConfig() async {
+  final lang = Uri.base.queryParameters['lang'];
+  return AppConfig.from(null, {'VISAGE_LANG': ?lang});
+}
 
 /// The web build has no config file; a face chosen there lasts the page's lifetime, by design.
 Future<void> saveFaceConfig(FaceSpec spec) async {}
