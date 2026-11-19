@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'app_config.dart';
 import 'attention.dart';
+import 'date_locale.dart';
 import 'captions.dart';
 import 'face/face.dart';
 import 'face/face_remote.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
   logFaultsPlainly();
   final config = await loadAppConfig();
   if (config.frameLog) startFrameLog(debugPrint);
+  await useDateLocale(config.lang, platform: WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag());
   await applyWindowConfig(config.window);
   runApp(VisageApp(config: config));
 }

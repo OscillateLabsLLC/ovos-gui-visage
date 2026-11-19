@@ -4,6 +4,7 @@
 /// condition text shows with no icon. Pure.
 library;
 
+import '../date_locale.dart';
 import 'spec_weather.dart';
 import 'weather_model.dart';
 
@@ -24,7 +25,6 @@ const codeIcons = {
 const maxForecastShown = 3;
 const noIcon = '';
 const _secondsPerDay = 86400;
-const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 String codeIcon(ConditionCode? code) => codeIcons[code] ?? noIcon;
 
@@ -73,12 +73,12 @@ List<ForecastItem> forecastItems(List<SpecForecast> entries, {required bool use2
 
 String _two(int value) => value.toString().padLeft(2, '0');
 
-/// `Mon`, or the hour: `15:00` on a 24-hour device, `3 PM` (or `3:30 PM`) on a 12-hour one.
+/// `Mon` (the date locale's short weekday), or the hour: `15:00` on a 24-hour device, `3 PM` (or `3:30 PM`) on a 12-hour one.
 String periodLabel(double unixSeconds, {required bool hourly, required bool use24Hour}) {
   final start = DateTime.fromMillisecondsSinceEpoch((unixSeconds * 1000).round());
-  if (!hourly) return _weekdays[start.weekday - 1];
+  if (!hourly) return localShortWeekday(start);
   if (use24Hour) return '${_two(start.hour)}:${_two(start.minute)}';
   final hour = start.hour % 12 == 0 ? 12 : start.hour % 12;
   final minutes = start.minute == 0 ? '' : ':${_two(start.minute)}';
-  return '$hour$minutes ${start.hour < 12 ? 'AM' : 'PM'}';
+  return '$hour$minutes ${localDayPeriod(start)}';
 }
